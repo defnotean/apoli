@@ -6,9 +6,9 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.core.Holder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -31,10 +31,10 @@ public class EffectImmunityPowerType extends PowerType {
             .set("inverted", powerType.inverted)
     );
 
-    protected final List<RegistryEntry<StatusEffect>> effects;
+    protected final List<Holder<MobEffect>> effects;
     protected final boolean inverted;
 
-    public EffectImmunityPowerType(List<RegistryEntry<StatusEffect>> effects, boolean inverted, Optional<EntityCondition> condition) {
+    public EffectImmunityPowerType(List<Holder<MobEffect>> effects, boolean inverted, Optional<EntityCondition> condition) {
         super(condition);
         this.effects = effects;
         this.inverted = inverted;
@@ -45,11 +45,11 @@ public class EffectImmunityPowerType extends PowerType {
         return PowerTypes.EFFECT_IMMUNITY;
     }
 
-    public boolean doesApply(StatusEffectInstance instance) {
+    public boolean doesApply(MobEffectInstance instance) {
         return doesApply(instance.getEffectType());
     }
 
-    public boolean doesApply(RegistryEntry<StatusEffect> effect) {
+    public boolean doesApply(Holder<MobEffect> effect) {
         return inverted ^ effects.contains(effect);
     }
 

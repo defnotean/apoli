@@ -14,9 +14,9 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerConfigurationNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 public class ModPacketsC2S {
 
@@ -40,7 +40,7 @@ public class ModPacketsC2S {
         }
 
         else {
-            handler.disconnect(Text.of("This server requires you to install the Apoli mod (v" + Apoli.VERSION + ") to play."));
+            handler.disconnect(Component.literal("This server requires you to install the Apoli mod (v" + Apoli.VERSION + ") to play."));
         }
 
     }
@@ -48,7 +48,7 @@ public class ModPacketsC2S {
 
     private static void handleHandshakeReply(VersionHandshakePacket payload, ServerConfigurationNetworking.Context context) {
 
-        ServerConfigurationNetworkHandler handler = context.networkHandler();
+        ServerConfigurationNetworkHandler handler = context.connection();
 
         int[] semver = payload.semver();
         boolean mismatch = semver.length != Apoli.SEMVER.length;
@@ -75,17 +75,17 @@ public class ModPacketsC2S {
             separator = ".";
         }
 
-        handler.disconnect(Text.stringifiedTranslatable("apoli.gui.version_mismatch", Apoli.VERSION, semverString));
+        handler.disconnect(Component.stringifiedTranslatable("apoli.gui.version_mismatch", Apoli.VERSION, semverString));
 
     }
 
 
     private static void onUseActivePowers(UseActivePowerTypesC2SPacket payload, ServerPlayNetworking.Context context) {
 
-        ServerPlayerEntity player = context.player();
+        ServerPlayer player = context.player();
         PowerHolderComponent component = PowerHolderComponent.KEY.get(player);
 
-        for (Identifier powerId : payload.powerIds()) {
+        for (ResourceLocation powerId : payload.powerIds()) {
 
             PowerType powerType = PowerManager.getOptional(powerId)
                 .map(component::getPowerType)

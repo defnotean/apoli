@@ -1,7 +1,7 @@
 package io.github.apace100.apoli.mixin;
 
-import net.minecraft.inventory.SlotRange;
-import net.minecraft.inventory.SlotRanges;
+import net.minecraft.world.SlotRange;
+import net.minecraft.world.SlotRanges;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 

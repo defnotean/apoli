@@ -10,7 +10,8 @@ import io.github.apace100.apoli.condition.EntityCondition;
 import io.github.apace100.apoli.registry.ApoliRegistries;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.util.IdentifierAlias;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 
 public class EntityActionTypes {
 

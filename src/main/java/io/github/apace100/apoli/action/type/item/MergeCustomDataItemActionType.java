@@ -7,9 +7,9 @@ import io.github.apace100.apoli.action.type.ItemActionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 
 public class MergeCustomDataItemActionType extends ItemActionType {
@@ -24,15 +24,15 @@ public class MergeCustomDataItemActionType extends ItemActionType {
             .set("nbt", actionType.nbt)
     );
 
-    private final NbtCompound nbt;
+    private final CompoundTag nbt;
 
-    public MergeCustomDataItemActionType(NbtCompound nbt) {
+    public MergeCustomDataItemActionType(CompoundTag nbt) {
         this.nbt = nbt;
     }
 
     @Override
     public void accept(ItemActionContext context) {
-        NbtComponent.set(DataComponentTypes.CUSTOM_DATA, context.stackReference().get(), oldNbt -> oldNbt.copyFrom(nbt));
+        CustomData.set(DataComponents.CUSTOM_DATA, context.stackReference().get(), oldNbt -> oldNbt.copyFrom(nbt));
     }
 
     @Override

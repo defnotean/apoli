@@ -6,14 +6,14 @@ import io.github.apace100.apoli.action.context.EntityActionContext;
 import io.github.apace100.apoli.action.type.EntityActionType;
 import io.github.apace100.apoli.action.type.EntityActionTypes;
 import io.github.apace100.apoli.action.type.meta.ChoiceMetaActionType;
-import net.minecraft.util.collection.WeightedList;
+import net.minecraft.world.entity.ai.behavior.ShufflingList;
 import org.jetbrains.annotations.NotNull;
 
 public class ChoiceEntityActionType extends EntityActionType implements ChoiceMetaActionType<EntityActionContext, EntityAction> {
 
-	private final WeightedList<EntityAction> actions;
+	private final ShufflingList<EntityAction> actions;
 
-	public ChoiceEntityActionType(WeightedList<EntityAction> actions) {
+	public ChoiceEntityActionType(ShufflingList<EntityAction> actions) {
 		this.actions = actions;
 	}
 
@@ -33,7 +33,7 @@ public class ChoiceEntityActionType extends EntityActionType implements ChoiceMe
 	}
 
 	@Override
-	public WeightedList<EntityAction> actions() {
+	public ShufflingList<EntityAction> actions() {
 		return actions;
 	}
 

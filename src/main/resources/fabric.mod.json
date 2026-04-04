@@ -32,9 +32,6 @@
     ],
     "modmenu": [
       "io.github.apace100.apoli.integration.ModMenuIntegration"
-    ],
-    "appleskin": [
-      "io.github.apace100.apoli.integration.AppleSkinIntegration"
     ]
   },
   "mixins": [
@@ -55,10 +52,10 @@
   "accessWidener": "apoli.accesswidener",
 
   "depends": {
-    "java": ">=21",
-    "fabricloader": ">=0.15.11",
-    "fabric-api": ">=0.100.4",
-    "minecraft": "1.21.1",
-    "calio": ">=1.13.0"
+    "java": ">=25",
+    "fabricloader": ">=0.18.4",
+    "fabric-api": ">=0.145.3",
+    "minecraft": "26.1",
+    "calio": ">=1.15.0"
   }
 }

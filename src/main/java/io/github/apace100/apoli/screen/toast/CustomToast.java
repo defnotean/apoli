@@ -5,15 +5,15 @@ import io.github.apace100.apoli.data.CustomToastData;
 import io.github.apace100.apoli.util.TextureUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.toast.ToastManager;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.OrderedText;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class CustomToast implements PositionAwareToast {
     private final List<OrderedText> title;
     private final List<OrderedText> description;
     private final ItemStack iconStack;
-    private final Identifier texture;
+    private final ResourceLocation texture;
 
     private final int duration;
 
@@ -42,9 +42,9 @@ public class CustomToast implements PositionAwareToast {
         this(toastData.title(), toastData.description(), toastData.texture(), toastData.iconStack(), (int) ((toastData.duration() / 20.0) * 1000.0));
     }
 
-    public CustomToast(Text title, Text description, Identifier texture, ItemStack iconStack, int duration) {
+    public CustomToast(Component title, Component description, ResourceLocation texture, ItemStack iconStack, int duration) {
 
-        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+        TextRenderer textRenderer = Minecraft.getInstance().textRenderer;
         int maxWidth = this.getWidth() - 33;
 
         this.title = textRenderer.wrapLines(title, maxWidth);
@@ -69,10 +69,10 @@ public class CustomToast implements PositionAwareToast {
     }
 
     @Override
-    public Visibility draw(int x, int y, DrawContext context, ToastManager manager, long startTime) {
+    public Visibility draw(int x, int y, GuiGraphics context, ToastManager manager, long startTime) {
 
         TextRenderer textRenderer = manager.getClient().textRenderer;
-        int alphaShift = MathHelper.floor(MathHelper.clamp((float) Math.abs(alphaShiftEnd - startTime) / 300, 0.0, 1.0) * 255.0f) << 24 | 67108864;
+        int alphaShift = Mth.floor(Mth.clamp((float) Math.abs(alphaShiftEnd - startTime) / 300, 0.0, 1.0) * 255.0f) << 24 | 67108864;
 
         int toastTextX = 30;
         int toastTextYCenter = this.getHeight() / 2;
@@ -123,7 +123,7 @@ public class CustomToast implements PositionAwareToast {
 
         }
 
-        this.height = MathHelper.lerp(MathHelper.clamp((float) startTime / (float) heightShift, 0F, 1F), titleHeight, descriptionHeight);
+        this.height = Mth.lerp(Mth.clamp((float) startTime / (float) heightShift, 0F, 1F), titleHeight, descriptionHeight);
         return startTime >= duration * manager.getNotificationDisplayTimeMultiplier()
             ? Visibility.HIDE
             : Visibility.SHOW;

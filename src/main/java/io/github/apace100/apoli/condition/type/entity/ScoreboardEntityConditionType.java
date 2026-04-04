@@ -9,10 +9,10 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.scoreboard.ReadableScoreboardScore;
-import net.minecraft.scoreboard.ScoreHolder;
-import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.scores.ReadOnlyScoreInfo;
+import net.minecraft.world.scores.ScoreHolder;
+import net.minecraft.world.scores.Scoreboard;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -57,11 +57,11 @@ public class ScoreboardEntityConditionType extends EntityConditionType {
         Entity entity = context.entity();
 
         ScoreHolder scoreHolder = ScoreHolder.fromName(name.orElse(entity.getNameForScoreboard()));
-        Scoreboard scoreboard = entity.getWorld().getScoreboard();
+        Scoreboard scoreboard = entity.level().getScoreboard();
 
         return Optional.ofNullable(scoreboard.getNullableObjective(objective))
             .flatMap(objective -> Optional.ofNullable(scoreboard.getScore(scoreHolder, objective)))
-            .map(ReadableScoreboardScore::getScore)
+            .map(ReadOnlyScoreInfo::getScore)
             .map(score -> comparison.compare(score, compareTo))
             .orElse(false);
 

@@ -9,9 +9,9 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.keybinding.KeyBindingReference;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NbtByte;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.nbt.ByteTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -81,7 +81,7 @@ public class TogglePowerType extends PowerType implements Active {
         Entity holder = getHolder();
         Power power = getPower();
 
-        if (!holder.getWorld().isClient()) {
+        if (!holder.level().isClientSide()) {
             this.toggled = !this.toggled;
             PowerHolderComponent.syncPower(holder, power);
         }
@@ -98,14 +98,14 @@ public class TogglePowerType extends PowerType implements Active {
     }
 
     @Override
-    public NbtElement toTag() {
-        return NbtByte.of(toggled);
+    public Tag toTag() {
+        return ByteTag.of(toggled);
     }
 
     @Override
-    public void fromTag(NbtElement tag) {
+    public void fromTag(Tag tag) {
 
-        if (tag instanceof NbtByte nbtByte) {
+        if (tag instanceof ByteTag nbtByte) {
             this.toggled = nbtByte.byteValue() > 0;
         }
 

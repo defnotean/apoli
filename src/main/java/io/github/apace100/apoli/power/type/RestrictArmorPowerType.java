@@ -6,9 +6,9 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.InventoryUtil;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -65,14 +65,14 @@ public class RestrictArmorPowerType extends PowerType {
 
     public boolean doesRestrict(ItemStack stack, EquipmentSlot slot) {
         return armorConditions.getOrDefault(slot, Optional.empty())
-            .map(condition -> condition.test(getHolder().getWorld(), stack))
+            .map(condition -> condition.test(getHolder().level(), stack))
             .orElse(false);
     }
 
     public void dropEquippedStacks() {
 
         LivingEntity holder = getHolder();
-        if (holder.getWorld().isClient()) {
+        if (holder.level().isClientSide()) {
             return;
         }
 
@@ -81,10 +81,10 @@ public class RestrictArmorPowerType extends PowerType {
             EquipmentSlot equipmentSlot = armorConditionEntry.getKey();
             Optional<ItemCondition> itemCondition = armorConditionEntry.getValue();
 
-            ItemStack equippedStack = holder.getEquippedStack(equipmentSlot);
+            ItemStack equippedStack = holder.getItemBySlot(equipmentSlot);
 
             //  TODO: Prefer inserting the armor items into the entity's inventory directly (if present)
-            if (equippedStack.isEmpty() && itemCondition.map(condition -> condition.test(holder.getWorld(), equippedStack)).orElse(false)) {
+            if (equippedStack.isEmpty() && itemCondition.map(condition -> condition.test(holder.level(), equippedStack)).orElse(false)) {
                 InventoryUtil.throwItem(holder, equippedStack, true, true, 0);
             }
 

@@ -1,9 +1,9 @@
 package io.github.apace100.apoli.util;
 
 import io.github.apace100.apoli.text.ForcedTranslatableTextContent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 
 import java.util.Optional;
 
@@ -16,14 +16,14 @@ public class TextUtil {
 	 * 	<ol>
 	 * 	    <li>
 	 * 	        If {@code altText} is empty, a traditional translatable text will be constructed
-	 * 	        (via {@link Text#translatable(String)}.)
+	 * 	        (via {@link Component#translatable(String)}.)
 	 * 	    </li>
 	 * 	    <li>
 	 * 	        If {@code altText} is already a translatable text, it will be used as is.
 	 * 	    </li>
 	 * 	    <li>
 	 * 	        If {@code altText} is a literal string, the string will be used as a fallback translation for the
-	 * 	        translatable text (constructed via {@link Text#translatableWithFallback(String, String)}.)
+	 * 	        translatable text (constructed via {@link Component#translatableWithFallback(String, String)}.)
 	 * 	    </li>
 	 * 	    <li>
 	 * 	        If neither of the above scenarios are inapplicable, a {@linkplain ForcedTranslatableTextContent forced
@@ -37,29 +37,29 @@ public class TextUtil {
 	 * @return	either a traditional translatable text (if {@code altText} is present, and a literal string, or a
 	 * 			translatable text), or a {@link ForcedTranslatableTextContent}.
 	 */
-	public static Text forceTranslatable(String translationKey, Optional<Text> altText) {
+	public static Component forceTranslatable(String translationKey, Optional<Component> altText) {
 
 		if (altText.isPresent()) {
 
-			Text text = altText.get();
+			Component text = altText.get();
 			String literal = text.getLiteralString();
 
-			if (text.getContent() instanceof TranslatableTextContent) {
+			if (text.getContent() instanceof TranslatableContents) {
 				return text;
 			}
 
 			else if (literal != null) {
-				return Text.translatableWithFallback(translationKey, literal);
+				return Component.translatableWithFallback(translationKey, literal);
 			}
 
 			else {
-				return MutableText.of(new ForcedTranslatableTextContent(translationKey, text));
+				return MutableComponent.of(new ForcedTranslatableTextContent(translationKey, text));
 			}
 
 		}
 
 		else {
-			return Text.translatable(translationKey);
+			return Component.translatable(translationKey);
 		}
 
 	}

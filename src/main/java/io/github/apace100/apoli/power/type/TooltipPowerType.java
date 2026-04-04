@@ -13,19 +13,19 @@ import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.RegistryOps;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextCodecs;
-import net.minecraft.text.Texts;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.ComponentUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -63,21 +63,21 @@ public class TooltipPowerType extends PowerType {
     );
 
     private final Optional<ItemCondition> itemCondition;
-    private final List<Text> texts;
+    private final List<Component> texts;
 
     private final boolean resolve;
 
     private final int tickRate;
     private final int order;
 
-    private final ObjectArrayList<Text> tooltipTexts;
+    private final ObjectArrayList<Component> tooltipTexts;
 
     private Integer startTicks;
     private Integer endTicks;
 
     private boolean wasActive;
 
-    public TooltipPowerType(Optional<ItemCondition> itemCondition, List<Text> texts, boolean resolve, int tickRate, int order, Optional<EntityCondition> condition) {
+    public TooltipPowerType(Optional<ItemCondition> itemCondition, List<Component> texts, boolean resolve, int tickRate, int order, Optional<EntityCondition> condition) {
         super(condition);
 
         this.itemCondition = itemCondition;
@@ -116,7 +116,7 @@ public class TooltipPowerType extends PowerType {
     public void serverTick() {
 
         LivingEntity holder = getHolder();
-        int modTicks = holder.age % tickRate;
+        int modTicks = holder.tickCount % tickRate;
 
         if (isActive()) {
 
@@ -127,7 +127,7 @@ public class TooltipPowerType extends PowerType {
 
             else if (modTicks == startTicks) {
 
-                List<Text> parsedTexts = parseTexts();
+                List<Component> parsedTexts = parseTexts();
                 this.wasActive = true;
 
                 if (!parsedTexts.isEmpty() && Collections.disjoint(tooltipTexts, parsedTexts)) {
@@ -160,16 +160,16 @@ public class TooltipPowerType extends PowerType {
     }
 
     @Override
-    public NbtElement toTag() {
+    public Tag toTag() {
 
-        RegistryWrapper.WrapperLookup registryLookup = getHolder().getRegistryManager();
-        RegistryOps<NbtElement> nbtOps = registryLookup.getOps(NbtOps.INSTANCE);
+        HolderLookup.Provider registryLookup = getHolder().registryAccess();
+        RegistryOps<Tag> nbtOps = registryLookup.getOps(NbtOps.INSTANCE);
 
-        NbtCompound rootNbt = new NbtCompound();
-        NbtList tooltipTextsNbt = new NbtList();
+        CompoundTag rootNbt = new CompoundTag();
+        ListTag tooltipTextsNbt = new ListTag();
 
         tooltipTexts.stream()
-            .map(text -> TextCodecs.CODEC.encodeStart(nbtOps, text))
+            .map(text -> ComponentSerialization.CODEC.encodeStart(nbtOps, text))
             .filter(DataResult::isSuccess)
             .map(DataResult::getOrThrow)
             .forEach(tooltipTextsNbt::add);
@@ -180,21 +180,21 @@ public class TooltipPowerType extends PowerType {
     }
 
     @Override
-    public void fromTag(NbtElement tag) {
+    public void fromTag(Tag tag) {
 
-        RegistryWrapper.WrapperLookup registryLookup = getHolder().getRegistryManager();
-        RegistryOps<NbtElement> nbtOps = registryLookup.getOps(NbtOps.INSTANCE);
+        HolderLookup.Provider registryLookup = getHolder().registryAccess();
+        RegistryOps<Tag> nbtOps = registryLookup.getOps(NbtOps.INSTANCE);
 
         this.tooltipTexts.clear();
 
-        NbtCompound rootNbt = (NbtCompound) tag;
-        NbtElement tooltipTextsNbt = rootNbt.get("Tooltips");
+        CompoundTag rootNbt = (CompoundTag) tag;
+        Tag tooltipTextsNbt = rootNbt.get("Tooltips");
 
-        if (tooltipTextsNbt instanceof NbtList actualTooltipTextNbt) {
+        if (tooltipTextsNbt instanceof ListTag actualTooltipTextNbt) {
 
             actualTooltipTextNbt
                 .stream()
-                .map(nbtElement -> TextCodecs.CODEC.parse(nbtOps, nbtElement))
+                .map(nbtElement -> ComponentSerialization.CODEC.parse(nbtOps, nbtElement))
                 .filter(DataResult::isSuccess)
                 .map(DataResult::getOrThrow)
                 .forEach(this.tooltipTexts::add);
@@ -209,7 +209,7 @@ public class TooltipPowerType extends PowerType {
         return order;
     }
 
-    public void processTooltips(Consumer<Text> processor) {
+    public void processTooltips(Consumer<Component> processor) {
 
         if (resolve) {
             tooltipTexts.forEach(processor);
@@ -223,31 +223,31 @@ public class TooltipPowerType extends PowerType {
 
     public boolean doesApply(ItemStack stack) {
         return itemCondition
-            .map(condition -> condition.test(getHolder().getWorld(), stack))
+            .map(condition -> condition.test(getHolder().level(), stack))
             .orElse(true);
     }
 
-    private List<Text> parseTexts() {
+    private List<Component> parseTexts() {
 
-        List<Text> parsedTexts = Lists.newLinkedList();
+        List<Component> parsedTexts = Lists.newLinkedList();
         LivingEntity holder = getHolder();
 
-        if (texts.isEmpty() || !(holder.getWorld() instanceof ServerWorld serverWorld)) {
+        if (texts.isEmpty() || !(holder.level() instanceof ServerLevel serverWorld)) {
             return parsedTexts;
         }
 
-        ListIterator<Text> textIterator = texts.listIterator();
+        ListIterator<Component> textIterator = texts.listIterator();
         ServerCommandSource source = holder.getCommandSource()
             .withOutput(serverWorld.getServer())
             .withLevel(Apoli.config.executeCommand.permissionLevel);
 
         while (textIterator.hasNext()) {
 
-            Text text = textIterator.next();
+            Component text = textIterator.next();
             int index = textIterator.nextIndex();
 
             try {
-                parsedTexts.add(Texts.parse(source, text, holder, 0));
+                parsedTexts.add(ComponentUtils.parse(source, text, holder, 0));
             }
 
             catch (CommandSyntaxException cse) {

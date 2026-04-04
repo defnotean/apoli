@@ -10,9 +10,9 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -73,7 +73,7 @@ public class ActionOnItemPickupPowerType extends PowerType implements Prioritize
     }
 
     public boolean doesApply(ItemStack stack, Entity thrower) {
-        return itemCondition.map(condition -> condition.test(getHolder().getWorld(), stack)).orElse(true)
+        return itemCondition.map(condition -> condition.test(getHolder().level(), stack)).orElse(true)
             && biEntityCondition.map(condition -> condition.test(thrower, getHolder())).orElse(true);
     }
 
@@ -81,8 +81,8 @@ public class ActionOnItemPickupPowerType extends PowerType implements Prioritize
         biEntityAction.ifPresent(action -> action.execute(thrower, getHolder()));
     }
 
-    public void executeItemAction(StackReference stackReference) {
-        itemAction.ifPresent(action -> action.execute(getHolder().getWorld(), stackReference));
+    public void executeItemAction(SlotAccess stackReference) {
+        itemAction.ifPresent(action -> action.execute(getHolder().level(), stackReference));
     }
 
     public static void executeBiEntityAction(CallInstance<ActionOnItemPickupPowerType> callInstance, Entity throwerEntity) {
@@ -93,7 +93,7 @@ public class ActionOnItemPickupPowerType extends PowerType implements Prioritize
 
     }
 
-    public static CallInstance<ActionOnItemPickupPowerType> executeItemAction(Entity throwerEntity, StackReference stackReference, Entity entity) {
+    public static CallInstance<ActionOnItemPickupPowerType> executeItemAction(Entity throwerEntity, SlotAccess stackReference, Entity entity) {
 
         if (PowerHolderComponent.getOptional(entity).isEmpty()) {
             return new CallInstance<>();

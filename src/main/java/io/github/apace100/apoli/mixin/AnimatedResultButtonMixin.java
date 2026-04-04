@@ -11,16 +11,16 @@ import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.PowerManager;
 import io.github.apace100.apoli.recipe.ModifiedCraftingRecipe;
 import io.github.apace100.apoli.recipe.PowerCraftingRecipe;
-import net.minecraft.client.gui.screen.recipebook.AnimatedResultButton;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.CraftingRecipe;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.recipe.book.RecipeBook;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.screens.recipebook.AnimatedResultButton;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.stats.RecipeBook;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,17 +32,17 @@ import java.util.function.Predicate;
 public abstract class AnimatedResultButtonMixin {
 
     @Shadow
-    public abstract RecipeEntry<?> currentRecipe();
+    public abstract RecipeHolder<?> currentRecipe();
 
     @Shadow
     private RecipeBook recipeBook;
 
-    @WrapOperation(method = {"renderWidget", "getTooltip", "appendClickableNarrations"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/recipe/RecipeEntry;value()Lnet/minecraft/recipe/Recipe;"))
-    private Recipe<?> apoli$modifyEntryQuery(RecipeEntry<?> entry, Operation<Recipe<?>> original, @Share("originalEntry") LocalRef<RecipeEntry<?>> sharedOriginalEntry) {
+    @WrapOperation(method = {"renderWidget", "getTooltip", "appendClickableNarrations"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeHolder;value()Lnet/minecraft/world/item/crafting/Recipe;"))
+    private Recipe<?> apoli$modifyEntryQuery(RecipeHolder<?> entry, Operation<Recipe<?>> original, @Share("originalEntry") LocalRef<RecipeHolder<?>> sharedOriginalEntry) {
 
         sharedOriginalEntry.set(entry);
 
-        Identifier id = entry.id();
+        ResourceLocation id = entry.id();
         Recipe<?> recipe = entry.value();
 
         if (recipe instanceof CraftingRecipe craftingRecipe && ModifiedCraftingRecipe.canModify(id, craftingRecipe, this.recipeBook)) {
@@ -55,8 +55,8 @@ public abstract class AnimatedResultButtonMixin {
 
     }
 
-    @WrapOperation(method = {"renderWidget", "getTooltip", "appendClickableNarrations"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/recipe/Recipe;getResult(Lnet/minecraft/registry/RegistryWrapper$WrapperLookup;)Lnet/minecraft/item/ItemStack;"))
-    private ItemStack apoli$modifyResultQuery(Recipe<?> recipe, RegistryWrapper.WrapperLookup wrapperLookup, Operation<ItemStack> original) {
+    @WrapOperation(method = {"renderWidget", "getTooltip", "appendClickableNarrations"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/Recipe;getResultItem(Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/world/item/ItemStack;"))
+    private ItemStack apoli$modifyResultQuery(Recipe<?> recipe, HolderLookup.Provider wrapperLookup, Operation<ItemStack> original) {
 
         if (recipe instanceof ModifiedCraftingRecipe modifiedCraftingRecipe && this.recipeBook instanceof PowerCraftingObject pco) {
             return modifiedCraftingRecipe.getModifiedResult(wrapperLookup, pco.apoli$getPlayer()).getFirst();
@@ -69,23 +69,23 @@ public abstract class AnimatedResultButtonMixin {
     }
 
     @ModifyReturnValue(method = "getTooltip", at = @At("RETURN"))
-    private List<Text> apoli$appendRequiredRecipePowerTooltip(List<Text> original, @Share("originalEntry") LocalRef<RecipeEntry<?>> sharedOriginalEntry) {
+    private List<Component> apoli$appendRequiredRecipePowerTooltip(List<Component> original, @Share("originalEntry") LocalRef<RecipeHolder<?>> sharedOriginalEntry) {
 
-        RecipeEntry<?> recipeEntry = sharedOriginalEntry.get() != null
+        RecipeHolder<?> recipeEntry = sharedOriginalEntry.get() != null
             ? sharedOriginalEntry.get()
             : this.currentRecipe();
 
         if (recipeEntry.value() instanceof PowerCraftingRecipe pcr && this.recipeBook instanceof PowerCraftingObject pco && pco.apoli$getPlayer() != null) {
 
             PowerHolderComponent component = PowerHolderComponent.KEY.get(pco.apoli$getPlayer());
-            Text powerTooltip = PowerManager.getOptional(pcr.powerId())
+            Component powerTooltip = PowerManager.getOptional(pcr.powerId())
                 .filter(Predicate.not(component::hasPower))
                 .map(Power::getName)
-                .map(name -> Text.translatable("tooltip.apoli.power_recipe.required_power", name).formatted(Formatting.RED))
+                .map(name -> Component.translatable("tooltip.apoli.power_recipe.required_power", name).withStyle(ChatFormatting.RED))
                 .orElse(null);
 
             if (powerTooltip != null) {
-                original.add(Text.empty());
+                original.add(Component.empty());
                 original.add(powerTooltip);
             }
 

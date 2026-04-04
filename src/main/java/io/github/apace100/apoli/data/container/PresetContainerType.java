@@ -1,8 +1,8 @@
 package io.github.apace100.apoli.data.container;
 
 import io.github.apace100.apoli.util.TextAlignment;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.screen.ScreenHandlerFactory;
+import net.minecraft.world.Inventory;
+import net.minecraft.world.MenuProvider;
 import org.jetbrains.annotations.NotNull;
 
 public record PresetContainerType(int columns, int rows, @NotNull Factory factory) implements ContainerType {
@@ -13,13 +13,13 @@ public record PresetContainerType(int columns, int rows, @NotNull Factory factor
 	}
 
 	@Override
-	public ScreenHandlerFactory create(Inventory inventory) {
+	public MenuProvider create(Inventory inventory) {
 		return factory().create(inventory, columns(), rows());
 	}
 
 	@FunctionalInterface
 	public interface Factory {
-		ScreenHandlerFactory create(Inventory inventory, int columns, int rows);
+		MenuProvider create(Inventory inventory, int columns, int rows);
 	}
 
 }

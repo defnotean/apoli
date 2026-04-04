@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.11-SNAPSHOT'
+	id 'fabric-loom' version '1.15-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -93,7 +93,7 @@ dependencies {
 
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	// MC 26.1 is deobfuscated - no mappings needed
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
@@ -109,7 +109,7 @@ dependencies {
 
 	//	PlayerAbilityLib
 	include(modApi("io.github.ladysnake:PlayerAbilityLib:${project.pal_version}"))
-	
+
 	//	Calio
 	include(modApi("io.github.apace100:calio:${project.calio_version}"))
 
@@ -119,16 +119,16 @@ dependencies {
 	})
 
 	//	Modmenu
-	include(modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}"))
+	implementation("com.terraformersmc:modmenu:${project.modmenu_version}")
 
-	//	AdditionalEntityAttributes
-	include(modApi("maven.modrinth:additionalentityattributes:${project.aea_version}"))
+	//	AdditionalEntityAttributes - no 26.1 build available
+	//	include(modApi("maven.modrinth:additionalentityattributes:${project.aea_version}"))
 
-	//	Appleskin
-	modCompileOnly("squeek.appleskin:appleskin-fabric:${appleskin_version}:api") {
-		transitive = false
-	}
-	modCompileOnly "squeek.appleskin:appleskin-fabric:${appleskin_version}"
+	//	Appleskin - no 26.1 build available
+	//	modCompileOnly("squeek.appleskin:appleskin-fabric:${appleskin_version}:api") {
+	//		transitive = false
+	//	}
+	//	modCompileOnly "squeek.appleskin:appleskin-fabric:${appleskin_version}"
 
 }
 
@@ -147,7 +147,7 @@ tasks.withType(JavaCompile).configureEach {
 	// If Javadoc is generated, this must be specified in that task too.
 	it.options.encoding = "UTF-8"
 
-	it.options.release = 21
+	it.options.release = 25
 }
 
 java {
@@ -156,8 +156,8 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 }
 
 jar {

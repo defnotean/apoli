@@ -2,23 +2,23 @@ package io.github.apace100.apoli.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import io.github.apace100.apoli.power.type.ModifyGrindstonePowerType;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.GrindstoneScreenHandler;
+import net.minecraft.world.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.GrindstoneMenu;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(targets = "net/minecraft/screen/GrindstoneScreenHandler$3")
+@Mixin(targets = "net/minecraft/world/inventory/GrindstoneMenu$3")
 public class GrindstoneScreenHandlerBottomInputSlotMixin {
 
     @Unique
-    private GrindstoneScreenHandler apoli$grindstoneHandler;
+    private GrindstoneMenu apoli$grindstoneHandler;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void apoli$cacheGrindstone(GrindstoneScreenHandler grindstoneScreenHandler, Inventory inventory, int i, int j, int k, CallbackInfo ci) {
+    private void apoli$cacheGrindstone(GrindstoneMenu grindstoneScreenHandler, Inventory inventory, int i, int j, int k, CallbackInfo ci) {
         this.apoli$grindstoneHandler = grindstoneScreenHandler;
     }
 

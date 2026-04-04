@@ -2,10 +2,10 @@ package io.github.apace100.apoli.power;
 
 import com.google.common.collect.ImmutableSet;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,21 +18,21 @@ public class MultiplePower extends Power {
 
 		@Override
 		public MultiplePower decode(RegistryByteBuf buf) {
-			Set<Identifier> subPowerIds = buf.readCollection(ObjectLinkedOpenHashSet::new, PacketByteBuf::readIdentifier);
+			Set<ResourceLocation> subPowerIds = buf.readCollection(ObjectLinkedOpenHashSet::new, FriendlyByteBuf::readIdentifier);
 			return new MultiplePower(power, subPowerIds);
 
 		}
 
 		@Override
 		public void encode(RegistryByteBuf buf, MultiplePower value) {
-			buf.writeCollection(value.getSubPowerIds(), PacketByteBuf::writeIdentifier);
+			buf.writeCollection(value.getSubPowerIds(), FriendlyByteBuf::writeIdentifier);
 		}
 
 	};
 
-    private ImmutableSet<Identifier> subPowerIds;
+    private ImmutableSet<ResourceLocation> subPowerIds;
 
-    MultiplePower(Power basePower, Set<Identifier> subPowerIds) {
+    MultiplePower(Power basePower, Set<ResourceLocation> subPowerIds) {
         super(basePower);
         this.subPowerIds = ImmutableSet.copyOf(subPowerIds);
     }
@@ -42,11 +42,11 @@ public class MultiplePower extends Power {
 		this.subPowerIds = ImmutableSet.of();
     }
 
-    public ImmutableSet<Identifier> getSubPowerIds() {
+    public ImmutableSet<ResourceLocation> getSubPowerIds() {
         return subPowerIds;
     }
 
-    void setSubPowerIds(Set<Identifier> subPowerIds) {
+    void setSubPowerIds(Set<ResourceLocation> subPowerIds) {
         this.subPowerIds = ImmutableSet.copyOf(subPowerIds);
     }
 

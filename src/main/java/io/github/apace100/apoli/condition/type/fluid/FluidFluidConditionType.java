@@ -7,7 +7,7 @@ import io.github.apace100.apoli.condition.type.FluidConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.fluid.Fluid;
+import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.NotNull;
 
 public class FluidFluidConditionType extends FluidConditionType {
@@ -30,7 +30,7 @@ public class FluidFluidConditionType extends FluidConditionType {
 
     @Override
     public boolean test(FluidConditionContext context) {
-        return context.fluidState().isOf(fluid);
+        return context.fluidState().is(fluid);
     }
 
     @Override

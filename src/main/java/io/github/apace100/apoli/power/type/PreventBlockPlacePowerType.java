@@ -10,13 +10,13 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
@@ -66,8 +66,8 @@ public class PreventBlockPlacePowerType extends ActiveInteractionPowerType {
 
     private final EnumSet<Direction> directions;
 
-    public PreventBlockPlacePowerType(Optional<EntityAction> entityAction, Optional<BlockAction> placeToAction, Optional<BlockAction> placeOnAction, Optional<BlockCondition> placeToCondition, Optional<BlockCondition> placeOnCondition, EnumSet<Direction> directions, Optional<ItemAction> heldItemAction, Optional<ItemCondition> itemCondition, Optional<ItemAction> resultItemAction, Optional<ItemStack> resultStack, EnumSet<Hand> hands, int priority, Optional<EntityCondition> condition) {
-        super(heldItemAction, itemCondition, resultItemAction, resultStack, hands, ActionResult.FAIL, priority, condition);
+    public PreventBlockPlacePowerType(Optional<EntityAction> entityAction, Optional<BlockAction> placeToAction, Optional<BlockAction> placeOnAction, Optional<BlockCondition> placeToCondition, Optional<BlockCondition> placeOnCondition, EnumSet<Direction> directions, Optional<ItemAction> heldItemAction, Optional<ItemCondition> itemCondition, Optional<ItemAction> resultItemAction, Optional<ItemStack> resultStack, EnumSet<InteractionHand> hands, int priority, Optional<EntityCondition> condition) {
+        super(heldItemAction, itemCondition, resultItemAction, resultStack, hands, InteractionResult.FAIL, priority, condition);
         this.entityAction = entityAction;
         this.placeToAction = placeToAction;
         this.placeOnAction = placeOnAction;
@@ -81,24 +81,24 @@ public class PreventBlockPlacePowerType extends ActiveInteractionPowerType {
         return PowerTypes.PREVENT_BLOCK_PLACE;
     }
 
-    public boolean doesPrevent(ItemStack heldStack, Hand hand, BlockPos toPos, BlockPos onPos, Direction direction) {
+    public boolean doesPrevent(ItemStack heldStack, InteractionHand hand, BlockPos toPos, BlockPos onPos, Direction direction) {
         LivingEntity holder = getHolder();
         return super.shouldExecute(hand, heldStack)
             && directions.contains(direction)
-            && placeOnCondition.map(condition -> condition.test(holder.getWorld(), onPos)).orElse(true)
-            && placeToCondition.map(condition -> condition.test(holder.getWorld(), toPos)).orElse(true);
+            && placeOnCondition.map(condition -> condition.test(holder.level(), onPos)).orElse(true)
+            && placeToCondition.map(condition -> condition.test(holder.level(), toPos)).orElse(true);
     }
 
-    public void executeActions(Hand hand, BlockPos toPos, BlockPos onPos, Direction direction) {
+    public void executeActions(InteractionHand hand, BlockPos toPos, BlockPos onPos, Direction direction) {
 
         LivingEntity holder = getHolder();
 
-        placeOnAction.ifPresent(action -> action.execute(holder.getWorld(), onPos, Optional.of(direction)));
-        placeToAction.ifPresent(action -> action.execute(holder.getWorld(), toPos, Optional.of(direction)));
+        placeOnAction.ifPresent(action -> action.execute(holder.level(), onPos, Optional.of(direction)));
+        placeToAction.ifPresent(action -> action.execute(holder.level(), toPos, Optional.of(direction)));
 
         entityAction.ifPresent(action -> action.execute(holder));
 
-        if (holder instanceof PlayerEntity playerEntity) {
+        if (holder instanceof Player playerEntity) {
             performActorItemStuff(playerEntity, hand);
         }
 

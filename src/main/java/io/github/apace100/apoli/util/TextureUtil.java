@@ -5,9 +5,9 @@ import io.github.apace100.apoli.mixin.SpriteAtlasTextureAccessor;
 import io.github.apace100.apoli.mixin.TextureManagerAccessor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.texture.*;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.*;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
@@ -17,31 +17,31 @@ import java.util.function.Function;
 @Environment(EnvType.CLIENT)
 public class TextureUtil {
 
-    public static final Identifier GUI_ATLAS_TEXTURE = Identifier.ofVanilla("textures/atlas/gui.png");
+    public static final ResourceLocation GUI_ATLAS_TEXTURE = ResourceLocation.ofVanilla("textures/atlas/gui.png");
 
     /**
-     *  <p>Tries loading the texture that corresponds with the specified {@link Identifier}.</p>
+     *  <p>Tries loading the texture that corresponds with the specified {@link ResourceLocation}.</p>
      *
-     *  @param id   the {@link Identifier} of the texture to load
+     *  @param id   the {@link ResourceLocation} of the texture to load
      *
-     *  @return     the {@link Identifier} of the texture wrapped in a {@link DataResult}
+     *  @return     the {@link ResourceLocation} of the texture wrapped in a {@link DataResult}
      */
-    public static DataResult<Identifier> tryLoadingTexture(Identifier id) {
+    public static DataResult<ResourceLocation> tryLoadingTexture(ResourceLocation id) {
         return tryLoadingTexture(id, _id -> "Texture \"" + id + "\" does not exist!", _id -> "Failed to load texture \"" + id + "\"\n");
     }
 
     /**
-     *  <p>Tries loading the texture that corresponds with the specified {@link Identifier}.</p>
+     *  <p>Tries loading the texture that corresponds with the specified {@link ResourceLocation}.</p>
      *
-     *  @param id               the {@link Identifier} of the texture to load
+     *  @param id               the {@link ResourceLocation} of the texture to load
      *  @param missingErr       the error message to use if the texture doesn't exist
      *  @param loadFailureErr   the error message to use if the texture failed to load
      *
-     *  @return                 the {@link Identifier} of the texture wrapped in a {@link DataResult}
+     *  @return                 the {@link ResourceLocation} of the texture wrapped in a {@link DataResult}
      */
-    public static DataResult<Identifier> tryLoadingTexture(Identifier id, Function<Identifier, String> missingErr, Function<Identifier, String> loadFailureErr) {
+    public static DataResult<ResourceLocation> tryLoadingTexture(ResourceLocation id, Function<ResourceLocation, String> missingErr, Function<ResourceLocation, String> loadFailureErr) {
 
-        TextureManagerAccessor textureManagerAccessor = (TextureManagerAccessor) MinecraftClient.getInstance().getTextureManager();
+        TextureManagerAccessor textureManagerAccessor = (TextureManagerAccessor) Minecraft.getInstance().getTextureManager();
 
         AbstractTexture texture = textureManagerAccessor.getTextures().get(id);
         StringBuilder errorMessage = new StringBuilder();
@@ -49,7 +49,7 @@ public class TextureUtil {
         boolean erred = false;
         
         if (texture != null) {
-            return texture == MissingSprite.getMissingSpriteTexture()
+            return texture == MissingTextureAtlasSprite.getMissingTextureAtlasSpriteTexture()
                 ? DataResult.error(() -> missingErr.apply(id))
                 : DataResult.success(id);
         }
@@ -59,7 +59,7 @@ public class TextureUtil {
             texture.load(textureManagerAccessor.getResourceContainer());
         } catch (IOException io) {
 
-            texture = MissingSprite.getMissingSpriteTexture();
+            texture = MissingTextureAtlasSprite.getMissingTextureAtlasSpriteTexture();
 
             if (id != TextureManager.MISSING_IDENTIFIER) {
 
@@ -74,7 +74,7 @@ public class TextureUtil {
         }
 
         AbstractTexture prevTexture = textureManagerAccessor.getTextures().put(id, texture);
-        if (prevTexture != null && prevTexture != MissingSprite.getMissingSpriteTexture()) {
+        if (prevTexture != null && prevTexture != MissingTextureAtlasSprite.getMissingTextureAtlasSpriteTexture()) {
             textureManagerAccessor.callCloseTexture(id, prevTexture);
         }
 
@@ -85,18 +85,18 @@ public class TextureUtil {
     }
 
     /**
-     *  <p>Tries loading the sprite that corresponds with the first {@link Identifier} from the
-     *  texture atlas that corresponds with the second {@link Identifier}.</p>
+     *  <p>Tries loading the sprite that corresponds with the first {@link ResourceLocation} from the
+     *  texture atlas that corresponds with the second {@link ResourceLocation}.</p>
      *
-     *  @param spriteId     the {@link Identifier} of the sprite to load
-     *  @param atlasId      the {@link Identifier} of the texture atlas
+     *  @param spriteId     the {@link ResourceLocation} of the sprite to load
+     *  @param atlasId      the {@link ResourceLocation} of the texture atlas
      *
-     *  @return             the {@link Identifier} of the sprite wrapped in a {@link DataResult}
+     *  @return             the {@link ResourceLocation} of the sprite wrapped in a {@link DataResult}
      */
-    public static DataResult<Identifier> tryLoadingSprite(Identifier spriteId, Identifier atlasId) {
+    public static DataResult<ResourceLocation> tryLoadingSprite(ResourceLocation spriteId, ResourceLocation atlasId) {
 
-        TextureManagerAccessor textureManagerAccessor = (TextureManagerAccessor) MinecraftClient.getInstance().getTextureManager();
-        DataResult<Identifier> atlasResult = tryLoadingTexture(atlasId, _id -> "Texture \"" + _id + "\" does not exist!", _id -> "\n");
+        TextureManagerAccessor textureManagerAccessor = (TextureManagerAccessor) Minecraft.getInstance().getTextureManager();
+        DataResult<ResourceLocation> atlasResult = tryLoadingTexture(atlasId, _id -> "Texture \"" + _id + "\" does not exist!", _id -> "\n");
 
         if (atlasResult.result().isEmpty()) {
             return atlasResult.mapError(err -> "Failed to load atlas \"%s\": %s".formatted(atlasId, err));
@@ -105,15 +105,15 @@ public class TextureUtil {
         AbstractTexture texture = textureManagerAccessor.getTextures().get(atlasId);
         try {
 
-            if (!(texture instanceof SpriteAtlasTexture atlasTexture)) {
-                throw new IllegalArgumentException("Identifier \"" + atlasId + "\" does not refer to an atlas texture!");
+            if (!(texture instanceof TextureAtlas atlasTexture)) {
+                throw new IllegalArgumentException("ResourceLocation \"" + atlasId + "\" does not refer to an atlas texture!");
             }
 
-            Sprite missingSprite = ((SpriteAtlasTextureAccessor) atlasTexture).getMissingSprite();
-            Sprite sprite = atlasTexture.getSprite(spriteId);
+            TextureAtlasSprite missingSprite = ((SpriteAtlasTextureAccessor) atlasTexture).getMissingTextureAtlasSprite();
+            TextureAtlasSprite sprite = atlasTexture.getSprite(spriteId);
 
             if (sprite == missingSprite) {
-                throw new IllegalArgumentException("Sprite \"" + spriteId + "\" does not exist in atlas \"" + atlasId + "\"!");
+                throw new IllegalArgumentException("TextureAtlasSprite \"" + spriteId + "\" does not exist in atlas \"" + atlasId + "\"!");
             }
 
             return DataResult.success(spriteId);

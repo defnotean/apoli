@@ -8,21 +8,22 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
+import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.registries.Registries;
 
 public class RemoveEnchantmentItemActionType extends ItemActionType {
 
@@ -45,15 +46,15 @@ public class RemoveEnchantmentItemActionType extends ItemActionType {
             .set("reset_repair_cost", actionType.resetRepairCost)
     );
 
-    private final Optional<RegistryKey<Enchantment>> enchantmentKey;
-    private final Optional<List<RegistryKey<Enchantment>>> enchantmentKeys;
+    private final Optional<ResourceKey<Enchantment>> enchantmentKey;
+    private final Optional<List<ResourceKey<Enchantment>>> enchantmentKeys;
 
-    private final List<RegistryKey<Enchantment>> allEnchantmentKeys;
+    private final List<ResourceKey<Enchantment>> allEnchantmentKeys;
 
     private final Optional<Integer> levels;
     private final boolean resetRepairCost;
 
-    public RemoveEnchantmentItemActionType(Optional<RegistryKey<Enchantment>> enchantmentKey, Optional<List<RegistryKey<Enchantment>>> enchantmentKeys, Optional<Integer> levels, boolean resetRepairCost) {
+    public RemoveEnchantmentItemActionType(Optional<ResourceKey<Enchantment>> enchantmentKey, Optional<List<ResourceKey<Enchantment>>> enchantmentKeys, Optional<Integer> levels, boolean resetRepairCost) {
 
         this.enchantmentKey = enchantmentKey;
         this.enchantmentKeys = enchantmentKeys;
@@ -71,24 +72,24 @@ public class RemoveEnchantmentItemActionType extends ItemActionType {
     @Override
     public void accept(ItemActionContext context) {
 
-        ServerWorld world = context.world();
-        StackReference stackReference = context.stackReference();
+        ServerLevel world = context.world();
+        SlotAccess stackReference = context.stackReference();
 
         ItemStack stack = stackReference.get();
-        DynamicRegistryManager dynamicRegistries = world.getRegistryManager();
+        RegistryAccess dynamicRegistries = world.registryAccess();
 
         if (!stack.hasEnchantments()) {
             return;
         }
 
-        ItemEnchantmentsComponent oldEnchantments = stack.getEnchantments();
-        ItemEnchantmentsComponent.Builder newEnchantments = new ItemEnchantmentsComponent.Builder(oldEnchantments);
+        ItemEnchantments oldEnchantments = stack.getEnchantments();
+        ItemEnchantments.Builder newEnchantments = new ItemEnchantments.Builder(oldEnchantments);
 
-        Registry<Enchantment> enchantmentRegistry = dynamicRegistries.get(RegistryKeys.ENCHANTMENT);
-        for (RegistryKey<Enchantment> enchantmentKey : allEnchantmentKeys) {
+        Registry<Enchantment> enchantmentRegistry = dynamicRegistries.get(Registries.ENCHANTMENT);
+        for (ResourceKey<Enchantment> enchantmentKey : allEnchantmentKeys) {
 
             //  Since the registry keys are already validated, this should be fine.
-            RegistryEntry<Enchantment> enchantment = enchantmentRegistry.entryOf(enchantmentKey);
+            Holder<Enchantment> enchantment = enchantmentRegistry.entryOf(enchantmentKey);
 
             if (oldEnchantments.getEnchantments().contains(enchantment)) {
                 newEnchantments.set(enchantment, levels.map(lvl -> oldEnchantments.getLevel(enchantment) - lvl).orElse(0));
@@ -96,7 +97,7 @@ public class RemoveEnchantmentItemActionType extends ItemActionType {
 
         }
 
-        for (RegistryEntry<Enchantment> oldEnchantment : oldEnchantments.getEnchantments()) {
+        for (Holder<Enchantment> oldEnchantment : oldEnchantments.getEnchantments()) {
 
             if (!allEnchantmentKeys.isEmpty()) {
                 break;
@@ -108,9 +109,9 @@ public class RemoveEnchantmentItemActionType extends ItemActionType {
 
         }
 
-        stack.set(DataComponentTypes.ENCHANTMENTS, newEnchantments.build());
+        stack.set(DataComponents.ENCHANTMENTS, newEnchantments.build());
         if (resetRepairCost && !stack.hasEnchantments()) {
-            stack.set(DataComponentTypes.REPAIR_COST, 0);
+            stack.set(DataComponents.REPAIR_COST, 0);
         }
 
     }

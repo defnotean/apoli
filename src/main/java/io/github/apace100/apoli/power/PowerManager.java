@@ -26,29 +26,30 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.RegistryOps;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
-import net.minecraft.util.JsonHelper;
-import net.minecraft.util.profiler.Profiler;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.util.profiling.Profiler;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import net.minecraft.core.registries.Registries;
 
 @SuppressWarnings("unused")
 public class PowerManager extends IdentifiableMultiJsonDataLoader implements IdentifiableResourceReloadListener {
 
-    public static final Set<Identifier> DEPENDENCIES = new HashSet<>();
-    public static final Identifier ID = Apoli.identifier("powers");
+    public static final Set<ResourceLocation> DEPENDENCIES = new HashSet<>();
+    public static final ResourceLocation ID = Apoli.identifier("powers");
 
     private static final Gson GSON = new GsonBuilder()
         .disableHtmlEscaping()
@@ -61,23 +62,23 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
         ResourceConditions.CONDITIONS_KEY
     );
 
-    private static final Map<Identifier, Integer> LOADING_PRIORITIES = new HashMap<>();
+    private static final Map<ResourceLocation, Integer> LOADING_PRIORITIES = new HashMap<>();
     private static final Map<String, AdditionalPowerDataCallback> ADDITIONAL_DATA = new HashMap<>();
 
-    private static final Object2ObjectOpenHashMap<Identifier, Power> POWERS_BY_ID = new Object2ObjectOpenHashMap<>();
-    private static final ObjectOpenHashSet<Identifier> DISABLED_POWERS = new ObjectOpenHashSet<>();
+    private static final Object2ObjectOpenHashMap<ResourceLocation, Power> POWERS_BY_ID = new Object2ObjectOpenHashMap<>();
+    private static final ObjectOpenHashSet<ResourceLocation> DISABLED_POWERS = new ObjectOpenHashSet<>();
 
-    private final RegistryWrapper.WrapperLookup wrapperLookup;
+    private final HolderLookup.Provider wrapperLookup;
 
-    PowerManager(RegistryWrapper.WrapperLookup wrapperLookup) {
-        super(GSON, "powers", ResourceType.SERVER_DATA);
+    PowerManager(HolderLookup.Provider wrapperLookup) {
+        super(GSON, "powers", PackType.SERVER_DATA);
         this.wrapperLookup = wrapperLookup;
     }
 
     public static void init() {
 
         ServerEntityEvents.ENTITY_LOAD.register(ID, (entity, world) -> {
-            if (!(entity instanceof PlayerEntity)) {
+            if (!(entity instanceof Player)) {
                 updateData(entity, false);
             }
         });
@@ -87,7 +88,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
             updateData(player, joined);
         });
 
-        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(ID, PowerManager::new);
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(ID, PowerManager::new);
 
     }
 
@@ -133,7 +134,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
     }
 
     @Override
-    public void onReject(String packName, Identifier resourceId) {
+    public void onReject(String packName, ResourceLocation resourceId) {
 
         if (!contains(resourceId)) {
             disable(resourceId);
@@ -142,18 +143,18 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
     }
 
     @Override
-    public Identifier getFabricId() {
+    public ResourceLocation getFabricId() {
         return ID;
     }
 
     @Override
-    public Collection<Identifier> getFabricDependencies() {
+    public Collection<ResourceLocation> getFabricDependencies() {
         return DEPENDENCIES;
     }
 
     private static void updateData(Entity entity, boolean initialize) {
 
-        RegistryOps<JsonElement> jsonOps = entity.getRegistryManager().getOps(JsonOps.INSTANCE);
+        RegistryOps<JsonElement> jsonOps = entity.registryAccess().getOps(JsonOps.INSTANCE);
         PowerHolderComponent component = PowerHolderComponent.KEY.getNullable(entity);
 
         if (component == null) {
@@ -183,7 +184,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
                 Apoli.LOGGER.error("Removed unregistered {} from entity {}!", oldPowerString, entity.getName().getString());
 
-                for (Identifier sourceId : component.getSources(oldPower)) {
+                for (ResourceLocation sourceId : component.getSources(oldPower)) {
                     component.removePower(oldPower, sourceId);
                 }
 
@@ -210,7 +211,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
                 Apoli.LOGGER.warn("{} from entity {} has mismatched data fields! Updating...", StringUtils.capitalize(oldPowerString.toString()), entity.getName().getString());
                 mismatches++;
 
-                for (Identifier source : component.getSources(oldPower)) {
+                for (ResourceLocation source : component.getSources(oldPower)) {
                     component.removePower(oldPower, source);
                     component.addPower(newPower, source);
                 }
@@ -240,7 +241,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
     }
 
-    private void readMultipleOrNormalPower(String packName, Identifier powerId, JsonObject powerJson) {
+    private void readMultipleOrNormalPower(String packName, ResourceLocation powerId, JsonObject powerJson) {
 
         powerJson.addProperty("id", powerId.toString());
 
@@ -250,7 +251,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
         if (basePower.isMultiple()) {
 
             Power supposedMultiplePower = this.readPower(packName, new MultiplePower(basePower), powerJson);
-            Set<Identifier> subPowerIds = new ObjectLinkedOpenHashSet<>();
+            Set<ResourceLocation> subPowerIds = new ObjectLinkedOpenHashSet<>();
 
             powerJson.asMap().forEach((key, jsonElement) -> {
 
@@ -260,13 +261,13 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
                 try {
 
-                    if (!Identifier.isPathValid(key)) {
-                        throw new InvalidIdentifierException("Non [a-z0-9/._-] character in sub-power name \"" + key + "\"!");
+                    if (!ResourceLocation.isPathValid(key)) {
+                        throw new ResourceLocationException("Non [a-z0-9/._-] character in sub-power name \"" + key + "\"!");
                     }
 
                     else if (jsonElement instanceof JsonObject subPowerJson) {
 
-                        Identifier subPowerId = powerId.withSuffixedPath("_" + key);
+                        ResourceLocation subPowerId = powerId.withSuffixedPath("_" + key);
 
                         if (this.readSubPower(packName, powerId, subPowerId, key, subPowerJson)) {
                             subPowerIds.add(subPowerId);
@@ -302,7 +303,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
     }
 
-    private boolean readSubPower(String packName, Identifier superPowerId, Identifier subPowerId, String name, JsonObject subPowerJson) {
+    private boolean readSubPower(String packName, ResourceLocation superPowerId, ResourceLocation subPowerId, String name, JsonObject subPowerJson) {
 
         if (!ResourceConditionsImpl.applyResourceConditions(subPowerJson, directoryName, subPowerId, wrapperLookup)) {
             this.onReject(packName, subPowerId);
@@ -338,10 +339,10 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
     @Nullable
     private <P extends Power> Power readPower(String packName, P power, JsonObject powerJson) {
 
-        Identifier powerId = power.getId();
+        ResourceLocation powerId = power.getId();
 
         int previousPriority = LOADING_PRIORITIES.getOrDefault(powerId, 0);
-        int priority = JsonHelper.getInt(powerJson, "loading_priority", 0);
+        int priority = GsonHelper.getInt(powerJson, "loading_priority", 0);
 
         if (!contains(powerId)) {
             return this.finishReadingPower(PowerManager::register, powerId, power, powerJson, priority);
@@ -411,9 +412,9 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
     }
 
-    private <P extends Power> P finishReadingPower(BiFunction<Identifier, Power, Power> powerProcessor, Identifier powerId, P power, JsonObject jsonObject, int priority) {
+    private <P extends Power> P finishReadingPower(BiFunction<ResourceLocation, Power, Power> powerProcessor, ResourceLocation powerId, P power, JsonObject jsonObject, int priority) {
 
-        Identifier powerTypeId = power.getType().getConfig().id();
+        ResourceLocation powerTypeId = power.getType().getConfig().id();
         boolean subPower = power.isSubPower();
 
         powerProcessor.apply(powerId, power);
@@ -426,7 +427,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
     }
 
-    private static Power register(Identifier id, Power power) {
+    private static Power register(ResourceLocation id, Power power) {
 
         if (contains(id)) {
             throw new IllegalArgumentException("Tried to register duplicate power with ID \"" + id + "\"");
@@ -443,7 +444,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
     }
 
-    private static Power update(Identifier id, Power power) {
+    private static Power update(ResourceLocation id, Power power) {
 
         Power oldPower = remove(id);
         if (oldPower instanceof MultiplePower removedMultiplePower) {
@@ -461,11 +462,11 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
     }
 
-    private static Power remove(Identifier id) {
+    private static Power remove(ResourceLocation id) {
         return POWERS_BY_ID.remove(id);
     }
 
-    public static void disable(Identifier id) {
+    public static void disable(ResourceLocation id) {
         remove(id);
         DISABLED_POWERS.add(id);
     }
@@ -478,13 +479,13 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
         }
 
         Apoli.LOGGER.info("Validating {} powers...", size());
-        Iterator<Map.Entry<Identifier, Power>> powerTypeIterator = POWERS_BY_ID.entrySet().iterator();
+        Iterator<Map.Entry<ResourceLocation, Power>> powerTypeIterator = POWERS_BY_ID.entrySet().iterator();
 
         while (powerTypeIterator.hasNext()) {
 
-            Map.Entry<Identifier, Power> powerTypeEntry = powerTypeIterator.next();
+            Map.Entry<ResourceLocation, Power> powerTypeEntry = powerTypeIterator.next();
 
-            Identifier id = powerTypeEntry.getKey();
+            ResourceLocation id = powerTypeEntry.getKey();
             Power power = powerTypeEntry.getValue();
 
             try {
@@ -547,7 +548,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
     }
 
-    public static void send(ServerPlayerEntity player) {
+    public static void send(ServerPlayer player) {
 
         if (player.server.isRemote()) {
             ServerPlayNetworking.send(player, new SyncPowersS2CPacket(POWERS_BY_ID));
@@ -562,30 +563,30 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
         endBuilding();
     }
 
-    public static DataResult<Power> getResult(Identifier id) {
+    public static DataResult<Power> getResult(ResourceLocation id) {
         return contains(id)
             ? DataResult.success(POWERS_BY_ID.get(id))
             : DataResult.error(() -> "Couldn't get power from ID \"" + id + "\", as it wasn't registered!");
     }
 
-    public static Optional<Power> getOptional(Identifier id) {
+    public static Optional<Power> getOptional(ResourceLocation id) {
         return getResult(id).result();
     }
 
     @Nullable
-    public static Power getNullable(Identifier id) {
+    public static Power getNullable(ResourceLocation id) {
         return POWERS_BY_ID.get(id);
     }
 
-    public static Power get(Identifier id) {
+    public static Power get(ResourceLocation id) {
         return getResult(id).getOrThrow();
     }
 
-    public static Set<Map.Entry<Identifier, Power>> entrySet() {
+    public static Set<Map.Entry<ResourceLocation, Power>> entrySet() {
         return new ObjectOpenHashSet<>(POWERS_BY_ID.entrySet());
     }
 
-    public static Set<Identifier> keySet() {
+    public static Set<ResourceLocation> keySet() {
         return new ObjectOpenHashSet<>(POWERS_BY_ID.keySet());
     }
 
@@ -593,7 +594,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
         return new ObjectOpenHashSet<>(POWERS_BY_ID.values());
     }
 
-    public static boolean isDisabled(Identifier id) {
+    public static boolean isDisabled(ResourceLocation id) {
         return DISABLED_POWERS.contains(id);
     }
 
@@ -601,7 +602,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
         return contains(power.getId());
     }
 
-    public static boolean contains(Identifier id) {
+    public static boolean contains(ResourceLocation id) {
         return POWERS_BY_ID.containsKey(id);
     }
 
@@ -609,7 +610,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
         return POWERS_BY_ID.size();
     }
 
-    private static void handleAdditionalData(Identifier powerId, Identifier factoryId, boolean isSubPower, JsonObject json, Power power) {
+    private static void handleAdditionalData(ResourceLocation powerId, ResourceLocation factoryId, boolean isSubPower, JsonObject json, Power power) {
         ADDITIONAL_DATA.entrySet()
             .stream()
             .filter(entry -> json.has(entry.getKey()))

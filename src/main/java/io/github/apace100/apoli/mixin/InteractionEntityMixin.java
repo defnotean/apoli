@@ -6,27 +6,27 @@ import com.llamalad7.mixinextras.sugar.ref.LocalFloatRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.type.*;
-import net.minecraft.advancement.criterion.PlayerHurtEntityCriterion;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.decoration.InteractionEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.World;
+import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.decoration.Interaction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(InteractionEntity.class)
+@Mixin(Interaction.class)
 public abstract class InteractionEntityMixin extends Entity {
 
-    private InteractionEntityMixin(EntityType<?> type, World world) {
+    private InteractionEntityMixin(EntityType<?> type, Level world) {
         super(type, world);
     }
 
-    @WrapWithCondition(method = "handleAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancement/criterion/PlayerHurtEntityCriterion;trigger(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/damage/DamageSource;FFZ)V"))
-    private boolean apoli$cacheDamageData(PlayerHurtEntityCriterion criterion, ServerPlayerEntity player, Entity entity, DamageSource source, float dealt, float taken, boolean blocked, @Share("damageSource") LocalRef<DamageSource> damageSourceRef, @Share("damageDealt") LocalFloatRef damageDealtRef, @Share("damageTaken") LocalFloatRef damageTakenRef) {
+    @WrapWithCondition(method = "handleAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/critereon/PlayerHurtEntityTrigger;trigger(Lnet/minecraft/server/network/ServerPlayer;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;FFZ)V"))
+    private boolean apoli$cacheDamageData(PlayerHurtEntityTrigger criterion, ServerPlayer player, Entity entity, DamageSource source, float dealt, float taken, boolean blocked, @Share("damageSource") LocalRef<DamageSource> damageSourceRef, @Share("damageDealt") LocalFloatRef damageDealtRef, @Share("damageTaken") LocalFloatRef damageTakenRef) {
 
         damageSourceRef.set(source);
 

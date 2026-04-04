@@ -13,15 +13,15 @@ import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.apoli.util.SavedBlockPosition;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootTable;
-import net.minecraft.loot.context.LootContext;
-import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.ResourceLocationException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -29,10 +29,11 @@ import java.util.Optional;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.minecraft.core.registries.Registries;
 
 public class ReplaceLootTablePowerType extends PowerType implements Prioritized<ReplaceLootTablePowerType> {
 
-    public static final RegistryKey<LootTable> REPLACED_TABLE_KEY = RegistryKey.of(RegistryKeys.LOOT_TABLE, Apoli.identifier("replaced_loot_table"));
+    public static final ResourceKey<LootTable> REPLACED_TABLE_KEY = ResourceKey.create(Registries.LOOT_TABLE, Apoli.identifier("replaced_loot_table"));
 
     private static final Stack<LootTable> REPLACEMENT_STACK = new Stack<>();
     private static final Stack<LootTable> BACKTRACK_STACK = new Stack<>();
@@ -89,9 +90,9 @@ public class ReplaceLootTablePowerType extends PowerType implements Prioritized<
         return priority;
     }
 
-    public boolean hasReplacement(RegistryKey<LootTable> lootTableKey) {
+    public boolean hasReplacement(ResourceKey<LootTable> lootTableKey) {
 
-        Identifier id = lootTableKey.getValue();
+        ResourceLocation id = lootTableKey.getValue();
         String idString = id.toString();
 
         for (var replacement : replacements.keySet()) {
@@ -108,20 +109,20 @@ public class ReplaceLootTablePowerType extends PowerType implements Prioritized<
 
     public boolean doesApply(LootContext context) {
 
-        Entity contextEntity = context.get(LootContextParameters.THIS_ENTITY);
-        ItemStack toolStack = context.hasParameter(LootContextParameters.TOOL) ? context.get(LootContextParameters.TOOL) : ItemStack.EMPTY;
+        Entity contextEntity = context.get(LootContextParams.THIS_ENTITY);
+        ItemStack toolStack = context.hasParameter(LootContextParams.TOOL) ? context.get(LootContextParams.TOOL) : ItemStack.EMPTY;
 
         return doesApply(contextEntity, toolStack, SavedBlockPosition.fromLootContext(context));
 
     }
 
     public boolean doesApply(Entity contextEntity, ItemStack toolStack, SavedBlockPosition savedBlock) {
-        return itemCondition.map(condition -> condition.test(getHolder().getWorld(), toolStack)).orElse(true)
+        return itemCondition.map(condition -> condition.test(getHolder().level(), toolStack)).orElse(true)
             && blockCondition.map(condition -> condition.test(savedBlock)).orElse(true)
             && biEntityCondition.map(condition -> condition.test(getHolder(), contextEntity)).orElse(true);
     }
 
-    public Optional<RegistryKey<LootTable>> getReplacement(RegistryKey<LootTable> key) {
+    public Optional<ResourceKey<LootTable>> getReplacement(ResourceKey<LootTable> key) {
 
         String id = key.getValue().toString();
         for (var entry : replacements.entrySet()) {
@@ -135,13 +136,13 @@ public class ReplaceLootTablePowerType extends PowerType implements Prioritized<
                 try {
 
                     String replaced = matcher.replaceAll(replacement);
-                    RegistryKey<LootTable> replacedKey = RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(replaced));
+                    ResourceKey<LootTable> replacedKey = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(replaced));
 
                     return Optional.of(replacedKey);
 
                 }
 
-                catch (InvalidIdentifierException e) {
+                catch (ResourceLocationException e) {
                     Apoli.LOGGER.warn("Error trying to parse replacement string \"{}\" in power \"{}\": {}", replacement, this.getPower().getId(), e.getMessage());
                 }
 

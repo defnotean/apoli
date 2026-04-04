@@ -5,15 +5,15 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.type.GameEventListenerPowerType;
-import net.minecraft.entity.Entity;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
-import net.minecraft.world.event.Vibrations;
-import net.minecraft.world.event.listener.EntityGameEventHandler;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.Holder;
+import net.minecraft.tags.TagKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
+import net.minecraft.world.level.gameevent.listener.EntityGameEventHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,13 +24,13 @@ import java.util.function.BiConsumer;
 
 public abstract class GameEventListenerPowerTypeMixin {
 
-	@Mixin(Vibrations.Callback.class)
+	@Mixin(VibrationSystem.Callback.class)
 	public interface CustomCallbackHandler {
 
-		@WrapOperation(method = "canAccept", at = @At(value = "INVOKE", target = "Lnet/minecraft/registry/entry/RegistryEntry;isIn(Lnet/minecraft/registry/tag/TagKey;)Z", ordinal = 0))
-		private boolean apoli$acceptsGameEvent(RegistryEntry<GameEvent> gameEvent, TagKey<GameEvent> gameEventTag, Operation<Boolean> original) {
+		@WrapOperation(method = "canAccept", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Holder;is(Lnet/minecraft/tags/TagKey;)Z", ordinal = 0))
+		private boolean apoli$acceptsGameEvent(Holder<GameEvent> gameEvent, TagKey<GameEvent> gameEventTag, Operation<Boolean> original) {
 
-			if ((Vibrations.Callback) this instanceof GameEventListenerPowerType.Callback powerCallback) {
+			if ((VibrationSystem.Callback) this instanceof GameEventListenerPowerType.Callback powerCallback) {
 				return powerCallback.containsEvent(gameEvent);
 			}
 
@@ -42,11 +42,11 @@ public abstract class GameEventListenerPowerTypeMixin {
 
 	}
 
-	@Mixin(Vibrations.Ticker.class)
+	@Mixin(VibrationSystem.Ticker.class)
 	public interface ParticleAppearanceHandler {
 
-		@WrapWithCondition(method = "method_51408", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;spawnParticles(Lnet/minecraft/particle/ParticleEffect;DDDIDDDD)I"))
-		private static boolean apoli$onlyShowParticleWhenSpecified(ServerWorld world, ParticleEffect particle, double x, double y, double z, int count, double deltaX, double deltaY, double deltaZ, double speed, Vibrations.ListenerData listenerData) {
+		@WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;spawnParticles(Lnet/minecraft/core/particles/ParticleOptions;DDDIDDDD)I"))
+		private static boolean apoli$onlyShowParticleWhenSpecified(ServerLevel world, ParticleOptions particle, double x, double y, double z, int count, double deltaX, double deltaY, double deltaZ, double speed, VibrationSystem.ListenerData listenerData) {
 
 			if (listenerData instanceof GameEventListenerPowerType.ListenerData powerListenerData) {
 				return powerListenerData.shouldShowParticle();
@@ -64,12 +64,12 @@ public abstract class GameEventListenerPowerTypeMixin {
 	public static abstract class EventHandlerUpdater {
 
 		@Shadow
-		public abstract World getWorld();
+		public abstract Level getWorld();
 
 		@Inject(method = "updateEventHandler", at = @At("HEAD"))
-		private void apoli$update(BiConsumer<EntityGameEventHandler<?>, ServerWorld> callback, CallbackInfo ci) {
+		private void apoli$update(BiConsumer<EntityGameEventHandler<?>, ServerLevel> callback, CallbackInfo ci) {
 
-			if (getWorld() instanceof ServerWorld serverWorld) {
+			if (getWorld() instanceof ServerLevel serverWorld) {
 				PowerHolderComponent.getPowerTypes((Entity) (Object) this, GameEventListenerPowerType.class, true)
 					.stream()
 					.map(GameEventListenerPowerType::getGameEventHandler)

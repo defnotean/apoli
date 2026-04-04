@@ -1,13 +1,14 @@
 package io.github.apace100.apoli.access;
 
-import net.minecraft.loot.LootTable;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.ReloadableRegistries;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.ReloadableRegistries;
+import net.minecraft.core.registries.Registries;
 
 public interface KeyableLootTable {
 
-    RegistryKey<LootTable> apoli$getKey();
+    ResourceKey<LootTable> apoli$getKey();
 
-    void apoli$setup(RegistryKey<LootTable> lootTableKey, ReloadableRegistries.Lookup lookup);
+    void apoli$setup(ResourceKey<LootTable> lootTableKey, ReloadableRegistries.Lookup lookup);
 
 }

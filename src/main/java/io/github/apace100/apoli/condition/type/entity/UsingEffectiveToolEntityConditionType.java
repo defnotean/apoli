@@ -7,10 +7,10 @@ import io.github.apace100.apoli.condition.type.EntityConditionTypes;
 import io.github.apace100.apoli.mixin.ClientPlayerEntityAccessor;
 import io.github.apace100.apoli.mixin.ClientPlayerInteractionManagerAccessor;
 import io.github.apace100.apoli.mixin.ServerPlayerInteractionManagerAccessor;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
 public class UsingEffectiveToolEntityConditionType extends EntityConditionType {
@@ -18,30 +18,30 @@ public class UsingEffectiveToolEntityConditionType extends EntityConditionType {
     @Override
     public boolean test(EntityConditionContext context) {
 
-        if (!(context.entity() instanceof PlayerEntity playerEntity)) {
+        if (!(context.entity() instanceof Player playerEntity)) {
             return false;
         }
 
         BlockState miningBlockState;
-        if (playerEntity instanceof ServerPlayerEntity serverPlayer) {
+        if (playerEntity instanceof ServerPlayer serverPlayer) {
 
             ServerPlayerInteractionManagerAccessor interactionManager = (ServerPlayerInteractionManagerAccessor) serverPlayer.interactionManager;
             if (!interactionManager.getMining()) {
                 return false;
             }
 
-            miningBlockState = playerEntity.getWorld().getBlockState(interactionManager.getMiningPos());
+            miningBlockState = playerEntity.level().getBlockState(interactionManager.getMiningPos());
 
         }
 
-        else if (playerEntity instanceof ClientPlayerEntity clientPlayer) {
+        else if (playerEntity instanceof LocalPlayer clientPlayer) {
 
             ClientPlayerInteractionManagerAccessor interactionManager = (ClientPlayerInteractionManagerAccessor) ((ClientPlayerEntityAccessor) clientPlayer).getClient().interactionManager;
             if (interactionManager == null || !interactionManager.getBreakingBlock()) {
                 return false;
             }
 
-            miningBlockState = playerEntity.getWorld().getBlockState(interactionManager.getCurrentBreakingPos());
+            miningBlockState = playerEntity.level().getBlockState(interactionManager.getCurrentBreakingPos());
 
         }
 

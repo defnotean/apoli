@@ -9,11 +9,11 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.PriorityPhase;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
@@ -45,7 +45,7 @@ public class ActionOnEntityUsePowerType extends ActiveInteractionPowerType {
     private final Optional<BiEntityAction> biEntityAction;
     private final Optional<BiEntityCondition> biEntityCondition;
 
-    public ActionOnEntityUsePowerType(Optional<BiEntityAction> biEntityAction, Optional<BiEntityCondition> biEntityCondition, Optional<ItemAction> heldItemAction, Optional<ItemCondition> heldItemCondition, Optional<ItemAction> resultItemAction, Optional<ItemStack> resultStack, EnumSet<Hand> hands, ActionResult actionResult, int priority, Optional<EntityCondition> condition) {
+    public ActionOnEntityUsePowerType(Optional<BiEntityAction> biEntityAction, Optional<BiEntityCondition> biEntityCondition, Optional<ItemAction> heldItemAction, Optional<ItemCondition> heldItemCondition, Optional<ItemAction> resultItemAction, Optional<ItemStack> resultStack, EnumSet<InteractionHand> hands, InteractionResult actionResult, int priority, Optional<EntityCondition> condition) {
         super(heldItemAction, heldItemCondition, resultItemAction, resultStack, hands, actionResult, priority, condition);
         this.biEntityAction = biEntityAction;
         this.biEntityCondition = biEntityCondition;
@@ -56,16 +56,16 @@ public class ActionOnEntityUsePowerType extends ActiveInteractionPowerType {
         return PowerTypes.ACTION_ON_ENTITY_USE;
     }
 
-    public boolean shouldExecute(Entity other, Hand hand, ItemStack heldStack, PriorityPhase priorityPhase) {
+    public boolean shouldExecute(Entity other, InteractionHand hand, ItemStack heldStack, PriorityPhase priorityPhase) {
         return priorityPhase.test(this.getPriority())
             && super.shouldExecute(hand, heldStack)
             && biEntityCondition.map(condition -> condition.test(getHolder(), other)).orElse(true);
     }
 
-    public ActionResult executeAction(Entity other, Hand hand) {
+    public InteractionResult executeAction(Entity other, InteractionHand hand) {
 
         biEntityAction.ifPresent(action -> action.execute(getHolder(), other));
-        this.performActorItemStuff((PlayerEntity) getHolder(), hand);
+        this.performActorItemStuff((Player) getHolder(), hand);
 
         return this.getActionResult();
 

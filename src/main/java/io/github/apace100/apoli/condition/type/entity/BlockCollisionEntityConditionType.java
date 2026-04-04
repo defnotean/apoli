@@ -9,12 +9,12 @@ import io.github.apace100.apoli.condition.type.EntityConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.BlockCollisionSpliterator;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -27,7 +27,7 @@ public class BlockCollisionEntityConditionType extends EntityConditionType {
             .add("offset_x", SerializableDataTypes.DOUBLE, 0.0)
             .add("offset_y", SerializableDataTypes.DOUBLE, 0.0)
             .add("offset_z", SerializableDataTypes.DOUBLE, 0.0)
-            .addFunctionedDefault("offset", SerializableDataTypes.VECTOR, data -> new Vec3d(data.get("offset_x"), data.get("offset_y"), data.get("offset_z"))),
+            .addFunctionedDefault("offset", SerializableDataTypes.VECTOR, data -> new Vec3(data.get("offset_x"), data.get("offset_y"), data.get("offset_z"))),
         data -> new BlockCollisionEntityConditionType(
             data.get("block_condition"),
             data.get("offset")
@@ -38,9 +38,9 @@ public class BlockCollisionEntityConditionType extends EntityConditionType {
     );
 
     private final Optional<BlockCondition> blockCondition;
-    private final Vec3d offset;
+    private final Vec3 offset;
 
-    public BlockCollisionEntityConditionType(Optional<BlockCondition> blockCondition, Vec3d offset) {
+    public BlockCollisionEntityConditionType(Optional<BlockCondition> blockCondition, Vec3 offset) {
         this.blockCondition = blockCondition;
         this.offset = offset;
     }
@@ -50,8 +50,8 @@ public class BlockCollisionEntityConditionType extends EntityConditionType {
 
         Entity entity = context.entity();
 
-        Box boundingBox = entity.getBoundingBox().offset(offset);
-        World world = entity.getWorld();
+        AABB boundingBox = entity.getBoundingBox().offset(offset);
+        Level world = entity.level();
 
         BlockCollisionSpliterator<BlockPos> spliterator = new BlockCollisionSpliterator<>(world, entity, boundingBox, false, (pos, shape) -> pos);
         ((BlockCollisionSpliteratorAccess) spliterator).apoli$setGetOriginalShapes(true);

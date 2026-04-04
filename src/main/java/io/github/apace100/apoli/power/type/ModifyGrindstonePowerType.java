@@ -14,11 +14,11 @@ import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.GrindstoneScreenHandler;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.GrindstoneMenu;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -105,18 +105,18 @@ public class ModifyGrindstonePowerType extends PowerType {
 
     public boolean allowsInTop(ItemStack stack) {
         return topItemCondition
-            .map(condition -> condition.test(getHolder().getWorld(), stack))
+            .map(condition -> condition.test(getHolder().level(), stack))
             .orElse(true);
     }
 
     public boolean allowsInBottom(ItemStack stack) {
         return bottomItemCondition
-            .map(condition -> condition.test(getHolder().getWorld(), stack))
+            .map(condition -> condition.test(getHolder().level(), stack))
             .orElse(true);
     }
 
     public boolean doesApply(ItemStack topStack, ItemStack bottomStack, ItemStack originalOutput, @Nullable BlockPos grindstonePos) {
-        World world = getHolder().getWorld();
+        Level world = getHolder().level();
         return allowsInTop(topStack)
             && allowsInBottom(bottomStack)
             && outputItemCondition.map(condition -> condition.test(world, originalOutput)).orElse(true)
@@ -127,7 +127,7 @@ public class ModifyGrindstonePowerType extends PowerType {
         return experienceModifier;
     }
 
-    public void setOutput(ItemStack inputTop, ItemStack inputBottom, StackReference currentOutputStackReference) {
+    public void setOutput(ItemStack inputTop, ItemStack inputBottom, SlotAccess currentOutputStackReference) {
 
         switch (resultType) {
             case SPECIFIED -> resultStack
@@ -139,30 +139,30 @@ public class ModifyGrindstonePowerType extends PowerType {
                 currentOutputStackReference.set(inputTop.copy());
         }
 
-        itemAction.ifPresent(action -> action.execute(getHolder().getWorld(), currentOutputStackReference));
+        itemAction.ifPresent(action -> action.execute(getHolder().level(), currentOutputStackReference));
 
     }
 
-    public void executeActions(@Nullable BlockPos pos, StackReference outputStackRef) {
+    public void executeActions(@Nullable BlockPos pos, SlotAccess outputStackRef) {
         executeActions(pos);
         applyAfterGrindingItemAction(outputStackRef);
     }
 
     public void executeActions(@Nullable BlockPos pos) {
         entityAction.ifPresent(action -> action.execute(getHolder()));
-        blockAction.filter(action -> pos != null).ifPresent(action -> action.execute(getHolder().getWorld(), pos, Optional.empty()));
+        blockAction.filter(action -> pos != null).ifPresent(action -> action.execute(getHolder().level(), pos, Optional.empty()));
     }
 
-    public void applyAfterGrindingItemAction(StackReference outputStackReference) {
-        itemActionAfterGrinding.ifPresent(action -> action.execute(getHolder().getWorld(), outputStackReference));
+    public void applyAfterGrindingItemAction(SlotAccess outputStackReference) {
+        itemActionAfterGrinding.ifPresent(action -> action.execute(getHolder().level(), outputStackReference));
     }
 
-    public static boolean allowsInTopSlot(GrindstoneScreenHandler screenHandler, ItemStack stack) {
+    public static boolean allowsInTopSlot(GrindstoneMenu screenHandler, ItemStack stack) {
         return screenHandler instanceof PowerModifiedGrindstone powerModifiedGrindstone
             && PowerHolderComponent.hasPowerType(powerModifiedGrindstone.apoli$getPlayer(), ModifyGrindstonePowerType.class, p -> p.allowsInTop(stack));
     }
 
-    public static boolean allowsInBottomSlot(GrindstoneScreenHandler screenHandler, ItemStack stack) {
+    public static boolean allowsInBottomSlot(GrindstoneMenu screenHandler, ItemStack stack) {
         return screenHandler instanceof PowerModifiedGrindstone powerModifiedGrindstone
             && PowerHolderComponent.hasPowerType(powerModifiedGrindstone.apoli$getPlayer(), ModifyGrindstonePowerType.class, p -> p.allowsInBottom(stack));
     }

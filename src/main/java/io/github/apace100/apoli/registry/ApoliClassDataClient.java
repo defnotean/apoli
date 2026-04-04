@@ -4,7 +4,7 @@ import io.github.apace100.calio.ClassUtil;
 import io.github.apace100.calio.data.ClassDataRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.entity.feature.*;
+import net.minecraft.client.renderer.entity.feature.*;
 
 @Environment(EnvType.CLIENT)
 public class ApoliClassDataClient {
@@ -17,7 +17,7 @@ public class ApoliClassDataClient {
         FEATURE_RENDERERS.addMapping("snowman_pumpkin", SnowGolemPumpkinFeatureRenderer.class);
         FEATURE_RENDERERS.addMapping("fox_held_item", FoxHeldItemFeatureRenderer.class);
         FEATURE_RENDERERS.addMapping("llama_decor", LlamaDecorFeatureRenderer.class);
-        FEATURE_RENDERERS.addMapping("elytra", ElytraFeatureRenderer.class);
+        FEATURE_RENDERERS.addMapping("elytra", ElytraLayer.class);
         FEATURE_RENDERERS.addMapping("villager_clothing", VillagerClothingFeatureRenderer.class);
         FEATURE_RENDERERS.addMapping("panda_held_item", PandaHeldItemFeatureRenderer.class);
         FEATURE_RENDERERS.addMapping("drowned_overlay", DrownedOverlayFeatureRenderer.class);
@@ -29,7 +29,7 @@ public class ApoliClassDataClient {
         FEATURE_RENDERERS.addMapping("held_item", HeldItemFeatureRenderer.class);
         FEATURE_RENDERERS.addMapping("sheep_wool", SheepWoolFeatureRenderer.class);
         FEATURE_RENDERERS.addMapping("iron_golem_flower", IronGolemFlowerFeatureRenderer.class);
-        FEATURE_RENDERERS.addMapping("cape", CapeFeatureRenderer.class);
+        FEATURE_RENDERERS.addMapping("cape", CapeLayer.class);
         FEATURE_RENDERERS.addMapping("eyes", EyesFeatureRenderer.class);
         FEATURE_RENDERERS.addMapping("dolphin_held_item", DolphinHeldItemFeatureRenderer.class);
         FEATURE_RENDERERS.addMapping("horse_marking", HorseMarkingFeatureRenderer.class);

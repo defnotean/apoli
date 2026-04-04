@@ -5,7 +5,7 @@ import io.github.apace100.apoli.condition.type.EntityConditionType;
 import io.github.apace100.apoli.condition.type.EntityConditionTypes;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.calio.data.SerializableDataType;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 public final class EntityCondition extends Condition<EntityConditionContext, EntityConditionType> {
 

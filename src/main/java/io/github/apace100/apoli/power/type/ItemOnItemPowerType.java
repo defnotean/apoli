@@ -12,12 +12,12 @@ import io.github.apace100.apoli.util.PriorityPhase;
 import io.github.apace100.apoli.util.StackClickPhase;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.ClickType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.ClickType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
@@ -111,11 +111,11 @@ public class ItemOnItemPowerType extends PowerType implements Prioritized<ItemOn
         return clickTypes.contains(clickType)
             && clickPhases.contains(clickPhase)
             && priorityPhase.test(this.getPriority())
-            && usingItemCondition.map(condition -> condition.test(getHolder().getWorld(), usingStack)).orElse(true)
-            && onItemCondition.map(condition -> condition.test(getHolder().getWorld(), onStack)).orElse(true);
+            && usingItemCondition.map(condition -> condition.test(getHolder().level(), usingStack)).orElse(true)
+            && onItemCondition.map(condition -> condition.test(getHolder().level(), onStack)).orElse(true);
     }
 
-    public void execute(StackReference usingStackReference, StackReference onStackReference, Slot slot) {
+    public void execute(SlotAccess usingStackReference, SlotAccess onStackReference, Slot slot) {
 
         LivingEntity holder = getHolder();
         ItemStack resultStackCopy = resultStack.isPresent()
@@ -124,13 +124,13 @@ public class ItemOnItemPowerType extends PowerType implements Prioritized<ItemOn
                 ? onStackReference.get().split(resultFromOnStack)
                 : onStackReference.get();
 
-        StackReference resultStackReference = InventoryUtil.createStackReference(resultStackCopy);
-        resultItemAction.ifPresent(action -> action.execute(holder.getWorld(), resultStackReference));
+        SlotAccess resultStackReference = InventoryUtil.createStackReference(resultStackCopy);
+        resultItemAction.ifPresent(action -> action.execute(holder.level(), resultStackReference));
 
-        usingItemAction.ifPresent(action -> action.execute(holder.getWorld(), usingStackReference));
-        onItemAction.ifPresent(action -> action.execute(holder.getWorld(), onStackReference));
+        usingItemAction.ifPresent(action -> action.execute(holder.level(), usingStackReference));
+        onItemAction.ifPresent(action -> action.execute(holder.level(), onStackReference));
 
-        if (holder instanceof PlayerEntity player && (resultStack.isPresent() || resultItemAction.isPresent())) {
+        if (holder instanceof Player player && (resultStack.isPresent() || resultItemAction.isPresent())) {
 
             if (slot.hasStack()) {
                 player.getInventory().offerOrDrop(resultStackReference.get());
@@ -146,7 +146,7 @@ public class ItemOnItemPowerType extends PowerType implements Prioritized<ItemOn
 
     }
 
-    public static boolean executeActions(PlayerEntity user, PriorityPhase priorityPhase, StackClickPhase clickPhase, ClickType clickType, Slot slot, StackReference slotStackReference, StackReference cursorStackReference) {
+    public static boolean executeActions(Player user, PriorityPhase priorityPhase, StackClickPhase clickPhase, ClickType clickType, Slot slot, SlotAccess slotStackReference, SlotAccess cursorStackReference) {
 
         CallInstance<ItemOnItemPowerType> ioipci = new CallInstance<>();
         ioipci.add(user, ItemOnItemPowerType.class, p -> p.doesApply(cursorStackReference.get(), slotStackReference.get(), clickType, clickPhase, priorityPhase));

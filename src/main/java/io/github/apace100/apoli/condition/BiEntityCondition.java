@@ -5,7 +5,7 @@ import io.github.apace100.apoli.condition.type.BiEntityConditionType;
 import io.github.apace100.apoli.condition.type.BiEntityConditionTypes;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.calio.data.SerializableDataType;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 public final class BiEntityCondition extends Condition<BiEntityConditionContext, BiEntityConditionType> {
 

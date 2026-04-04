@@ -16,16 +16,16 @@ import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.GameOptions;
-import net.minecraft.client.render.*;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.resource.metadata.AnimationResourceMetadata;
 import net.minecraft.client.resource.metadata.TextureResourceMetadata;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.texture.SpriteAtlasHolder;
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureAtlasSpriteAtlasHolder;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -34,7 +34,7 @@ import java.util.Set;
 //  TODO: Drop the old 'texture' field -eggohito
 public class OverlayPowerType extends PowerType {
 
-    public static final Identifier ATLAS_TEXTURE = Apoli.identifier("textures/atlas/overlay.png");
+    public static final ResourceLocation ATLAS_TEXTURE = Apoli.identifier("textures/atlas/overlay.png");
 
     public static final TypedDataObjectFactory<OverlayPowerType> DATA_FACTORY = createConditionedDataFactory(
         new SerializableData()
@@ -76,7 +76,7 @@ public class OverlayPowerType extends PowerType {
             .set("priority", powerType.getPriority())
     );
 
-    private final Identifier spriteId;
+    private final ResourceLocation spriteId;
 
     private final DrawMode drawMode;
     private final DrawPhase drawPhase;
@@ -94,7 +94,7 @@ public class OverlayPowerType extends PowerType {
     private boolean initRender = true;
     private boolean invalidTexture;
 
-    public OverlayPowerType(Identifier spriteId, DrawMode drawMode, DrawPhase drawPhase, float strength, float red, float green, float blue, boolean hideWithHud, boolean visibleInThirdPerson, int priority, Optional<EntityCondition> condition) {
+    public OverlayPowerType(ResourceLocation spriteId, DrawMode drawMode, DrawPhase drawPhase, float strength, float red, float green, float blue, boolean hideWithHud, boolean visibleInThirdPerson, int priority, Optional<EntityCondition> condition) {
         super(condition);
         this.spriteId = spriteId;
         this.drawMode = drawMode;
@@ -130,7 +130,7 @@ public class OverlayPowerType extends PowerType {
     }
 
     @Environment(EnvType.CLIENT)
-    public boolean shouldRender(GameOptions options, DrawPhase targetDrawPhase) {
+    public boolean shouldRender(Options options, DrawPhase targetDrawPhase) {
         return this.getDrawPhase() == targetDrawPhase
             && (!options.hudHidden || !this.doesHideWithHud())
             && (options.getPerspective().isFirstPerson() || this.shouldBeVisibleInThirdPerson());
@@ -144,7 +144,7 @@ public class OverlayPowerType extends PowerType {
             return;
         }
 
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
         if (!(client instanceof OverlaySpriteHolder overlaySpriteHolder)) {
             return;
         }
@@ -176,7 +176,7 @@ public class OverlayPowerType extends PowerType {
             case NAUSEA -> {
 
                 RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE);
-                float stretch = MathHelper.lerp(strength, 2.0F, 1.0F);
+                float stretch = Mth.lerp(strength, 2.0F, 1.0F);
 
                 red = this.red * strength;
                 green = this.green * strength;
@@ -210,8 +210,8 @@ public class OverlayPowerType extends PowerType {
             }
         }
 
-        Sprite sprite = overlaySpriteHolder.apoli$getSprite(spriteId);
-        Identifier textureToDraw = sprite.getAtlasId();
+        TextureAtlasSprite sprite = overlaySpriteHolder.apoli$getSprite(spriteId);
+        ResourceLocation textureToDraw = sprite.getAtlasId();
 
         float minU = sprite.getMinU();
         float maxU = sprite.getMaxU();
@@ -253,14 +253,14 @@ public class OverlayPowerType extends PowerType {
         }
 
         @Override
-        public Sprite getSprite(Identifier objectId) {
+        public TextureAtlasSprite getSprite(ResourceLocation objectId) {
             return super.getSprite(objectId);
         }
 
     }
 
     @Environment(EnvType.CLIENT)
-    public static void integrateCallback(MinecraftClient client, boolean initialized) {
+    public static void integrateCallback(Minecraft client, boolean initialized) {
         PowerHolderComponent.getPowerTypes(client.player, OverlayPowerType.class, true).forEach(p -> p.initRender = true);
     }
 

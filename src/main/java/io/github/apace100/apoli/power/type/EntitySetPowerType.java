@@ -7,12 +7,12 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -88,11 +88,11 @@ public class EntitySetPowerType extends PowerType {
         if (!tempEntities.isEmpty() && this.isActive()) {
 
             if (startTicks == null) {
-                this.startTicks = holder.age % tickRate;
+                this.startTicks = holder.tickCount % tickRate;
                 return;
             }
 
-            if (holder.age % tickRate == startTicks) {
+            if (holder.tickCount % tickRate == startTicks) {
                 this.tickTempEntities();
             }
 
@@ -112,7 +112,7 @@ public class EntitySetPowerType extends PowerType {
         Iterator<Map.Entry<UUID, Long>> entryIterator = tempEntities.entrySet().iterator();
         LivingEntity holder = getHolder();
 
-        long time = holder.getWorld().getTime();
+        long time = holder.level().getGameTime();
 
         while (entryIterator.hasNext()) {
 
@@ -170,16 +170,16 @@ public class EntitySetPowerType extends PowerType {
 
     public boolean add(Entity entity, Optional<Integer> time) {
 
-        if (entity == null || entity.isRemoved() || entity.getWorld().isClient) {
+        if (entity == null || entity.isRemoved() || entity.level().isClientSide) {
             return false;
         }
 
-        UUID uuid = entity.getUuid();
+        UUID uuid = entity.getUUID();
         boolean addedToSet = false;
 
         if (time.isPresent()) {
             addedToSet |= tempUuids.add(uuid);
-            tempEntities.compute(uuid, (prevUuid, prevTime) -> entity.getWorld().getTime() + time.get());
+            tempEntities.compute(uuid, (prevUuid, prevTime) -> entity.level().getGameTime() + time.get());
         }
 
         if (!entityUuids.contains(uuid)) {
@@ -201,11 +201,11 @@ public class EntitySetPowerType extends PowerType {
 
     public boolean remove(@Nullable Entity entity, boolean executeRemoveAction) {
 
-        if (entity == null || entity.getWorld().isClient) {
+        if (entity == null || entity.level().isClientSide) {
             return false;
         }
 
-        UUID uuid = entity.getUuid();
+        UUID uuid = entity.getUUID();
         boolean result = entityUuids.remove(uuid)
             | entities.remove(uuid) != null
             | tempUuids.remove(uuid)
@@ -220,7 +220,7 @@ public class EntitySetPowerType extends PowerType {
     }
 
     public boolean contains(Entity entity) {
-        return entities.containsValue(entity) || entityUuids.contains(entity.getUuid());
+        return entities.containsValue(entity) || entityUuids.contains(entity.getUUID());
     }
 
     public int size() {
@@ -279,25 +279,34 @@ public class EntitySetPowerType extends PowerType {
     }
 
     @Override
-    public NbtElement toTag() {
+    public Tag toTag() {
 
-        NbtCompound rootNbt = new NbtCompound();
+        CompoundTag rootNbt = new CompoundTag();
 
-        NbtList entityUuidsNbt = new NbtList();
-        NbtList tempUuidsNbt = new NbtList();
+        ListTag entityUuidsNbt = new ListTag();
+        ListTag tempUuidsNbt = new ListTag();
 
         for (UUID entityUuid : entityUuids) {
-            NbtIntArray entityUuidNbt = NbtHelper.fromUuid(entityUuid);
+            IntArrayTag entityUuidNbt = NbtUtils.createUUID(entityUuid);
             entityUuidsNbt.add(entityUuidNbt);
         }
 
         for (UUID tempUuid : tempUuids) {
-            NbtIntArray tempUuidNbt = NbtHelper.fromUuid(tempUuid);
+            IntArrayTag tempUuidNbt = NbtUtils.createUUID(tempUuid);
             tempUuidsNbt.add(tempUuidNbt);
+        }
+
+        ListTag tempExpirationsNbt = new ListTag();
+        for (Map.Entry<UUID, Long> entry : tempEntities.entrySet()) {
+            CompoundTag entryNbt = new CompoundTag();
+            entryNbt.putIntArray("UUID", NbtUtils.createUUID(entry.getKey()).getAsIntArray());
+            entryNbt.putLong("Expiration", entry.getValue());
+            tempExpirationsNbt.add(entryNbt);
         }
 
         rootNbt.put("Entities", entityUuidsNbt);
         rootNbt.put("TempEntities", tempUuidsNbt);
+        rootNbt.put("TempExpirations", tempExpirationsNbt);
         rootNbt.putBoolean("RemovedTemps", removedTemps);
 
         return rootNbt;
@@ -305,9 +314,9 @@ public class EntitySetPowerType extends PowerType {
     }
 
     @Override
-    public void fromTag(NbtElement tag) {
+    public void fromTag(Tag tag) {
 
-        if (!(tag instanceof NbtCompound rootNbt)) {
+        if (!(tag instanceof CompoundTag rootNbt)) {
             return;
         }
 
@@ -316,23 +325,32 @@ public class EntitySetPowerType extends PowerType {
         entityUuids.clear();
         entities.clear();
 
-        NbtList tempUuidsNbt = rootNbt.getList("TempEntities", NbtElement.INT_ARRAY_TYPE);
-        for (NbtElement tempUuidNbt : tempUuidsNbt) {
-            UUID tempUuid = NbtHelper.toUuid(tempUuidNbt);
+        ListTag tempUuidsNbt = rootNbt.getList("TempEntities", Tag.TAG_INT_ARRAY);
+        for (Tag tempUuidNbt : tempUuidsNbt) {
+            UUID tempUuid = NbtUtils.loadUUID(tempUuidNbt);
             tempUuids.add(tempUuid);
         }
 
-        NbtList entityUuidsNbt = rootNbt.getList("Entities", NbtElement.INT_ARRAY_TYPE);
-        for (NbtElement entityUuidNbt : entityUuidsNbt) {
-            UUID entityUuid = NbtHelper.toUuid(entityUuidNbt);
+        ListTag entityUuidsNbt = rootNbt.getList("Entities", Tag.TAG_INT_ARRAY);
+        for (Tag entityUuidNbt : entityUuidsNbt) {
+            UUID entityUuid = NbtUtils.loadUUID(entityUuidNbt);
             entityUuids.add(entityUuid);
+        }
+
+        ListTag tempExpirationsNbt = rootNbt.getList("TempExpirations", Tag.TAG_COMPOUND);
+        for (Tag expirationTag : tempExpirationsNbt) {
+            if (expirationTag instanceof CompoundTag entryNbt) {
+                UUID uuid = NbtUtils.loadUUID(new IntArrayTag(entryNbt.getIntArray("UUID")));
+                long expiration = entryNbt.getLong("Expiration");
+                tempEntities.put(uuid, expiration);
+            }
         }
 
         removedTemps = rootNbt.getBoolean("RemovedTemps");
 
     }
 
-    public static void integrateLoadCallback(Entity loadedEntity, ServerWorld world) {
+    public static void integrateLoadCallback(Entity loadedEntity, ServerLevel world) {
         PowerHolderComponent.syncPowers(loadedEntity, PowerHolderComponent.getPowerTypes(loadedEntity, EntitySetPowerType.class, true)
             .stream()
             .filter(Predicate.not(EntitySetPowerType::validateEntities))
@@ -340,16 +358,16 @@ public class EntitySetPowerType extends PowerType {
             .toList());
     }
 
-    public static void integrateUnloadCallback(Entity unloadedEntity, ServerWorld world) {
+    public static void integrateUnloadCallback(Entity unloadedEntity, ServerLevel world) {
 
         Entity.RemovalReason removalReason = unloadedEntity.getRemovalReason();
-        if (removalReason == null || !removalReason.shouldDestroy() || unloadedEntity instanceof PlayerEntity) {
+        if (removalReason == null || !removalReason.shouldDestroy() || unloadedEntity instanceof Player) {
             return;
         }
 
-        for (ServerWorld otherWorld : world.getServer().getWorlds()) {
+        for (ServerLevel otherWorld : world.getServer().getAllLevels()) {
 
-            for (Entity entity : otherWorld.iterateEntities()) {
+            for (Entity entity : otherWorld.getAllEntities()) {
 
                  PowerHolderComponent.syncPowers(entity, PowerHolderComponent.getPowerTypes(entity, EntitySetPowerType.class, true)
                     .stream()

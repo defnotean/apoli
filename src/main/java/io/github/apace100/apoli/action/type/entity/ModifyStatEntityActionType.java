@@ -8,9 +8,9 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.stat.ServerStatHandler;
-import net.minecraft.stat.Stat;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.ServerStatsCounter;
+import net.minecraft.stats.Stat;
 import org.jetbrains.annotations.NotNull;
 
 public class ModifyStatEntityActionType extends EntityActionType {
@@ -39,9 +39,9 @@ public class ModifyStatEntityActionType extends EntityActionType {
     @Override
     public void accept(EntityActionContext context) {
 
-        if (context.entity() instanceof ServerPlayerEntity serverPlayer) {
+        if (context.entity() instanceof ServerPlayer serverPlayer) {
 
-            ServerStatHandler statHandler = serverPlayer.getStatHandler();
+            ServerStatsCounter statHandler = serverPlayer.getStats();
             int originalValue = statHandler.getStat(stat);
 
             serverPlayer.resetStat(stat);

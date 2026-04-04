@@ -7,7 +7,7 @@ import io.github.apace100.apoli.condition.type.EntityConditionType;
 import io.github.apace100.apoli.condition.type.EntityConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -33,8 +33,8 @@ public class OnBlockEntityConditionType extends EntityConditionType {
     @Override
     public boolean test(EntityConditionContext context) {
         Entity entity = context.entity();
-        return entity.isOnGround()
-            && blockCondition.map(condition -> condition.test(entity.getWorld(), entity.getSteppingPos())).orElse(true);
+        return entity.onGround()
+            && blockCondition.map(condition -> condition.test(entity.level(), entity.getSteppingPos())).orElse(true);
     }
 
     @Override

@@ -13,12 +13,12 @@ import io.github.apace100.apoli.util.BlockUsagePhase;
 import io.github.apace100.apoli.util.PriorityPhase;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.Direction;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
@@ -64,7 +64,7 @@ public class ActionOnBlockUsePowerType extends ActiveInteractionPowerType {
     private final EnumSet<BlockUsagePhase> usePhases;
     private final EnumSet<Direction> directions;
 
-    public ActionOnBlockUsePowerType(Optional<EntityAction> entityAction, Optional<BlockAction> blockAction, Optional<BlockCondition> blockCondition, EnumSet<BlockUsagePhase> usePhases, EnumSet<Direction> directions, Optional<ItemAction> heldItemAction, Optional<ItemCondition> heldItemCondition, Optional<ItemAction> resultItemAction, Optional<ItemStack> resultStack, EnumSet<Hand> hands, ActionResult actionResult, int priority, Optional<EntityCondition> condition) {
+    public ActionOnBlockUsePowerType(Optional<EntityAction> entityAction, Optional<BlockAction> blockAction, Optional<BlockCondition> blockCondition, EnumSet<BlockUsagePhase> usePhases, EnumSet<Direction> directions, Optional<ItemAction> heldItemAction, Optional<ItemCondition> heldItemCondition, Optional<ItemAction> resultItemAction, Optional<ItemStack> resultStack, EnumSet<InteractionHand> hands, InteractionResult actionResult, int priority, Optional<EntityCondition> condition) {
         super(heldItemAction, heldItemCondition, resultItemAction, resultStack, hands, actionResult, priority, condition);
         this.entityAction = entityAction;
         this.blockCondition = blockCondition;
@@ -78,20 +78,20 @@ public class ActionOnBlockUsePowerType extends ActiveInteractionPowerType {
         return PowerTypes.ACTION_ON_BLOCK_USE;
     }
 
-    public boolean shouldExecute(BlockUsagePhase usePhase, PriorityPhase priorityPhase, BlockHitResult hitResult, Hand hand, ItemStack heldStack) {
+    public boolean shouldExecute(BlockUsagePhase usePhase, PriorityPhase priorityPhase, BlockHitResult hitResult, InteractionHand hand, ItemStack heldStack) {
         return priorityPhase.test(this.getPriority())
             && usePhases.contains(usePhase)
             && directions.contains(hitResult.getSide())
             && super.shouldExecute(hand, heldStack)
-            && blockCondition.map(condition -> condition.test(getHolder().getWorld(), hitResult.getBlockPos())).orElse(true);
+            && blockCondition.map(condition -> condition.test(getHolder().level(), hitResult.blockPosition())).orElse(true);
     }
 
-    public ActionResult executeAction(BlockHitResult hitResult, Hand hand) {
+    public InteractionResult executeAction(BlockHitResult hitResult, InteractionHand hand) {
 
-        blockAction.ifPresent(action -> action.execute(getHolder().getWorld(), hitResult.getBlockPos(), Optional.of(hitResult.getSide())));
+        blockAction.ifPresent(action -> action.execute(getHolder().level(), hitResult.blockPosition(), Optional.of(hitResult.getSide())));
         entityAction.ifPresent(action -> action.execute(getHolder()));
 
-        if (getHolder() instanceof PlayerEntity player) {
+        if (getHolder() instanceof Player player) {
             this.performActorItemStuff(player, hand);
         }
 

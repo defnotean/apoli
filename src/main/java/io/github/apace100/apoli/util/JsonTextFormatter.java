@@ -2,9 +2,9 @@ package io.github.apace100.apoli.util;
 
 import com.google.common.base.Strings;
 import com.google.gson.*;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -12,11 +12,11 @@ import java.util.Optional;
 
 public class JsonTextFormatter {
 
-    private static final Formatting NAME_COLOR = Formatting.AQUA;
-    private static final Formatting STRING_COLOR = Formatting.GREEN;
-    private static final Formatting NUMBER_COLOR = Formatting.GOLD;
-    private static final Formatting BOOLEAN_COLOR = Formatting.BLUE;
-    private static final Formatting TYPE_SUFFIX_COLOR = Formatting.RED;
+    private static final ChatFormatting NAME_COLOR = ChatFormatting.AQUA;
+    private static final ChatFormatting STRING_COLOR = ChatFormatting.GREEN;
+    private static final ChatFormatting NUMBER_COLOR = ChatFormatting.GOLD;
+    private static final ChatFormatting BOOLEAN_COLOR = ChatFormatting.BLUE;
+    private static final ChatFormatting TYPE_SUFFIX_COLOR = ChatFormatting.RED;
 
     private final String indent;
 
@@ -37,13 +37,13 @@ public class JsonTextFormatter {
         this(' ', size);
     }
 
-    public Text apply(JsonElement jsonElement) {
-        return applyInternal(jsonElement).orElse(Text.empty());
+    public Component apply(JsonElement jsonElement) {
+        return applyInternal(jsonElement).orElse(Component.empty());
     }
 
-    protected Optional<Text> applyInternal(JsonElement jsonElement) {
+    protected Optional<Component> applyInternal(JsonElement jsonElement) {
 
-        Text result = switch (jsonElement) {
+        Component result = switch (jsonElement) {
             case JsonArray jsonArray ->
                 visitArray(jsonArray);
             case JsonObject jsonObject ->
@@ -62,13 +62,13 @@ public class JsonTextFormatter {
 
     }
 
-    public Text visitArray(JsonArray jsonArray) {
+    public Component visitArray(JsonArray jsonArray) {
 
         if (jsonArray.isEmpty()) {
-            return Text.literal("[]");
+            return Component.literal("[]");
         }
 
-        MutableText result = Text.literal("[");
+        MutableComponent result = Component.literal("[");
         if (!indent.isEmpty()) {
             result.append("\n");
         }
@@ -77,7 +77,7 @@ public class JsonTextFormatter {
         while (iterator.hasNext()) {
 
             JsonElement jsonElement = iterator.next();
-            Optional<Text> jsonText = new JsonTextFormatter(indent, offset + 1, false).applyInternal(jsonElement);
+            Optional<Component> jsonText = new JsonTextFormatter(indent, offset + 1, false).applyInternal(jsonElement);
 
             jsonText.ifPresent(text -> result
                 .append(Strings.repeat(indent, offset))
@@ -101,13 +101,13 @@ public class JsonTextFormatter {
 
     }
 
-    public Text visitObject(JsonObject jsonObject) {
+    public Component visitObject(JsonObject jsonObject) {
 
         if (jsonObject.isEmpty()) {
-            return Text.literal("{}");
+            return Component.literal("{}");
         }
 
-        MutableText result = Text.literal("{");
+        MutableComponent result = Component.literal("{");
         if (!indent.isEmpty()) {
             result.append("\n");
         }
@@ -117,8 +117,8 @@ public class JsonTextFormatter {
 
             Map.Entry<String, JsonElement> entry = iterator.next();
 
-            Text name = Text.literal(entry.getKey()).formatted(NAME_COLOR);
-            Optional<Text> jsonText = new JsonTextFormatter(indent, offset + 1, false).applyInternal(entry.getValue());
+            Component name = Component.literal(entry.getKey()).withStyle(NAME_COLOR);
+            Optional<Component> jsonText = new JsonTextFormatter(indent, offset + 1, false).applyInternal(entry.getValue());
 
             jsonText.ifPresent(text -> result
                 .append(Strings.repeat(indent, offset))
@@ -143,14 +143,14 @@ public class JsonTextFormatter {
 
     }
 
-    public Text visitPrimitive(JsonPrimitive jsonPrimitive) {
+    public Component visitPrimitive(JsonPrimitive jsonPrimitive) {
 
         if (jsonPrimitive.isBoolean()) {
-            return Text.literal(String.valueOf(jsonPrimitive.getAsBoolean())).formatted(BOOLEAN_COLOR);
+            return Component.literal(String.valueOf(jsonPrimitive.getAsBoolean())).withStyle(BOOLEAN_COLOR);
         }
 
         else if (jsonPrimitive.isString()) {
-            return Text.literal("\"" + jsonPrimitive.getAsString() + "\"").formatted(STRING_COLOR);
+            return Component.literal("\"" + jsonPrimitive.getAsString() + "\"").withStyle(STRING_COLOR);
         }
 
         else if (jsonPrimitive.isNumber()) {
@@ -159,22 +159,22 @@ public class JsonTextFormatter {
 
             return switch (number) {
                 case Integer i ->
-                    Text.literal(i.toString()).formatted(NUMBER_COLOR);
+                    Component.literal(i.toString()).withStyle(NUMBER_COLOR);
                 case Long l ->
-                    Text.literal(l.toString()).formatted(NUMBER_COLOR)
-                        .append(Text.literal("L").formatted(TYPE_SUFFIX_COLOR));
+                    Component.literal(l.toString()).withStyle(NUMBER_COLOR)
+                        .append(Component.literal("L").withStyle(TYPE_SUFFIX_COLOR));
                 case Float f ->
-                    Text.literal(f.toString()).formatted(NUMBER_COLOR)
-                        .append(Text.literal("F").formatted(TYPE_SUFFIX_COLOR));
+                    Component.literal(f.toString()).withStyle(NUMBER_COLOR)
+                        .append(Component.literal("F").withStyle(TYPE_SUFFIX_COLOR));
                 case Double d ->
-                    Text.literal(d.toString()).formatted(NUMBER_COLOR)
-                        .append(Text.literal("D").formatted(TYPE_SUFFIX_COLOR));
+                    Component.literal(d.toString()).withStyle(NUMBER_COLOR)
+                        .append(Component.literal("D").withStyle(TYPE_SUFFIX_COLOR));
                 case Byte b ->
-                    Text.literal(b.toString()).formatted(NUMBER_COLOR)
-                        .append(Text.literal("B")).formatted(TYPE_SUFFIX_COLOR);
+                    Component.literal(b.toString()).withStyle(NUMBER_COLOR)
+                        .append(Component.literal("B")).withStyle(TYPE_SUFFIX_COLOR);
                 case Short s ->
-                    Text.literal(s.toString()).formatted(NUMBER_COLOR)
-                        .append(Text.literal("S")).formatted(TYPE_SUFFIX_COLOR);
+                    Component.literal(s.toString()).withStyle(NUMBER_COLOR)
+                        .append(Component.literal("S")).withStyle(TYPE_SUFFIX_COLOR);
                 case null ->
                     throw new JsonSyntaxException("Number cannot be null!");
                 default ->

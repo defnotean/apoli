@@ -12,15 +12,15 @@ import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.apoli.util.Space;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.projectile.ProjectileUtil;
-import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.RaycastContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -82,7 +82,7 @@ public class RaycastEntityConditionType extends EntityConditionType {
     private final RaycastContext.ShapeType shapeType;
     private final RaycastContext.FluidHandling fluidHandling;
 
-    private final Optional<Vec3d> direction;
+    private final Optional<Vec3> direction;
     private final Space space;
 
     private final Optional<Double> entityDistance;
@@ -92,7 +92,7 @@ public class RaycastEntityConditionType extends EntityConditionType {
     private final boolean entity;
     private final boolean block;
 
-    public RaycastEntityConditionType(Optional<BiEntityCondition> matchBiEntityCondition, Optional<BiEntityCondition> hitBiEntityCondition, Optional<BlockCondition> blockCondition, RaycastContext.ShapeType shapeType, RaycastContext.FluidHandling fluidHandling, Optional<Vec3d> direction, Space space, Optional<Double> entityDistance, Optional<Double> blockDistance, Optional<Double> distance, boolean entity, boolean block) {
+    public RaycastEntityConditionType(Optional<BiEntityCondition> matchBiEntityCondition, Optional<BiEntityCondition> hitBiEntityCondition, Optional<BlockCondition> blockCondition, RaycastContext.ShapeType shapeType, RaycastContext.FluidHandling fluidHandling, Optional<Vec3> direction, Space space, Optional<Double> entityDistance, Optional<Double> blockDistance, Optional<Double> distance, boolean entity, boolean block) {
         this.matchBiEntityCondition = matchBiEntityCondition;
         this.hitBiEntityCondition = hitBiEntityCondition;
         this.blockCondition = blockCondition;
@@ -112,12 +112,12 @@ public class RaycastEntityConditionType extends EntityConditionType {
 
         Entity entity = context.entity();
 
-        Vec3d origin = MiscUtil.getPoseDependentEyePos(entity);
-        Vec3d direction = this.direction
+        Vec3 origin = MiscUtil.getPoseDependentEyePos(entity);
+        Vec3 direction = this.direction
             .map(dir -> transformDirection(entity, dir))
             .orElseGet(() -> entity.getRotationVec(1.0F));
 
-        Vec3d destination;
+        Vec3 destination;
         HitResult hitResult = null;
 
         if (this.entity) {
@@ -144,7 +144,7 @@ public class RaycastEntityConditionType extends EntityConditionType {
         return switch (hitResult) {
             case BlockHitResult blockResult when blockCondition.isPresent() ->
                 blockResult.getType() != HitResult.Type.MISS
-                    && blockCondition.get().test(entity.getWorld(), blockResult.getBlockPos());
+                    && blockCondition.get().test(entity.level(), blockResult.blockPosition());
             case EntityHitResult entityResult when hitBiEntityCondition.isPresent() ->
                 entityResult.getType() != HitResult.Type.MISS
                     && hitBiEntityCondition.get().test(entity, entityResult.getEntity());
@@ -160,12 +160,12 @@ public class RaycastEntityConditionType extends EntityConditionType {
         return EntityConditionTypes.RAYCAST;
     }
 
-    private EntityHitResult entityRaycast(Entity caster, Vec3d origin, Vec3d destination) {
+    private EntityHitResult entityRaycast(Entity caster, Vec3 origin, Vec3 destination) {
 
-        Vec3d ray = destination.subtract(origin);
-        Box box = caster.getBoundingBox().stretch(ray).expand(1.0D);
+        Vec3 ray = destination.subtract(origin);
+        AABB box = caster.getBoundingBox().stretch(ray).expand(1.0D);
 
-        Predicate<Entity> intersectPredicate = EntityPredicates.EXCEPT_SPECTATOR
+        Predicate<Entity> intersectPredicate = EntitySelector.EXCEPT_SPECTATOR
             .and(intersected -> matchBiEntityCondition
                 .map(condition -> condition.test(caster, intersected))
                 .orElse(true));
@@ -181,36 +181,36 @@ public class RaycastEntityConditionType extends EntityConditionType {
 
     }
 
-    private BlockHitResult blockRaycast(Entity caster, Vec3d origin, Vec3d destination) {
+    private BlockHitResult blockRaycast(Entity caster, Vec3 origin, Vec3 destination) {
         RaycastContext context = new RaycastContext(origin, destination, shapeType, fluidHandling, caster);
-        return caster.getWorld().raycast(context);
+        return caster.level().raycast(context);
     }
 
-    private Vec3d transformDirection(Entity entity, Vec3d direction) {
+    private Vec3 transformDirection(Entity entity, Vec3 direction) {
 
         Vector3f normalizedDirection = new Vector3f((float) direction.getX(), (float) direction.getY(), (float) direction.getZ()).normalize();
         space.toGlobal(normalizedDirection, entity);
 
-        return new Vec3d(normalizedDirection);
+        return new Vec3(normalizedDirection);
 
     }
 
     private static boolean overrideHitResult(Entity caster, @Nullable HitResult prev, HitResult next) {
         return prev == null
             || prev.getType() == HitResult.Type.MISS
-            || prev.squaredDistanceTo(caster) > next.squaredDistanceTo(caster);
+            || prev.distanceToSqr(caster) > next.distanceToSqr(caster);
     }
 
     private double getEntityReach(Entity entity) {
         return entityDistance
             .or(() -> distance)
-            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE, 1.0));
+            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, Attributes.PLAYER_ENTITY_INTERACTION_RANGE, 1.0));
     }
 
     private double getBlockReach(Entity entity) {
         return blockDistance
             .or(() -> distance)
-            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE, 1.0));
+            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, Attributes.PLAYER_BLOCK_INTERACTION_RANGE, 1.0));
     }
 
 }

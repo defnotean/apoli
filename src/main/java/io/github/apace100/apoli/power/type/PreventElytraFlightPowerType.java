@@ -6,9 +6,10 @@ import io.github.apace100.apoli.condition.EntityCondition;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Optional;
 
 public class PreventElytraFlightPowerType extends PowerType {
@@ -40,9 +41,13 @@ public class PreventElytraFlightPowerType extends PowerType {
 		entityAction.ifPresent(action -> action.execute(getHolder()));
     }
 
-    //  FIXME: Fix the entity action not being executed when preventing elytra flight -eggohito
     public static boolean integrateAllowCallback(LivingEntity entity) {
-        return !PowerHolderComponent.hasPowerType(entity, PreventElytraFlightPowerType.class);
+        List<PreventElytraFlightPowerType> powers = PowerHolderComponent.getPowerTypes(entity, PreventElytraFlightPowerType.class);
+        if (powers.isEmpty()) {
+            return true;
+        }
+        powers.forEach(PreventElytraFlightPowerType::executeAction);
+        return false;
     }
 
 }

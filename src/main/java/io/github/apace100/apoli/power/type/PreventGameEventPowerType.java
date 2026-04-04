@@ -8,9 +8,9 @@ import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.core.Holder;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -39,10 +39,10 @@ public class PreventGameEventPowerType extends PowerType {
 
     private final Optional<EntityAction> entityAction;
 
-    private final List<RegistryEntry<GameEvent>> events;
+    private final List<Holder<GameEvent>> events;
     private final Optional<TagKey<GameEvent>> eventTag;
 
-    public PreventGameEventPowerType(Optional<EntityAction> entityAction, List<RegistryEntry<GameEvent>> events, Optional<TagKey<GameEvent>> eventTag, Optional<EntityCondition> condition) {
+    public PreventGameEventPowerType(Optional<EntityAction> entityAction, List<Holder<GameEvent>> events, Optional<TagKey<GameEvent>> eventTag, Optional<EntityCondition> condition) {
         super(condition);
         this.entityAction = entityAction;
         this.events = events
@@ -61,7 +61,7 @@ public class PreventGameEventPowerType extends PowerType {
         entityAction.ifPresent(action -> action.execute(getHolder()));
     }
 
-    public boolean doesPrevent(RegistryEntry<GameEvent> event) {
+    public boolean doesPrevent(Holder<GameEvent> event) {
         return eventTag.map(event::isIn).orElse(false)
             || (events.isEmpty() || events.contains(event));
     }

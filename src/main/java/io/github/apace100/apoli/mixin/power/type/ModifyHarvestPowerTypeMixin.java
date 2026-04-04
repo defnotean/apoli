@@ -9,15 +9,15 @@ import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.type.ModifyHarvestPowerType;
 import io.github.apace100.apoli.util.SavedBlockPosition;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.resource.featuretoggle.ToggleableFeature;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.ServerPlayerInteractionManager;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockView;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureElement;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,11 +27,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 public abstract class ModifyHarvestPowerTypeMixin {
 
-	@Mixin(AbstractBlock.class)
-	public abstract static class BlockBreakingDeltaProxy implements ToggleableFeature {
+	@Mixin(BlockBehaviour.class)
+	public abstract static class BlockBreakingDeltaProxy implements FeatureElement {
 
-		@WrapOperation(method = "calcBlockBreakingDelta", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;canHarvest(Lnet/minecraft/block/BlockState;)Z"))
-		private boolean apoli$modifyHarvest(PlayerEntity player, BlockState state, Operation<Boolean> original, BlockState mState, PlayerEntity mPlayer, BlockView world, BlockPos pos) {
+		@WrapOperation(method = "getDestroyProgress", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;canHarvest(Lnet/minecraft/world/level/block/state/BlockState;)Z"))
+		private boolean apoli$modifyHarvest(Player player, BlockState state, Operation<Boolean> original, BlockState mState, Player mPlayer, BlockGetter world, BlockPos pos) {
 			return PowerHolderComponent.getPowerTypes(player, ModifyHarvestPowerType.class)
 				.stream()
 				.filter(powerType -> powerType.doesApply(world, pos))
@@ -42,23 +42,23 @@ public abstract class ModifyHarvestPowerTypeMixin {
 
 	}
 
-	@Mixin(ServerPlayerInteractionManager.class)
+	@Mixin(ServerPlayerGameMode.class)
 	public abstract static class HarvestabilityProxy {
 
 		@Shadow
-		protected ServerWorld world;
+		protected ServerLevel world;
 
 		@Shadow
 		@Final
-		protected ServerPlayerEntity player;
+		protected ServerPlayer player;
 
-		@Inject(method = "tryBreakBlock", at = @At("HEAD"))
+		@Inject(method = "destroyBlock", at = @At("HEAD"))
 		private void apoli$cacheBreakingBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir, @Share(value = "breakingBlock", namespace = Apoli.MODID) LocalRef<SavedBlockPosition> breakingBlockRef) {
 			breakingBlockRef.set(new SavedBlockPosition(this.world, pos));
 		}
 
-		@WrapOperation(method = "tryBreakBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;canHarvest(Lnet/minecraft/block/BlockState;)Z"))
-		private boolean apoli$modifyHarvest(ServerPlayerEntity player, BlockState state, Operation<Boolean> original, @Share(value = "breakingBlock", namespace = Apoli.MODID) LocalRef<SavedBlockPosition> breakingBlockRef, @Share(value = "modifiedHarvest", namespace = Apoli.MODID) LocalBooleanRef modifiedHarvestRef) {
+		@WrapOperation(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;canHarvest(Lnet/minecraft/world/level/block/state/BlockState;)Z"))
+		private boolean apoli$modifyHarvest(ServerPlayer player, BlockState state, Operation<Boolean> original, @Share(value = "breakingBlock", namespace = Apoli.MODID) LocalRef<SavedBlockPosition> breakingBlockRef, @Share(value = "modifiedHarvest", namespace = Apoli.MODID) LocalBooleanRef modifiedHarvestRef) {
 
 			boolean result = PowerHolderComponent.getPowerTypes(this.player, ModifyHarvestPowerType.class)
 				.stream()

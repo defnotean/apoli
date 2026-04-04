@@ -5,8 +5,8 @@ import io.github.apace100.apoli.access.PowerModifiedGrindstone;
 import io.github.apace100.apoli.power.type.ModifyGrindstonePowerType;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.apoli.util.modifier.ModifierUtil;
-import net.minecraft.screen.GrindstoneScreenHandler;
-import net.minecraft.world.World;
+import net.minecraft.world.inventory.GrindstoneMenu;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,15 +15,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import java.util.List;
 import java.util.Optional;
 
-@Mixin(targets = "net/minecraft/screen/GrindstoneScreenHandler$4")
+@Mixin(targets = "net/minecraft/world/inventory/GrindstoneMenu$4")
 public abstract class GrindstoneScreenHandlerOutputSlotMixin {
 
     @Final
     @Shadow
-    GrindstoneScreenHandler field_16780;
+    // TODO: Resolve intermediary name for field_16780 (GrindstoneMenu reference in anonymous inner class)
+    GrindstoneMenu field_16780;
 
-    @ModifyReturnValue(method = "getExperience(Lnet/minecraft/world/World;)I", at = @At("RETURN"))
-    private int apoli$modifyExperience(int original, World world) {
+    @ModifyReturnValue(method = "getExperience(Lnet/minecraft/world/Level;)I", at = @At("RETURN"))
+    private int apoli$modifyExperience(int original, Level world) {
 
         if (!(field_16780 instanceof PowerModifiedGrindstone powerModifiedGrindstone)) {
             return original;

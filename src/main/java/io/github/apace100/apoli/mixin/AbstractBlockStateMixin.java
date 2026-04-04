@@ -8,31 +8,31 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.type.PhasingPowerType;
 import io.github.apace100.apoli.power.type.PreventBlockSelectionPowerType;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.entity.Entity;
-import net.minecraft.state.State;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.StateHolder;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(AbstractBlock.AbstractBlockState.class)
-public abstract class AbstractBlockStateMixin extends State<Block, BlockState> implements BlockStateCollisionShapeAccess {
+@Mixin(BlockBehaviour.AbstractBlockState.class)
+public abstract class AbstractBlockStateMixin extends StateHolder<Block, BlockState> implements BlockStateCollisionShapeAccess {
 
     @Shadow
     public abstract Block getBlock();
 
     @Shadow
-    public abstract VoxelShape getCollisionShape(BlockView world, BlockPos pos, ShapeContext context);
+    public abstract VoxelShape getCollisionShape(BlockGetter world, BlockPos pos, CollisionContext context);
 
     @Unique
     private boolean apoli$queryOriginal = false;
@@ -41,43 +41,43 @@ public abstract class AbstractBlockStateMixin extends State<Block, BlockState> i
         super(owner, propertyMap, codec);
     }
 
-    @ModifyReturnValue(method = "getOutlineShape(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/ShapeContext;)Lnet/minecraft/util/shape/VoxelShape;", at = @At("RETURN"))
-    private VoxelShape apoli$preventBlockSelection(VoxelShape original, BlockView blockView, BlockPos blockPos, ShapeContext context) {
+    @ModifyReturnValue(method = "getOutlineShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/CollisionContext;)Lnet/minecraft/world/phys/shapes/VoxelShape;", at = @At("RETURN"))
+    private VoxelShape apoli$preventBlockSelection(VoxelShape original, BlockGetter blockView, BlockPos blockPos, CollisionContext context) {
 
-        if (context == ShapeContext.absent()) {
+        if (context == CollisionContext.absent()) {
             return original;
         }
 
         else {
             return PreventBlockSelectionPowerType.doesPrevent(context, blockPos)
-                ? VoxelShapes.empty()
+                ? Shapes.empty()
                 : original;
         }
 
     }
 
-    @ModifyReturnValue(method = "getCollisionShape(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/ShapeContext;)Lnet/minecraft/util/shape/VoxelShape;", at = @At("RETURN"))
-    private VoxelShape apoli$phaseThroughBlocks(VoxelShape original, BlockView blockView, BlockPos blockPos, ShapeContext context) {
+    @ModifyReturnValue(method = "getCollisionShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/CollisionContext;)Lnet/minecraft/world/phys/shapes/VoxelShape;", at = @At("RETURN"))
+    private VoxelShape apoli$phaseThroughBlocks(VoxelShape original, BlockGetter blockView, BlockPos blockPos, CollisionContext context) {
 
-        if (context == ShapeContext.absent()) {
+        if (context == CollisionContext.absent()) {
             return original;
         }
 
         else {
             return !apoli$queryOriginal && PhasingPowerType.shouldPhase(context, original, blockPos)
-                ? VoxelShapes.empty()
+                ? Shapes.empty()
                 : original;
         }
 
     }
 
-    @WrapWithCondition(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollision(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
-    private boolean apoli$preventOnEntityCollisionCallWhenPhasing(Block instance, BlockState state, World world, BlockPos blockPos, Entity entity) {
+    @WrapWithCondition(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;onEntityCollision(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)V"))
+    private boolean apoli$preventOnEntityCollisionCallWhenPhasing(Block instance, BlockState state, Level world, BlockPos blockPos, Entity entity) {
         return !PowerHolderComponent.hasPowerType(entity, PhasingPowerType.class, p -> p.doesApply(blockPos));
     }
 
     @Override
-    public VoxelShape apoli$getOriginalCollisionShape(BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape apoli$getOriginalCollisionShape(BlockGetter world, BlockPos pos, CollisionContext context) {
 
         this.apoli$queryOriginal = true;
         VoxelShape originalShape = this.getCollisionShape(world, pos, context);

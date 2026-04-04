@@ -12,14 +12,14 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.type.PowerType;
 import io.github.apace100.apoli.util.PowerUtil;
-import net.minecraft.command.argument.ScoreHolderArgumentType;
-import net.minecraft.command.argument.ScoreboardObjectiveArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.scoreboard.ScoreAccess;
-import net.minecraft.scoreboard.ScoreHolder;
-import net.minecraft.scoreboard.ScoreboardObjective;
+import net.minecraft.commands.arguments.ScoreHolderArgumentType;
+import net.minecraft.commands.arguments.ScoreboardObjectiveArgumentType;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.scores.ScoreAccess;
+import net.minecraft.world.scores.ScoreHolder;
+import net.minecraft.world.scores.Objective;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -59,16 +59,16 @@ public class ResourceCommand {
             Entity target = PowerHolderArgumentType.getHolder(context, "target");
             Power power = PowerArgumentType.getResource(context, "resource");
 
-            ServerCommandSource commandSource = context.getSource();
+            ServerCommandSource commandSource = context.getDirectEntity();
             PowerType powerType = PowerUtil.getOptionalPowerType(power, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), power.getId().toString()));
 
             if (powerType != null) {
-                commandSource.sendFeedback(() -> Text.translatable("commands.execute.conditional.pass"), false);
+                commandSource.sendFeedback(() -> Component.translatable("commands.execute.conditional.pass"), false);
                 return 1;
             }
 
             else {
-                commandSource.sendError(Text.translatable("commands.execute.conditional.fail"));
+                commandSource.sendError(Component.translatable("commands.execute.conditional.fail"));
                 return 0;
             }
 
@@ -92,20 +92,20 @@ public class ResourceCommand {
             Entity target = PowerHolderArgumentType.getHolder(context, "target");
             Power power = PowerArgumentType.getResource(context, "resource");
 
-            ServerCommandSource commandSource = context.getSource();
+            ServerCommandSource commandSource = context.getDirectEntity();
             PowerType powerType = PowerUtil.getOptionalPowerType(power, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), power.getId().toString()));
 
             if (powerType != null) {
 
                 int value = PowerUtil.getResourceValue(powerType);
-                commandSource.sendFeedback(() -> Text.translatable("commands.scoreboard.players.get.success", target.getName(), value, power.getId().toString()), false);
+                commandSource.sendFeedback(() -> Component.translatable("commands.scoreboard.players.get.success", target.getName(), value, power.getId().toString()), false);
 
                 return value;
 
             }
 
             else {
-                commandSource.sendError(Text.translatable("commands.scoreboard.players.get.null", power.getId().toString(), target.getName()));
+                commandSource.sendError(Component.translatable("commands.scoreboard.players.get.null", power.getId().toString(), target.getName()));
                 return 0;
             }
 
@@ -132,7 +132,7 @@ public class ResourceCommand {
             int value = IntegerArgumentType.getInteger(context, "value");
             int newValue;
 
-            ServerCommandSource commandSource = context.getSource();
+            ServerCommandSource commandSource = context.getDirectEntity();
             PowerType powerType = PowerUtil.getOptionalPowerType(power, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), power.getId().toString()));
 
             if (PowerUtil.setResourceValue(powerType, value)) {
@@ -140,7 +140,7 @@ public class ResourceCommand {
             }
 
             newValue = PowerUtil.getResourceValue(powerType);
-            commandSource.sendFeedback(() -> Text.translatable("commands.scoreboard.players.set.success.single", power.getId().toString(), target.getName(), newValue), true);
+            commandSource.sendFeedback(() -> Component.translatable("commands.scoreboard.players.set.success.single", power.getId().toString(), target.getName(), newValue), true);
 
             return newValue;
 
@@ -167,7 +167,7 @@ public class ResourceCommand {
             int value = IntegerArgumentType.getInteger(context, "value");
             int newValue;
             
-            ServerCommandSource commandSource = context.getSource();
+            ServerCommandSource commandSource = context.getDirectEntity();
             PowerType powerType = PowerUtil.getOptionalPowerType(resource, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), resource.getId().toString()));
             
             if (PowerUtil.changeResourceValue(powerType, value)) {
@@ -175,7 +175,7 @@ public class ResourceCommand {
             }
             
             newValue = PowerUtil.getResourceValue(powerType);
-            commandSource.sendFeedback(() -> Text.translatable("commands.scoreboard.players.add.success.single", value, resource.getId().toString(), target.getName(), newValue), true);
+            commandSource.sendFeedback(() -> Component.translatable("commands.scoreboard.players.add.success.single", value, resource.getId().toString(), target.getName(), newValue), true);
             
             return newValue;
 
@@ -204,9 +204,9 @@ public class ResourceCommand {
             PowerOperationArgumentType.Operation operation = PowerOperationArgumentType.getOperation(context, "operation");
 
             ScoreHolder source = ScoreHolderArgumentType.getScoreHolder(context, "source");
-            ScoreboardObjective objective = ScoreboardObjectiveArgumentType.getObjective(context, "objective");
+            Objective objective = ScoreboardObjectiveArgumentType.getObjective(context, "objective");
 
-            ServerCommandSource commandSource = context.getSource();
+            ServerCommandSource commandSource = context.getDirectEntity();
             PowerType powerType = PowerUtil.getOptionalPowerType(resource, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), resource.getId().toString()));
 
             ScoreAccess scoreAccess = commandSource.getServer().getScoreboard().getOrCreateScore(source, objective);
@@ -218,7 +218,7 @@ public class ResourceCommand {
                 PowerHolderComponent.syncPower(target, resource);
             }
 
-            commandSource.sendFeedback(() -> Text.translatable("commands.scoreboard.players.operation.success.single", resource.getId().toString(), target.getName(), newValue), true);
+            commandSource.sendFeedback(() -> Component.translatable("commands.scoreboard.players.operation.success.single", resource.getId().toString(), target.getName(), newValue), true);
             return newValue;
 
         }

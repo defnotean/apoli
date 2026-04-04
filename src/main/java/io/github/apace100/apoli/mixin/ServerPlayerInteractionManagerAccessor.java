@@ -1,12 +1,12 @@
 package io.github.apace100.apoli.mixin;
 
-import net.minecraft.server.network.ServerPlayerInteractionManager;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.server.level.ServerPlayerGameMode;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.GameMode;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ServerPlayerInteractionManager.class)
+@Mixin(ServerPlayerGameMode.class)
 public interface ServerPlayerInteractionManagerAccessor {
 
     @Accessor

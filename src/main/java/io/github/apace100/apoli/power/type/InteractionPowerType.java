@@ -7,12 +7,12 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.InventoryUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
 
 import java.util.EnumSet;
 import java.util.Optional;
@@ -26,10 +26,10 @@ public abstract class InteractionPowerType extends PowerType {
     protected final Optional<ItemAction> resultItemAction;
     protected final Optional<ItemStack> resultStack;
 
-    protected final EnumSet<Hand> hands;
-    protected final ActionResult actionResult;
+    protected final EnumSet<InteractionHand> hands;
+    protected final InteractionResult actionResult;
 
-    public InteractionPowerType(Optional<ItemAction> heldItemAction, Optional<ItemCondition> heldItemCondition, Optional<ItemAction> resultItemAction, Optional<ItemStack> resultStack, EnumSet<Hand> hands, ActionResult actionResult, Optional<EntityCondition> condition) {
+    public InteractionPowerType(Optional<ItemAction> heldItemAction, Optional<ItemCondition> heldItemCondition, Optional<ItemAction> resultItemAction, Optional<ItemStack> resultStack, EnumSet<InteractionHand> hands, InteractionResult actionResult, Optional<EntityCondition> condition) {
         super(condition);
         this.hands = hands;
         this.actionResult = actionResult;
@@ -39,47 +39,47 @@ public abstract class InteractionPowerType extends PowerType {
         this.resultItemAction = resultItemAction;
     }
 
-    public InteractionPowerType(Optional<ItemAction> heldItemAction, Optional<ItemCondition> heldItemCondition, Optional<ItemStack> resultStack, Optional<ItemAction> resultItemAction, EnumSet<Hand> hands, ActionResult actionResult) {
+    public InteractionPowerType(Optional<ItemAction> heldItemAction, Optional<ItemCondition> heldItemCondition, Optional<ItemStack> resultStack, Optional<ItemAction> resultItemAction, EnumSet<InteractionHand> hands, InteractionResult actionResult) {
         this(heldItemAction, heldItemCondition, resultItemAction, resultStack, hands, actionResult, Optional.empty());
     }
 
-    public boolean shouldExecute(Hand hand, ItemStack heldStack) {
+    public boolean shouldExecute(InteractionHand hand, ItemStack heldStack) {
         return doesApplyToHand(hand)
             && doesApplyToItem(heldStack);
     }
 
-    public boolean doesApplyToHand(Hand hand) {
+    public boolean doesApplyToHand(InteractionHand hand) {
         return hands.contains(hand);
     }
 
     public boolean doesApplyToItem(ItemStack heldStack) {
         return heldItemCondition
-            .map(condition -> condition.test(getHolder().getWorld(), heldStack))
+            .map(condition -> condition.test(getHolder().level(), heldStack))
             .orElse(true);
     }
 
-    public ActionResult getActionResult() {
+    public InteractionResult getActionResult() {
         return actionResult;
     }
 
-    protected void performActorItemStuff(PlayerEntity actor, Hand hand) {
+    protected void performActorItemStuff(Player actor, InteractionHand hand) {
 
-        StackReference heldStackReference = getHeldStackReference(actor, hand);
-        heldItemAction.ifPresent(action -> action.execute(actor.getWorld(), heldStackReference));
+        SlotAccess heldStackReference = getHeldStackReference(actor, hand);
+        heldItemAction.ifPresent(action -> action.execute(actor.level(), heldStackReference));
 
         ItemStack resultStack = this.resultStack.isPresent()
             ? this.resultStack.get().copy()
             : heldStackReference.get().copy();
 
-        StackReference resultStackReference = InventoryUtil.createStackReference(resultStack);
+        SlotAccess resultStackReference = InventoryUtil.createStackReference(resultStack);
         boolean modified = this.resultStack.isPresent() || resultItemAction.isPresent();
 
-        resultItemAction.ifPresent(action -> action.execute(actor.getWorld(), resultStackReference));
+        resultItemAction.ifPresent(action -> action.execute(actor.level(), resultStackReference));
 
         if (modified) {
 
             if (heldStackReference.get().isEmpty()) {
-                actor.setStackInHand(hand, resultStackReference.get());
+                actor.setItemInHand(hand, resultStackReference.get());
             }
 
             else {
@@ -90,21 +90,21 @@ public abstract class InteractionPowerType extends PowerType {
 
     }
 
-    protected static StackReference getHeldStackReference(PlayerEntity player, Hand hand) {
+    protected static SlotAccess getHeldStackReference(Player player, InteractionHand hand) {
 
-        PlayerInventory playerInventory = player.getInventory();
+        Inventory playerInventory = player.getInventory();
         int selectedSlot = playerInventory.selectedSlot;
 
-        if (hand == Hand.MAIN_HAND && PlayerInventory.isValidHotbarIndex(selectedSlot)) {
-            return StackReference.of(playerInventory, selectedSlot);
+        if (hand == InteractionHand.MAIN_HAND && Inventory.isValidHotbarIndex(selectedSlot)) {
+            return SlotAccess.of(playerInventory, selectedSlot);
         }
 
-        else if (hand == Hand.OFF_HAND) {
-            return StackReference.of(playerInventory.offHand::getFirst, stack -> playerInventory.offHand.set(0, stack));
+        else if (hand == InteractionHand.OFF_HAND) {
+            return SlotAccess.of(playerInventory.offHand::getFirst, stack -> playerInventory.offHand.set(0, stack));
         }
 
         else {
-            return StackReference.EMPTY;
+            return SlotAccess.EMPTY;
         }
 
     }
@@ -117,8 +117,8 @@ public abstract class InteractionPowerType extends PowerType {
                 .addFunctionedDefault("held_item_condition", ItemCondition.DATA_TYPE.optional(), data -> data.get("item_condition"))
                 .add("result_item_action", ItemAction.DATA_TYPE.optional(), Optional.empty())
                 .add("result_stack", SerializableDataTypes.ITEM_STACK.optional(), Optional.empty())
-                .add("hands", SerializableDataTypes.HAND_SET, EnumSet.allOf(Hand.class))
-                .add("action_result", SerializableDataTypes.ACTION_RESULT, ActionResult.SUCCESS),
+                .add("hands", SerializableDataTypes.HAND_SET, EnumSet.allOf(InteractionHand.class))
+                .add("action_result", SerializableDataTypes.ACTION_RESULT, InteractionResult.SUCCESS),
             (data, condition) -> fromData.apply(
                 data,
                 data.get("held_item_action"),
@@ -141,7 +141,7 @@ public abstract class InteractionPowerType extends PowerType {
 
     @FunctionalInterface
     public interface FromData<T extends InteractionPowerType> {
-        T apply(SerializableData.Instance data, Optional<ItemAction> heldItemAction, Optional<ItemCondition> heldItemCondition, Optional<ItemAction> resultItemAction, Optional<ItemStack> resultStack, EnumSet<Hand> hands, ActionResult actionResult, Optional<EntityCondition> condition);
+        T apply(SerializableData.Instance data, Optional<ItemAction> heldItemAction, Optional<ItemCondition> heldItemCondition, Optional<ItemAction> resultItemAction, Optional<ItemStack> resultStack, EnumSet<InteractionHand> hands, InteractionResult actionResult, Optional<EntityCondition> condition);
     }
 
 }

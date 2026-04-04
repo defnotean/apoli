@@ -10,7 +10,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.Vec3i;
 import org.jetbrains.annotations.NotNull;
 
 public class OffsetBlockActionType extends BlockActionType {

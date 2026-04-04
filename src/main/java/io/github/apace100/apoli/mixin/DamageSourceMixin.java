@@ -2,7 +2,7 @@ package io.github.apace100.apoli.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import io.github.apace100.apoli.access.NameMutableDamageSource;
-import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.world.damagesource.DamageSource;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,7 +31,7 @@ public abstract class DamageSourceMixin implements NameMutableDamageSource {
         apoli$mutableName = name;
     }
 
-    @ModifyVariable(method = "getDeathMessage", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/entity/damage/DamageSource;attacker:Lnet/minecraft/entity/Entity;", ordinal = 0))
+    @ModifyVariable(method = "getDeathMessage", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/world/damagesource/DamageSource;attacker:Lnet/minecraft/world/entity/Entity;", ordinal = 0))
     private String apoli$modifyDeathMessageString(String value) {
         return "death.attack." + this.getName();
     }

@@ -12,10 +12,10 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.PowerManager;
 import io.github.apace100.apoli.util.PowerUtil;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.Entity;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collection;
 import java.util.List;
@@ -88,15 +88,15 @@ public record PowerSuggestionProvider(Function<CommandContext<ServerCommandSourc
 
 		try {
 
-			Stream.Builder<Identifier> powerIds = Stream.builder();
+			Stream.Builder<ResourceLocation> powerIds = Stream.builder();
 			Collection<Entity> entities = getter().apply(context);
 
 			for (Entity entity : entities) {
 
 				PowerHolderComponent powerComponent = PowerHolderComponent.KEY.get(entity);
-				for (Map.Entry<Identifier, Power> powerEntry : PowerManager.entrySet()) {
+				for (Map.Entry<ResourceLocation, Power> powerEntry : PowerManager.entrySet()) {
 
-					Identifier id = powerEntry.getKey();
+					ResourceLocation id = powerEntry.getKey();
 					Power power = powerEntry.getValue();
 
 					try {
@@ -115,7 +115,7 @@ public record PowerSuggestionProvider(Function<CommandContext<ServerCommandSourc
 
 			}
 
-			return CommandSource.suggestIdentifiers(powerIds.build(), builder);
+			return SharedSuggestionProvider.suggestIdentifiers(powerIds.build(), builder);
 
 		}
 

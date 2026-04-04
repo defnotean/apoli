@@ -8,11 +8,11 @@ import io.github.apace100.apoli.util.HudRender;
 import io.github.apace100.apoli.util.keybinding.KeyBindingReference;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -61,16 +61,16 @@ public class LaunchPowerType extends ActiveCooldownPowerType {
 	public void onUse() {
 
 		LivingEntity holder = getHolder();
-		if (!(holder.getWorld() instanceof ServerWorld serverWorld)) {
+		if (!(holder.level() instanceof ServerLevel serverWorld)) {
 			return;
 		}
 
 		super.onUse();
 
-		holder.addVelocity(0, speed, 0);
-		holder.velocityModified = true;
+		holder.push(0, speed, 0);
+		holder.hasImpulse = true;
 
-		sound.ifPresent(soundEvent -> serverWorld.playSound(null, holder.getX(), holder.getY(), holder.getZ(), soundEvent, SoundCategory.NEUTRAL, 0.5F, 0.4F / holder.getRandom().nextFloat()));
+		sound.ifPresent(soundEvent -> serverWorld.playSound(null, holder.getX(), holder.getY(), holder.getZ(), soundEvent, SoundSource.NEUTRAL, 0.5F, 0.4F / holder.getRandom().nextFloat()));
 
 		for (int i = 0; i < 4; i++) {
 			serverWorld.spawnParticles(ParticleTypes.CLOUD, holder.getX(), holder.getRandomBodyY(), holder.getZ(), 8, holder.getRandom().nextGaussian(), 0.0D, holder.getRandom().nextGaussian(), 0.5);

@@ -8,14 +8,14 @@ import io.github.apace100.apoli.action.type.BlockActionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec2f;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.network.chat.Component;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec2f;
 import org.jetbrains.annotations.NotNull;
 
 public class ExecuteCommandBlockActionType extends BlockActionType {
@@ -39,7 +39,7 @@ public class ExecuteCommandBlockActionType extends BlockActionType {
     @Override
     public void accept(BlockActionContext context) {
 
-        ServerWorld world = context.world();
+        ServerLevel world = context.world();
         BlockPos pos = context.pos();
 
         BlockState blockState = world.getBlockState(pos);
@@ -53,7 +53,7 @@ public class ExecuteCommandBlockActionType extends BlockActionType {
             world,
             Apoli.config.executeCommand.permissionLevel,
             blockTranslationKey,
-            Text.translatable(blockTranslationKey),
+            Component.translatable(blockTranslationKey),
             server,
             null
         );

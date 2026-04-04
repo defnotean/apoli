@@ -5,9 +5,9 @@ import io.github.apace100.apoli.condition.context.EntityConditionContext;
 import io.github.apace100.apoli.condition.type.EntityConditionType;
 import io.github.apace100.apoli.condition.type.EntityConditionTypes;
 import io.github.apace100.apoli.util.MiscUtil;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 public class ExposedToSkyEntityConditionType extends EntityConditionType {
@@ -16,10 +16,10 @@ public class ExposedToSkyEntityConditionType extends EntityConditionType {
     public boolean test(EntityConditionContext context) {
 
         Entity entity = context.entity();
-        World world = entity.getWorld();
+        Level world = entity.level();
 
         return world.isSkyVisible(BlockPos.ofFloored(MiscUtil.getPoseDependentEyePos(entity)))
-            || world.isSkyVisible(entity.getBlockPos());
+            || world.isSkyVisible(entity.blockPosition());
 
     }
 

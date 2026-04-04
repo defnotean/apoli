@@ -8,11 +8,11 @@ import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.apoli.util.modifier.ModifierUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.attribute.AttributeContainer;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.core.Holder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -38,11 +38,11 @@ public class AttributeModifyTransferPowerType extends PowerType {
     );
 
     private final Class<?> modifyClass;
-    private final RegistryEntry<EntityAttribute> attribute;
+    private final Holder<Attribute> attribute;
 
     private final double valueMultiplier;
 
-    public AttributeModifyTransferPowerType(Class<?> modifyClass, RegistryEntry<EntityAttribute> attribute, double valueMultiplier, Optional<EntityCondition> condition) {
+    public AttributeModifyTransferPowerType(Class<?> modifyClass, Holder<Attribute> attribute, double valueMultiplier, Optional<EntityCondition> condition) {
         super(condition);
         this.modifyClass = modifyClass;
         this.attribute = attribute;
@@ -60,8 +60,8 @@ public class AttributeModifyTransferPowerType extends PowerType {
 
     public void addModifiers(List<Modifier> modifiers) {
 
-        AttributeContainer attributeContainer = getHolder().getAttributes();
-        EntityAttributeInstance attributeInstance = attributeContainer.getCustomInstance(attribute);
+        AttributeMap attributeContainer = getHolder().getAttributes();
+        AttributeInstance attributeInstance = attributeContainer.getCustomInstance(attribute);
 
         if (attributeInstance == null) {
             return;
@@ -69,7 +69,7 @@ public class AttributeModifyTransferPowerType extends PowerType {
 
         attributeInstance.getModifiers()
             .stream()
-            .map(mod -> new EntityAttributeModifier(mod.id(), mod.value() * valueMultiplier, mod.operation()))
+            .map(mod -> new AttributeModifier(mod.id(), mod.value() * valueMultiplier, mod.operation()))
             .map(ModifierUtil::fromAttributeModifier)
             .forEach(modifiers::add);
 

@@ -10,7 +10,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerReference;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 public class RevokePowerEntityActionType extends EntityActionType {
@@ -29,9 +29,9 @@ public class RevokePowerEntityActionType extends EntityActionType {
     );
 
     private final PowerReference power;
-    private final Identifier source;
+    private final ResourceLocation source;
 
-    public RevokePowerEntityActionType(PowerReference power, Identifier source) {
+    public RevokePowerEntityActionType(PowerReference power, ResourceLocation source) {
         this.power = power;
         this.source = source;
     }

@@ -1,10 +1,10 @@
 package io.github.apace100.apoli.util;
 
-import net.minecraft.util.ActionResult;
+import net.minecraft.world.InteractionResult;
 
 public class ActionResultUtil {
 
-    public static boolean shouldOverride(ActionResult oldResult, ActionResult newResult) {
+    public static boolean shouldOverride(InteractionResult oldResult, InteractionResult newResult) {
         return (newResult.isAccepted() && !oldResult.isAccepted())
             || (newResult.shouldSwingHand() && !oldResult.shouldSwingHand());
     }

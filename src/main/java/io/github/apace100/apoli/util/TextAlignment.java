@@ -1,10 +1,10 @@
 package io.github.apace100.apoli.util;
 
-import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.Optional;
 
-public enum TextAlignment implements StringIdentifiable {
+public enum TextAlignment implements StringRepresentable {
 
     NONE("none", (left, right, textWidth) -> null),
     LEFT("left", (left, right, textWidth) -> left - 1),

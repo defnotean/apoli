@@ -1,9 +1,9 @@
 package io.github.apace100.apoli.util;
 
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.core.Holder;
 
-public record AttributedEntityAttributeModifier(RegistryEntry<EntityAttribute> attribute, EntityAttributeModifier modifier) {
+public record AttributedEntityAttributeModifier(Holder<Attribute> attribute, AttributeModifier modifier) {
 
 }

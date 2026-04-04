@@ -2,7 +2,7 @@ package io.github.apace100.apoli.access;
 
 import io.github.apace100.apoli.power.type.EdibleItemPowerType;
 import io.github.apace100.apoli.power.type.ModifyFoodPowerType;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 

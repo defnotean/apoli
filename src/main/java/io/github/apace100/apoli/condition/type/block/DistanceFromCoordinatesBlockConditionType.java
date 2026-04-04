@@ -8,7 +8,7 @@ import io.github.apace100.apoli.condition.type.BlockConditionTypes;
 import io.github.apace100.apoli.condition.type.meta.DistanceFromCoordinatesMetaConditionType;
 import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.apoli.util.Shape;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -22,7 +22,7 @@ public class DistanceFromCoordinatesBlockConditionType extends BlockConditionTyp
 	private final Shape shape;
 
 	private final Optional<Integer> roundToDigit;
-	private final Vec3d offset;
+	private final Vec3 offset;
 
 	private final Comparison comparison;
 	private final double compareTo;
@@ -34,7 +34,7 @@ public class DistanceFromCoordinatesBlockConditionType extends BlockConditionTyp
 	private final boolean ignoreY;
 	private final boolean ignoreZ;
 
-	public DistanceFromCoordinatesBlockConditionType(DistanceFromCoordinatesMetaConditionType.Reference reference, Shape shape, Optional<Integer> roundToDigit, Vec3d offset, Comparison comparison, double compareTo, boolean scaleReferenceToDimension, boolean scaleDistanceToDimension, boolean ignoreX, boolean ignoreY, boolean ignoreZ) {
+	public DistanceFromCoordinatesBlockConditionType(DistanceFromCoordinatesMetaConditionType.Reference reference, Shape shape, Optional<Integer> roundToDigit, Vec3 offset, Comparison comparison, double compareTo, boolean scaleReferenceToDimension, boolean scaleDistanceToDimension, boolean ignoreX, boolean ignoreY, boolean ignoreZ) {
 		this.reference = reference;
 		this.shape = shape;
 		this.roundToDigit = roundToDigit;
@@ -74,7 +74,7 @@ public class DistanceFromCoordinatesBlockConditionType extends BlockConditionTyp
 	}
 
 	@Override
-	public Vec3d offset() {
+	public Vec3 offset() {
 		return offset;
 	}
 

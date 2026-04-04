@@ -5,30 +5,30 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.apace100.apoli.mixin.TranslatableTextContentAccessor;
-import net.minecraft.text.*;
+import net.minecraft.network.chat.*;
 import net.minecraft.util.Language;
 
 import java.util.List;
 import java.util.Optional;
 
-public class ForcedTranslatableTextContent extends TranslatableTextContent {
+public class ForcedTranslatableTextContent extends TranslatableContents {
 
 	public static final MapCodec<ForcedTranslatableTextContent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("translate").forGetter(ForcedTranslatableTextContent::getKey),
-		TextCodecs.CODEC.fieldOf("alt_text").forGetter(ForcedTranslatableTextContent::getTextFallback),
+		ComponentSerialization.CODEC.fieldOf("alt_text").forGetter(ForcedTranslatableTextContent::getTextFallback),
 		TranslatableTextContentAccessor.getArgumentCodec().listOf().optionalFieldOf("with").forGetter(content -> TranslatableTextContentAccessor.callToOptionalList(content.getArgs()))
 	).apply(instance, ForcedTranslatableTextContent::new));
 
 	public static final Type<ForcedTranslatableTextContent> TYPE = new Type<>(CODEC, "apoli:forced_translatable");
 
-	private final Text textFallback;
+	private final Component textFallback;
 
-	public ForcedTranslatableTextContent(String key, Text textFallback, Object... args) {
+	public ForcedTranslatableTextContent(String key, Component textFallback, Object... args) {
 		super(key, null, args);
 		this.textFallback = textFallback;
 	}
 
-	private ForcedTranslatableTextContent(String key, Text textFallback, Optional<List<Object>> args) {
+	private ForcedTranslatableTextContent(String key, Component textFallback, Optional<List<Object>> args) {
 		this(key, textFallback, TranslatableTextContentAccessor.callToArray(args));
 	}
 
@@ -38,42 +38,42 @@ public class ForcedTranslatableTextContent extends TranslatableTextContent {
 	}
 
 	@Override
-	protected void updateTranslations() {
+	protected void decompose() {
 
 		Language language = Language.getInstance();
-		if (language == this.languageCache) {
+		if (language == this.decomposedWith) {
 			return;
 		}
 
 		String key = this.getKey();
 		String translated = language.get(key);
 
-		this.languageCache = language;
+		this.decomposedWith = language;
 
-		if (language.hasTranslation(key)) {
+		if (language.has(key)) {
 
 			try {
 
-				ImmutableList.Builder<StringVisitable> builder = ImmutableList.builder();
+				ImmutableList.Builder<FormattedText> builder = ImmutableList.builder();
 				((TranslatableTextContentAccessor) this).callForEachPart(translated, builder::add);
 
-				this.translations = builder.build();
+				this.decomposedParts = builder.build();
 
 			}
 
 			catch (TranslationException te) {
-				this.translations = ImmutableList.of(StringVisitable.plain(translated));
+				this.decomposedParts = ImmutableList.of(FormattedText.of(translated));
 			}
 
 		}
 
 		else {
-			this.translations = ImmutableList.of(getTextFallback());
+			this.decomposedParts = ImmutableList.of(getTextFallback());
 		}
 
 	}
 
-	public Text getTextFallback() {
+	public Component getTextFallback() {
 		return textFallback;
 	}
 

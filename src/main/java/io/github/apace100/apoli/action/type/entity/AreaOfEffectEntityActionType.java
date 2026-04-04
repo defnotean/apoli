@@ -12,8 +12,8 @@ import io.github.apace100.apoli.util.Shape;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -63,9 +63,9 @@ public class AreaOfEffectEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         Entity actor = context.entity();
-        Vec3d lerpedPos = actor.getLerpedPos(1.0F);
+        Vec3 lerpedPos = actor.getLerpedPos(1.0F);
 
-        shape.getEntities(actor.getWorld(), lerpedPos.lerp(actor.getPos().add(context.offset()), 1.0), radius)
+        shape.getEntities(actor.level(), lerpedPos.lerp(actor.position().add(context.offset()), 1.0), radius)
             .stream()
             .filter(target -> includeActor || !Objects.equals(actor, target))
             .map(target -> new BiEntityActionContext(actor, target))

@@ -6,28 +6,28 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfile;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.type.ModifyFovPowerType;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.List;
 
-@Mixin(AbstractClientPlayerEntity.class)
-public abstract class AbstractClientPlayerEntityMixin extends PlayerEntity {
+@Mixin(AbstractClientPlayer.class)
+public abstract class AbstractClientPlayerEntityMixin extends Player {
 
-    private AbstractClientPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile gameProfile) {
+    private AbstractClientPlayerEntityMixin(Level world, BlockPos pos, float yaw, GameProfile gameProfile) {
         super(world, pos, yaw, gameProfile);
     }
 
-    @ModifyReturnValue(method = "getFovMultiplier", at = @At(value = "RETURN", ordinal = 0))
+    @ModifyReturnValue(method = "getFieldOfViewModifier", at = @At(value = "RETURN", ordinal = 0))
     private float apoli$modifySpyglassFov(float original) {
         return PowerHolderComponent.modify(this, ModifyFovPowerType.class, original);
     }
 
-    @WrapOperation(method = "getFovMultiplier", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F"))
+    @WrapOperation(method = "getFieldOfViewModifier", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Mth;lerp(FFF)F"))
     private float apoli$modifyFov(float delta, float start, float end, Operation<Float> original) {
 
         List<ModifyFovPowerType> mfps = PowerHolderComponent.getPowerTypes(this, ModifyFovPowerType.class);

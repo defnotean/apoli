@@ -4,8 +4,8 @@ import io.github.apace100.apoli.access.PseudoRenderDataHolder;
 import io.github.apace100.apoli.power.type.PosePowerType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityPose;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Pose;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,7 +36,7 @@ public abstract class EntityMixinClient implements PseudoRenderDataHolder {
     private void apoli$tickPseudoVars(CallbackInfo ci) {
 
         Entity thisAsEntity = (Entity) (Object) this;
-        if (PosePowerType.hasEntityPose(thisAsEntity, EntityPose.DYING)) {
+        if (PosePowerType.hasEntityPose(thisAsEntity, Pose.DYING)) {
             ++this.apoli$pseudoDeathTicks;
         }
 
@@ -44,7 +44,7 @@ public abstract class EntityMixinClient implements PseudoRenderDataHolder {
             this.apoli$pseudoDeathTicks = 0;
         }
 
-        if (PosePowerType.hasEntityPose(thisAsEntity, EntityPose.FALL_FLYING)) {
+        if (PosePowerType.hasEntityPose(thisAsEntity, Pose.FALL_FLYING)) {
             ++this.apoli$pseudoFallFlyingTicks;
         }
 

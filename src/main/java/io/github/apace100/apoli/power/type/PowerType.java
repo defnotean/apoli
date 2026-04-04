@@ -6,9 +6,9 @@ import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.util.Validatable;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -121,11 +121,11 @@ public abstract class PowerType implements Validatable {
             .orElse(true);
     }
 
-    public NbtElement toTag() {
-        return new NbtCompound();
+    public Tag toTag() {
+        return new CompoundTag();
     }
 
-    public void fromTag(NbtElement tag) {
+    public void fromTag(Tag tag) {
 
     }
 

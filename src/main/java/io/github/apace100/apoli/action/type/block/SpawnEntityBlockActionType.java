@@ -9,10 +9,10 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.EntityType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -23,7 +23,7 @@ public class SpawnEntityBlockActionType extends BlockActionType {
         new SerializableData()
             .add("entity_type", SerializableDataTypes.ENTITY_TYPE)
             .add("entity_action", EntityAction.DATA_TYPE.optional(), Optional.empty())
-            .add("tag", SerializableDataTypes.NBT_COMPOUND, new NbtCompound()),
+            .add("tag", SerializableDataTypes.NBT_COMPOUND, new CompoundTag()),
         data -> new SpawnEntityBlockActionType(
             data.get("entity_type"),
             data.get("entity_action"),
@@ -38,9 +38,9 @@ public class SpawnEntityBlockActionType extends BlockActionType {
     private final EntityType<?> entityType;
 
     private final Optional<EntityAction> entityAction;
-    private final NbtCompound tag;
+    private final CompoundTag tag;
 
-    public SpawnEntityBlockActionType(EntityType<?> entityType, Optional<EntityAction> entityAction, NbtCompound tag) {
+    public SpawnEntityBlockActionType(EntityType<?> entityType, Optional<EntityAction> entityAction, CompoundTag tag) {
         this.entityType = entityType;
         this.entityAction = entityAction;
         this.tag = tag;
@@ -49,7 +49,7 @@ public class SpawnEntityBlockActionType extends BlockActionType {
     @Override
     public void accept(BlockActionContext context) {
 
-        ServerWorld world = context.world();
+        ServerLevel world = context.world();
         BlockPos pos = context.pos();
 
         MiscUtil.getEntityWithPassengers(world, entityType, tag, pos.toBottomCenterPos(), Optional.empty(), Optional.empty()).ifPresent(entity -> {

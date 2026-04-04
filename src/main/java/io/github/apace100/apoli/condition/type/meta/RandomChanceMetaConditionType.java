@@ -8,7 +8,7 @@ import io.github.apace100.apoli.util.context.ConditionContext;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
 
 import java.util.function.Function;
 

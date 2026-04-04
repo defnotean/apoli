@@ -9,13 +9,13 @@ import io.github.apace100.apoli.power.type.PhasingPowerType;
 import io.github.apace100.apoli.util.MiscUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.enums.CameraSubmersionType;
-import net.minecraft.client.render.BackgroundRenderer;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.level.material.FogType;
+import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.List;
 
-@Mixin(BackgroundRenderer.class)
+@Mixin(FogRenderer.class)
 @Environment(EnvType.CLIENT)
 public abstract class BackgroundRendererMixin {
 
@@ -35,14 +35,14 @@ public abstract class BackgroundRendererMixin {
 
     @Shadow private static float blue;
 
-    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasStatusEffect(Lnet/minecraft/registry/entry/RegistryEntry;)Z", ordinal = 0))
+    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hasEffect(Lnet/minecraft/core/Holder;)Z", ordinal = 0))
     private static boolean apoli$nightVisionProxy(boolean original, @Local Entity cameraFocusedEntity) {
         return original
             || PowerHolderComponent.hasPowerType(cameraFocusedEntity, NightVisionPowerType.class);
     }
 
-    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;getSubmersionType()Lnet/minecraft/block/enums/CameraSubmersionType;"))
-    private static CameraSubmersionType apoli$modifyCameraSubmersionType(CameraSubmersionType original, Camera camera) {
+    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Camera;getSubmersionType()Lnet/minecraft/world/level/material/FogType;"))
+    private static FogType apoli$modifyCameraSubmersionType(FogType original, Camera camera) {
         return PowerHolderComponent.getPowerTypes(camera.getFocusedEntity(), ModifyCameraSubmersionTypePowerType.class, true)
             .stream()
             .filter(p -> p.doesModify(original) && p.isActive())
@@ -51,8 +51,8 @@ public abstract class BackgroundRendererMixin {
             .orElse(original);
     }
 
-    @ModifyExpressionValue(method = "applyFog", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;getSubmersionType()Lnet/minecraft/block/enums/CameraSubmersionType;"))
-    private static CameraSubmersionType apoli$modifyCameraSubmersionTypeFog(CameraSubmersionType original, Camera camera) {
+    @ModifyExpressionValue(method = "applyFog", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Camera;getSubmersionType()Lnet/minecraft/world/level/material/FogType;"))
+    private static FogType apoli$modifyCameraSubmersionTypeFog(FogType original, Camera camera) {
         return PowerHolderComponent.getPowerTypes(camera.getFocusedEntity(), ModifyCameraSubmersionTypePowerType.class, true)
             .stream()
             .filter(p -> p.doesModify(original) && p.isActive())
@@ -61,11 +61,11 @@ public abstract class BackgroundRendererMixin {
             .orElse(original);
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/BackgroundRenderer;getFogModifier(Lnet/minecraft/entity/Entity;F)Lnet/minecraft/client/render/BackgroundRenderer$StatusEffectFogModifier;"))
-    private static void modifyFogColor(Camera camera, float tickDelta, ClientWorld world, int viewDistance, float skyDarkness, CallbackInfo ci) {
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/FogRenderer;getFogModifier(Lnet/minecraft/world/entity/Entity;F)Lnet/minecraft/client/renderer/FogRenderer$MobEffectFogModifier;"))
+    private static void modifyFogColor(Camera camera, float tickDelta, ClientLevel world, int viewDistance, float skyDarkness, CallbackInfo ci) {
         if(camera.getFocusedEntity() instanceof LivingEntity) {
             if(PowerHolderComponent.getPowerTypes(camera.getFocusedEntity(), PhasingPowerType.class).stream().anyMatch(pp -> pp.getRenderType() == PhasingPowerType.RenderType.BLINDNESS)) {
-                if(MiscUtil.getInWallBlockState((PlayerEntity)camera.getFocusedEntity()) != null) {
+                if(MiscUtil.getInWallBlockState((Player)camera.getFocusedEntity()) != null) {
                     red = 0f;
                     green = 0f;
                     blue = 0f;
@@ -75,13 +75,13 @@ public abstract class BackgroundRendererMixin {
     }
 
     @Inject(method = "applyFog", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderFogStart(F)V", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
-    private static void modifyFogData(Camera camera, BackgroundRenderer.FogType fogType, float viewDistance, boolean thickFog, float tickDelta, CallbackInfo ci, CameraSubmersionType cameraSubmersionType, Entity entity, BackgroundRenderer.FogData fogData) {
+    private static void modifyFogData(Camera camera, FogRenderer.FogType fogType, float viewDistance, boolean thickFog, float tickDelta, CallbackInfo ci, FogType cameraSubmersionType, Entity entity, FogRenderer.FogData fogData) {
         if(camera.getFocusedEntity() instanceof LivingEntity) {
             List<PhasingPowerType> phasings = PowerHolderComponent.getPowerTypes(camera.getFocusedEntity(), PhasingPowerType.class);
             if(phasings.stream().anyMatch(pp -> pp.getRenderType() == PhasingPowerType.RenderType.BLINDNESS)) {
                 if(MiscUtil.getInWallBlockState((LivingEntity)camera.getFocusedEntity()) != null) {
                     float view = phasings.stream().filter(pp -> pp.getRenderType() == PhasingPowerType.RenderType.BLINDNESS).map(PhasingPowerType::getViewDistance).min(Float::compareTo).get();
-                    if (fogData.fogType == BackgroundRenderer.FogType.FOG_SKY) {
+                    if (fogData.fogType == FogRenderer.FogType.FOG_SKY) {
                         fogData.fogStart = 0.0f;
                         fogData.fogEnd = view * 0.8f;
                     } else {

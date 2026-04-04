@@ -2,7 +2,7 @@ package io.github.apace100.apoli.power;
 
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Function;
 
@@ -13,7 +13,7 @@ public class SubPower extends Power {
         @Override
         public SubPower decode(RegistryByteBuf buf) {
 
-            Identifier superPowerId = buf.readIdentifier();
+            ResourceLocation superPowerId = buf.readIdentifier();
             String subName = buf.readString();
 
             return new SubPower(superPowerId, subName, power);
@@ -28,16 +28,16 @@ public class SubPower extends Power {
 
     };
 
-    private final Identifier superPowerId;
+    private final ResourceLocation superPowerId;
     private final String subName;
 
-    SubPower(Identifier superPowerId, String subName, Power basePower) {
+    SubPower(ResourceLocation superPowerId, String subName, Power basePower) {
         super(basePower);
         this.superPowerId = superPowerId;
         this.subName = subName;
     }
 
-    public Identifier getSuperPowerId() {
+    public ResourceLocation getSuperPowerId() {
         return superPowerId;
     }
 

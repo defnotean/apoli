@@ -8,17 +8,17 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.type.*;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -30,19 +30,19 @@ import java.util.List;
 public class BlockItemMixin {
 
     @ModifyReturnValue(method = "canPlace", at = @At("RETURN"))
-    private boolean apoli$preventBlockPlace(boolean original, ItemPlacementContext context, BlockState state) {
+    private boolean apoli$preventBlockPlace(boolean original, BlockPlaceContext context, BlockState state) {
 
-        PlayerEntity playerEntity = context.getPlayer();
+        Player playerEntity = context.getPlayer();
         if (playerEntity == null) {
             return original;
         }
 
         Direction direction = context.getSide();
         ItemStack stack = context.getStack();
-        Hand hand = context.getHand();
+        InteractionHand hand = context.getHand();
 
-        BlockPos toPos = context.getBlockPos();
-        BlockPos onPos = ((ItemUsageContextAccessor) context).callGetHitResult().getBlockPos();
+        BlockPos toPos = context.blockPosition();
+        BlockPos onPos = ((ItemUsageContextAccessor) context).callGetHitResult().blockPosition();
 
         Prioritized.CallInstance<ActiveInteractionPowerType> aipci = new Prioritized.CallInstance<>();
         int preventBlockPlacePowers = 0;
@@ -70,16 +70,16 @@ public class BlockItemMixin {
 
     }
 
-    @Inject(method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
-    private void apoli$actionOnBlockPlace(ItemPlacementContext context, CallbackInfoReturnable<ActionResult> cir, @Local PlayerEntity user, @Local BlockPos toPos, @Local ItemStack stack, @Share("aipci") LocalRef<Prioritized.CallInstance<ActiveInteractionPowerType>> aipciRef) {
+    @Inject(method = "place(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/Level;getBlockState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;"))
+    private void apoli$actionOnBlockPlace(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir, @Local Player user, @Local BlockPos toPos, @Local ItemStack stack, @Share("aipci") LocalRef<Prioritized.CallInstance<ActiveInteractionPowerType>> aipciRef) {
 
         if (user == null) {
             return;
         }
 
         Direction direction = context.getSide();
-        BlockPos onPos = ((ItemUsageContextAccessor) context).callGetHitResult().getBlockPos();
-        Hand hand = context.getHand();
+        BlockPos onPos = ((ItemUsageContextAccessor) context).callGetHitResult().blockPosition();
+        InteractionHand hand = context.getHand();
 
         Prioritized.CallInstance<ActiveInteractionPowerType> aipci = new Prioritized.CallInstance<>();
         aipci.add(user, ActionOnBlockPlacePowerType.class, aobpp -> aobpp.shouldExecute(stack, hand, toPos, onPos, direction));
@@ -95,8 +95,8 @@ public class BlockItemMixin {
 
     }
 
-    @Inject(method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;", at = @At("TAIL"))
-    private void apoli$actionOnBlockPlacePost(ItemPlacementContext context, CallbackInfoReturnable<ActionResult> cir, @Share("aipci") LocalRef<Prioritized.CallInstance<ActiveInteractionPowerType>> aipciRef) {
+    @Inject(method = "place(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;", at = @At("TAIL"))
+    private void apoli$actionOnBlockPlacePost(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir, @Share("aipci") LocalRef<Prioritized.CallInstance<ActiveInteractionPowerType>> aipciRef) {
 
         Prioritized.CallInstance<ActiveInteractionPowerType> aipci = aipciRef.get();
 
@@ -114,11 +114,11 @@ public class BlockItemMixin {
 
     }
 
-    @WrapOperation(method = "useOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/TypedActionResult;"))
-    private TypedActionResult<ItemStack> apoli$preventItemUseIfFoodBlockItem(BlockItem instance, World world, PlayerEntity user, Hand hand, Operation<TypedActionResult<ItemStack>> original) {
-        ItemStack handStack = user.getStackInHand(hand);
+    @WrapOperation(method = "useOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;use(Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResultHolder;"))
+    private InteractionResultHolder<ItemStack> apoli$preventItemUseIfFoodBlockItem(BlockItem instance, Level world, Player user, InteractionHand hand, Operation<InteractionResultHolder<ItemStack>> original) {
+        ItemStack handStack = user.getItemInHand(hand);
         return PowerHolderComponent.hasPowerType(user, PreventItemUsePowerType.class, p -> p.doesPrevent(handStack))
-            ? TypedActionResult.fail(handStack)
+            ? InteractionResultHolder.fail(handStack)
             : original.call(instance, world, user, hand);
     }
 

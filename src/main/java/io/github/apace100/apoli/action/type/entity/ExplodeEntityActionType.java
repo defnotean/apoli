@@ -10,9 +10,9 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.world.World;
-import net.minecraft.world.explosion.Explosion;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.Explosion;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Predicate;
@@ -72,9 +72,9 @@ public class ExplodeEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         Entity entity = context.entity();
-        World world = entity.getWorld();
+        Level world = entity.level();
 
-        if (world.isClient()) {
+        if (world.isClientSide()) {
             return;
         }
 
@@ -84,12 +84,12 @@ public class ExplodeEntityActionType extends EntityActionType {
         }
 
         MiscUtil.createExplosion(
-            entity.getWorld(),
+            entity.level(),
             damageSelf ? null : entity,
-            Explosion.createDamageSource(entity.getWorld(), entity),
-            entity.getPos().getX(),
-            entity.getPos().getY(),
-            entity.getPos().getZ(),
+            Explosion.createDamageSource(entity.level(), entity),
+            entity.position().getX(),
+            entity.position().getY(),
+            entity.position().getZ(),
             power,
             createFire,
             destructionType,

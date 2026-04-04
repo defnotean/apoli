@@ -6,10 +6,10 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtInt;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.IntTag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public class StackingStatusEffectPowerType extends StatusEffectPowerType {
     private boolean wasActive = false;
     private int currentStack = 0;
 
-    public StackingStatusEffectPowerType(List<StatusEffectInstance> effects, int minStacks, int maxStacks, int durationPerStack, int tickRate, Optional<EntityCondition> condition) {
+    public StackingStatusEffectPowerType(List<MobEffectInstance> effects, int minStacks, int maxStacks, int durationPerStack, int tickRate, Optional<EntityCondition> condition) {
         super(effects, condition);
         this.minStacks = minStacks;
         this.maxStacks = maxStacks;
@@ -76,11 +76,11 @@ public class StackingStatusEffectPowerType extends StatusEffectPowerType {
         if (isActive()) {
 
             if (startTicks == null) {
-                this.startTicks = holder.age % tickRate;
+                this.startTicks = holder.tickCount % tickRate;
                 this.endTicks = null;
             }
 
-            else if (holder.age % tickRate == startTicks) {
+            else if (holder.tickCount % tickRate == startTicks) {
 
                 this.currentStack = Math.clamp(++currentStack, minStacks, maxStacks);
                 this.wasActive = true;
@@ -97,10 +97,10 @@ public class StackingStatusEffectPowerType extends StatusEffectPowerType {
 
             if (endTicks == null) {
                 this.startTicks = null;
-                this.endTicks = holder.age % tickRate;
+                this.endTicks = holder.tickCount % tickRate;
             }
 
-            else if (holder.age % tickRate == endTicks) {
+            else if (holder.tickCount % tickRate == endTicks) {
                 this.currentStack = Math.clamp(--currentStack, minStacks, maxStacks);
                 this.wasActive = currentStack > minStacks;
             }
@@ -112,26 +112,26 @@ public class StackingStatusEffectPowerType extends StatusEffectPowerType {
     @Override
     public void applyEffects() {
 
-        for (StatusEffectInstance effectInstance : effects) {
+        for (MobEffectInstance effectInstance : effects) {
 
             int duration = Math.max(0, durationPerStack * currentStack);
-            effectInstance = new StatusEffectInstance(effectInstance.getEffectType(), duration, effectInstance.getAmplifier(), effectInstance.isAmbient(), effectInstance.shouldShowParticles(), effectInstance.shouldShowIcon());
+            effectInstance = new MobEffectInstance(effectInstance.getEffectType(), duration, effectInstance.getAmplifier(), effectInstance.isAmbient(), effectInstance.shouldShowParticles(), effectInstance.shouldShowIcon());
 
-            getHolder().addStatusEffect(effectInstance);
+            getHolder().addEffect(effectInstance);
 
         }
 
     }
 
     @Override
-    public NbtElement toTag() {
-        return NbtInt.of(currentStack);
+    public Tag toTag() {
+        return IntTag.of(currentStack);
     }
 
     @Override
-    public void fromTag(NbtElement tag) {
+    public void fromTag(Tag tag) {
 
-        if (tag instanceof NbtInt nbtInt) {
+        if (tag instanceof IntTag nbtInt) {
             this.currentStack = nbtInt.intValue();
         }
 

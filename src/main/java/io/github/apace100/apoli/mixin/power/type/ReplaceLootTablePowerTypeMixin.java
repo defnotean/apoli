@@ -11,18 +11,18 @@ import io.github.apace100.apoli.access.ReplacingLootContext;
 import io.github.apace100.apoli.power.type.Prioritized;
 import io.github.apace100.apoli.power.type.ReplaceLootTablePowerType;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.brain.MemoryModuleType;
-import net.minecraft.entity.mob.PiglinEntity;
-import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootTable;
-import net.minecraft.loot.context.*;
-import net.minecraft.loot.entry.LootTableEntry;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.ReloadableRegistries;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.monster.Piglin;
+import net.minecraft.world.entity.projectile.FishingHook;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.*;
+import net.minecraft.world.level.storage.loot.entries.NestedLootTable;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.ReloadableRegistries;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import net.minecraft.core.registries.Registries;
 
 public abstract class ReplaceLootTablePowerTypeMixin {
 
@@ -44,10 +45,10 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 	public static abstract class Replacer {
 
 		@Inject(method = "<init>", at = @At("TAIL"))
-		private void setupLootTables(DynamicRegistryManager.Immutable registryManager, CallbackInfo ci) {
-			registryManager.get(RegistryKeys.LOOT_TABLE).streamEntries().forEach(reference -> {
+		private void setupLootTables(RegistryAccess.Immutable registryManager, CallbackInfo ci) {
+			registryManager.get(Registries.LOOT_TABLE).streamEntries().forEach(reference -> {
 
-				RegistryKey<LootTable> key = reference.registryKey();
+				ResourceKey<LootTable> key = reference.registryKey();
 
 				if (reference.value() instanceof KeyableLootTable keyable) {
 					keyable.apoli$setup(key, (ReloadableRegistries.Lookup) (Object) this);
@@ -57,7 +58,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 		}
 
 		@ModifyReturnValue(method = "getLootTable", at = @At("RETURN"))
-		private LootTable getReplacedOrNormalTable(LootTable original, RegistryKey<LootTable> key) {
+		private LootTable getReplacedOrNormalTable(LootTable original, ResourceKey<LootTable> key) {
 
 			if (key.equals(ReplaceLootTablePowerType.REPLACED_TABLE_KEY)) {
 				return ReplaceLootTablePowerType.peek();
@@ -71,14 +72,14 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 
 	}
 
-	@Mixin(LootTableEntry.class)
+	@Mixin(NestedLootTable.class)
 	public static abstract class NestedReplacer {
 
 		@SuppressWarnings("unchecked")
 		@WrapOperation(method = "generateLoot", at = @At(value = "INVOKE", target = "Lcom/mojang/datafixers/util/Either;map(Ljava/util/function/Function;Ljava/util/function/Function;)Ljava/lang/Object;"))
-		private <T, L extends RegistryKey<LootTable>, R extends LootTable> T replaceGetter(Either<L, R> either, Function<? super L, ? extends T> leftFunction, Function<? super R, ? extends T> rightFunction, Operation<T> original, Consumer<ItemStack> stackConsumer, LootContext lootContext) {
+		private <T, L extends ResourceKey<LootTable>, R extends LootTable> T replaceGetter(Either<L, R> either, Function<? super L, ? extends T> leftFunction, Function<? super R, ? extends T> rightFunction, Operation<T> original, Consumer<ItemStack> stackConsumer, LootContext lootContext) {
 
-			ReloadableRegistries.Lookup lookup = lootContext.getWorld().getServer().getReloadableRegistries();
+			ReloadableRegistries.Lookup lookup = lootContext.level().getServer().getReloadableRegistries();
 			Function<? super L, ? extends T> newGetter = l -> (T) lookup.getLootTable(l);
 
 			return original.call(either, newGetter, rightFunction);
@@ -91,58 +92,58 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 	public static abstract class LootTableCache implements KeyableLootTable {
 
 		@Unique
-		private RegistryKey<LootTable> apoli$key;
+		private ResourceKey<LootTable> apoli$key;
 
 		@Unique
 		private ReloadableRegistries.Lookup apoli$lookup;
 
 		@Override
-		public RegistryKey<LootTable> apoli$getKey() {
+		public ResourceKey<LootTable> apoli$getKey() {
 			return apoli$key;
 		}
 
 		@Override
-		public void apoli$setup(RegistryKey<LootTable> lootTableKey, ReloadableRegistries.Lookup lookup) {
+		public void apoli$setup(ResourceKey<LootTable> lootTableKey, ReloadableRegistries.Lookup lookup) {
 			this.apoli$key = lootTableKey;
 			this.apoli$lookup = lookup;
 		}
 
-		@Inject(method = "generateUnprocessedLoot(Lnet/minecraft/loot/context/LootContext;Ljava/util/function/Consumer;)V", at = @At("HEAD"), cancellable = true)
+		@Inject(method = "generateUnprocessedLoot(Lnet/minecraft/world/level/storage/loot/LootContext;Ljava/util/function/Consumer;)V", at = @At("HEAD"), cancellable = true)
 		private void replaceTable(LootContext context, Consumer<ItemStack> lootConsumer, CallbackInfo ci) {
 
 			if (!(context instanceof ReplacingLootContext replacingContext)) {
 				return;
 			}
 
-			LootContextType contextType = replacingContext.apoli$getType();
-			RegistryKey<LootTable> key = this.apoli$getKey();
+			LootContextParamSet contextType = replacingContext.apoli$getType();
+			ResourceKey<LootTable> key = this.apoli$getKey();
 
 			if (key == null || replacingContext.apoli$isReplaced(key)) {
 				return;
 			}
 
-			Entity thisEntity = context.get(LootContextParameters.THIS_ENTITY);
+			Entity thisEntity = context.get(LootContextParams.THIS_ENTITY);
 			Entity holder = thisEntity;
 
-			if (contextType == LootContextTypes.FISHING) {
+			if (contextType == BuiltInLootContextParamSets.FISHING) {
 
-				if (thisEntity instanceof FishingBobberEntity bobber) {
+				if (thisEntity instanceof FishingHook bobber) {
 					holder = bobber.getOwner();
 				}
 
 			}
 
-			else if (contextType == LootContextTypes.ENTITY) {
+			else if (contextType == BuiltInLootContextParamSets.ENTITY) {
 
-				if (context.hasParameter(LootContextParameters.ATTACKING_ENTITY)) {
-					holder = context.get(LootContextParameters.ATTACKING_ENTITY);
+				if (context.hasParameter(LootContextParams.ATTACKING_ENTITY)) {
+					holder = context.get(LootContextParams.ATTACKING_ENTITY);
 				}
 
 			}
 
-			else if (contextType == LootContextTypes.BARTER) {
+			else if (contextType == BuiltInLootContextParamSets.BARTER) {
 
-				if (thisEntity instanceof PiglinEntity piglin) {
+				if (thisEntity instanceof Piglin piglin) {
 					holder = piglin.getBrain().getOptionalRegisteredMemory(MemoryModuleType.NEAREST_VISIBLE_PLAYER).orElse(null);
 				}
 
@@ -178,7 +179,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 
 		}
 
-		@WrapMethod(method = "generateUnprocessedLoot(Lnet/minecraft/loot/context/LootContext;Ljava/util/function/Consumer;)V")
+		@WrapMethod(method = "generateUnprocessedLoot(Lnet/minecraft/world/level/storage/loot/LootContext;Ljava/util/function/Consumer;)V")
 		private void wrapGenerateForReplacing(LootContext context, Consumer<ItemStack> lootConsumer, Operation<Void> original) {
 
 			try {
@@ -191,12 +192,12 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 
 		}
 
-		@Inject(method = "generateUnprocessedLoot(Lnet/minecraft/loot/context/LootContext;Ljava/util/function/Consumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/loot/context/LootContext;markActive(Lnet/minecraft/loot/context/LootContext$Entry;)Z"))
+		@Inject(method = "generateUnprocessedLoot(Lnet/minecraft/world/level/storage/loot/LootContext;Ljava/util/function/Consumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/loot/LootContext;markActive(Lnet/minecraft/world/level/storage/loot/LootContext$Entry;)Z"))
 		private void popReplaced(LootContext context, Consumer<ItemStack> lootConsumer, CallbackInfo ci) {
 			ReplaceLootTablePowerType.pop();
 		}
 
-		@Inject(method = "generateUnprocessedLoot(Lnet/minecraft/loot/context/LootContext;Ljava/util/function/Consumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/loot/context/LootContext;markInactive(Lnet/minecraft/loot/context/LootContext$Entry;)V"))
+		@Inject(method = "generateUnprocessedLoot(Lnet/minecraft/world/level/storage/loot/LootContext;Ljava/util/function/Consumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/loot/LootContext;markInactive(Lnet/minecraft/world/level/storage/loot/LootContext$Entry;)V"))
 		private void restoreReplaced(LootContext context, Consumer<ItemStack> lootConsumer, CallbackInfo ci) {
 			ReplaceLootTablePowerType.restore();
 		}
@@ -211,20 +212,20 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 		private LootContextParameterSet parameters;
 
 		@Unique
-		private final Set<RegistryKey<LootTable>> apoli$replacedTables = new ObjectOpenHashSet<>();
+		private final Set<ResourceKey<LootTable>> apoli$replacedTables = new ObjectOpenHashSet<>();
 
 		@Override
-		public LootContextType apoli$getType() {
+		public LootContextParamSet apoli$getType() {
 			return ((LootContextTypeHolder) this.parameters).apoli$getType();
 		}
 
 		@Override
-		public boolean apoli$isReplaced(RegistryKey<LootTable> key) {
+		public boolean apoli$isReplaced(ResourceKey<LootTable> key) {
 			return apoli$replacedTables.contains(key);
 		}
 
 		@Override
-		public void apoli$setReplaced(RegistryKey<LootTable> key) {
+		public void apoli$setReplaced(ResourceKey<LootTable> key) {
 			this.apoli$replacedTables.add(key);
 		}
 
@@ -234,15 +235,15 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 	public static abstract class LootContextParametersCache implements LootContextTypeHolder {
 
 		@Unique
-		private LootContextType apoli$contextType;
+		private LootContextParamSet apoli$contextType;
 
 		@Override
-		public LootContextType apoli$getType() {
+		public LootContextParamSet apoli$getType() {
 			return Objects.requireNonNull(this.apoli$contextType, "Loot context parameters are not initialized properly!");
 		}
 
 		@Override
-		public void apoli$setType(LootContextType type) {
+		public void apoli$setType(LootContextParamSet type) {
 			this.apoli$contextType = type;
 		}
 
@@ -252,7 +253,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 	public static abstract class LootContextParametersCacheInit {
 
 		@ModifyReturnValue(method = "build", at = @At("RETURN"))
-		private LootContextParameterSet cacheType(LootContextParameterSet original, LootContextType type) {
+		private LootContextParameterSet cacheType(LootContextParameterSet original, LootContextParamSet type) {
 
 			((LootContextTypeHolder) original).apoli$setType(type);
 

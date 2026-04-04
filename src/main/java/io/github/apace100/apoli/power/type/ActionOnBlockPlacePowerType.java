@@ -10,14 +10,14 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
@@ -66,8 +66,8 @@ public class ActionOnBlockPlacePowerType extends ActiveInteractionPowerType {
 
     private final EnumSet<Direction> directions;
 
-    public ActionOnBlockPlacePowerType(Optional<EntityAction> entityAction, Optional<BlockAction> placeToAction, Optional<BlockAction> placeOnAction, Optional<BlockCondition> placeToCondition, Optional<BlockCondition> placeOnCondition, EnumSet<Direction> directions, Optional<ItemAction> heldItemAction, Optional<ItemCondition> heldItemCondition, Optional<ItemAction> resultItemAction, Optional<ItemStack> resultStack, EnumSet<Hand> hands, int priority, Optional<EntityCondition> condition) {
-        super(heldItemAction, heldItemCondition, resultItemAction, resultStack, hands, ActionResult.SUCCESS, priority, condition);
+    public ActionOnBlockPlacePowerType(Optional<EntityAction> entityAction, Optional<BlockAction> placeToAction, Optional<BlockAction> placeOnAction, Optional<BlockCondition> placeToCondition, Optional<BlockCondition> placeOnCondition, EnumSet<Direction> directions, Optional<ItemAction> heldItemAction, Optional<ItemCondition> heldItemCondition, Optional<ItemAction> resultItemAction, Optional<ItemStack> resultStack, EnumSet<InteractionHand> hands, int priority, Optional<EntityCondition> condition) {
+        super(heldItemAction, heldItemCondition, resultItemAction, resultStack, hands, InteractionResult.SUCCESS, priority, condition);
         this.entityAction = entityAction;
         this.placeToAction = placeToAction;
         this.placeOnAction = placeOnAction;
@@ -81,17 +81,17 @@ public class ActionOnBlockPlacePowerType extends ActiveInteractionPowerType {
         return PowerTypes.ACTION_ON_BLOCK_PLACE;
     }
 
-    public boolean shouldExecute(ItemStack heldStack, Hand hand, BlockPos toPos, BlockPos onPos, Direction direction) {
+    public boolean shouldExecute(ItemStack heldStack, InteractionHand hand, BlockPos toPos, BlockPos onPos, Direction direction) {
         return super.shouldExecute(hand, heldStack)
             && directions.contains(direction)
-            && placeOnCondition.map(condition -> condition.test(getHolder().getWorld(), onPos)).orElse(true)
-            && placeToCondition.map(condition -> condition.test(getHolder().getWorld(), toPos)).orElse(true);
+            && placeOnCondition.map(condition -> condition.test(getHolder().level(), onPos)).orElse(true)
+            && placeToCondition.map(condition -> condition.test(getHolder().level(), toPos)).orElse(true);
     }
 
     public void executeOtherActions(BlockPos toPos, BlockPos onPos, Direction direction) {
 
         Entity holder = getHolder();
-        World world = holder.getWorld();
+        Level world = holder.level();
 
         Optional<Direction> optDirection = Optional.of(direction);
 
@@ -102,9 +102,9 @@ public class ActionOnBlockPlacePowerType extends ActiveInteractionPowerType {
 
     }
 
-    public void executeItemActions(Hand hand) {
+    public void executeItemActions(InteractionHand hand) {
 
-        if (getHolder() instanceof PlayerEntity playerEntity) {
+        if (getHolder() instanceof Player playerEntity) {
             this.performActorItemStuff(playerEntity, hand);
         }
 

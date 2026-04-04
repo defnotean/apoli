@@ -7,8 +7,8 @@ import io.github.apace100.apoli.condition.type.BlockConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.block.Block;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 
 public class InTagBlockConditionType extends BlockConditionType {
@@ -31,7 +31,7 @@ public class InTagBlockConditionType extends BlockConditionType {
 
     @Override
     public boolean test(BlockConditionContext context) {
-        return context.blockState().isIn(tag);
+        return context.blockState().is(tag);
     }
 
     @Override

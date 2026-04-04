@@ -12,11 +12,11 @@ import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.apoli.util.modifier.ModifierUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.FoodComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -105,13 +105,13 @@ public class ModifyFoodPowerType extends PowerType {
 
     public boolean doesApply(ItemStack stack) {
         return itemCondition
-            .map(condition -> condition.test(getHolder().getWorld(), stack))
+            .map(condition -> condition.test(getHolder().level(), stack))
             .orElse(true);
     }
 
-    public void setConsumedItemStackReference(StackReference stackReference) {
+    public void setConsumedItemStackReference(SlotAccess stackReference) {
         replaceStack.ifPresent(stackReference::set);
-        itemAction.ifPresent(action -> action.execute(getHolder().getWorld(), stackReference));
+        itemAction.ifPresent(action -> action.execute(getHolder().level(), stackReference));
     }
 
     public void eat() {
@@ -140,9 +140,9 @@ public class ModifyFoodPowerType extends PowerType {
 
     public static OptionalInt modifyEatTicks(@Nullable Entity entity, ItemStack stack) {
 
-        FoodComponent foodComponent = EdibleItemPowerType.get(stack)
+        FoodProperties foodComponent = EdibleItemPowerType.get(stack)
             .map(EdibleItemPowerType::getFoodComponent)
-            .orElseGet(() -> stack.get(DataComponentTypes.FOOD));
+            .orElseGet(() -> stack.get(DataComponents.FOOD));
 
         if (foodComponent == null) {
             return OptionalInt.empty();

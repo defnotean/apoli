@@ -14,23 +14,23 @@ import io.github.apace100.apoli.util.ApoliConfigClient;
 import io.github.apace100.apoli.util.keybinding.KeyBindingUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.component.ComponentHolder;
-import net.minecraft.component.ComponentMap;
-import net.minecraft.component.ComponentType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.AttributeModifierSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.UseAction;
+import net.minecraft.core.component.ComponentHolder;
+import net.minecraft.core.component.ComponentMap;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.inventory.ScreenTexts;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.item.UseAnim;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,7 +49,7 @@ import java.util.function.Consumer;
 public abstract class ItemStackMixinClient implements ComponentHolder {
 
     @Shadow
-    public abstract UseAction getUseAction();
+    public abstract UseAnim getUseAnimation();
 
     @Shadow
     public abstract ComponentMap getComponents();
@@ -58,26 +58,26 @@ public abstract class ItemStackMixinClient implements ComponentHolder {
     public abstract Item getItem();
 
     @Unique
-    private EnumSet<AttributeModifierSlot> apoli$appendedSlots;
+    private EnumSet<EquipmentSlotGroup> apoli$appendedSlots;
 
     @Unique
     private Item.TooltipContext apoli$tooltipContext;
 
     @Unique
-    private TooltipType apoli$tooltipType;
+    private TooltipFlag apoli$tooltipType;
 
     @Unique
-    private List<Text> apoli$tooltip;
+    private List<Component> apoli$tooltip;
 
-    @Inject(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/text/MutableText;append(Lnet/minecraft/text/Text;)Lnet/minecraft/text/MutableText;"))
-    private void apoli$cacheTooltipStuff(Item.TooltipContext context, @Nullable PlayerEntity player, TooltipType type, CallbackInfoReturnable<List<Text>> cir, @Local List<Text> tooltip) {
+    @Inject(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/MutableComponent;append(Lnet/minecraft/network/chat/Component;)Lnet/minecraft/network/chat/MutableComponent;"))
+    private void apoli$cacheTooltipStuff(Item.TooltipContext context, @Nullable Player player, TooltipFlag type, CallbackInfoReturnable<List<Component>> cir, @Local List<Component> tooltip) {
 
 		// Although this is a client-only mixin, this is still seen by the internal server.
-        if (player == null || !player.getWorld().isClient) {
+        if (player == null || !player.level().isClientSide) {
             return;
         }
 
-        this.apoli$appendedSlots = EnumSet.noneOf(AttributeModifierSlot.class);
+        this.apoli$appendedSlots = EnumSet.noneOf(EquipmentSlotGroup.class);
         this.apoli$tooltipContext = context;
         this.apoli$tooltipType = type;
         this.apoli$tooltip = tooltip;
@@ -92,8 +92,8 @@ public abstract class ItemStackMixinClient implements ComponentHolder {
         this.apoli$tooltip = null;
     }
 
-    @Inject(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;appendTooltip(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/Item$TooltipContext;Ljava/util/List;Lnet/minecraft/item/tooltip/TooltipType;)V", shift = At.Shift.AFTER))
-    private void apoli$appendUnusableTooltip(Item.TooltipContext context, @Nullable PlayerEntity player, TooltipType type, CallbackInfoReturnable<List<Text>> cir) {
+    @Inject(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;appendTooltip(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/Item$TooltipContext;Ljava/util/List;Lnet/minecraft/world/item/tooltip/TooltipFlag;)V", shift = At.Shift.AFTER))
+    private void apoli$appendUnusableTooltip(Item.TooltipContext context, @Nullable Player player, TooltipFlag type, CallbackInfoReturnable<List<Component>> cir) {
 
         if (!(Apoli.config instanceof ApoliConfigClient config) || !config.tooltips.showUsabilityHints) {
             return;
@@ -108,20 +108,20 @@ public abstract class ItemStackMixinClient implements ComponentHolder {
             return;
         }
 
-        String translationKey = "tooltip.apoli.unusable." + this.getUseAction().toString().toLowerCase(Locale.ROOT) + (preventItemUsePowers.size() == 1 ? ".single" : ".multiple");
+        String translationKey = "tooltip.apoli.unusable." + this.getUseAnimation().toString().toLowerCase(Locale.ROOT) + (preventItemUsePowers.size() == 1 ? ".single" : ".multiple");
 
-        Formatting baseTextFormat = Formatting.GRAY;
-        Formatting powerTextFormat = Formatting.RED;
+        ChatFormatting baseTextFormat = ChatFormatting.GRAY;
+        ChatFormatting powerTextFormat = ChatFormatting.RED;
 
-        Text powerText;
-        Text baseText;
+        Component powerText;
+        Component baseText;
 
         if (preventItemUsePowers.size() == 1) {
 
             PreventItemUsePowerType preventItemUsePower = preventItemUsePowers.getFirst();
 
-            powerText = preventItemUsePower.getPower().getName().formatted(powerTextFormat);
-            baseText = Text.translatable(translationKey, powerText).formatted(baseTextFormat);
+            powerText = preventItemUsePower.getPower().getName().withStyle(powerTextFormat);
+            baseText = Component.translatable(translationKey, powerText).withStyle(baseTextFormat);
 
             apoli$tooltip.add(baseText);
 
@@ -129,8 +129,8 @@ public abstract class ItemStackMixinClient implements ComponentHolder {
 
         else if (config.tooltips.compactUsabilityHints) {
 
-            MinecraftClient client = MinecraftClient.getInstance();
-            KeyBinding keyBinding = ApoliClient.showPowersOnUsabilityHint;
+            Minecraft client = Minecraft.getInstance();
+            KeyMapping keyBinding = ApoliClient.showPowersOnUsabilityHint;
 
             Integer keyCode = !keyBinding.isUnbound()
                 ? InputUtil.fromTranslationKey(keyBinding.getBoundKeyTranslationKey()).getCode()
@@ -144,17 +144,17 @@ public abstract class ItemStackMixinClient implements ComponentHolder {
 
             else {
 
-                powerText = Text.translatable("tooltip.apoli.usability_hint.power_count", preventItemUsePowers.size()).formatted(powerTextFormat);
-                baseText = Text.translatable(translationKey, powerText).formatted(baseTextFormat);
+                powerText = Component.translatable("tooltip.apoli.usability_hint.power_count", preventItemUsePowers.size()).withStyle(powerTextFormat);
+                baseText = Component.translatable(translationKey, powerText).withStyle(baseTextFormat);
 
                 apoli$tooltip.add(baseText);
-                apoli$tooltip.add(Text.empty());
+                apoli$tooltip.add(Component.empty());
 
-                Text keyBindingText = KeyBindingUtil.getLocalizedName(keyBinding.getTranslationKey()).styled(style -> style
-                    .withColor(Formatting.YELLOW)
+                Component keyBindingText = KeyBindingUtil.getLocalizedName(keyBinding.getTranslationKey()).styled(style -> style
+                    .withColor(ChatFormatting.YELLOW)
                     .withItalic(keyBinding.isUnbound()));
 
-                Text guideText = Text.translatable("tooltip.apoli.usability_hint.show_powers", keyBindingText).formatted(baseTextFormat);
+                Component guideText = Component.translatable("tooltip.apoli.usability_hint.show_powers", keyBindingText).withStyle(baseTextFormat);
                 apoli$tooltip.add(guideText);
 
             }
@@ -167,12 +167,12 @@ public abstract class ItemStackMixinClient implements ComponentHolder {
 
     }
 
-    @WrapOperation(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;appendTooltip(Lnet/minecraft/component/ComponentType;Lnet/minecraft/item/Item$TooltipContext;Ljava/util/function/Consumer;Lnet/minecraft/item/tooltip/TooltipType;)V"))
-    private void apoli$appendPowerTooltips(ItemStack stack, ComponentType<?> componentType, Item.TooltipContext context, Consumer<Text> tooltipConsumer, TooltipType type, Operation<Void> original, Item.TooltipContext mContext, @Nullable PlayerEntity player, @Local List<Text> tooltip) {
+    @WrapOperation(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;appendTooltip(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/item/Item$TooltipContext;Ljava/util/function/Consumer;Lnet/minecraft/world/item/tooltip/TooltipFlag;)V"))
+    private void apoli$appendPowerTooltips(ItemStack stack, DataComponentType<?> componentType, Item.TooltipContext context, Consumer<Component> tooltipConsumer, TooltipFlag type, Operation<Void> original, Item.TooltipContext mContext, @Nullable Player player, @Local List<Component> tooltip) {
 
         original.call(stack, componentType, context, tooltipConsumer, type);
 
-        if (componentType == DataComponentTypes.LORE) {
+        if (componentType == DataComponents.LORE) {
             PowerHolderComponent.getPowerTypes(player, TooltipPowerType.class)
                 .stream()
                 .filter(p -> p.doesApply((ItemStack) (Object) this))
@@ -182,8 +182,8 @@ public abstract class ItemStackMixinClient implements ComponentHolder {
 
     }
 
-    @Inject(method = "appendAttributeModifiersTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;applyAttributeModifier(Lnet/minecraft/component/type/AttributeModifierSlot;Ljava/util/function/BiConsumer;)V", shift = At.Shift.AFTER))
-    private void apoli$appendItemPowersTooltips(Consumer<Text> tooltipConsumer, @Nullable PlayerEntity player, CallbackInfo ci, @Local AttributeModifierSlot modifierSlot, @Local MutableBoolean shouldAppendSlotName) {
+    @Inject(method = "addAttributeTooltips", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;applyAttributeModifier(Lnet/minecraft/world/item/component/EquipmentSlotGroup;Ljava/util/function/BiConsumer;)V", shift = At.Shift.AFTER))
+    private void apoli$appendItemPowersTooltips(Consumer<Component> tooltipConsumer, @Nullable Player player, CallbackInfo ci, @Local EquipmentSlotGroup modifierSlot, @Local MutableBoolean shouldAppendSlotName) {
 
         ItemPowersComponent itemPowersComponent = this.getOrDefault(ApoliDataComponentTypes.POWERS, ItemPowersComponent.DEFAULT);
         if (apoli$appendedSlots == null || apoli$appendedSlots.contains(modifierSlot) || !itemPowersComponent.containsSlot(modifierSlot)) {
@@ -193,7 +193,7 @@ public abstract class ItemStackMixinClient implements ComponentHolder {
         if (shouldAppendSlotName.isTrue()) {
 
             tooltipConsumer.accept(ScreenTexts.EMPTY);
-            tooltipConsumer.accept(Text.translatable("item.modifiers." + modifierSlot.asString()).formatted(Formatting.GRAY));
+            tooltipConsumer.accept(Component.translatable("item.modifiers." + modifierSlot.getSerializedName()).withStyle(ChatFormatting.GRAY));
 
             shouldAppendSlotName.setFalse();
 
@@ -205,20 +205,20 @@ public abstract class ItemStackMixinClient implements ComponentHolder {
     }
 
     @Unique
-    private void apoli$appendExpandedTooltip(List<PreventItemUsePowerType> powers, List<Text> tooltip, String translationKey, Formatting powerTextColor, Formatting baseTextColor) {
+    private void apoli$appendExpandedTooltip(List<PreventItemUsePowerType> powers, List<Component> tooltip, String translationKey, ChatFormatting powerTextColor, ChatFormatting baseTextColor) {
 
-        List<Text> powerTexts = new LinkedList<>();
+        List<Component> powerTexts = new LinkedList<>();
         for (PreventItemUsePowerType power : powers) {
 
-            MutableText prependedText = Text.literal("  - ").formatted(baseTextColor);
-            MutableText powerText = power.getPower().getName().formatted(powerTextColor);
+            MutableComponent prependedText = Component.literal("  - ").withStyle(baseTextColor);
+            MutableComponent powerText = power.getPower().getName().withStyle(powerTextColor);
 
             powerTexts.add(prependedText.append(powerText));
 
         }
 
-        Text powerText = Text.translatable("tooltip.apoli.usability_hint.power_count", powers.size()).formatted(powerTextColor);
-        Text baseText = Text.translatable(translationKey, powerText).formatted(baseTextColor);
+        Component powerText = Component.translatable("tooltip.apoli.usability_hint.power_count", powers.size()).withStyle(powerTextColor);
+        Component baseText = Component.translatable(translationKey, powerText).withStyle(baseTextColor);
 
         tooltip.add(baseText);
         tooltip.addAll(powerTexts);

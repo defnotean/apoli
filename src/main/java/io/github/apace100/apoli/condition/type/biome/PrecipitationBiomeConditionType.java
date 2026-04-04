@@ -7,7 +7,7 @@ import io.github.apace100.apoli.condition.type.BiomeConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.world.level.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 
 public class PrecipitationBiomeConditionType extends BiomeConditionType {

@@ -6,7 +6,7 @@ import io.github.apace100.apoli.action.type.EntityActionTypes;
 import io.github.apace100.apoli.action.type.entity.meta.SequenceEntityActionType;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.calio.data.SerializableDataType;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 public final class EntityAction extends Action<EntityActionContext, EntityActionType> {
 

@@ -8,12 +8,12 @@ import io.github.apace100.apoli.action.type.EntityActionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.NotNull;
 
 public class ExecuteCommandEntityActionType extends EntityActionType {
@@ -39,7 +39,7 @@ public class ExecuteCommandEntityActionType extends EntityActionType {
 
         Entity entity = context.entity();
 
-        if (!(entity.getWorld() instanceof ServerWorld serverWorld)) {
+        if (!(entity.level() instanceof ServerLevel serverWorld)) {
             return;
         }
 
@@ -50,7 +50,7 @@ public class ExecuteCommandEntityActionType extends EntityActionType {
 
         if (Apoli.config.executeCommand.showOutput) {
 
-            CommandOutput output = entity instanceof ServerPlayerEntity serverPlayer && serverPlayer.networkHandler != null
+            CommandOutput output = entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
                 ? serverPlayer
                 : server;
 

@@ -11,11 +11,11 @@ import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.apoli.util.modifier.ModifierUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSources;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.damagesource.DamageSources;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class DamageEntityActionType extends EntityActionType {
                     Optional<Float> amount = data.get("amount");
                     return amount
                         .map(value -> DataResult.success(data))
-                        .orElseGet(() -> DataResult.error(() -> "Any of 'amount', 'modifier', or 'modifier' fields must be defined!"));
+                        .orElseGet(() -> DataResult.error(() -> "Any of 'amount', 'modifier', or 'modifiers' fields must be defined!"));
                 }
 
             }),
@@ -54,12 +54,12 @@ public class DamageEntityActionType extends EntityActionType {
             .set("modifiers", actionType.modifiers)
     );
 
-    private final RegistryKey<DamageType> damageType;
+    private final ResourceKey<DamageType> damageType;
     private final Optional<Float> amount;
 
     private final List<Modifier> modifiers;
 
-    public DamageEntityActionType(RegistryKey<DamageType> damageType, Optional<Float> amount, List<Modifier> modifiers) {
+    public DamageEntityActionType(ResourceKey<DamageType> damageType, Optional<Float> amount, List<Modifier> modifiers) {
         this.damageType = damageType;
         this.amount = amount;
         this.modifiers = modifiers;
@@ -69,11 +69,11 @@ public class DamageEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         Entity entity = context.entity();
-        DamageSources damageSources = entity.getDamageSources();
+        DamageSources damageSources = entity.damageSources();
 
         this.amount
             .or(() -> getModifiedAmount(entity))
-            .ifPresent(amount -> entity.damage(damageSources.create(damageType), amount));
+            .ifPresent(amount -> entity.hurt(damageSources.create(damageType), amount));
 
     }
 

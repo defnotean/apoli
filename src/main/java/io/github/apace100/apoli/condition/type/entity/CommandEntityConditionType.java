@@ -10,13 +10,13 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -54,9 +54,9 @@ public class CommandEntityConditionType extends EntityConditionType {
     public boolean test(EntityConditionContext context) {
 
         Entity entity = context.entity();
-        World world = entity.getWorld();
+        Level world = entity.level();
 
-        if (!(world instanceof ServerWorld serverWorld)) {
+        if (!(world instanceof ServerLevel serverWorld)) {
             return false;
         }
 
@@ -70,7 +70,7 @@ public class CommandEntityConditionType extends EntityConditionType {
 
         if (Apoli.config.executeCommand.showOutput) {
 
-            CommandOutput output = entity instanceof ServerPlayerEntity serverPlayer && serverPlayer.networkHandler != null
+            CommandOutput output = entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
                 ? serverPlayer
                 : server;
 

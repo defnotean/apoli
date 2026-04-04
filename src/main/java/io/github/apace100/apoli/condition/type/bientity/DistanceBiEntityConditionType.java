@@ -37,7 +37,7 @@ public class DistanceBiEntityConditionType extends BiEntityConditionType {
 
     @Override
     public boolean test(BiEntityConditionContext context) {
-        return comparison.compare(context.actor().getPos().squaredDistanceTo(context.target().getPos()), compareTo * compareTo);
+        return comparison.compare(context.actor().position().distanceToSqr(context.target().position()), compareTo * compareTo);
     }
 
     @Override

@@ -8,7 +8,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -31,18 +31,18 @@ public class HasCommandTagEntityConditionType extends EntityConditionType {
     private final List<String> commandTags;
 
     public HasCommandTagEntityConditionType(List<String> commandTags) {
-        this.commandTags = commandTags;
+        this.tags = commandTags;
     }
 
     @Override
     public boolean test(EntityConditionContext context) {
 
         Entity entity = context.entity();
-        Set<String> commandTags = entity.getCommandTags();
+        Set<String> commandTags = entity.getTags();
 
-        return this.commandTags.isEmpty()
+        return this.tags.isEmpty()
             ? !commandTags.isEmpty()
-            : !Collections.disjoint(commandTags, this.commandTags);
+            : !Collections.disjoint(commandTags, this.tags);
 
     }
 

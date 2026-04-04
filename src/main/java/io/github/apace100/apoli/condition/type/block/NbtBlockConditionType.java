@@ -7,8 +7,8 @@ import io.github.apace100.apoli.condition.type.BlockConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -26,17 +26,17 @@ public class NbtBlockConditionType extends BlockConditionType {
             .set("nbt", conditionType.nbt)
     );
 
-    private final NbtCompound nbt;
+    private final CompoundTag nbt;
 
-    public NbtBlockConditionType(NbtCompound nbt) {
+    public NbtBlockConditionType(CompoundTag nbt) {
         this.nbt = nbt;
     }
 
     @Override
     public boolean test(BlockConditionContext context) {
         return context.blockEntity()
-            .map(be -> be.createNbtWithIdentifyingData(context.world().getRegistryManager()))
-            .map(beNbt -> NbtHelper.matches(nbt, beNbt, true))
+            .map(be -> be.createNbtWithIdentifyingData(context.world().registryAccess()))
+            .map(beNbt -> NbtUtils.compareNbt(nbt, beNbt, true))
             .orElse(false);
     }
 

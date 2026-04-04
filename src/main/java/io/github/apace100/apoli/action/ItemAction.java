@@ -7,10 +7,10 @@ import io.github.apace100.apoli.action.type.item.meta.SequenceItemActionType;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.type.ModifyEnchantmentLevelPowerType;
 import io.github.apace100.calio.data.SerializableDataType;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 
 public final class ItemAction extends Action<ItemActionContext, ItemActionType> {
 
@@ -20,9 +20,9 @@ public final class ItemAction extends Action<ItemActionContext, ItemActionType> 
 		super(actionType);
 	}
 
-	public void execute(World world, StackReference stackReference) {
+	public void execute(Level world, SlotAccess stackReference) {
 
-		if (world instanceof ServerWorld serverWorld) {
+		if (world instanceof ServerLevel serverWorld) {
 			accept(new ItemActionContext(serverWorld, stackReference));
 		}
 
@@ -31,7 +31,7 @@ public final class ItemAction extends Action<ItemActionContext, ItemActionType> 
 	@Override
 	public void accept(ItemActionContext context) {
 
-		StackReference stackReference = context.stackReference();
+		SlotAccess stackReference = context.stackReference();
 
 		//	Replace the stack of the stack reference with a "workable" empty stack if the said stack is an
 		//	empty stack

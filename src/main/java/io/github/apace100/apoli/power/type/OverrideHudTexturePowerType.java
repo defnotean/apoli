@@ -10,9 +10,9 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -29,7 +29,7 @@ public class OverrideHudTexturePowerType extends PowerType implements Prioritize
             .validate(MiscUtil.validateAnyFieldsPresent("texture", "texture_map")),
         (data, condition) -> {
 
-            Either<Identifier, Map<Identifier, Identifier>> textureOrMapping = data.isPresent("texture")
+            Either<ResourceLocation, Map<ResourceLocation, ResourceLocation>> textureOrMapping = data.isPresent("texture")
                 ? Either.left(data.get("texture"))
                 : Either.right(data.get("texture_map"));
 
@@ -52,10 +52,10 @@ public class OverrideHudTexturePowerType extends PowerType implements Prioritize
         }
     );
 
-    private final Either<Identifier, Map<Identifier, Identifier>> textureOrMapping;
+    private final Either<ResourceLocation, Map<ResourceLocation, ResourceLocation>> textureOrMapping;
     private final int priority;
 
-    public OverrideHudTexturePowerType(Either<Identifier, Map<Identifier, Identifier>> textureOrMapping, int priority, Optional<EntityCondition> condition) {
+    public OverrideHudTexturePowerType(Either<ResourceLocation, Map<ResourceLocation, ResourceLocation>> textureOrMapping, int priority, Optional<EntityCondition> condition) {
         super(condition);
         this.textureOrMapping = textureOrMapping;
         this.priority = priority;
@@ -72,7 +72,7 @@ public class OverrideHudTexturePowerType extends PowerType implements Prioritize
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawHeartTexture(DrawContext context, InGameHud.HeartType heartType, int x, int y, int width, int height, boolean hardcore, boolean blinking, boolean half) {
+    public void drawHeartTexture(GuiGraphics context, Gui.HeartType heartType, int x, int y, int width, int height, boolean hardcore, boolean blinking, boolean half) {
 
         textureOrMapping.ifLeft(id -> {
 
@@ -92,15 +92,15 @@ public class OverrideHudTexturePowerType extends PowerType implements Prioritize
             };
 
             int v = hardcore ? 5 * 9 : 0;
-            int u = heartType == InGameHud.HeartType.CONTAINER ? (blinking ? 1 : 0) : (half ? 1 : 0) + (blinking ? 2 : 0);
+            int u = heartType == Gui.HeartType.CONTAINER ? (blinking ? 1 : 0) : (half ? 1 : 0) + (blinking ? 2 : 0);
 
             u = 16 + (index * 2 + u) * 9;
             context.drawTexture(id, x, y, u, v, width, height);
 
         }).ifRight(mapping -> {
 
-            Identifier texture = heartType.getTexture(hardcore, half, blinking);
-            Identifier newTexture = mapping.getOrDefault(texture, texture);
+            ResourceLocation texture = heartType.getTexture(hardcore, half, blinking);
+            ResourceLocation newTexture = mapping.getOrDefault(texture, texture);
 
             context.drawGuiTexture(newTexture, x, y, width, height);
 
@@ -109,14 +109,14 @@ public class OverrideHudTexturePowerType extends PowerType implements Prioritize
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawTextureRegion(DrawContext context, Identifier texture, int width, int height, int minU, int minV, int legacyMinU, int legacyMinV, int x, int y, int maxU, int maxV) {
+    public void drawTextureRegion(GuiGraphics context, ResourceLocation texture, int width, int height, int minU, int minV, int legacyMinU, int legacyMinV, int x, int y, int maxU, int maxV) {
         textureOrMapping
             .ifLeft(id -> context.drawTexture(id, x, y, legacyMinU, legacyMinV, maxU, maxV))
             .ifRight(mapping -> context.drawGuiTexture(mapping.getOrDefault(texture, texture), width, height, minU, minV, x, y, maxU, maxV));
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawTexture(DrawContext context, Identifier texture, int x, int y, int legacyU, int legacyV, int width, int height) {
+    public void drawTexture(GuiGraphics context, ResourceLocation texture, int x, int y, int legacyU, int legacyV, int width, int height) {
         textureOrMapping
             .ifLeft(id -> context.drawTexture(id, x, y, legacyU, legacyV, width, height))
             .ifRight(mapping -> context.drawGuiTexture(mapping.getOrDefault(texture, texture), x, y, width, height));

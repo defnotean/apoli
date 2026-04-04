@@ -1,8 +1,8 @@
 package io.github.apace100.apoli.mixin;
 
 import io.github.apace100.apoli.access.PowerCraftingObject;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.recipe.book.RecipeBook;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.stats.RecipeBook;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -13,15 +13,15 @@ import java.util.Objects;
 public abstract class RecipeBookMixin implements PowerCraftingObject {
 
     @Unique
-    private WeakReference<PlayerEntity> apoli$player;
+    private WeakReference<Player> apoli$player;
 
     @Override
-    public PlayerEntity apoli$getPlayer() {
+    public Player apoli$getPlayer() {
         return Objects.requireNonNull(apoli$player.get(), "Player was cleared; recipe book: " + this);
     }
 
     @Override
-    public void apoli$setPlayer(PlayerEntity player) {
+    public void apoli$setPlayer(Player player) {
         this.apoli$player = new WeakReference<>(player);
     }
 

@@ -1,18 +1,18 @@
 package io.github.apace100.apoli.mixin;
 
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.PlacedAdvancement;
-import net.minecraft.server.command.AdvancementCommand;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementNode;
+import net.minecraft.server.commands.AdvancementCommands;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.List;
 
-@Mixin(AdvancementCommand.class)
+@Mixin(AdvancementCommands.class)
 public interface AdvancementCommandAccessor {
 
     @Invoker
-    static void callAddChildrenRecursivelyToList(PlacedAdvancement parent, List<AdvancementEntry> children) {
+    static void callAddChildrenRecursivelyToList(AdvancementNode parent, List<AdvancementHolder> children) {
         throw new AssertionError();
     }
 

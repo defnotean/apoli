@@ -9,7 +9,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.Space;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.function.TriConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
@@ -53,13 +53,13 @@ public class AddVelocityEntityActionType extends EntityActionType {
 
         Vector3f velocityCopy = new Vector3f(velocity);
         TriConsumer<Float, Float, Float> method = set
-            ? entity::setVelocity
-            : entity::addVelocity;
+            ? entity::setDeltaMovement
+            : entity::push;
 
         space.toGlobal(velocityCopy, entity);
         method.accept(velocityCopy.x(), velocityCopy.y(), velocityCopy.z());
 
-        entity.velocityModified = true;
+        entity.hasImpulse = true;
 
     }
 

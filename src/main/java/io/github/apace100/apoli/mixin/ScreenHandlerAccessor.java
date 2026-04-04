@@ -1,14 +1,14 @@
 package io.github.apace100.apoli.mixin;
 
-import net.minecraft.inventory.StackReference;
-import net.minecraft.screen.ScreenHandler;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(ScreenHandler.class)
+@Mixin(AbstractContainerMenu.class)
 public interface ScreenHandlerAccessor {
 
     @Invoker
-    StackReference callGetCursorStackReference();
+    SlotAccess callGetCursorStackReference();
 
 }

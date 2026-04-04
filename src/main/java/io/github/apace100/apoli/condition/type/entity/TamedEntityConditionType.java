@@ -4,7 +4,7 @@ import io.github.apace100.apoli.condition.ConditionConfiguration;
 import io.github.apace100.apoli.condition.context.EntityConditionContext;
 import io.github.apace100.apoli.condition.type.EntityConditionType;
 import io.github.apace100.apoli.condition.type.EntityConditionTypes;
-import net.minecraft.entity.Tameable;
+import net.minecraft.world.entity.Tameable;
 import org.jetbrains.annotations.NotNull;
 
 public class TamedEntityConditionType extends EntityConditionType {

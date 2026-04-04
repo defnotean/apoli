@@ -9,12 +9,12 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.block.EntityShapeContext;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.level.block.EntityShapeContext;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -68,13 +68,13 @@ public class PhasingPowerType extends PowerType {
 
     public boolean doesApply(BlockPos pos) {
         return blockCondition
-            .map(condition -> blacklist != condition.test(getHolder().getWorld(), pos))
+            .map(condition -> blacklist != condition.test(getHolder().level(), pos))
             .orElse(true);
     }
 
     public boolean shouldPhase(VoxelShape shape, BlockPos pos) {
         LivingEntity holder = getHolder();
-        return (holder.getY() < (double) pos.getY() + shape.getMax(Direction.Axis.Y) - (holder.isOnGround() ? 8.05 / 16.0 : 0.0015) || this.shouldPhaseDown())
+        return (holder.getY() < (double) pos.getY() + shape.getMax(Direction.Axis.Y) - (holder.onGround() ? 8.05 / 16.0 : 0.0015) || this.shouldPhaseDown())
             && this.doesApply(pos);
     }
 
@@ -94,7 +94,7 @@ public class PhasingPowerType extends PowerType {
         BLINDNESS, REMOVE_BLOCKS, NONE
     }
 
-    public static boolean shouldPhase(ShapeContext context, VoxelShape shape, BlockPos pos) {
+    public static boolean shouldPhase(CollisionContext context, VoxelShape shape, BlockPos pos) {
         return context instanceof EntityShapeContext entityContext
             && PowerHolderComponent.hasPowerType(entityContext.getEntity(), PhasingPowerType.class, p -> p.shouldPhase(shape, pos));
     }

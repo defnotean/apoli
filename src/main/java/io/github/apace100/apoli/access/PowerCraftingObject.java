@@ -1,10 +1,10 @@
 package io.github.apace100.apoli.access;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 
 public interface PowerCraftingObject {
 
-    PlayerEntity apoli$getPlayer();
-    void apoli$setPlayer(PlayerEntity player);
+    Player apoli$getPlayer();
+    void apoli$setPlayer(Player player);
 
 }

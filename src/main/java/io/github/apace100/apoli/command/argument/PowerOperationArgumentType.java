@@ -9,18 +9,18 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.github.apace100.apoli.power.type.PowerType;
 import io.github.apace100.apoli.util.PowerUtil;
-import net.minecraft.command.CommandSource;
-import net.minecraft.scoreboard.ScoreAccess;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.world.scores.ScoreAccess;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.concurrent.CompletableFuture;
 
 // Very similar to OperationArgumentType, but modified to make it work with resources.
 public class PowerOperationArgumentType implements ArgumentType<PowerOperationArgumentType.Operation> {
 
-    public static final SimpleCommandExceptionType INVALID_OPERATION = new SimpleCommandExceptionType(Text.translatable("arguments.operation.invalid"));
-    public static final SimpleCommandExceptionType DIVISION_ZERO_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("arguments.operation.div0"));
+    public static final SimpleCommandExceptionType INVALID_OPERATION = new SimpleCommandExceptionType(Component.translatable("arguments.operation.invalid"));
+    public static final SimpleCommandExceptionType DIVISION_ZERO_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("arguments.operation.div0"));
 
     public static PowerOperationArgumentType operation() {
         return new PowerOperationArgumentType();
@@ -32,7 +32,7 @@ public class PowerOperationArgumentType implements ArgumentType<PowerOperationAr
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(new String[]{"=", "+=", "-=", "*=", "/=", "%=", "<", ">", "><"}, builder);
+        return SharedSuggestionProvider.suggestMatching(new String[]{"=", "+=", "-=", "*=", "/=", "%=", "<", ">", "><"}, builder);
     }
 
     @Override

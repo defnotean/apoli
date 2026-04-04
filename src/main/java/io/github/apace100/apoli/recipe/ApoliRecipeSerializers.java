@@ -1,10 +1,11 @@
 package io.github.apace100.apoli.recipe;
 
 import io.github.apace100.apoli.Apoli;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 
 public class ApoliRecipeSerializers {
 
@@ -16,7 +17,7 @@ public class ApoliRecipeSerializers {
     }
 
     public static <R extends Recipe<?>, S extends RecipeSerializer<R>> S register(String path, S serializer) {
-        return Registry.register(Registries.RECIPE_SERIALIZER, Apoli.identifier(path), serializer);
+        return Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Apoli.identifier(path), serializer);
     }
 
 }

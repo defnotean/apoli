@@ -5,17 +5,17 @@ import io.github.apace100.apoli.access.PowerModifiedGrindstone;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.type.ModifyGrindstonePowerType;
 import io.github.apace100.apoli.util.InventoryUtil;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.GrindstoneScreenHandler;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.Inventory;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.GrindstoneMenu;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,8 +30,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Mixin(GrindstoneScreenHandler.class)
-public abstract class GrindstoneScreenHandlerMixin extends ScreenHandler implements PowerModifiedGrindstone {
+@Mixin(GrindstoneMenu.class)
+public abstract class GrindstoneScreenHandlerMixin extends AbstractContainerMenu implements PowerModifiedGrindstone {
 
     @Shadow
     @Final
@@ -55,20 +55,20 @@ public abstract class GrindstoneScreenHandlerMixin extends ScreenHandler impleme
 
     @Shadow
     @Final
-    private ScreenHandlerContext context;
+    private ContainerLevelAccess context;
 
     @Unique
-    private PlayerEntity apoli$cachedPlayer;
+    private Player apoli$cachedPlayer;
 
     @Unique
     private List<ModifyGrindstonePowerType> apoli$appliedPowers;
 
-    private GrindstoneScreenHandlerMixin(@Nullable ScreenHandlerType<?> type, int syncId) {
+    private GrindstoneScreenHandlerMixin(@Nullable MenuType<?> type, int syncId) {
         super(type, syncId);
     }
 
-    @Inject(method = "<init>(ILnet/minecraft/entity/player/PlayerInventory;Lnet/minecraft/screen/ScreenHandlerContext;)V", at = @At("RETURN"))
-    private void cachePlayer(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, CallbackInfo ci) {
+    @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/AbstractContainerMenuContext;)V", at = @At("RETURN"))
+    private void cachePlayer(int syncId, Inventory playerInventory, ContainerLevelAccess context, CallbackInfo ci) {
         apoli$cachedPlayer = playerInventory.player;
     }
 
@@ -78,7 +78,7 @@ public abstract class GrindstoneScreenHandlerMixin extends ScreenHandler impleme
         ItemStack topStack = input.getStack(INPUT_1_ID);
         ItemStack bottomStack = input.getStack(INPUT_2_ID);
 
-        StackReference outputStackRef = InventoryUtil.createStackReference(result.getStack(0));
+        SlotAccess outputStackRef = InventoryUtil.createStackReference(result.getStack(0));
         this.apoli$appliedPowers = PowerHolderComponent.getPowerTypes(apoli$cachedPlayer, ModifyGrindstonePowerType.class)
             .stream()
             .filter(mgp -> mgp.doesApply(topStack, bottomStack, outputStackRef.get(), apoli$getPos()))
@@ -90,11 +90,11 @@ public abstract class GrindstoneScreenHandlerMixin extends ScreenHandler impleme
 
     }
 
-    @ModifyVariable(method = "quickMove", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;copy()Lnet/minecraft/item/ItemStack;"), ordinal = 1)
-    private ItemStack performAfterGrindstoneActionsQuickMove(ItemStack original, PlayerEntity player, int slotIndex, @Local Slot slot) {
+    @ModifyVariable(method = "quickMove", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;copy()Lnet/minecraft/world/item/ItemStack;"), ordinal = 1)
+    private ItemStack performAfterGrindstoneActionsQuickMove(ItemStack original, Player player, int slotIndex, @Local Slot slot) {
 
         List<ModifyGrindstonePowerType> applyingPowers = this.apoli$getAppliedPowers();
-        StackReference stackReference = InventoryUtil.createStackReference(original);
+        SlotAccess stackReference = InventoryUtil.createStackReference(original);
 
         if (slotIndex != OUTPUT_ID || applyingPowers == null || applyingPowers.isEmpty()) {
             return original;
@@ -117,7 +117,7 @@ public abstract class GrindstoneScreenHandlerMixin extends ScreenHandler impleme
     }
 
     @Override
-    public PlayerEntity apoli$getPlayer() {
+    public Player apoli$getPlayer() {
         return apoli$cachedPlayer;
     }
 

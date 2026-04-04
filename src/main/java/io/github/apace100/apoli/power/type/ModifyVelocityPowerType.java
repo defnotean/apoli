@@ -6,7 +6,7 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;

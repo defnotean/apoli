@@ -12,7 +12,7 @@ import io.github.apace100.apoli.util.Shape;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 public class EntityInRadiusEntityConditionType extends EntityConditionType {
@@ -70,7 +70,7 @@ public class EntityInRadiusEntityConditionType extends EntityConditionType {
         Entity entity = context.entity();
         int matches = 0;
 
-        for (Entity target : shape.getEntities(entity.getWorld(), entity.getLerpedPos(1.0F), radius)) {
+        for (Entity target : shape.getEntities(entity.level(), entity.getLerpedPos(1.0F), radius)) {
 
             if (biEntityCondition.test(entity, target)) {
                 ++matches;

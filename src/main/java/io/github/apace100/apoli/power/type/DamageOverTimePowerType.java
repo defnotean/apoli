@@ -6,28 +6,29 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
 import net.minecraft.world.Difficulty;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.core.registries.Registries;
 
 public class DamageOverTimePowerType extends PowerType {
 
-    public static final RegistryKey<DamageType> GENERIC_DAMAGE = RegistryKey.of(RegistryKeys.DAMAGE_TYPE, Apoli.identifier("damage_over_time"));
+    public static final ResourceKey<DamageType> GENERIC_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Apoli.identifier("damage_over_time"));
 
     public static final TypedDataObjectFactory<DamageOverTimePowerType> DATA_FACTORY = PowerType.createConditionedDataFactory(
         new SerializableData()
@@ -42,8 +43,8 @@ public class DamageOverTimePowerType extends PowerType {
             data.get("damage_type"),
             data.get("protection_enchantment"),
             data.get("protection_effectiveness"),
-            data.get("damage"),
             data.get("damage_easy"),
+            data.get("damage"),
             data.get("interval"),
             data.get("onset_delay"),
             condition
@@ -58,8 +59,8 @@ public class DamageOverTimePowerType extends PowerType {
             .set("onset_delay", powerType.damageOnsetDelay)
     );
 
-    private final RegistryKey<DamageType> damageType;
-    private final Optional<RegistryKey<Enchantment>> protectionEnchantmentKey;
+    private final ResourceKey<DamageType> damageType;
+    private final Optional<ResourceKey<Enchantment>> protectionEnchantmentKey;
 
     private final float protectionEffectiveness;
 
@@ -72,7 +73,7 @@ public class DamageOverTimePowerType extends PowerType {
     private int outOfDamageTicks = 0;
     private int inDamageTicks = 0;
 
-    public DamageOverTimePowerType(RegistryKey<DamageType> damageType, Optional<RegistryKey<Enchantment>> protectionEnchantmentKey, float protectionEffectiveness, float damageAmountEasy, float damageAmount, int damageInterval, int damageOnsetDelay, Optional<EntityCondition> condition) {
+    public DamageOverTimePowerType(ResourceKey<DamageType> damageType, Optional<ResourceKey<Enchantment>> protectionEnchantmentKey, float protectionEffectiveness, float damageAmountEasy, float damageAmount, int damageInterval, int damageOnsetDelay, Optional<EntityCondition> condition) {
         super(condition);
         this.damageType = damageType;
         this.protectionEnchantmentKey = protectionEnchantmentKey;
@@ -118,12 +119,12 @@ public class DamageOverTimePowerType extends PowerType {
 
         if (inDamageTicks++ - getDamageBegin() >= 0 && (inDamageTicks - getDamageBegin()) % damageInterval == 0) {
 
-            DamageSource damageSource = holder.getDamageSources().create(damageType);
-            float amount = holder.getWorld().getDifficulty() == Difficulty.EASY
+            DamageSource damageSource = holder.damageSources().create(damageType);
+            float amount = holder.level().getDifficulty() == Difficulty.EASY
                 ? damageAmountEasy
                 : damageAmount;
 
-            holder.damage(damageSource, amount);
+            holder.hurt(damageSource, amount);
 
         }
 
@@ -154,10 +155,10 @@ public class DamageOverTimePowerType extends PowerType {
         }
 
         LivingEntity holder = getHolder();
-        Registry<Enchantment> enchantmentRegistry = holder.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        Registry<Enchantment> enchantmentRegistry = holder.registryAccess().get(Registries.ENCHANTMENT);
 
         Enchantment protectingEnchantment = enchantmentRegistry.getOrThrow(protectionEnchantmentKey.get());
-        RegistryEntry<Enchantment> protectingEnchantmentEntry = enchantmentRegistry.getEntry(protectingEnchantment);
+        Holder<Enchantment> protectingEnchantmentEntry = enchantmentRegistry.wrapAsHolder(protectingEnchantment);
 
         Map<EquipmentSlot, ItemStack> potentialItems = protectingEnchantment.getEquipment(holder);
 
@@ -180,9 +181,9 @@ public class DamageOverTimePowerType extends PowerType {
     }
 
     @Override
-    public NbtElement toTag() {
+    public Tag toTag() {
 
-        NbtCompound nbt = new NbtCompound();
+        CompoundTag nbt = new CompoundTag();
 
         nbt.putInt("InDamage", inDamageTicks);
         nbt.putInt("OutDamage", outOfDamageTicks);
@@ -192,9 +193,9 @@ public class DamageOverTimePowerType extends PowerType {
     }
 
     @Override
-    public void fromTag(NbtElement tag) {
+    public void fromTag(Tag tag) {
 
-        if (tag instanceof NbtCompound nbt) {
+        if (tag instanceof CompoundTag nbt) {
             inDamageTicks = nbt.getInt("InDamage");
             outOfDamageTicks = nbt.getInt("OutDamage");
         }

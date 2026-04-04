@@ -8,12 +8,12 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.ElytraItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.item.ElytraItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 
 public class ElytraFlightPossibleEntityConditionType extends EntityConditionType {
@@ -52,16 +52,16 @@ public class ElytraFlightPossibleEntityConditionType extends EntityConditionType
 
         if (checkState) {
             checked = true;
-            state = !living.isOnGround()
+            state = !living.onGround()
                 && !living.isFallFlying()
-                && !living.isTouchingWater()
-                && !living.hasStatusEffect(StatusEffects.LEVITATION);
+                && !living.isInWater()
+                && !living.hasEffect(MobEffects.LEVITATION);
         }
 
         if (checkAbility) {
             checked = true;
-            ItemStack equippedChestStack = living.getEquippedStack(EquipmentSlot.CHEST);
-            ability = (equippedChestStack.isOf(Items.ELYTRA) && ElytraItem.isUsable(equippedChestStack) || EntityElytraEvents.CUSTOM.invoker().useCustomElytra(living, false))
+            ItemStack equippedChestStack = living.getItemBySlot(EquipmentSlot.CHEST);
+            ability = (equippedChestStack.is(Items.ELYTRA) && ElytraItem.isUsable(equippedChestStack) || EntityElytraEvents.CUSTOM.invoker().useCustomElytra(living, false))
                 && EntityElytraEvents.ALLOW.invoker().allowElytraFlight(living);
         }
 

@@ -7,8 +7,8 @@ import io.github.apace100.apoli.condition.EntityCondition;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -51,12 +51,12 @@ public class ActionOnWakeUpPowerType extends PowerType {
 
     public boolean doesApply(BlockPos pos) {
         return blockCondition
-            .map(condition -> condition.test(getHolder().getWorld(), pos))
+            .map(condition -> condition.test(getHolder().level(), pos))
             .orElse(true);
     }
 
     public void executeActions(BlockPos pos, Direction direction) {
-        blockAction.ifPresent(action -> action.execute(getHolder().getWorld(), pos, Optional.of(direction)));
+        blockAction.ifPresent(action -> action.execute(getHolder().level(), pos, Optional.of(direction)));
         entityAction.ifPresent(action -> action.execute(getHolder()));
     }
 

@@ -3,11 +3,11 @@ package io.github.apace100.apoli.util;
 import com.mojang.serialization.MapCodec;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.CompoundSerializableDataType;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public interface TypeConfiguration<T> {
 
-	Identifier id();
+	ResourceLocation id();
 
 	TypedDataObjectFactory<T> dataFactory();
 

@@ -10,15 +10,16 @@ import io.github.apace100.apoli.power.type.ModifyEnchantmentLevelPowerType;
 import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.world.World;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import net.minecraft.core.registries.Registries;
 
 public class EnchantmentItemConditionType extends ItemConditionType {
 
@@ -41,13 +42,13 @@ public class EnchantmentItemConditionType extends ItemConditionType {
             .set("compare_to", conditionType.compareTo)
     );
 
-    private final Optional<RegistryKey<Enchantment>> enchantmentKey;
+    private final Optional<ResourceKey<Enchantment>> enchantmentKey;
     private final boolean useModifications;
 
     private final Comparison comparison;
     private final int compareTo;
 
-    public EnchantmentItemConditionType(Optional<RegistryKey<Enchantment>> enchantmentKey, boolean useModifications, Comparison comparison, int compareTo) {
+    public EnchantmentItemConditionType(Optional<ResourceKey<Enchantment>> enchantmentKey, boolean useModifications, Comparison comparison, int compareTo) {
         this.enchantmentKey = enchantmentKey;
         this.useModifications = useModifications;
         this.comparison = comparison;
@@ -58,11 +59,11 @@ public class EnchantmentItemConditionType extends ItemConditionType {
     public boolean test(ItemConditionContext context) {
 
         ItemStack stack = context.stack();
-        World world = context.world();
+        Level world = context.world();
 
-        ItemEnchantmentsComponent enchantmentsComponent = ModifyEnchantmentLevelPowerType.getEnchantments(stack, stack.getEnchantments(), useModifications);
+        ItemEnchantments enchantmentsComponent = ModifyEnchantmentLevelPowerType.getEnchantments(stack, stack.getEnchantments(), useModifications);
         int levelOrEnchantments = enchantmentKey
-            .map(key -> world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).entryOf(key))
+            .map(key -> world.registryAccess().get(Registries.ENCHANTMENT).entryOf(key))
             .map(enchantmentsComponent::getLevel)
             .orElseGet(enchantmentsComponent::getSize);
 

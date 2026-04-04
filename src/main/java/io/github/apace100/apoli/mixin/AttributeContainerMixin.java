@@ -3,12 +3,12 @@ package io.github.apace100.apoli.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.github.apace100.apoli.access.OwnableAttributeContainer;
 import io.github.apace100.apoli.access.OwnableAttributeInstance;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.attribute.AttributeContainer;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.core.Holder;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,12 +18,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(AttributeContainer.class)
+@Mixin(AttributeMap.class)
 public abstract class AttributeContainerMixin implements OwnableAttributeContainer {
 
     @Shadow
     @Final
-    private DefaultAttributeContainer fallback;
+    private AttributeSupplier fallback;
 
     @Unique
     @Nullable
@@ -41,7 +41,7 @@ public abstract class AttributeContainerMixin implements OwnableAttributeContain
     }
 
     @Inject(method = "getCustomInstance", at = @At("RETURN"))
-    private void apoli$setCustomAttributeInstanceOwner(RegistryEntry<EntityAttribute> attribute, CallbackInfoReturnable<EntityAttributeInstance> cir) {
+    private void apoli$setCustomAttributeInstanceOwner(Holder<Attribute> attribute, CallbackInfoReturnable<AttributeInstance> cir) {
 
         if (cir.getReturnValue() instanceof OwnableAttributeInstance ownableAttributeInstance) {
             ownableAttributeInstance.apoli$setOwner(this.apoli$getOwner());
@@ -50,7 +50,7 @@ public abstract class AttributeContainerMixin implements OwnableAttributeContain
     }
 
     @Inject(method = "getValue", at = @At("RETURN"))
-    private void apoli$setAttributeInstanceOwner(RegistryEntry<EntityAttribute> attribute, CallbackInfoReturnable<Double> cir, @Local EntityAttributeInstance attributeInstance) {
+    private void apoli$setAttributeInstanceOwner(Holder<Attribute> attribute, CallbackInfoReturnable<Double> cir, @Local AttributeInstance attributeInstance) {
 
         if (attributeInstance instanceof OwnableAttributeInstance ownableAttributeInstance) {
             ownableAttributeInstance.apoli$setOwner(this.apoli$getOwner());

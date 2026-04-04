@@ -6,8 +6,8 @@ import io.github.apace100.apoli.action.context.BiEntityActionContext;
 import io.github.apace100.apoli.action.type.BiEntityActionType;
 import io.github.apace100.apoli.action.type.BiEntityActionTypes;
 import io.github.apace100.apoli.util.requirement.BiEntityRequirement;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.Leashable;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Leashable;
 import org.jetbrains.annotations.NotNull;
 
 public class LeashBiEntityActionType extends BiEntityActionType {

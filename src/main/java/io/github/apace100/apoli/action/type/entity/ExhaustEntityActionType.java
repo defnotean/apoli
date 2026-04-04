@@ -7,7 +7,7 @@ import io.github.apace100.apoli.action.type.EntityActionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class ExhaustEntityActionType extends EntityActionType {
@@ -31,7 +31,7 @@ public class ExhaustEntityActionType extends EntityActionType {
     @Override
     public void accept(EntityActionContext context) {
 
-        if (context.entity() instanceof PlayerEntity player) {
+        if (context.entity() instanceof Player player) {
             player.addExhaustion(amount);
         }
 

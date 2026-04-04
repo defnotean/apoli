@@ -8,29 +8,29 @@ import io.github.apace100.apoli.power.type.PreventItemPickupPowerType;
 import io.github.apace100.apoli.power.type.Prioritized;
 import io.github.apace100.apoli.util.InventoryUtil;
 import io.github.apace100.apoli.util.MiscUtil;
-import net.minecraft.entity.*;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(MobEntity.class)
+@Mixin(Mob.class)
 public abstract class MobEntityMixin extends LivingEntity implements Targeter {
 
-    private MobEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
+    private MobEntityMixin(EntityType<? extends LivingEntity> entityType, Level world) {
         super(entityType, world);
     }
 
-    @WrapWithCondition(method = "tickMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/mob/MobEntity;loot(Lnet/minecraft/entity/ItemEntity;)V"))
-    private boolean apoli$preventItemPickup(MobEntity mobEntity, ItemEntity itemEntity) {
+    @WrapWithCondition(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/Mob;loot(Lnet/minecraft/world/entity/ItemEntity;)V"))
+    private boolean apoli$preventItemPickup(Mob mobEntity, ItemEntity itemEntity) {
         return !PreventItemPickupPowerType.doesPrevent(itemEntity, this);
     }
 
-    @WrapOperation(method = "tickMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/mob/MobEntity;loot(Lnet/minecraft/entity/ItemEntity;)V"))
-    private void apoli$actionOnItemPickup(MobEntity mobEntity, ItemEntity itemEntity, Operation<Void> original) {
+    @WrapOperation(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/Mob;loot(Lnet/minecraft/world/entity/ItemEntity;)V"))
+    private void apoli$actionOnItemPickup(Mob mobEntity, ItemEntity itemEntity, Operation<Void> original) {
 
-        StackReference stackReference = InventoryUtil.createStackReference(itemEntity.getStack());
+        SlotAccess stackReference = InventoryUtil.createStackReference(itemEntity.getStack());
         Entity thrower = MiscUtil.getEntityByUuid(((ItemEntityAccessor) itemEntity).getThrowerUuid(), this.getServer());
 
         Prioritized.CallInstance<ActionOnItemPickupPowerType> callInstance = ActionOnItemPickupPowerType.executeItemAction(thrower, stackReference, this);

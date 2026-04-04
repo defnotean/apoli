@@ -1,11 +1,11 @@
 package io.github.apace100.apoli.util;
 
 import io.github.apace100.apoli.mixin.AdvancementCommandAccessor;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.AdvancementManager;
-import net.minecraft.advancement.PlacedAdvancement;
-import net.minecraft.server.command.AdvancementCommand;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementTree;
+import net.minecraft.advancements.AdvancementNode;
+import net.minecraft.server.commands.AdvancementCommands;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,17 +13,17 @@ import java.util.List;
 
 public class AdvancementUtil {
 
-    public static List<AdvancementEntry> selectEntries(AdvancementManager advancementManager, AdvancementEntry advancementEntry, AdvancementCommand.Selection selection) {
+    public static List<AdvancementHolder> selectEntries(AdvancementTree advancementManager, AdvancementHolder advancementEntry, AdvancementCommands.Selection selection) {
 
-        PlacedAdvancement placedAdvancement = advancementManager.get(advancementEntry);
+        AdvancementNode placedAdvancement = advancementManager.get(advancementEntry);
         if (placedAdvancement == null) {
             return List.of(advancementEntry);
         }
 
-        List<AdvancementEntry> advancementEntries = new ArrayList<>();
+        List<AdvancementHolder> advancementEntries = new ArrayList<>();
         if (selection.before) {
 
-            for (PlacedAdvancement parent = placedAdvancement.getParent(); parent != null; parent = parent.getParent()) {
+            for (AdvancementNode parent = placedAdvancement.getParent(); parent != null; parent = parent.getParent()) {
                 advancementEntries.add(parent.getAdvancementEntry());
             }
 
@@ -38,14 +38,14 @@ public class AdvancementUtil {
 
     }
 
-    public static void processCriteria(AdvancementEntry advancementEntry, Collection<String> criteria, AdvancementCommand.Operation operation, ServerPlayerEntity serverPlayerEntity) {
+    public static void processCriteria(AdvancementHolder advancementEntry, Collection<String> criteria, AdvancementCommands.Operation operation, ServerPlayer serverPlayerEntity) {
         for (String criterion : criteria.stream().filter(c -> advancementEntry.value().criteria().containsKey(c)).toList()) {
             operation.processEachCriterion(serverPlayerEntity, advancementEntry, criterion);
         }
     }
 
-    public static void processAdvancements(Collection<AdvancementEntry> advancementEntries, AdvancementCommand.Operation operation, ServerPlayerEntity serverPlayerEntity) {
-        for (AdvancementEntry advancementEntry : advancementEntries) {
+    public static void processAdvancements(Collection<AdvancementHolder> advancementEntries, AdvancementCommands.Operation operation, ServerPlayer serverPlayerEntity) {
+        for (AdvancementHolder advancementEntry : advancementEntries) {
             operation.processEach(serverPlayerEntity, advancementEntry);
         }
     }

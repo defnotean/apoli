@@ -6,8 +6,8 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -69,11 +69,11 @@ public class ConditionedRestrictArmorPowerType extends RestrictArmorPowerType {
         if (this.isActive()) {
 
             if (startTicks == null) {
-                this.startTicks = holder.age % tickRate;
+                this.startTicks = holder.tickCount % tickRate;
                 this.endTicks = null;
             }
 
-            else if (holder.age % tickRate == startTicks) {
+            else if (holder.tickCount % tickRate == startTicks) {
                 dropEquippedStacks();
                 this.wasActive = true;
             }
@@ -83,11 +83,11 @@ public class ConditionedRestrictArmorPowerType extends RestrictArmorPowerType {
         else if (wasActive) {
 
             if (endTicks == null) {
-                this.endTicks = holder.age % tickRate;
+                this.endTicks = holder.tickCount % tickRate;
                 this.startTicks = null;
             }
 
-            else if (holder.age % tickRate == endTicks) {
+            else if (holder.tickCount % tickRate == endTicks) {
                 this.wasActive = false;
             }
 

@@ -7,8 +7,8 @@ import io.github.apace100.apoli.action.type.EntityActionType;
 import io.github.apace100.apoli.action.type.EntityActionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -35,9 +35,9 @@ public class BlockActionAtEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         Entity entity = context.entity();
-        BlockPos blockPos = BlockPos.ofFloored(entity.getPos().add(context.offset()));
+        BlockPos blockPos = BlockPos.ofFloored(entity.position().add(context.offset()));
 
-        blockAction.execute(entity.getWorld(), blockPos, Optional.empty());
+        blockAction.execute(entity.level(), blockPos, Optional.empty());
 
     }
 

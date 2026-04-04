@@ -1,8 +1,8 @@
 package io.github.apace100.apoli.mixin;
 
 import io.github.apace100.apoli.access.SlotState;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -12,15 +12,15 @@ import java.util.Optional;
 public abstract class SlotMixin implements SlotState {
 
     @Unique
-    private Identifier apoli$state;
+    private ResourceLocation apoli$state;
 
     @Override
-    public Optional<Identifier> apoli$getState() {
+    public Optional<ResourceLocation> apoli$getState() {
         return Optional.ofNullable(apoli$state);
     }
 
     @Override
-    public void apoli$setState(Identifier state) {
+    public void apoli$setState(ResourceLocation state) {
         this.apoli$state = state;
     }
 

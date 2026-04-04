@@ -12,8 +12,8 @@ import io.github.apace100.apoli.util.Shape;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
 public class BlockInRadiusEntityConditionType extends EntityConditionType {
@@ -71,9 +71,9 @@ public class BlockInRadiusEntityConditionType extends EntityConditionType {
         Entity entity = context.entity();
         int matches = 0;
 
-        for (BlockPos pos : shape.getBlockPositions(entity.getBlockPos(), radius)) {
+        for (BlockPos pos : shape.getBlockPositions(entity.blockPosition(), radius)) {
 
-            if (blockCondition.test(entity.getWorld(), pos)) {
+            if (blockCondition.test(entity.level(), pos)) {
                 ++matches;
             }
 

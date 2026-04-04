@@ -5,7 +5,7 @@ import io.github.apace100.apoli.condition.type.FluidConditionType;
 import io.github.apace100.apoli.condition.type.FluidConditionTypes;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.calio.data.SerializableDataType;
-import net.minecraft.fluid.FluidState;
+import net.minecraft.world.level.material.FluidState;
 
 public final class FluidCondition extends Condition<FluidConditionContext, FluidConditionType> {
 

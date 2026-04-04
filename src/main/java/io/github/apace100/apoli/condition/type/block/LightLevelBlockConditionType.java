@@ -10,9 +10,9 @@ import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.LightType;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -49,7 +49,7 @@ public class LightLevelBlockConditionType extends BlockConditionType {
     @Override
     public boolean test(BlockConditionContext context) {
 
-        World world = context.world();
+        Level world = context.world();
         BlockPos pos = context.pos();
 
         int lightLevel = lightType

@@ -7,14 +7,14 @@ import io.github.apace100.apoli.util.ApoliConfigClient;
 import io.github.apace100.apoli.util.HudRender;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.tag.FluidTags;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderTickCounter;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -35,10 +35,10 @@ public class PowerHudRenderer implements GameHudRender {
     private final AtomicInteger y = new AtomicInteger();
 
     @Override
-    public void render(DrawContext context, RenderTickCounter delta) {
+    public void render(GuiGraphics context, RenderTickCounter delta) {
 
-        MinecraftClient client = MinecraftClient.getInstance();
-        ClientPlayerEntity player = client.player;
+        Minecraft client = Minecraft.getInstance();
+        LocalPlayer player = client.player;
 
         if (player == null || !(Apoli.config instanceof ApoliConfigClient config)) {
             return;
@@ -50,7 +50,7 @@ public class PowerHudRenderer implements GameHudRender {
         }
 
         if (player.getVehicle() instanceof LivingEntity livingVehicle) {
-            int bars = MathHelper.clamp((int) Math.ceil(livingVehicle.getMaxHealth() / 20.0F), 1, 3) - 1;
+            int bars = Mth.clamp((int) Math.ceil(livingVehicle.getMaxHealth() / 20.0F), 1, 3) - 1;
             yOffset += bars * 10;
         }
 
@@ -71,7 +71,7 @@ public class PowerHudRenderer implements GameHudRender {
                 HudRender hudRender = entry.getValue().get();
 
                 //  Draw the background texture of the resource bar
-                Identifier spriteLocation = hudRender.getSpriteLocation();
+                ResourceLocation spriteLocation = hudRender.getSpriteLocation();
                 context.drawTexture(spriteLocation, x.get(), y.get(), 0, 0, BAR_WIDTH, 5);
 
                 int barV = BAR_HEIGHT + hudRender.getBarIndex() * BAR_INDEX_OFFSET;

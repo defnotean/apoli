@@ -9,10 +9,10 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -65,7 +65,7 @@ public class ModifyFluidRenderPowerType extends PowerType {
         ApoliClient.shouldReloadWorldRenderer = true;
     }
 
-    public boolean doesPrevent(World world, BlockPos pos) {
+    public boolean doesPrevent(Level world, BlockPos pos) {
         return fluidCondition.map(condition -> condition.test(world.getFluidState(pos))).orElse(true)
             && blockCondition.map(condition -> condition.test(world, pos)).orElse(true);
     }

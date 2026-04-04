@@ -7,7 +7,7 @@ import io.github.apace100.apoli.util.AttributedEntityAttributeModifier;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class LavaVisionPowerType extends PowerType implements AttributeModifying
 
     @Override
     public void onInit() {
-        this.modifier = new AttributedEntityAttributeModifier(AdditionalEntityAttributes.LAVA_VISIBILITY, new EntityAttributeModifier(this.getPower().getId(), v - 1, EntityAttributeModifier.Operation.ADD_VALUE));
+        this.modifier = new AttributedEntityAttributeModifier(AdditionalEntityAttributes.LAVA_VISIBILITY, new AttributeModifier(this.getPower().getId(), v - 1, AttributeModifier.Operation.ADD_VALUE));
     }
 
     @Override

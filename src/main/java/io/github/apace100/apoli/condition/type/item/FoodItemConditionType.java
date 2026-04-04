@@ -5,8 +5,8 @@ import io.github.apace100.apoli.condition.context.ItemConditionContext;
 import io.github.apace100.apoli.condition.type.ItemConditionType;
 import io.github.apace100.apoli.condition.type.ItemConditionTypes;
 import io.github.apace100.apoli.power.type.EdibleItemPowerType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemStack;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class FoodItemConditionType extends ItemConditionType {
@@ -15,7 +15,7 @@ public class FoodItemConditionType extends ItemConditionType {
     public boolean test(ItemConditionContext context) {
         ItemStack stack = context.stack();
         return EdibleItemPowerType.get(stack).isPresent()
-            || stack.contains(DataComponentTypes.FOOD);
+            || stack.contains(DataComponents.FOOD);
     }
 
     @Override

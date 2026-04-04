@@ -5,10 +5,10 @@ import io.github.apace100.apoli.condition.EntityCondition;
 import io.github.ladysnake.pal.AbilitySource;
 import io.github.ladysnake.pal.Pal;
 import io.github.ladysnake.pal.PlayerAbility;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -30,7 +30,7 @@ public abstract class PlayerAbilityPowerType extends PowerType {
 
     @Override
     public boolean shouldTick() {
-        return getHolder() instanceof PlayerEntity;
+        return getHolder() instanceof Player;
     }
 
     @Override
@@ -45,9 +45,9 @@ public abstract class PlayerAbilityPowerType extends PowerType {
     }
 
     @Override
-    public NbtElement toTag() {
+    public Tag toTag() {
 
-        NbtCompound rootNbt = new NbtCompound();
+        CompoundTag rootNbt = new CompoundTag();
         rootNbt.putBoolean("ShouldRefresh", shouldRefresh);
 
         return rootNbt;
@@ -55,8 +55,8 @@ public abstract class PlayerAbilityPowerType extends PowerType {
     }
 
     @Override
-    public void fromTag(NbtElement tag) {
-        if (tag instanceof NbtCompound rootNbt) {
+    public void fromTag(Tag tag) {
+        if (tag instanceof CompoundTag rootNbt) {
             this.shouldRefresh = rootNbt.getBoolean("ShouldRefresh");
         }
     }
@@ -64,7 +64,7 @@ public abstract class PlayerAbilityPowerType extends PowerType {
     @Override
     public void serverTick() {
 
-        if (!(getHolder() instanceof PlayerEntity player)) {
+        if (!(getHolder() instanceof Player player)) {
             return;
         }
 
@@ -92,7 +92,7 @@ public abstract class PlayerAbilityPowerType extends PowerType {
 
     @Override
     public void onAdded() {
-        if (getHolder() instanceof ServerPlayerEntity serverPlayer && Apoli.LEGACY_POWER_SOURCE.grants(serverPlayer, ability)) {
+        if (getHolder() instanceof ServerPlayer serverPlayer && Apoli.LEGACY_POWER_SOURCE.grants(serverPlayer, ability)) {
             Apoli.LEGACY_POWER_SOURCE.revokeFrom(serverPlayer, ability);
         }
     }
@@ -105,14 +105,14 @@ public abstract class PlayerAbilityPowerType extends PowerType {
 
     @Override
     public void onGained() {
-        if (!getHolder().getWorld().isClient && this.isActive()) {
+        if (!getHolder().level().isClientSide && this.isActive()) {
             grantAbility();
         }
     }
 
     @Override
     public void onLost() {
-        if (!getHolder().getWorld().isClient) {
+        if (!getHolder().level().isClientSide) {
             revokeAbility();
         }
     }
@@ -122,17 +122,17 @@ public abstract class PlayerAbilityPowerType extends PowerType {
     }
 
     public boolean hasAbility() {
-        return getHolder() instanceof PlayerEntity playerEntity && getSource().grants(playerEntity, ability);
+        return getHolder() instanceof Player playerEntity && getSource().grants(playerEntity, ability);
     }
 
     public void grantAbility() {
-        if (getHolder() instanceof PlayerEntity playerEntity) {
+        if (getHolder() instanceof Player playerEntity) {
             getSource().grantTo(playerEntity, ability);
         }
     }
 
     public void revokeAbility() {
-        if (getHolder() instanceof PlayerEntity playerEntity) {
+        if (getHolder() instanceof Player playerEntity) {
             getSource().revokeFrom(playerEntity, ability);
         }
     }

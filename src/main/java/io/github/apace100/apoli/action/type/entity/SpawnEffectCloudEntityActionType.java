@@ -7,19 +7,19 @@ import io.github.apace100.apoli.action.type.EntityActionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.entity.AreaEffectCloudEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.entity.AreaEffectCloudEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 public class SpawnEffectCloudEntityActionType extends EntityActionType {
 
     public static final TypedDataObjectFactory<SpawnEffectCloudEntityActionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("effect_component", SerializableDataTypes.POTION_CONTENTS_COMPONENT, PotionContentsComponent.DEFAULT)
+            .add("effect_component", SerializableDataTypes.POTION_CONTENTS_COMPONENT, PotionContents.DEFAULT)
             .add("wait_time", SerializableDataTypes.INT, 10)
             .add("radius", SerializableDataTypes.FLOAT, 3.0F)
             .add("radius_on_use", SerializableDataTypes.FLOAT, -0.5F)
@@ -42,7 +42,7 @@ public class SpawnEffectCloudEntityActionType extends EntityActionType {
             .set("duration_on_use", actionType.durationOnUse)
     );
 
-    private final PotionContentsComponent effectComponent;
+    private final PotionContents effectComponent;
     private final int waitTime;
 
     private final float radius;
@@ -51,7 +51,7 @@ public class SpawnEffectCloudEntityActionType extends EntityActionType {
     private final int duration;
     private final int durationOnUse;
 
-    public SpawnEffectCloudEntityActionType(PotionContentsComponent effectComponent, int waitTime, float radius, float radiusOnUse, int duration, int durationOnUse) {
+    public SpawnEffectCloudEntityActionType(PotionContents effectComponent, int waitTime, float radius, float radiusOnUse, int duration, int durationOnUse) {
         this.effectComponent = effectComponent;
         this.waitTime = waitTime;
         this.radius = radius;
@@ -64,13 +64,13 @@ public class SpawnEffectCloudEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         Entity entity = context.entity();
-        Vec3d pos = entity.getPos().add(context.offset());
+        Vec3 pos = entity.position().add(context.offset());
 
-        if (!(entity.getWorld() instanceof ServerWorld serverWorld)) {
+        if (!(entity.level() instanceof ServerLevel serverWorld)) {
             return;
         }
 
-        AreaEffectCloudEntity aec = new AreaEffectCloudEntity(entity.getWorld(), pos.getX(), pos.getY(), pos.getZ());
+        AreaEffectCloudEntity aec = new AreaEffectCloudEntity(entity.level(), pos.getX(), pos.getY(), pos.getZ());
 
         if (entity instanceof LivingEntity living) {
             aec.setOwner(living);
@@ -83,7 +83,7 @@ public class SpawnEffectCloudEntityActionType extends EntityActionType {
         aec.setDurationOnUse(durationOnUse);
         aec.setWaitTime(waitTime);
 
-        serverWorld.spawnEntity(aec);
+        serverWorld.addFreshEntity(aec);
 
     }
 

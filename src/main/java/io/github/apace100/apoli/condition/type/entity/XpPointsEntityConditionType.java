@@ -9,7 +9,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class XpPointsEntityConditionType extends EntityConditionType {
@@ -37,7 +37,7 @@ public class XpPointsEntityConditionType extends EntityConditionType {
 
     @Override
     public boolean test(EntityConditionContext context) {
-        return context.entity() instanceof PlayerEntity player
+        return context.entity() instanceof Player player
             && comparison.compare(player.totalExperience, compareTo);
     }
 

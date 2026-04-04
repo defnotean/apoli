@@ -2,7 +2,7 @@ package io.github.apace100.apoli.action.type;
 
 import io.github.apace100.apoli.action.ItemAction;
 import io.github.apace100.apoli.action.context.ItemActionContext;
-import net.minecraft.inventory.StackReference;
+import net.minecraft.world.entity.SlotAccess;
 
 public abstract class ItemActionType extends ActionType<ItemActionContext, ItemAction> {
 
@@ -13,7 +13,7 @@ public abstract class ItemActionType extends ActionType<ItemActionContext, ItemA
 
 	@Override
 	public boolean shouldExecute(ItemActionContext context) {
-		return context.stackReference() != StackReference.EMPTY;
+		return context.stackReference() != SlotAccess.EMPTY;
 	}
 
 }

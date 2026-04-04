@@ -10,7 +10,7 @@ public class SneakingEntityConditionType extends EntityConditionType {
 
 	@Override
 	public boolean test(EntityConditionContext context) {
-		return context.entity().isSneaking();
+		return context.entity().isShiftKeyDown();
 	}
 
 	@Override

@@ -10,14 +10,14 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec2f;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.network.chat.Component;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec2f;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -57,7 +57,7 @@ public class CommandBlockConditionType extends BlockConditionType {
         BlockState blockState = context.blockState();
         BlockPos pos = context.pos();
 
-        if (!(context.world() instanceof ServerWorld serverWorld)) {
+        if (!(context.world() instanceof ServerLevel serverWorld)) {
             return false;
         }
 
@@ -72,7 +72,7 @@ public class CommandBlockConditionType extends BlockConditionType {
             serverWorld,
             Apoli.config.executeCommand.permissionLevel,
             blockTranslationKey,
-            Text.translatable(blockTranslationKey),
+            Component.translatable(blockTranslationKey),
             server,
             null
         );

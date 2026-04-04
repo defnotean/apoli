@@ -3,8 +3,8 @@ package io.github.apace100.apoli.util;
 import io.github.apace100.apoli.access.ModifiedPoseHolder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.world.entity.Entity;
 
 import java.util.Optional;
 
@@ -22,7 +22,7 @@ public enum ArmPoseReference {
     BRUSH;
 
     @Environment(EnvType.CLIENT)
-    public static Optional<BipedEntityModel.ArmPose> getArmPose(Entity entity) {
+    public static Optional<HumanoidModel.ArmPose> getArmPose(Entity entity) {
 
         if (!(entity instanceof ModifiedPoseHolder poseHolder)) {
             return Optional.empty();
@@ -31,25 +31,25 @@ public enum ArmPoseReference {
         else {
             return poseHolder.apoli$getModifiedArmPose().map(armPoseReference -> switch (armPoseReference) {
                 case EMPTY ->
-                    BipedEntityModel.ArmPose.EMPTY;
+                    HumanoidModel.ArmPose.EMPTY;
                 case ITEM ->
-                    BipedEntityModel.ArmPose.ITEM;
+                    HumanoidModel.ArmPose.ITEM;
                 case BLOCK ->
-                    BipedEntityModel.ArmPose.BLOCK;
+                    HumanoidModel.ArmPose.BLOCK;
                 case BRUSH ->
-                    BipedEntityModel.ArmPose.BRUSH;
+                    HumanoidModel.ArmPose.BRUSH;
                 case SPYGLASS ->
-                    BipedEntityModel.ArmPose.SPYGLASS;
+                    HumanoidModel.ArmPose.SPYGLASS;
                 case TOOT_HORN ->
-                    BipedEntityModel.ArmPose.TOOT_HORN;
+                    HumanoidModel.ArmPose.TOOT_HORN;
                 case THROW_SPEAR ->
-                    BipedEntityModel.ArmPose.THROW_SPEAR;
+                    HumanoidModel.ArmPose.THROW_SPEAR;
                 case BOW_AND_ARROW ->
-                    BipedEntityModel.ArmPose.BOW_AND_ARROW;
+                    HumanoidModel.ArmPose.BOW_AND_ARROW;
                 case CROSSBOW_HOLD ->
-                    BipedEntityModel.ArmPose.CROSSBOW_HOLD;
+                    HumanoidModel.ArmPose.CROSSBOW_HOLD;
                 case CROSSBOW_CHARGE ->
-                    BipedEntityModel.ArmPose.CROSSBOW_CHARGE;
+                    HumanoidModel.ArmPose.CROSSBOW_CHARGE;
             });
         }
 

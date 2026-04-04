@@ -1,13 +1,13 @@
 package io.github.apace100.apoli.util;
 
-import net.minecraft.component.type.AttributeModifierSlot;
-import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.EquipmentSlot;
 
 import java.util.Optional;
 
 public final class EquipmentSlotUtil {
 
-    public static Optional<EquipmentSlot> fromAttributeModifierSlot(AttributeModifierSlot modifierSlot) {
+    public static Optional<EquipmentSlot> fromAttributeModifierSlot(EquipmentSlotGroup modifierSlot) {
         return switch (modifierSlot) {
             case MAINHAND ->
                 Optional.of(EquipmentSlot.MAINHAND);

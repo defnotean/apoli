@@ -4,7 +4,7 @@ import io.github.apace100.apoli.power.type.ValueModifyingPowerType;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 import java.util.List;
 

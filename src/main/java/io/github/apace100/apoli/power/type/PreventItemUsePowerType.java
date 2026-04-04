@@ -5,7 +5,7 @@ import io.github.apace100.apoli.condition.ItemCondition;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -37,7 +37,7 @@ public class PreventItemUsePowerType extends PowerType {
 
     public boolean doesPrevent(ItemStack stack) {
         return itemCondition
-            .map(condition -> condition.test(getHolder().getWorld(), stack))
+            .map(condition -> condition.test(getHolder().level(), stack))
             .orElse(true);
     }
 

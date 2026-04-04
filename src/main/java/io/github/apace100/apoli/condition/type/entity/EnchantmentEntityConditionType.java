@@ -11,13 +11,14 @@ import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
 import org.jetbrains.annotations.NotNull;
+import net.minecraft.core.registries.Registries;
 
 public class EnchantmentEntityConditionType extends EntityConditionType {
 
@@ -43,7 +44,7 @@ public class EnchantmentEntityConditionType extends EntityConditionType {
             .set("compare_to", conditionType.compareTo)
     );
 
-    private final RegistryKey<Enchantment> enchantmentKey;
+    private final ResourceKey<Enchantment> enchantmentKey;
     private final boolean useModifications;
 
     private final Calculation calculation;
@@ -51,7 +52,7 @@ public class EnchantmentEntityConditionType extends EntityConditionType {
     private final Comparison comparison;
     private final int compareTo;
 
-    public EnchantmentEntityConditionType(RegistryKey<Enchantment> enchantmentKey, boolean useModifications, Calculation calculation, Comparison comparison, int compareTo) {
+    public EnchantmentEntityConditionType(ResourceKey<Enchantment> enchantmentKey, boolean useModifications, Calculation calculation, Comparison comparison, int compareTo) {
         this.enchantmentKey = enchantmentKey;
         this.useModifications = useModifications;
         this.calculation = calculation;
@@ -64,7 +65,7 @@ public class EnchantmentEntityConditionType extends EntityConditionType {
 
         if (context.entity() instanceof LivingEntity livingEntity) {
 
-            RegistryEntry<Enchantment> enchantment = livingEntity.getRegistryManager().get(RegistryKeys.ENCHANTMENT).entryOf(enchantmentKey);
+            Holder<Enchantment> enchantment = livingEntity.registryAccess().get(Registries.ENCHANTMENT).entryOf(enchantmentKey);
             int level = calculation.queryTotalLevel(livingEntity, enchantment, useModifications);
 
             return comparison.compare(level, compareTo);
@@ -87,7 +88,7 @@ public class EnchantmentEntityConditionType extends EntityConditionType {
         SUM {
 
             @Override
-            public int queryLevel(ItemStack stack, RegistryEntry<Enchantment> enchantmentEntry, boolean useModifications, int totalLevel) {
+            public int queryLevel(ItemStack stack, Holder<Enchantment> enchantmentEntry, boolean useModifications, int totalLevel) {
                 return ModifyEnchantmentLevelPowerType.getEnchantments(stack, stack.getEnchantments(), useModifications).getLevel(enchantmentEntry);
             }
 
@@ -96,7 +97,7 @@ public class EnchantmentEntityConditionType extends EntityConditionType {
         MAX {
 
             @Override
-            public int queryLevel(ItemStack stack, RegistryEntry<Enchantment> enchantmentEntry, boolean useModifications, int totalLevel) {
+            public int queryLevel(ItemStack stack, Holder<Enchantment> enchantmentEntry, boolean useModifications, int totalLevel) {
 
                 int potentialLevel = ModifyEnchantmentLevelPowerType.getEnchantments(stack, stack.getEnchantments(), useModifications).getLevel(enchantmentEntry);
 
@@ -112,7 +113,7 @@ public class EnchantmentEntityConditionType extends EntityConditionType {
 
         };
 
-        public int queryTotalLevel(LivingEntity entity, RegistryEntry<Enchantment> enchantmentEntry, boolean useModifications) {
+        public int queryTotalLevel(LivingEntity entity, Holder<Enchantment> enchantmentEntry, boolean useModifications) {
 
             Enchantment enchantment = enchantmentEntry.value();
             int totalLevel = 0;
@@ -125,7 +126,7 @@ public class EnchantmentEntityConditionType extends EntityConditionType {
 
         }
 
-        public abstract int queryLevel(ItemStack stack, RegistryEntry<Enchantment> enchantmentEntry, boolean useModifications, int totalLevel);
+        public abstract int queryLevel(ItemStack stack, Holder<Enchantment> enchantmentEntry, boolean useModifications, int totalLevel);
 
     }
 

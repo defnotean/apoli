@@ -9,14 +9,14 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.mixin.ClientAdvancementManagerAccessor;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.AdvancementProgress;
-import net.minecraft.client.network.ClientAdvancementManager;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.client.multiplayer.ClientAdvancements;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -33,23 +33,23 @@ public class AdvancementEntityConditionType extends EntityConditionType {
             .set("advancement", conditionType.advancement)
     );
 
-    private final Identifier advancement;
+    private final ResourceLocation advancement;
 
-    public AdvancementEntityConditionType(Identifier advancement) {
+    public AdvancementEntityConditionType(ResourceLocation advancement) {
         this.advancement = advancement;
     }
 
     @Override
     public boolean test(EntityConditionContext context) {
 
-        if (!(context.entity() instanceof PlayerEntity player)) {
+        if (!(context.entity() instanceof Player player)) {
             return false;
         }
 
         MinecraftServer server = player.getServer();
         if (server != null) {
 
-            AdvancementEntry advancementEntry = server.getAdvancementLoader().get(advancement);
+            AdvancementHolder advancementEntry = server.getAdvancementLoader().get(advancement);
             if (advancementEntry == null) {
                 //  TODO: Throw an exception and pass it to the factory instance to be caught instead -eggohito
                 Apoli.LOGGER.warn("Advancement \"{}\" did not exist, but was referenced in an \"advancement\" entity condition!", advancement);
@@ -57,17 +57,17 @@ public class AdvancementEntityConditionType extends EntityConditionType {
             }
 
             else {
-                return ((ServerPlayerEntity) player).getAdvancementTracker()
+                return ((ServerPlayer) player).getAdvancementTracker()
                     .getProgress(advancementEntry)
                     .isDone();
             }
 
         }
 
-        else if (player instanceof ClientPlayerEntity clientPlayer && clientPlayer.networkHandler != null) {
+        else if (player instanceof LocalPlayer clientPlayer && clientPlayer.connection != null) {
 
-            ClientAdvancementManager advancementManager = clientPlayer.networkHandler.getAdvancementHandler();
-            AdvancementEntry advancement = advancementManager.get(this.advancement);
+            ClientAdvancements advancementManager = clientPlayer.connection.getAdvancementHandler();
+            AdvancementHolder advancement = advancementManager.get(this.advancement);
 
             if (advancement == null) {
                 //  We don't want to print an error here if the advancement does not exist,
@@ -75,7 +75,7 @@ public class AdvancementEntityConditionType extends EntityConditionType {
                 return false;
             }
 
-            Map<AdvancementEntry, AdvancementProgress> progresses = ((ClientAdvancementManagerAccessor) advancementManager).getAdvancementProgresses();
+            Map<AdvancementHolder, AdvancementProgress> progresses = ((ClientAdvancementManagerAccessor) advancementManager).getAdvancementProgresses();
             AdvancementProgress progress = progresses.get(advancement);
 
             return progress != null

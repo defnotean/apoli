@@ -7,12 +7,12 @@ import io.github.apace100.apoli.action.type.BlockActionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.BoneMealItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.BoneMealItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.WorldEvents;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,7 +41,7 @@ public class BoneMealBlockActionType extends BlockActionType {
     @Override
     public void accept(BlockActionContext context) {
 
-        World world = context.world();
+        Level world = context.world();
         BlockPos pos = context.pos();
 
         Optional<Direction> optDirection = context.direction();
@@ -71,9 +71,9 @@ public class BoneMealBlockActionType extends BlockActionType {
         return BlockActionTypes.BONE_MEAL;
     }
 
-    private void boneMealEvent(World world, BlockPos pos) {
+    private void boneMealEvent(Level world, BlockPos pos) {
 
-        if (showEffects && !world.isClient()) {
+        if (showEffects && !world.isClientSide()) {
             world.syncWorldEvent(WorldEvents.BONE_MEAL_USED, pos, 0);
         }
 

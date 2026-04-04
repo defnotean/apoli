@@ -1,11 +1,11 @@
 package io.github.apace100.apoli.util;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 
 import java.util.Collection;
 import java.util.Set;
@@ -37,14 +37,14 @@ public enum Shape {
 
     }
 
-    public final Collection<Entity> getEntities(World world, Vec3d center, double radius) {
+    public final Collection<Entity> getEntities(Level world, Vec3 center, double radius) {
 
         ObjectOpenHashSet<Entity> entities = new ObjectOpenHashSet<>();
 
         double diameter = radius * 2;
         double x, y, z;
 
-        for (Entity entity : world.getNonSpectatingEntities(Entity.class, Box.of(center, diameter, diameter, diameter))) {
+        for (Entity entity : world.getNonSpectatingEntities(Entity.class, AABB.of(center, diameter, diameter, diameter))) {
 
             x = Math.abs(entity.getX() - center.getX());
             y = Math.abs(entity.getY() - center.getY());
@@ -89,7 +89,7 @@ public enum Shape {
     }
 
     @Deprecated(forRemoval = true)
-    public static Set<Entity> getEntities(Shape shape, World world, Vec3d center, double radius) {
+    public static Set<Entity> getEntities(Shape shape, Level world, Vec3 center, double radius) {
         return (ObjectOpenHashSet<Entity>) shape.getEntities(world, center, radius);    // Should be safe
     }
 

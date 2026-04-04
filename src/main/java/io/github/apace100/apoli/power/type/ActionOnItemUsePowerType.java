@@ -10,9 +10,9 @@ import io.github.apace100.apoli.util.PriorityPhase;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -72,11 +72,11 @@ public class ActionOnItemUsePowerType extends PowerType implements Prioritized<A
     public boolean doesApply(ItemStack stack, TriggerType triggerType, io.github.apace100.apoli.util.PriorityPhase priorityPhase) {
         return this.triggerType == triggerType
             && priorityPhase.test(this.getPriority())
-            && itemCondition.map(condition -> condition.test(getHolder().getWorld(), stack)).orElse(true);
+            && itemCondition.map(condition -> condition.test(getHolder().level(), stack)).orElse(true);
     }
 
-    public void executeActions(StackReference stackReference) {
-        itemAction.ifPresent(action -> action.execute(getHolder().getWorld(), stackReference));
+    public void executeActions(SlotAccess stackReference) {
+        itemAction.ifPresent(action -> action.execute(getHolder().level(), stackReference));
         entityAction.ifPresent(action -> action.execute(getHolder()));
     }
 
@@ -84,9 +84,9 @@ public class ActionOnItemUsePowerType extends PowerType implements Prioritized<A
         INSTANT, START, STOP, FINISH, DURING
     }
 
-    public static void executeActions(Entity user, StackReference useStack, ItemStack checkStack, TriggerType triggerType, PriorityPhase phase) {
+    public static void executeActions(Entity user, SlotAccess useStack, ItemStack checkStack, TriggerType triggerType, PriorityPhase phase) {
 
-        if (user.getWorld().isClient()) {
+        if (user.level().isClientSide()) {
             return;
         }
 

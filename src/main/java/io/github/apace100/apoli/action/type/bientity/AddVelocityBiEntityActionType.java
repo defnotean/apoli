@@ -11,9 +11,9 @@ import io.github.apace100.apoli.util.requirement.BiEntityRequirement;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.function.TriConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
@@ -60,14 +60,14 @@ public class AddVelocityBiEntityActionType extends BiEntityActionType {
 
         Vector3f velocityCopy = new Vector3f(velocity);
         TriConsumer<Float, Float, Float> method = set
-            ? target::setVelocity
-            : target::addVelocity;
+            ? target::setDeltaMovement
+            : target::push;
 
-        Vec3d referenceVec = reference.apply(actor, target);
-        Space.transformVectorToBase(referenceVec, velocityCopy, actor.getYaw(), true);  //  Vector normalized by method
+        Vec3 referenceVec = reference.apply(actor, target);
+        Space.transformVectorToBase(referenceVec, velocityCopy, actor.getYRot(), true);  //  Vector normalized by method
 
         method.accept(velocityCopy.x(), velocityCopy.y(), velocityCopy.z());
-        target.velocityModified = true;
+        target.hasImpulse = true;
 
     }
 
@@ -81,13 +81,13 @@ public class AddVelocityBiEntityActionType extends BiEntityActionType {
         return BiEntityRequirement.BOTH;
     }
 
-    public enum Reference implements BiFunction<Entity, Entity, Vec3d> {
+    public enum Reference implements BiFunction<Entity, Entity, Vec3> {
 
         POSITION {
 
             @Override
-            public Vec3d apply(Entity actor, Entity target) {
-                return target.getPos().subtract(actor.getPos());
+            public Vec3 apply(Entity actor, Entity target) {
+                return target.position().subtract(actor.position());
             }
 
         },
@@ -95,18 +95,18 @@ public class AddVelocityBiEntityActionType extends BiEntityActionType {
         ROTATION {
 
             @Override
-            public Vec3d apply(Entity actor, Entity target) {
+            public Vec3 apply(Entity actor, Entity target) {
 
-                float pitch = actor.getPitch();
-                float yaw = actor.getYaw();
+                float pitch = actor.getXRot();
+                float yaw = actor.getYRot();
 
                 float i = 0.017453292F;
 
-                float j = -MathHelper.sin(yaw * i) * MathHelper.cos(pitch * i);
-                float k = -MathHelper.sin(pitch * i);
-                float l =  MathHelper.cos(yaw * i) * MathHelper.cos(pitch * i);
+                float j = -Mth.sin(yaw * i) * Mth.cos(pitch * i);
+                float k = -Mth.sin(pitch * i);
+                float l =  Mth.cos(yaw * i) * Mth.cos(pitch * i);
 
-                return new Vec3d(j, k, l);
+                return new Vec3(j, k, l);
 
             }
 

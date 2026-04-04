@@ -4,23 +4,23 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class PowerHolderArgumentType extends EntityArgumentType {
+public class PowerHolderArgumentType extends EntityArgument {
 
     public static final SimpleCommandExceptionType HOLDERS_NOT_FOUND = new SimpleCommandExceptionType(
-        Text.translatable("argument.apoli.power_holder.not_found.multiple")
+        Component.translatable("argument.apoli.power_holder.not_found.multiple")
     );
 
     public static final DynamicCommandExceptionType HOLDER_NOT_FOUND = new DynamicCommandExceptionType(
-        o -> Text.translatable("argument.apoli.power_holder.not_found.single", o)
+        o -> Component.translatable("argument.apoli.power_holder.not_found.single", o)
     );
 
     protected PowerHolderArgumentType(boolean singleTarget) {

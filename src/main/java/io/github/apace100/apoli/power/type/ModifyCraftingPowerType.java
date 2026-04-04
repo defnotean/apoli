@@ -12,14 +12,14 @@ import io.github.apace100.apoli.util.InventoryUtil;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.RecipeInputInventory;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.CraftingResultSlot;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.RecipeInputInventory;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.CraftingResultSlot;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -60,7 +60,7 @@ public class ModifyCraftingPowerType extends PowerType implements Prioritized<Mo
             .set("priority", powerType.getPriority())
     );
 
-    private final Optional<Identifier> recipeId;
+    private final Optional<ResourceLocation> recipeId;
 
     private final Optional<EntityAction> entityAction;
     private final Optional<BlockAction> blockAction;
@@ -73,7 +73,7 @@ public class ModifyCraftingPowerType extends PowerType implements Prioritized<Mo
     private final Optional<ItemStack> resultStack;
     private final int priority;
 
-    public ModifyCraftingPowerType(Optional<Identifier> recipeId, Optional<EntityAction> entityAction, Optional<BlockAction> blockAction, Optional<ItemAction> itemAction, Optional<ItemAction> itemActionAfterCrafting, Optional<ItemCondition> itemCondition, Optional<ItemStack> resultStack, int priority, Optional<EntityCondition> condition) {
+    public ModifyCraftingPowerType(Optional<ResourceLocation> recipeId, Optional<EntityAction> entityAction, Optional<BlockAction> blockAction, Optional<ItemAction> itemAction, Optional<ItemAction> itemActionAfterCrafting, Optional<ItemCondition> itemCondition, Optional<ItemStack> resultStack, int priority, Optional<EntityCondition> condition) {
         super(condition);
         this.recipeId = recipeId;
         this.entityAction = entityAction;
@@ -95,38 +95,38 @@ public class ModifyCraftingPowerType extends PowerType implements Prioritized<Mo
         return priority;
     }
 
-    public boolean doesApply(Identifier targetRecipeId, ItemStack originalResultStack) {
+    public boolean doesApply(ResourceLocation targetRecipeId, ItemStack originalResultStack) {
         return recipeId.map(targetRecipeId::equals).orElse(true)
-            && itemCondition.map(condition -> condition.test(getHolder().getWorld(), originalResultStack)).orElse(true);
+            && itemCondition.map(condition -> condition.test(getHolder().level(), originalResultStack)).orElse(true);
     }
 
-    public void applyAfterCraftingItemAction(StackReference outputStackReference) {
-		itemActionAfterCrafting.ifPresent(action -> action.execute(getHolder().getWorld(), outputStackReference));
+    public void applyAfterCraftingItemAction(SlotAccess outputStackReference) {
+		itemActionAfterCrafting.ifPresent(action -> action.execute(getHolder().level(), outputStackReference));
     }
 
-    public StackReference getNewResult(StackReference resultStackReference) {
+    public SlotAccess getNewResult(SlotAccess resultStackReference) {
 
         resultStack
             .map(ItemStack::copy)
             .ifPresent(resultStackReference::set);
 
-        itemAction.ifPresent(action -> action.execute(getHolder().getWorld(), resultStackReference));
+        itemAction.ifPresent(action -> action.execute(getHolder().level(), resultStackReference));
         return resultStackReference;
 
     }
 
     public void executeActions(Optional<BlockPos> craftingBlockPos) {
-        craftingBlockPos.ifPresent(pos -> blockAction.ifPresent(action -> action.execute(getHolder().getWorld(), pos, Optional.empty())));
+        craftingBlockPos.ifPresent(pos -> blockAction.ifPresent(action -> action.execute(getHolder().level(), pos, Optional.empty())));
         entityAction.ifPresent(action -> action.execute(getHolder()));
     }
 
-    public static ItemStack executeAfterCraftingAction(PlayerEntity player, RecipeInputInventory recipeInput, Slot slot, ItemStack stack) {
+    public static ItemStack executeAfterCraftingAction(Player player, RecipeInputInventory recipeInput, Slot slot, ItemStack stack) {
 
         if (!(recipeInput instanceof PowerCraftingInventory pci)) {
             return stack;
         }
 
-        StackReference stackReference = InventoryUtil.createStackReference(stack);
+        SlotAccess stackReference = InventoryUtil.createStackReference(stack);
         List<ModifyCraftingPowerType> modifyCraftingPowers = pci.apoli$getPowerTypes()
             .stream()
             .filter(ModifyCraftingPowerType.class::isInstance)

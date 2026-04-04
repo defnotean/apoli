@@ -1,7 +1,7 @@
 package io.github.apace100.apoli.access;
 
 import io.github.apace100.apoli.power.type.PowerType;
-import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.world.inventory.TransientCraftingContainer;
 
 import java.util.Collection;
 
@@ -11,11 +11,11 @@ public interface PowerCraftingInventory extends PowerCraftingObject {
 
     void apoli$setPowerTypes(Collection<? extends PowerType> powerType);
 
-    default CraftingInventory apoli$getInventory() {
+    default TransientCraftingContainer apoli$getInventory() {
         return null;
     }
 
-    default void apoli$setInventory(CraftingInventory inventory) {
+    default void apoli$setInventory(TransientCraftingContainer inventory) {
 
     }
 

@@ -6,14 +6,14 @@ import io.github.apace100.apoli.action.context.BiEntityActionContext;
 import io.github.apace100.apoli.action.type.BiEntityActionType;
 import io.github.apace100.apoli.action.type.BiEntityActionTypes;
 import io.github.apace100.apoli.action.type.meta.ChoiceMetaActionType;
-import net.minecraft.util.collection.WeightedList;
+import net.minecraft.world.entity.ai.behavior.ShufflingList;
 import org.jetbrains.annotations.NotNull;
 
 public class ChoiceBiEntityActionType extends BiEntityActionType implements ChoiceMetaActionType<BiEntityActionContext, BiEntityAction> {
 
-	private final WeightedList<BiEntityAction> actions;
+	private final ShufflingList<BiEntityAction> actions;
 
-	public ChoiceBiEntityActionType(WeightedList<BiEntityAction> actions) {
+	public ChoiceBiEntityActionType(ShufflingList<BiEntityAction> actions) {
 		this.actions = actions;
 	}
 
@@ -28,7 +28,7 @@ public class ChoiceBiEntityActionType extends BiEntityActionType implements Choi
 	}
 
 	@Override
-	public WeightedList<BiEntityAction> actions() {
+	public ShufflingList<BiEntityAction> actions() {
 		return actions;
 	}
 

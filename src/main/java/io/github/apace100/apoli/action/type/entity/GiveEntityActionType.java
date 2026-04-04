@@ -9,13 +9,13 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.InventoryUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.component.type.AttributeModifierSlot;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -40,10 +40,10 @@ public class GiveEntityActionType extends EntityActionType {
 
     private final Optional<ItemAction> itemAction;
 
-    private final Optional<AttributeModifierSlot> preferredSlot;
+    private final Optional<EquipmentSlotGroup> preferredSlot;
     private final ItemStack stack;
 
-    public GiveEntityActionType(Optional<ItemAction> itemAction, Optional<AttributeModifierSlot> preferredSlot, ItemStack stack) {
+    public GiveEntityActionType(Optional<ItemAction> itemAction, Optional<EquipmentSlotGroup> preferredSlot, ItemStack stack) {
         this.itemAction = itemAction;
         this.preferredSlot = preferredSlot;
         this.stack = stack;
@@ -54,27 +54,27 @@ public class GiveEntityActionType extends EntityActionType {
 
         Entity entity = context.entity();
 
-        if (entity.getWorld().isClient() || stack.isEmpty()) {
+        if (entity.level().isClientSide() || stack.isEmpty()) {
             return;
         }
 
-        StackReference stackReference = InventoryUtil.createStackReference(stack.copy());
-        itemAction.ifPresent(action -> action.execute(entity.getWorld(), stackReference));
+        SlotAccess stackReference = InventoryUtil.createStackReference(stack.copy());
+        itemAction.ifPresent(action -> action.execute(entity.level(), stackReference));
 
         ItemStack stackToGive = stackReference.get();
 
         if (preferredSlot.isPresent() && entity instanceof LivingEntity living) {
 
-            AttributeModifierSlot actualPreferredSlot = preferredSlot.get();
+            EquipmentSlotGroup actualPreferredSlot = preferredSlot.get();
             for (EquipmentSlot slot : EquipmentSlot.values()) {
 
                 if (!actualPreferredSlot.matches(slot)) {
                     continue;
                 }
 
-                ItemStack stackInSlot = living.getEquippedStack(slot);
+                ItemStack stackInSlot = living.getItemBySlot(slot);
                 if (stackInSlot.isEmpty()) {
-                    living.equipStack(slot, stackToGive);
+                    living.setItemSlot(slot, stackToGive);
                     return;
                 }
 
@@ -95,7 +95,7 @@ public class GiveEntityActionType extends EntityActionType {
 
         }
 
-        if (entity instanceof PlayerEntity player) {
+        if (entity instanceof Player player) {
             player.getInventory().offerOrDrop(stackToGive);
         }
 

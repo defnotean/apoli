@@ -7,8 +7,8 @@ import io.github.apace100.apoli.condition.type.EntityConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.EntityType;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 
 public class InTagEntityConditionType extends EntityConditionType {
@@ -31,7 +31,7 @@ public class InTagEntityConditionType extends EntityConditionType {
 
     @Override
     public boolean test(EntityConditionContext context) {
-        return context.entity().getType().isIn(tag);
+        return context.entity().getType().is(tag);
     }
 
     @Override

@@ -1,9 +1,9 @@
 package io.github.apace100.apoli.power.type;
 
 import io.github.apace100.apoli.condition.EntityCondition;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtInt;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.util.Mth;
 
 import java.util.Optional;
 
@@ -42,7 +42,7 @@ public abstract class VariableIntPowerType extends PowerType {
     }
 
     public int setValue(int newValue) {
-        return currentValue = MathHelper.clamp(newValue, min, max);
+        return currentValue = Mth.clamp(newValue, min, max);
     }
 
     public int increment() {
@@ -54,13 +54,13 @@ public abstract class VariableIntPowerType extends PowerType {
     }
 
     @Override
-    public NbtElement toTag() {
-        return NbtInt.of(currentValue);
+    public Tag toTag() {
+        return IntTag.of(currentValue);
     }
 
     @Override
-    public void fromTag(NbtElement tag) {
-        currentValue = MathHelper.clamp(((NbtInt) tag).intValue(), min, max);
+    public void fromTag(Tag tag) {
+        currentValue = Mth.clamp(((IntTag) tag).intValue(), min, max);
     }
 
 }

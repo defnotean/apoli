@@ -35,10 +35,10 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.advancement.criterion.Criteria;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ladysnake.cca.api.v3.entity.EntityComponentFactoryRegistry;
@@ -123,14 +123,14 @@ public class Apoli implements ModInitializer, EntityComponentInitializer {
 		ServerEntityEvents.EQUIPMENT_CHANGE.register(ItemPowersComponent::onChangeEquipment);
 
 		CalioResourceConditions.ALIASES.addNamespaceAlias(MODID, Calio.MOD_NAMESPACE);
-		Criteria.register(GainedPowerCriterion.ID.toString(), GainedPowerCriterion.INSTANCE);
+		CriteriaTriggers.register(GainedPowerCriterion.ID.toString(), GainedPowerCriterion.INSTANCE);
 
 		LOGGER.info("Apoli " + VERSION + " has initialized. Ready to power up your game!");
 
 	}
 
-	public static Identifier identifier(String path) {
-		return Identifier.of(MODID, path);
+	public static ResourceLocation identifier(String path) {
+		return ResourceLocation.parse(MODID, path);
 	}
 
 	public static boolean onServerSide() {

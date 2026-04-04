@@ -9,7 +9,7 @@ import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.apoli.util.context.ActionContext;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.Optional;

@@ -3,15 +3,15 @@ package io.github.apace100.apoli.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import io.github.apace100.apoli.access.OwnableAttributeContainer;
 import io.github.apace100.apoli.access.OwnableAttributeInstance;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(DefaultAttributeContainer.class)
+@Mixin(AttributeSupplier.class)
 public abstract class DefaultAttributeContainerMixin implements OwnableAttributeContainer {
 
     @Unique
@@ -28,8 +28,8 @@ public abstract class DefaultAttributeContainerMixin implements OwnableAttribute
         this.apoli$owner.set(owner);
     }
 
-    @ModifyExpressionValue(method = "getValue", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/attribute/DefaultAttributeContainer;require(Lnet/minecraft/registry/entry/RegistryEntry;)Lnet/minecraft/entity/attribute/EntityAttributeInstance;"))
-    private EntityAttributeInstance apoli$setAttributeInstanceOwner(EntityAttributeInstance original) {
+    @ModifyExpressionValue(method = "getValue", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/attribute/AttributeSupplier;require(Lnet/minecraft/core/Holder;)Lnet/minecraft/world/entity/attribute/AttributeInstance;"))
+    private AttributeInstance apoli$setAttributeInstanceOwner(AttributeInstance original) {
 
         if (original instanceof OwnableAttributeInstance ownableAttributeInstance) {
             ownableAttributeInstance.apoli$setOwner(this.apoli$getOwner());

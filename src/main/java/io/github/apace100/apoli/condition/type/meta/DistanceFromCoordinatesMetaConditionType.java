@@ -14,9 +14,9 @@ import io.github.apace100.apoli.util.context.ConditionContext;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -32,7 +32,7 @@ public interface DistanceFromCoordinatesMetaConditionType {
 	Shape shape();
 
 	Optional<Integer> roundToDigit();
-	Vec3d offset();
+	Vec3 offset();
 
 //	Optional<Boolean> resultOnWrongDimension();
 //	boolean checkModifiedSpawns();
@@ -49,7 +49,7 @@ public interface DistanceFromCoordinatesMetaConditionType {
 
 	default boolean testCondition(Either<BlockConditionContext, EntityConditionContext> context) {
 
-		World world = context.map(BlockConditionContext::world, EntityConditionContext::world);
+		Level world = context.map(BlockConditionContext::world, EntityConditionContext::world);
 		BlockPos pos = context.map(BlockConditionContext::pos, EntityConditionContext::blockPos);
 
 		double coordinateScale = world.getDimension().coordinateScale();
@@ -68,7 +68,7 @@ public interface DistanceFromCoordinatesMetaConditionType {
 				//	This, and other of it parts, has been commented since other dimensions (or worlds, in Yarn's terms) can have
 				//	its own spawn points (which can be set via `/setworldspawn`)	-eggohito
 
-//				if (resultOnWrongDimension().isPresent() && world.getRegistryKey != World.OVERWORLD) {
+//				if (resultOnWrongDimension().isPresent() && world.getRegistryKey != Level.OVERWORLD) {
 //					return resultOnWrongDimension().get();
 //				}
 
@@ -130,7 +130,7 @@ public interface DistanceFromCoordinatesMetaConditionType {
 				.add("reference", SerializableDataType.enumValue(Reference.class), Reference.WORLD_ORIGIN)	//	The reference point for comparison
 				.add("shape", SerializableDataType.enumValue(Shape.class), Shape.CUBE)	//	The shape used for comparing the distance
 				.add("round_to_digit", SerializableDataTypes.INT.optional(), Optional.empty())	//	Rounds the calculated distance to this amount of digits (e.g: 0 for unitary values, 1 for decimals, -1 for multiples of ten)
-				.add("offset", SerializableDataTypes.VECTOR, Vec3d.ZERO)	//	The offset for the reference point
+				.add("offset", SerializableDataTypes.VECTOR, Vec3.ZERO)	//	The offset for the reference point
 				.add("comparison", ApoliDataTypes.COMPARISON)
 				.add("compare_to", SerializableDataTypes.DOUBLE)
 //				.add("result_on_wrong_dimension", SerializableDataTypes.BOOLEAN.optional(), Optional.empty())	//	The value to be used as the result if the dimension is not the same as the reference's
@@ -169,7 +169,7 @@ public interface DistanceFromCoordinatesMetaConditionType {
 	}
 
 	interface Constructor<M extends ConditionType<?, ?> & DistanceFromCoordinatesMetaConditionType> {
-		M create(Reference reference, Shape shape, Optional<Integer> roundToDigit, Vec3d offset, Comparison comparison, double compareTo, boolean scaleReferenceToDimension, boolean scaleDistanceToDimension, boolean ignoreX, boolean ignoreY, boolean ignoreZ);
+		M create(Reference reference, Shape shape, Optional<Integer> roundToDigit, Vec3 offset, Comparison comparison, double compareTo, boolean scaleReferenceToDimension, boolean scaleDistanceToDimension, boolean ignoreX, boolean ignoreY, boolean ignoreZ);
 	}
 
 	enum Reference {

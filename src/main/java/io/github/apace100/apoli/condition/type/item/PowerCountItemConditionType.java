@@ -11,7 +11,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.component.type.AttributeModifierSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -34,12 +34,12 @@ public class PowerCountItemConditionType extends ItemConditionType {
             .set("compare_to", conditionType.compareTo)
     );
 
-    private final Optional<AttributeModifierSlot> slot;
+    private final Optional<EquipmentSlotGroup> slot;
 
     private final Comparison comparison;
     private final int compareTo;
 
-    public PowerCountItemConditionType(Optional<AttributeModifierSlot> slot, Comparison comparison, int compareTo) {
+    public PowerCountItemConditionType(Optional<EquipmentSlotGroup> slot, Comparison comparison, int compareTo) {
         this.slot = slot;
         this.comparison = comparison;
         this.compareTo = compareTo;

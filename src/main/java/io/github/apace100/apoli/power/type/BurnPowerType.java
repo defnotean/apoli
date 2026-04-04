@@ -51,11 +51,11 @@ public class BurnPowerType extends PowerType {
         if (isActive()) {
 
             if (startTicks == null) {
-                this.startTicks = getHolder().age % interval;
+                this.startTicks = getHolder().tickCount % interval;
                 this.endTicks = null;
             }
 
-            else if (getHolder().age % interval == startTicks) {
+            else if (getHolder().tickCount % interval == startTicks) {
                 getHolder().setOnFireFor(burnDuration);
                 this.wasActive = true;
             }
@@ -66,10 +66,10 @@ public class BurnPowerType extends PowerType {
 
             if (endTicks == null) {
                 this.startTicks = null;
-                this.endTicks = getHolder().age % interval;
+                this.endTicks = getHolder().tickCount % interval;
             }
 
-            else if (getHolder().age % interval == endTicks) {
+            else if (getHolder().tickCount % interval == endTicks) {
                 this.wasActive = false;
             }
 

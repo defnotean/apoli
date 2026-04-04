@@ -6,8 +6,8 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -28,10 +28,10 @@ public class ElytraFlightPowerType extends PowerType {
             .set("render_elytra", powerType.renderElytra)
     );
 
-    private final Optional<Identifier> textureLocation;
+    private final Optional<ResourceLocation> textureLocation;
     private final boolean renderElytra;
 
-    public ElytraFlightPowerType(Optional<Identifier> textureLocation, boolean renderElytra,Optional<EntityCondition> condition) {
+    public ElytraFlightPowerType(Optional<ResourceLocation> textureLocation, boolean renderElytra,Optional<EntityCondition> condition) {
         super(condition);
         this.textureLocation = textureLocation;
         this.renderElytra = renderElytra;
@@ -47,7 +47,7 @@ public class ElytraFlightPowerType extends PowerType {
         return super.isActive();
     }
 
-    public Optional<Identifier> getTextureLocation() {
+    public Optional<ResourceLocation> getTextureLocation() {
         return textureLocation;
     }
 

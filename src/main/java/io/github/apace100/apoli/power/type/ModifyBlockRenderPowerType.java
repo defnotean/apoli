@@ -8,9 +8,9 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -57,7 +57,7 @@ public class ModifyBlockRenderPowerType extends PowerType {
         ApoliClient.shouldReloadWorldRenderer = true;
     }
 
-    public boolean doesPrevent(World world, BlockPos pos) {
+    public boolean doesPrevent(Level world, BlockPos pos) {
         return blockCondition
             .map(condition -> condition.test(world, pos))
             .orElse(true);

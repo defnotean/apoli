@@ -9,8 +9,8 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 public class HardnessBlockConditionType extends BlockConditionType {
@@ -38,7 +38,7 @@ public class HardnessBlockConditionType extends BlockConditionType {
     @Override
     public boolean test(BlockConditionContext context) {
 
-        World world = context.world();
+        Level world = context.world();
         BlockPos pos = context.pos();
 
         return comparison.compare(context.blockState().getHardness(world, pos), compareTo);

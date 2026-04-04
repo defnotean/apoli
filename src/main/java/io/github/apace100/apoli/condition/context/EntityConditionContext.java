@@ -1,18 +1,18 @@
 package io.github.apace100.apoli.condition.context;
 
 import io.github.apace100.apoli.util.context.ConditionContext;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 public record EntityConditionContext(Entity entity) implements ConditionContext {
 
-	public World world() {
-		return entity().getWorld();
+	public Level world() {
+		return entity().level();
 	}
 
 	public BlockPos blockPos() {
-		return entity().getBlockPos();
+		return entity().blockPosition();
 	}
 
 }

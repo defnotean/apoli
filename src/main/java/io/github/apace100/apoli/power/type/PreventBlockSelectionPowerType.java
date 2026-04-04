@@ -6,9 +6,9 @@ import io.github.apace100.apoli.condition.EntityCondition;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.block.EntityShapeContext;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.EntityShapeContext;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -41,11 +41,11 @@ public class PreventBlockSelectionPowerType extends PowerType {
 
     public boolean doesPrevent(BlockPos pos) {
         return blockCondition
-            .map(condition -> condition.test(getHolder().getWorld(), pos))
+            .map(condition -> condition.test(getHolder().level(), pos))
             .orElse(true);
     }
 
-    public static boolean doesPrevent(ShapeContext context, BlockPos pos) {
+    public static boolean doesPrevent(CollisionContext context, BlockPos pos) {
         return context instanceof EntityShapeContext entityContext
             && PowerHolderComponent.hasPowerType(entityContext.getEntity(), PreventBlockSelectionPowerType.class, p -> p.doesPrevent(pos));
     }

@@ -15,8 +15,8 @@ import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.entity.Entity;
-import net.minecraft.inventory.SlotRange;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.SlotRange;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;

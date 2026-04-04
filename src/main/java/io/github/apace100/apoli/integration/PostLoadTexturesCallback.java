@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 @Environment(EnvType.CLIENT)
 public interface PostLoadTexturesCallback {
@@ -20,6 +20,6 @@ public interface PostLoadTexturesCallback {
         }
     );
 
-    void onPostLoad(MinecraftClient client, boolean initialized);
+    void onPostLoad(Minecraft client, boolean initialized);
 
 }

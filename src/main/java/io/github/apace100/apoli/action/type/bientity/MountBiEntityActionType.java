@@ -7,8 +7,8 @@ import io.github.apace100.apoli.action.type.BiEntityActionTypes;
 import io.github.apace100.apoli.networking.packet.s2c.MountPlayerS2CPacket;
 import io.github.apace100.apoli.util.requirement.BiEntityRequirement;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
 public class MountBiEntityActionType extends BiEntityActionType {
@@ -21,7 +21,7 @@ public class MountBiEntityActionType extends BiEntityActionType {
 
         actor.startRiding(target, true);
 
-        if (target instanceof ServerPlayerEntity targetPlayer) {
+        if (target instanceof ServerPlayer targetPlayer) {
             ServerPlayNetworking.send(targetPlayer, new MountPlayerS2CPacket(actor.getId(), target.getId()));
         }
 

@@ -7,10 +7,10 @@ import io.github.apace100.apoli.condition.type.EntityConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.core.Holder;
 import org.jetbrains.annotations.NotNull;
 
 public class StatusEffectEntityConditionType extends EntityConditionType {
@@ -37,7 +37,7 @@ public class StatusEffectEntityConditionType extends EntityConditionType {
             .set("max_duration", conditionType.maxDuration)
     );
 
-    private final RegistryEntry<StatusEffect> effect;
+    private final Holder<MobEffect> effect;
 
     private final int minAmplifier;
     private final int maxAmplifier;
@@ -45,7 +45,7 @@ public class StatusEffectEntityConditionType extends EntityConditionType {
     private final int minDuration;
     private final int maxDuration;
 
-    public StatusEffectEntityConditionType(RegistryEntry<StatusEffect> effect, int minAmplifier, int maxAmplifier, int minDuration, int maxDuration) {
+    public StatusEffectEntityConditionType(Holder<MobEffect> effect, int minAmplifier, int maxAmplifier, int minDuration, int maxDuration) {
         this.effect = effect;
         this.minAmplifier = minAmplifier;
         this.maxAmplifier = maxAmplifier;
@@ -58,7 +58,7 @@ public class StatusEffectEntityConditionType extends EntityConditionType {
 
         if (context.entity() instanceof LivingEntity livingEntity) {
 
-            StatusEffectInstance effectInstance = livingEntity.getStatusEffect(effect);
+            MobEffectInstance effectInstance = livingEntity.getEffect(effect);
 
             if (effectInstance != null) {
 

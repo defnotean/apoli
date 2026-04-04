@@ -8,10 +8,10 @@ import io.github.apace100.apoli.action.type.EntityActionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.component.type.AttributeModifierSlot;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.inventory.StackReference;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SlotAccess;
 import org.jetbrains.annotations.NotNull;
 
 public class EquippedItemActionEntityActionType extends EntityActionType {
@@ -29,10 +29,10 @@ public class EquippedItemActionEntityActionType extends EntityActionType {
             .set("item_action", actionType.itemAction)
     );
 
-    private final AttributeModifierSlot equipmentSlot;
+    private final EquipmentSlotGroup equipmentSlot;
     private final ItemAction itemAction;
 
-    public EquippedItemActionEntityActionType(AttributeModifierSlot equipmentSlot, ItemAction itemAction) {
+    public EquippedItemActionEntityActionType(EquipmentSlotGroup equipmentSlot, ItemAction itemAction) {
         this.equipmentSlot = equipmentSlot;
         this.itemAction = itemAction;
     }
@@ -47,7 +47,7 @@ public class EquippedItemActionEntityActionType extends EntityActionType {
         for (EquipmentSlot slot : EquipmentSlot.values()) {
 
             if (equipmentSlot.matches(slot)) {
-                itemAction.execute(livingEntity.getWorld(), StackReference.of(livingEntity, slot));
+                itemAction.execute(livingEntity.level(), SlotAccess.of(livingEntity, slot));
             }
 
         }

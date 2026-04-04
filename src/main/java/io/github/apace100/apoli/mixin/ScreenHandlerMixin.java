@@ -8,14 +8,14 @@ import io.github.apace100.apoli.power.type.ModifyCraftingPowerType;
 import io.github.apace100.apoli.power.type.ModifyGrindstonePowerType;
 import io.github.apace100.apoli.recipe.ModifiedCraftingRecipe;
 import io.github.apace100.apoli.util.InventoryUtil;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.CraftingResultSlot;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.TransientCraftingContainer;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.CraftingResultSlot;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.SlotActionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -23,20 +23,20 @@ import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-@Mixin(ScreenHandler.class)
+@Mixin(AbstractContainerMenu.class)
 public class ScreenHandlerMixin {
 
-    @ModifyExpressionValue(method = "internalOnSlotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/Slot;tryTakeStackRange(IILnet/minecraft/entity/player/PlayerEntity;)Ljava/util/Optional;"))
-    private Optional<ItemStack> apoli$performAfterCraftingActions(Optional<ItemStack> original, int slotIndex, int button, SlotActionType actionType, PlayerEntity player, @Local Slot slot) {
+    @ModifyExpressionValue(method = "internalOnSlotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;tryRemove(IILnet/minecraft/world/entity/player/Player;)Ljava/util/Optional;"))
+    private Optional<ItemStack> apoli$performAfterCraftingActions(Optional<ItemStack> original, int slotIndex, int button, SlotActionType actionType, Player player, @Local Slot slot) {
 
-        if ((ScreenHandler) (Object) this instanceof PowerModifiedGrindstone pmg && original.isPresent() && slotIndex == 2) {
+        if ((AbstractContainerMenu) (Object) this instanceof PowerModifiedGrindstone pmg && original.isPresent() && slotIndex == 2) {
 
             List<ModifyGrindstonePowerType> applyingPowers = pmg.apoli$getAppliedPowers();
             if (applyingPowers == null || applyingPowers.isEmpty()) {
                 return original;
             }
 
-            StackReference stackReference = InventoryUtil.createStackReference(original.get());
+            SlotAccess stackReference = InventoryUtil.createStackReference(original.get());
             applyingPowers.forEach(mgpt -> mgpt.executeActions(pmg.apoli$getPos(), stackReference));
 
             return Optional.of(stackReference.get());
@@ -45,7 +45,7 @@ public class ScreenHandlerMixin {
 
         else if (original.isPresent() && slot instanceof CraftingResultSlot resultSlot) {
 
-            if (!(((CraftingResultSlotAccessor) resultSlot).getInput() instanceof CraftingInventory craftingInventory)) {
+            if (!(((CraftingResultSlotAccessor) resultSlot).getInput() instanceof TransientCraftingContainer craftingInventory)) {
                 return original;
             }
 
@@ -64,7 +64,7 @@ public class ScreenHandlerMixin {
             }
 
             modifyCraftingPowers.forEach(mcpt -> mcpt.executeActions(ModifiedCraftingRecipe.getBlockFromInventory(craftingInventory)));
-            StackReference stackReference = InventoryUtil.createStackReference(original.get());
+            SlotAccess stackReference = InventoryUtil.createStackReference(original.get());
 
             modifyCraftingPowers.forEach(mcpt -> mcpt.applyAfterCraftingItemAction(stackReference));
             return Optional.of(stackReference.get());

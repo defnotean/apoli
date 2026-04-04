@@ -4,12 +4,13 @@ import io.github.apace100.apoli.access.EntityLinkedType;
 import io.github.apace100.apoli.access.OwnableAttributeContainer;
 import io.github.apace100.apoli.mixin.internal.DefaultAttributeContainerAccessor;
 import io.github.apace100.apoli.mixin.internal.DefaultAttributeRegistryAccessor;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.registry.Registries;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
+import net.minecraft.core.registries.Registries;
 
 /**
  * @author Ampflower
@@ -24,13 +25,13 @@ public final class Internal {
      * as the server discards its thread when it exists.
      * */
     public static void globalStateCleanup() {
-        for (final EntityType<?> entityType : Registries.ENTITY_TYPE) {
+        for (final EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
             if (entityType instanceof EntityLinkedType entityLinkedType) {
                 entityLinkedType.apoli$setEntity(null);
             }
         }
 
-        for (final DefaultAttributeContainer container : DefaultAttributeRegistryAccessor.apoli$getRegistry().values()) {
+        for (final AttributeSupplier container : DefaultAttributeRegistryAccessor.apoli$getRegistry().values()) {
             clearOwnableAttribute(container);
 
             if (container instanceof DefaultAttributeContainerAccessor accessor) {

@@ -8,10 +8,10 @@ import io.github.apace100.apoli.condition.BiEntityCondition;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -25,8 +25,8 @@ public class SpawnParticlesEntityActionType extends EntityActionType {
             .add("offset_x", SerializableDataTypes.DOUBLE, 0.0D)
             .add("offset_y", SerializableDataTypes.DOUBLE, 0.5D)
             .add("offset_z", SerializableDataTypes.DOUBLE, 0.0D)
-            .addFunctionedDefault("offset", SerializableDataTypes.VECTOR, data -> new Vec3d(data.getDouble("offset_x"), data.getDouble("offset_y"), data.getDouble("offset_z")))
-            .add("spread", SerializableDataTypes.VECTOR, new Vec3d(0.5D, 0.5D, 0.5D))
+            .addFunctionedDefault("offset", SerializableDataTypes.VECTOR, data -> new Vec3(data.getDouble("offset_x"), data.getDouble("offset_y"), data.getDouble("offset_z")))
+            .add("spread", SerializableDataTypes.VECTOR, new Vec3(0.5D, 0.5D, 0.5D))
             .add("force", SerializableDataTypes.BOOLEAN, false)
             .add("speed", SerializableDataTypes.FLOAT, 0.0F)
             .add("count", SerializableDataTypes.INT, 1),
@@ -50,16 +50,16 @@ public class SpawnParticlesEntityActionType extends EntityActionType {
     );
 
     private final Optional<BiEntityCondition> biEntityCondition;
-    private final ParticleEffect particle;
+    private final ParticleOptions particle;
 
-    private final Vec3d offset;
-    private final Vec3d spread;
+    private final Vec3 offset;
+    private final Vec3 spread;
 
     private final boolean force;
     private final float speed;
     private final int count;
 
-    public SpawnParticlesEntityActionType(Optional<BiEntityCondition> biEntityCondition, ParticleEffect particle, Vec3d offset, Vec3d spread, boolean force, float speed, int count) {
+    public SpawnParticlesEntityActionType(Optional<BiEntityCondition> biEntityCondition, ParticleOptions particle, Vec3 offset, Vec3 spread, boolean force, float speed, int count) {
         this.biEntityCondition = biEntityCondition;
         this.particle = particle;
         this.offset = offset;
@@ -73,14 +73,14 @@ public class SpawnParticlesEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         Entity entity = context.entity();
-        Vec3d pos = entity.getPos().add(context.offset()).add(offset);
+        Vec3 pos = entity.position().add(context.offset()).add(offset);
 
-        if (!(entity.getWorld() instanceof ServerWorld serverWorld)) {
+        if (!(entity.level() instanceof ServerLevel serverWorld)) {
             return;
         }
 
-        Vec3d delta = spread.multiply(entity.getWidth(), entity.getHeight(), entity.getWidth());
-        serverWorld.getPlayers()
+        Vec3 delta = spread.multiply(entity.getWidth(), entity.getHeight(), entity.getWidth());
+        serverWorld.players()
             .stream()
             .filter(player -> biEntityCondition.map(condition -> condition.test(entity, player)).orElse(true))
             .forEach(player -> serverWorld.spawnParticles(player, particle, force, pos.getX(), pos.getY(), pos.getZ(), count, delta.getX(), delta.getY(), delta.getZ(), speed));

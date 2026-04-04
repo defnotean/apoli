@@ -13,30 +13,30 @@ import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.PowerManager;
 import io.github.apace100.apoli.power.type.PowerType;
 import io.github.apace100.apoli.util.PowerUtil;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.serialize.ArgumentSerializer;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType<Identifier> {
+public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType<ResourceLocation> {
 
     public static final DynamicCommandExceptionType POWER_NOT_RESOURCE = new DynamicCommandExceptionType(
-        o -> Text.stringifiedTranslatable("commands.apoli.power_not_resource", o)
+        o -> Component.stringifiedTranslatable("commands.apoli.power_not_resource", o)
     );
 
     public static final Dynamic2CommandExceptionType POWER_NOT_GRANTED = new Dynamic2CommandExceptionType(
-        (a, b) -> Text.translatable("commands.apoli.power_not_granted", a, b)
+        (a, b) -> Component.translatable("commands.apoli.power_not_granted", a, b)
     );
 
     public static final DynamicCommandExceptionType POWER_NOT_FOUND = new DynamicCommandExceptionType(
-        o -> Text.stringifiedTranslatable("commands.apoli.power_not_found", o)
+        o -> Component.stringifiedTranslatable("commands.apoli.power_not_found", o)
     );
 
     public static PowerArgumentType power() {
@@ -44,7 +44,7 @@ public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType
     }
 
     public static Power getPower(CommandContext<ServerCommandSource> context, String argumentName) throws CommandSyntaxException {
-        Identifier powerId = context.getArgument(argumentName, Identifier.class);
+        ResourceLocation powerId = context.getArgument(argumentName, ResourceLocation.class);
         return PowerManager.getOptional(powerId).orElseThrow(() -> POWER_NOT_FOUND.create(powerId));
     }
 
@@ -60,19 +60,19 @@ public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType
     }
 
     @Override
-    public Identifier parse(StringReader reader) throws CommandSyntaxException {
-        return Identifier.fromCommandInputNonEmpty(reader);
+    public ResourceLocation parse(StringReader reader) throws CommandSyntaxException {
+        return ResourceLocation.fromCommandInputNonEmpty(reader);
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
 
-        Stream<Identifier> powerIds = PowerManager.entrySet()
+        Stream<ResourceLocation> powerIds = PowerManager.entrySet()
             .stream()
             .filter(e -> powerTarget() != PowerTarget.RESOURCE || PowerUtil.validateResource(e.getValue().getType()).isSuccess())
             .map(Map.Entry::getKey);
 
-        return CommandSource.suggestIdentifiers(powerIds, builder);
+        return SharedSuggestionProvider.suggestIdentifiers(powerIds, builder);
 
     }
 
@@ -81,15 +81,15 @@ public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType
         RESOURCE
     }
 
-    public record Serializer() implements ArgumentSerializer<PowerArgumentType, Serializer.Properties> {
+    public record Serializer() implements ArgumentTypeInfo<PowerArgumentType, Serializer.Properties> {
 
         @Override
-        public void writePacket(Properties properties, PacketByteBuf buf) {
+        public void writePacket(Properties properties, FriendlyByteBuf buf) {
             buf.writeEnumConstant(properties.powerTarget());
         }
 
         @Override
-        public Properties fromPacket(PacketByteBuf buf) {
+        public Properties fromPacket(FriendlyByteBuf buf) {
             return new Properties(this, buf.readEnumConstant(PowerTarget.class));
         }
 
@@ -106,12 +106,12 @@ public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType
         public record Properties(Serializer serializer, PowerTarget powerTarget) implements ArgumentTypeProperties<PowerArgumentType> {
 
             @Override
-            public PowerArgumentType createType(CommandRegistryAccess commandRegistryAccess) {
+            public PowerArgumentType createType(CommandBuildContext commandRegistryAccess) {
                 return new PowerArgumentType(powerTarget());
             }
 
             @Override
-            public ArgumentSerializer<PowerArgumentType, ?> getSerializer() {
+            public ArgumentTypeInfo<PowerArgumentType, ?> getSerializer() {
                 return serializer();
             }
 

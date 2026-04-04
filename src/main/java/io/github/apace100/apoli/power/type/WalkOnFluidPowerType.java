@@ -5,8 +5,8 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;

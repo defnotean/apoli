@@ -2,10 +2,10 @@ package io.github.apace100.apoli.action.context;
 
 import io.github.apace100.apoli.condition.context.ItemConditionContext;
 import io.github.apace100.apoli.util.context.ActionContext;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.server.level.ServerLevel;
 
-public record ItemActionContext(ServerWorld world, StackReference stackReference) implements ActionContext<ItemConditionContext> {
+public record ItemActionContext(ServerLevel world, SlotAccess stackReference) implements ActionContext<ItemConditionContext> {
 
 	@Override
 	public ItemConditionContext forCondition() {

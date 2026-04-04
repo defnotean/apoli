@@ -3,31 +3,31 @@ package io.github.apace100.apoli.util;
 import io.github.apace100.apoli.networking.packet.s2c.SyncStatusEffectS2CPacket;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.function.BiConsumer;
 
 public class SyncStatusEffectsUtil {
 
-    public static void sendStatusEffectUpdatePacket(LivingEntity entity, UpdateType updateType, StatusEffectInstance instance) {
+    public static void sendStatusEffectUpdatePacket(LivingEntity entity, UpdateType updateType, MobEffectInstance instance) {
 
-        if (entity.getWorld().isClient) {
+        if (entity.level().isClientSide) {
             return;
         }
 
-        NbtCompound statusEffectNbt = new NbtCompound();
+        CompoundTag statusEffectNbt = new CompoundTag();
         if (instance != null && updateType != UpdateType.CLEAR) {
-            statusEffectNbt = (NbtCompound) instance.writeNbt();
+            statusEffectNbt = (CompoundTag) instance.save();
         }
 
         SyncStatusEffectS2CPacket syncStatusEffectPacket = new SyncStatusEffectS2CPacket(entity.getId(), statusEffectNbt, updateType);
-        for (ServerPlayerEntity player : PlayerLookup.tracking(entity)) {
+        for (ServerPlayer player : PlayerLookup.tracking(entity)) {
             ServerPlayNetworking.send(player, syncStatusEffectPacket);
         }
 
@@ -35,11 +35,11 @@ public class SyncStatusEffectsUtil {
 
     public enum UpdateType {
 
-        CLEAR((le, sei) -> le.getActiveStatusEffects().clear()),
+        CLEAR((le, sei) -> le.getActiveEffectsMap().clear()),
         APPLY((le, sei) -> {
 
             if (sei != null) {
-                le.getActiveStatusEffects().put(sei.getEffectType(), sei);
+                le.getActiveEffectsMap().put(sei.getEffectType(), sei);
             }
 
         }),
@@ -47,19 +47,19 @@ public class SyncStatusEffectsUtil {
         REMOVE((le, sei) -> {
 
             if (sei != null) {
-                le.getActiveStatusEffects().remove(sei.getEffectType());
+                le.getActiveEffectsMap().remove(sei.getEffectType());
             }
 
         });
 
-        public static final PacketCodec<PacketByteBuf, UpdateType> PACKET_CODEC = PacketCodecs.indexed(index -> values()[index], UpdateType::ordinal).cast();
+        public static final PacketCodec<FriendlyByteBuf, UpdateType> PACKET_CODEC = PacketCodecs.indexed(index -> values()[index], UpdateType::ordinal).cast();
 
-        final BiConsumer<LivingEntity, StatusEffectInstance> consumer;
-        UpdateType(BiConsumer<LivingEntity, StatusEffectInstance> consumer) {
+        final BiConsumer<LivingEntity, MobEffectInstance> consumer;
+        UpdateType(BiConsumer<LivingEntity, MobEffectInstance> consumer) {
             this.consumer = consumer;
         }
 
-        public void accept(LivingEntity le, StatusEffectInstance sei) {
+        public void accept(LivingEntity le, MobEffectInstance sei) {
             this.consumer.accept(le, sei);
         }
 

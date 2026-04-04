@@ -3,10 +3,10 @@ package io.github.apace100.apoli.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import io.github.apace100.apoli.access.EntityLinkedType;
 import io.github.apace100.apoli.power.type.ModifyTypeTagPowerType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.core.HolderSet;
+import net.minecraft.tags.TagKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,14 +33,14 @@ public abstract class EntityTypeMixin implements EntityLinkedType {
         this.apoli$currentEntity.set(new WeakReference<>(entity));
     }
 
-    @ModifyReturnValue(method = "isIn(Lnet/minecraft/registry/tag/TagKey;)Z", at = @At("RETURN"))
+    @ModifyReturnValue(method = "isIn(Lnet/minecraft/tags/TagKey;)Z", at = @At("RETURN"))
     private boolean apoli$inTagProxy(boolean original, TagKey<EntityType<?>> tag) {
         return original
             || ModifyTypeTagPowerType.doesApply(this.apoli$getEntity(), tag);
     }
 
-    @ModifyReturnValue(method = "isIn(Lnet/minecraft/registry/entry/RegistryEntryList;)Z", at = @At("RETURN"))
-    private boolean apoli$inTagEntryListProxy(boolean original, RegistryEntryList<EntityType<?>> entryList) {
+    @ModifyReturnValue(method = "isIn(Lnet/minecraft/core/HolderSet;)Z", at = @At("RETURN"))
+    private boolean apoli$inTagEntryListProxy(boolean original, HolderSet<EntityType<?>> entryList) {
         return original
             || ModifyTypeTagPowerType.doesApply(this.apoli$getEntity(), entryList);
     }

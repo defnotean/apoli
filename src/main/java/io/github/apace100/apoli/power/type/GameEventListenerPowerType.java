@@ -12,25 +12,25 @@ import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.event.EntityPositionSource;
-import net.minecraft.world.event.GameEvent;
-import net.minecraft.world.event.PositionSource;
-import net.minecraft.world.event.Vibrations;
-import net.minecraft.world.event.listener.EntityGameEventHandler;
-import net.minecraft.world.event.listener.GameEventListener;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.core.Holder;
+import net.minecraft.tags.TagKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.gameevent.EntityPositionSource;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.gameevent.PositionSource;
+import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
+import net.minecraft.world.level.gameevent.listener.EntityGameEventHandler;
+import net.minecraft.world.level.gameevent.listener.GameEventListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
 
-public class GameEventListenerPowerType extends CooldownPowerType implements Vibrations {
+public class GameEventListenerPowerType extends CooldownPowerType implements VibrationSystem {
 
     public static final TypedDataObjectFactory<GameEventListenerPowerType> DATA_FACTORY = PowerType.createConditionedDataFactory(
         new SerializableData()
@@ -80,7 +80,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
     private final Optional<BiEntityCondition> biEntityCondition;
     private final Optional<BlockCondition> blockCondition;
 
-    private final List<RegistryEntry<GameEvent>> gameEvents;
+    private final List<Holder<GameEvent>> gameEvents;
     private final Optional<TagKey<GameEvent>> gameEventTag;
 
     private final GameEventListener.TriggerOrder triggerOrder;
@@ -93,7 +93,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
 
     private EntityGameEventHandler<VibrationListener> gameEventHandler;
 
-    public GameEventListenerPowerType(Optional<BiEntityAction> biEntityAction, Optional<BiEntityCondition> biEntityCondition, Optional<BlockAction> blockAction, Optional<BlockCondition> blockCondition, List<RegistryEntry<GameEvent>> gameEvents, Optional<TagKey<GameEvent>> gameEventTag, GameEventListener.TriggerOrder triggerOrder, HudRender hudRender, int cooldownDuration, boolean showParticle, int range, Optional<EntityCondition> condition) {
+    public GameEventListenerPowerType(Optional<BiEntityAction> biEntityAction, Optional<BiEntityCondition> biEntityCondition, Optional<BlockAction> blockAction, Optional<BlockCondition> blockCondition, List<Holder<GameEvent>> gameEvents, Optional<TagKey<GameEvent>> gameEventTag, GameEventListener.TriggerOrder triggerOrder, HudRender hudRender, int cooldownDuration, boolean showParticle, int range, Optional<EntityCondition> condition) {
         super(cooldownDuration, hudRender, condition);
 
         this.biEntityAction = biEntityAction;
@@ -125,7 +125,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
     @Override
     public void onAdded() {
 
-        if (getHolder().getWorld() instanceof ServerWorld serverWorld) {
+        if (getHolder().level() instanceof ServerLevel serverWorld) {
             getGameEventHandler().onEntitySetPos(serverWorld);
         }
 
@@ -134,7 +134,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
     @Override
     public void onRemoved() {
 
-        if (getHolder().getWorld() instanceof ServerWorld serverWorld) {
+        if (getHolder().level() instanceof ServerLevel serverWorld) {
             getGameEventHandler().onEntityRemoval(serverWorld);
         }
 
@@ -142,7 +142,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
 
     @Override
     public void serverTick() {
-        Ticker.tick(getHolder().getWorld(), getVibrationListenerData(), getVibrationCallback());
+        Ticker.tick(getHolder().level(), getVibrationListenerData(), getVibrationCallback());
     }
 
     @Override
@@ -187,7 +187,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
 
     }
 
-    public class Callback implements Vibrations.Callback {
+    public class Callback implements VibrationSystem.Callback {
 
         @Override
         public int getRange() {
@@ -201,14 +201,14 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
         }
 
         @Override
-        public boolean accepts(ServerWorld world, BlockPos pos, RegistryEntry<GameEvent> event, GameEvent.Emitter emitter) {
+        public boolean accepts(ServerLevel world, BlockPos pos, Holder<GameEvent> event, GameEvent.Emitter emitter) {
             return GameEventListenerPowerType.this.canUse()
                 && blockCondition.map(condition -> condition.test(world, pos)).orElse(true)
                 && biEntityCondition.map(condition -> condition.test(emitter.sourceEntity(), getHolder())).orElse(true);
         }
 
         @Override
-        public void accept(ServerWorld world, BlockPos pos, RegistryEntry<GameEvent> event, @Nullable Entity sourceEntity, @Nullable Entity entity, float distance) {
+        public void accept(ServerLevel world, BlockPos pos, Holder<GameEvent> event, @Nullable Entity sourceEntity, @Nullable Entity entity, float distance) {
 
             GameEventListenerPowerType.this.use();
 
@@ -219,17 +219,17 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
 
         @Override
         public TagKey<GameEvent> getTag() {
-            return gameEventTag.orElse(Vibrations.Callback.super.getTag());
+            return gameEventTag.orElse(VibrationSystem.Callback.super.getTag());
         }
 
-        public boolean containsEvent(RegistryEntry<GameEvent> gameEvent) {
+        public boolean containsEvent(Holder<GameEvent> gameEvent) {
             return gameEventTag.map(gameEvent::isIn).orElse(true)
                 && (gameEvents.isEmpty() || gameEvents.contains(gameEvent));
         }
 
     }
 
-    public class ListenerData extends Vibrations.ListenerData {
+    public class ListenerData extends VibrationSystem.ListenerData {
 
         public boolean shouldShowParticle() {
             return GameEventListenerPowerType.this.shouldShowParticle();

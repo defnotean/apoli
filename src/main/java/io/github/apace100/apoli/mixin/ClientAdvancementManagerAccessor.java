@@ -1,17 +1,17 @@
 package io.github.apace100.apoli.mixin;
 
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.AdvancementProgress;
-import net.minecraft.client.network.ClientAdvancementManager;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.client.multiplayer.ClientAdvancements;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Map;
 
-@Mixin(ClientAdvancementManager.class)
+@Mixin(ClientAdvancements.class)
 public interface ClientAdvancementManagerAccessor {
 
     @Accessor
-    Map<AdvancementEntry, AdvancementProgress> getAdvancementProgresses();
+    Map<AdvancementHolder, AdvancementProgress> getAdvancementProgresses();
 
 }

@@ -9,15 +9,15 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.projectile.ExplosiveProjectileEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.projectile.ExplosiveProjectileEntity;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -31,7 +31,7 @@ public class FireProjectileEntityActionType extends EntityActionType {
         new SerializableData()
             .add("entity_type", SerializableDataTypes.ENTITY_TYPE)
             .add("projectile_action", EntityAction.DATA_TYPE.optional(), Optional.empty())
-            .add("tag", SerializableDataTypes.NBT_COMPOUND, new NbtCompound())
+            .add("tag", SerializableDataTypes.NBT_COMPOUND, new CompoundTag())
             .add("divergence", SerializableDataTypes.FLOAT, 1.0F)
             .add("speed", SerializableDataTypes.FLOAT, 1.5F)
             .add("count", SerializableDataTypes.INT, 1),
@@ -55,14 +55,14 @@ public class FireProjectileEntityActionType extends EntityActionType {
     private final EntityType<?> entityType;
     private final Optional<EntityAction> projectileAction;
 
-    private final NbtCompound tag;
+    private final CompoundTag tag;
 
     private final float divergence;
     private final float speed;
 
     private final int count;
 
-    public FireProjectileEntityActionType(EntityType<?> entityType, Optional<EntityAction> projectileAction, NbtCompound tag, float divergence, float speed, int count) {
+    public FireProjectileEntityActionType(EntityType<?> entityType, Optional<EntityAction> projectileAction, CompoundTag tag, float divergence, float speed, int count) {
         this.entityType = entityType;
         this.projectileAction = projectileAction;
         this.tag = tag;
@@ -76,17 +76,17 @@ public class FireProjectileEntityActionType extends EntityActionType {
 
         Entity entity = context.entity();
 
-        if (!(entity.getWorld() instanceof ServerWorld serverWorld)) {
+        if (!(entity.level() instanceof ServerLevel serverWorld)) {
             return;
         }
 
         Random random = serverWorld.getRandom();
 
-        Vec3d velocity = entity.getVelocity();
-        Vec3d verticalOffset = entity.getPos().add(0, entity.getEyeHeight(entity.getPose()), 0);
+        Vec3 velocity = entity.getDeltaMovement();
+        Vec3 verticalOffset = entity.position().add(0, entity.getEyeHeight(entity.getPose()), 0);
 
-        float pitch = entity.getPitch();
-        float yaw = entity.getYaw();
+        float pitch = entity.getXRot();
+        float yaw = entity.getYRot();
 
         for (int i = 0; i < count; i++) {
 
@@ -98,14 +98,14 @@ public class FireProjectileEntityActionType extends EntityActionType {
                 return;
             }
 
-            if (entityToSpawn instanceof ProjectileEntity projectileToSpawn) {
+            if (entityToSpawn instanceof Projectile projectileToSpawn) {
 
                 if (projectileToSpawn instanceof ExplosiveProjectileEntity explosiveProjectileToSpawn) {
                     explosiveProjectileToSpawn.accelerationPower = speed;
                 }
 
                 projectileToSpawn.setOwner(entity);
-                projectileToSpawn.setVelocity(entity, pitch, yaw, 0F, speed, divergence);
+                projectileToSpawn.setDeltaMovement(entity, pitch, yaw, 0F, speed, divergence);
 
             }
 
@@ -114,26 +114,26 @@ public class FireProjectileEntityActionType extends EntityActionType {
                 float j = 0.017453292F;
                 double k = 0.007499999832361937D;
 
-                float l = -MathHelper.sin(yaw * j) * MathHelper.cos(pitch * j);
-                float m = -MathHelper.sin(pitch * j);
-                float n =  MathHelper.cos(yaw * j) * MathHelper.cos(pitch * j);
+                float l = -Mth.sin(yaw * j) * Mth.cos(pitch * j);
+                float m = -Mth.sin(pitch * j);
+                float n =  Mth.cos(yaw * j) * Mth.cos(pitch * j);
 
-                Vec3d velocityToApply = new Vec3d(l, m, n)
+                Vec3 velocityToApply = new Vec3(l, m, n)
                     .normalize()
                     .add(random.nextGaussian() * k * divergence, random.nextGaussian() * k * divergence, random.nextGaussian() * k * divergence)
                     .multiply(speed);
 
-                entityToSpawn.setVelocity(velocityToApply);
-                entityToSpawn.addVelocity(velocity.x, entity.isOnGround() ? 0.0D : velocity.y, velocity.z);
+                entityToSpawn.setDeltaMovement(velocityToApply);
+                entityToSpawn.push(velocity.x, entity.onGround() ? 0.0D : velocity.y, velocity.z);
 
             }
 
             if (!tag.isEmpty()) {
 
-                NbtCompound mergedNbt = entityToSpawn.writeNbt(new NbtCompound());
+                CompoundTag mergedNbt = entityToSpawn.save(new CompoundTag());
                 mergedNbt.copyFrom(tag);
 
-                entityToSpawn.readNbt(mergedNbt);
+                entityToSpawn.load(mergedNbt);
 
             }
 

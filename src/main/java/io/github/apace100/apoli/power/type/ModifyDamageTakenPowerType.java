@@ -9,8 +9,8 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.damagesource.DamageSource;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -96,7 +96,7 @@ public class ModifyDamageTakenPowerType extends ValueModifyingPowerType {
     }
 
     public boolean doesApply(DamageSource source, float damageAmount) {
-        Entity attacker = source.getAttacker();
+        Entity attacker = source.getEntity();
         return attacker == null
             ? damageCondition.map(condition -> condition.test(source, damageAmount)).orElse(true)
                 && biEntityCondition.isEmpty()

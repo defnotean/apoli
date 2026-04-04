@@ -2,7 +2,7 @@ package io.github.apace100.apoli.networking.task;
 
 import io.github.apace100.apoli.networking.packet.VersionHandshakePacket;
 import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
-import net.minecraft.network.packet.Packet;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.network.ServerPlayerConfigurationTask;
 
 import java.util.function.Consumer;

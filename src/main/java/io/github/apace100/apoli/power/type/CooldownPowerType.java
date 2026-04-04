@@ -7,10 +7,10 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.HudRender;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtLong;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.LongTag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -56,13 +56,13 @@ public class CooldownPowerType extends PowerType implements HudRendered {
     }
 
     @Override
-    public NbtElement toTag() {
-        return NbtLong.of(lastUseTime);
+    public Tag toTag() {
+        return LongTag.of(lastUseTime);
     }
 
     @Override
-    public void fromTag(NbtElement tag) {
-        lastUseTime = ((NbtLong)tag).longValue();
+    public void fromTag(Tag tag) {
+        lastUseTime = ((LongTag)tag).longValue();
     }
 
     @Override
@@ -77,35 +77,35 @@ public class CooldownPowerType extends PowerType implements HudRendered {
 
     @Override
     public boolean shouldRender() {
-        return (getHolder().getEntityWorld().getTime() - lastUseTime) <= cooldown;
+        return (getHolder().level().getGameTime() - lastUseTime) <= cooldown;
     }
 
     public boolean canUse() {
         return isInitialized()
-            && getHolder().getWorld().getTime() >= lastUseTime + cooldown;
+            && getHolder().level().getGameTime() >= lastUseTime + cooldown;
     }
 
     public void use() {
 
         LivingEntity holder = getHolder();
-        World world = holder.getWorld();
+        Level world = holder.level();
 
-        if (world.isClient()) {
+        if (world.isClientSide()) {
             return;
         }
 
-        this.lastUseTime = world.getTime();
+        this.lastUseTime = world.getGameTime();
         PowerHolderComponent.syncPower(holder, getPower());
 
     }
 
     public float getProgress() {
-        float time = getHolder().getWorld().getTime() - lastUseTime;
+        float time = getHolder().level().getGameTime() - lastUseTime;
         return Math.min(1F, Math.max(time / (float) cooldown, 0F));
     }
 
     public int getRemainingTicks() {
-        return (int) Math.max(0, cooldown - (getHolder().getWorld().getTime() - lastUseTime));
+        return (int) Math.max(0, cooldown - (getHolder().level().getGameTime() - lastUseTime));
     }
 
     public int getCooldown() {
@@ -113,12 +113,12 @@ public class CooldownPowerType extends PowerType implements HudRendered {
     }
 
     public void modify(int changeInTicks) {
-        long currentTime = getHolder().getWorld().getTime();
+        long currentTime = getHolder().level().getGameTime();
         this.lastUseTime = Math.min(lastUseTime + changeInTicks, currentTime);
     }
 
     public void setCooldown(int cooldownInTicks) {
-        long currentTime = getHolder().getWorld().getTime();
+        long currentTime = getHolder().level().getGameTime();
         this.lastUseTime = currentTime - Math.min(cooldownInTicks, cooldown);
     }
 

@@ -2,13 +2,13 @@ package io.github.apace100.apoli.networking.packet.s2c;
 
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.util.SyncStatusEffectsUtil;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.protocol.CustomPayload;
 
-public record SyncStatusEffectS2CPacket(int targetId, NbtCompound statusEffectData, SyncStatusEffectsUtil.UpdateType updateType) implements CustomPayload {
+public record SyncStatusEffectS2CPacket(int targetId, CompoundTag statusEffectData, SyncStatusEffectsUtil.UpdateType updateType) implements CustomPayload {
 
     public static final Id<SyncStatusEffectS2CPacket> PACKET_ID = new Id<>(Apoli.identifier("s2c/sync_status_effect"));
     public static final PacketCodec<RegistryByteBuf, SyncStatusEffectS2CPacket> PACKET_CODEC = PacketCodec.tuple(

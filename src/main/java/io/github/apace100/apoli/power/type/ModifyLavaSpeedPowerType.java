@@ -8,7 +8,7 @@ import io.github.apace100.apoli.util.AttributedEntityAttributeModifier;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -30,9 +30,9 @@ public class ModifyLavaSpeedPowerType extends ConditionedAttributePowerType {
             .set("modifiers", powerType.attributeModifiers)
     );
 
-    protected final List<EntityAttributeModifier> attributeModifiers;
+    protected final List<AttributeModifier> attributeModifiers;
 
-    public ModifyLavaSpeedPowerType(List<EntityAttributeModifier> attributeModifiers, Optional<EntityCondition> condition) {
+    public ModifyLavaSpeedPowerType(List<AttributeModifier> attributeModifiers, Optional<EntityCondition> condition) {
         super(attributeModifiers.stream().map(attributeModifier -> new AttributedEntityAttributeModifier(AdditionalEntityAttributes.LAVA_SPEED, attributeModifier)).toList(), false, 10, condition);
         this.attributeModifiers = attributeModifiers;
     }

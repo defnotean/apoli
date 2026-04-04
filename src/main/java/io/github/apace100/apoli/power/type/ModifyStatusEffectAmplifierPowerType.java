@@ -8,8 +8,8 @@ import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.core.Holder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -31,9 +31,9 @@ public class ModifyStatusEffectAmplifierPowerType extends ValueModifyingPowerTyp
             .set("status_effects", powerType.statusEffects)
     );
 
-    private final List<RegistryEntry<StatusEffect>> statusEffects;
+    private final List<Holder<MobEffect>> statusEffects;
 
-    public ModifyStatusEffectAmplifierPowerType(List<RegistryEntry<StatusEffect>> statusEffects, List<Modifier> modifiers, Optional<EntityCondition> condition) {
+    public ModifyStatusEffectAmplifierPowerType(List<Holder<MobEffect>> statusEffects, List<Modifier> modifiers, Optional<EntityCondition> condition) {
         super(modifiers, condition);
         this.statusEffects = statusEffects
             .stream()
@@ -46,7 +46,7 @@ public class ModifyStatusEffectAmplifierPowerType extends ValueModifyingPowerTyp
         return PowerTypes.MODIFY_STATUS_EFFECT_AMPLIFIER;
     }
 
-    public boolean doesApply(RegistryEntry<StatusEffect> statusEffect) {
+    public boolean doesApply(Holder<MobEffect> statusEffect) {
         return statusEffects.isEmpty()
             || statusEffects.contains(statusEffect);
     }

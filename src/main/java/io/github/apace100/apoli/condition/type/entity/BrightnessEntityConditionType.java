@@ -10,9 +10,9 @@ import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 public class BrightnessEntityConditionType extends EntityConditionType {
@@ -42,10 +42,10 @@ public class BrightnessEntityConditionType extends EntityConditionType {
     public boolean test(EntityConditionContext context) {
 
         Entity entity = context.entity();
-        World world = entity.getWorld();
+        Level world = entity.level();
 
         return comparison.compare(world.getBrightness(BlockPos.ofFloored(MiscUtil.getPoseDependentEyePos(entity))), compareTo)
-            || comparison.compare(world.getBrightness(entity.getBlockPos()), compareTo);
+            || comparison.compare(world.getBrightness(entity.blockPosition()), compareTo);
 
     }
 

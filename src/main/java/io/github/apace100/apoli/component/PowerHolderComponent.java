@@ -15,13 +15,13 @@ import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.apoli.util.modifier.ModifierUtil;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -47,9 +47,9 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
     @ApiStatus.Internal
     ComponentKey<PowerHolderComponent> KEY = ComponentRegistry.getOrCreate(Apoli.identifier("powers"), PowerHolderComponent.class);
 
-    boolean removePower(Power power, Identifier source);
+    boolean removePower(Power power, ResourceLocation source);
 
-    default boolean removePower(PowerReference powerReference, Identifier source) {
+    default boolean removePower(PowerReference powerReference, ResourceLocation source) {
         return powerReference.getResultPower()
             .mapError(err -> "Couldn't revoke non-existing power with ID \"" + powerReference.id() + "\"!")
             .resultOrPartial(Apoli.LOGGER::warn)
@@ -57,13 +57,13 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
             .orElse(false);
     }
 
-    int removeAllPowersFromSource(Identifier source);
+    int removeAllPowersFromSource(ResourceLocation source);
 
-    List<Power> getPowersFromSource(Identifier source);
+    List<Power> getPowersFromSource(ResourceLocation source);
 
-    boolean addPower(Power power, Identifier source);
+    boolean addPower(Power power, ResourceLocation source);
 
-    default boolean addPower(PowerReference powerReference, Identifier source) {
+    default boolean addPower(PowerReference powerReference, ResourceLocation source) {
         return powerReference.getResultPower()
             .mapError(error -> "Couldn't grant non-existing power with ID \"" + powerReference.id() + "\"!")
             .resultOrPartial(Apoli.LOGGER::warn)
@@ -79,9 +79,9 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
             .orElse(false);
     }
 
-    boolean hasPower(Power power, Identifier source);
+    boolean hasPower(Power power, ResourceLocation source);
 
-    default boolean hasPower(PowerReference powerReference, Identifier source) {
+    default boolean hasPower(PowerReference powerReference, ResourceLocation source) {
         return powerReference.getOptionalPower()
             .map(power -> hasPower(power, source))
             .orElse(false);
@@ -97,9 +97,9 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
 
     <T extends PowerType> List<T> getPowerTypes(Class<T> typeClass, boolean includeInactive);
 
-    List<Identifier> getSources(Power power);
+    List<ResourceLocation> getSources(Power power);
 
-    default List<Identifier> getSources(PowerReference powerReference) {
+    default List<ResourceLocation> getSources(PowerReference powerReference) {
         return powerReference.getOptionalPower()
             .map(this::getSources)
             .orElseGet(ArrayList::new);
@@ -145,14 +145,14 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
         getOptional(entity).ifPresent(PowerHolderComponent::sync);
     }
 
-    static boolean grantPower(@NotNull Entity entity, Power power, Identifier source, boolean sync) {
+    static boolean grantPower(@NotNull Entity entity, Power power, ResourceLocation source, boolean sync) {
         return grantPowers(entity, Map.of(source, List.of(power)), sync);
     }
 
-    static boolean grantPowers(@NotNull Entity entity, Map<Identifier, Collection<Power>> powersBySource, boolean sync) {
+    static boolean grantPowers(@NotNull Entity entity, Map<ResourceLocation, Collection<Power>> powersBySource, boolean sync) {
 
         PowerHolderComponent powerComponent = getNullable(entity);
-        if (!entity.getWorld().isClient() && powerComponent != null) {
+        if (!entity.level().isClientSide() && powerComponent != null) {
 
             boolean granted = powersBySource.entrySet()
                 .stream()
@@ -175,14 +175,14 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
 
     }
 
-    static boolean revokePower(@NotNull Entity entity, Power power, Identifier source, boolean sync) {
+    static boolean revokePower(@NotNull Entity entity, Power power, ResourceLocation source, boolean sync) {
         return revokePowers(entity, Map.of(source, List.of(power)), sync);
     }
 
-    static boolean revokePowers(@NotNull Entity entity, Map<Identifier, Collection<Power>> powersBySource, boolean sync) {
+    static boolean revokePowers(@NotNull Entity entity, Map<ResourceLocation, Collection<Power>> powersBySource, boolean sync) {
 
         PowerHolderComponent powerComponent = getNullable(entity);
-        if (!entity.getWorld().isClient() && powerComponent != null) {
+        if (!entity.level().isClientSide() && powerComponent != null) {
 
             boolean revoked = powersBySource.entrySet()
                 .stream()
@@ -205,14 +205,14 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
 
     }
 
-    static int revokeAllPowersFromSource(@NotNull Entity entity, Identifier source, boolean sync) {
+    static int revokeAllPowersFromSource(@NotNull Entity entity, ResourceLocation source, boolean sync) {
         return revokeAllPowersFromAllSources(entity, List.of(source), sync);
     }
 
-    static int revokeAllPowersFromAllSources(@NotNull Entity entity, Collection<Identifier> sources, boolean sync) {
+    static int revokeAllPowersFromAllSources(@NotNull Entity entity, Collection<ResourceLocation> sources, boolean sync) {
 
         PowerHolderComponent powerComponent = getNullable(entity);
-        if (!entity.getWorld().isClient() && powerComponent != null) {
+        if (!entity.level().isClientSide() && powerComponent != null) {
 
             int revokedPowers = sources
                 .stream()
@@ -239,7 +239,7 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
 
     static void syncPower(@Nullable Entity entity, @Nullable Power power) {
 
-        if (power == null || entity == null || entity.getWorld().isClient()) {
+        if (power == null || entity == null || entity.level().isClientSide()) {
             return;
         }
 
@@ -248,7 +248,7 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
             return;
         }
 
-        NbtCompound powerData = new NbtCompound();
+        CompoundTag powerData = new CompoundTag();
         PowerType powerType = component.getPowerType(power);
 
         if (powerType == null) {
@@ -258,11 +258,11 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
         powerData.put("Data", powerType.toTag());
         SyncPowerDataS2CPacket syncPowerDataPacket = new SyncPowerDataS2CPacket(entity.getId(), power.getId(), powerData);
 
-        for (ServerPlayerEntity trackingPlayer : PlayerLookup.tracking(entity)) {
+        for (ServerPlayer trackingPlayer : PlayerLookup.tracking(entity)) {
             ServerPlayNetworking.send(trackingPlayer, syncPowerDataPacket);
         }
 
-        if (entity instanceof ServerPlayerEntity player) {
+        if (entity instanceof ServerPlayer player) {
             ServerPlayNetworking.send(player, syncPowerDataPacket);
         }
 
@@ -270,12 +270,12 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
 
     static <P extends Power> void syncPowers(@Nullable Entity entity, Collection<P> powers) {
 
-        if (entity == null || entity.getWorld().isClient() || powers.isEmpty()) {
+        if (entity == null || entity.level().isClientSide() || powers.isEmpty()) {
             return;
         }
 
         PowerHolderComponent component = getNullable(entity);
-        Map<Identifier, NbtElement> powersToSync = new HashMap<>();
+        Map<ResourceLocation, Tag> powersToSync = new HashMap<>();
 
         if (component == null) {
             return;
@@ -296,11 +296,11 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
         }
 
         SyncBulkPowerDataS2CPacket syncBulkPowerDataPacket = new SyncBulkPowerDataS2CPacket(entity.getId(), powersToSync);
-        for (ServerPlayerEntity otherPlayer : PlayerLookup.tracking(entity)) {
+        for (ServerPlayer otherPlayer : PlayerLookup.tracking(entity)) {
             ServerPlayNetworking.send(otherPlayer, syncBulkPowerDataPacket);
         }
 
-        if (entity instanceof ServerPlayerEntity player) {
+        if (entity instanceof ServerPlayer player) {
             ServerPlayNetworking.send(player, syncBulkPowerDataPacket);
         }
 
@@ -405,15 +405,15 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
 
     final class PacketHandlers {
 
-        public static final PacketHandler<Map<Identifier, Collection<Power>>> GRANT_POWERS = new PacketHandler.Impl<>(
+        public static final PacketHandler<Map<ResourceLocation, Collection<Power>>> GRANT_POWERS = new PacketHandler.Impl<>(
             powersBySource -> (buf, recipient) -> buf.writeMap(powersBySource,
-                PacketByteBuf::writeIdentifier,
+                FriendlyByteBuf::writeIdentifier,
                 (vbuf, powers) -> vbuf.writeCollection(powers, (ebuf, power) -> ebuf.writeIdentifier(power.getId()))
             ),
             (buf, component) -> {
 
                 var powersBySource = buf.readMap(
-                    PacketByteBuf::readIdentifier,
+                    FriendlyByteBuf::readIdentifier,
                     vbuf -> vbuf.readCollection(ArrayList::new, ebuf -> PowerManager.get(ebuf.readIdentifier())));
 
                 powersBySource.forEach((source, powers) -> powers.forEach(power -> component.addPower(power, source)));
@@ -422,12 +422,12 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
             1
         );
 
-        public static final PacketHandler<Map<Identifier, Collection<Power>>> REVOKE_POWERS = new PacketHandler.Impl<>(
+        public static final PacketHandler<Map<ResourceLocation, Collection<Power>>> REVOKE_POWERS = new PacketHandler.Impl<>(
             GRANT_POWERS::write,
             (buf, component) -> {
 
                 var powersBySource = buf.readMap(
-                    PacketByteBuf::readIdentifier,
+                    FriendlyByteBuf::readIdentifier,
                     vbuf -> vbuf.readCollection(ArrayList::new, ebuf -> PowerManager.get(ebuf.readIdentifier())));
 
                 powersBySource.forEach((source, powers) -> powers.forEach(power -> component.removePower(power, source)));
@@ -436,11 +436,11 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
             2
         );
 
-        public static final PacketHandler<Collection<Identifier>> REVOKE_ALL_POWERS = new PacketHandler.Impl<>(
+        public static final PacketHandler<Collection<ResourceLocation>> REVOKE_ALL_POWERS = new PacketHandler.Impl<>(
             sources -> (buf, recipient) ->
-                buf.writeCollection(sources, PacketByteBuf::writeIdentifier),
+                buf.writeCollection(sources, FriendlyByteBuf::writeIdentifier),
             (buf, component) -> buf
-                .readCollection(ArrayList::new, PacketByteBuf::readIdentifier)
+                .readCollection(ArrayList::new, FriendlyByteBuf::readIdentifier)
                 .forEach(component::removeAllPowersFromSource),
             3
         );

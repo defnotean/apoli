@@ -5,9 +5,9 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.type.PreventEntityRenderPowerType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -18,7 +18,7 @@ public class EntityRenderDispatcherMixin {
     @ModifyReturnValue(method = "shouldRender", at = @At("RETURN"))
     private boolean apoli$preventRenderingEntities(boolean original, Entity entity) {
         return original
-            && !PowerHolderComponent.hasPowerType(MinecraftClient.getInstance().player, PreventEntityRenderPowerType.class, p -> p.doesApply(entity));
+            && !PowerHolderComponent.hasPowerType(Minecraft.getInstance().player, PreventEntityRenderPowerType.class, p -> p.doesApply(entity));
     }
 
 }

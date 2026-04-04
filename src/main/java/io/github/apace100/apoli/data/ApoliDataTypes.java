@@ -27,24 +27,24 @@ import io.github.apace100.calio.registry.DataObjectFactories;
 import io.github.apace100.calio.util.ArgumentWrapper;
 import io.github.ladysnake.pal.Pal;
 import io.github.ladysnake.pal.PlayerAbility;
-import net.minecraft.command.EntitySelector;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.ItemSlotArgumentType;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.inventory.SlotRange;
-import net.minecraft.item.ItemStack;
+import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ItemSlotArgumentType;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.SlotRange;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.recipe.CraftingRecipe;
-import net.minecraft.server.command.AdvancementCommand;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextCodecs;
-import net.minecraft.util.ClickType;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.server.commands.AdvancementCommands;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.resources.ResourceLocation;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.GameMode;
-import net.minecraft.world.explosion.Explosion;
+import net.minecraft.world.level.Explosion;
 import org.joml.Vector3f;
 
 import java.util.EnumSet;
@@ -165,11 +165,11 @@ public class ApoliDataTypes {
 
     public static final SerializableDataType<Explosion.DestructionType> DESTRUCTION_TYPE = SerializableDataType.enumValue(Explosion.DestructionType.class);
 
-    public static final SerializableDataType<ArgumentWrapper<EntitySelector>> ENTITIES_SELECTOR = SerializableDataType.argumentType(EntityArgumentType.entities());
+    public static final SerializableDataType<ArgumentWrapper<EntitySelector>> ENTITIES_SELECTOR = SerializableDataType.argumentType(EntityArgument.entities());
 
-    public static final SerializableDataType<AdvancementCommand.Operation> ADVANCEMENT_OPERATION = SerializableDataType.enumValue(AdvancementCommand.Operation.class);
+    public static final SerializableDataType<AdvancementCommands.Operation> ADVANCEMENT_OPERATION = SerializableDataType.enumValue(AdvancementCommands.Operation.class);
 
-    public static final SerializableDataType<AdvancementCommand.Selection> ADVANCEMENT_SELECTION = SerializableDataType.enumValue(AdvancementCommand.Selection.class);
+    public static final SerializableDataType<AdvancementCommands.Selection> ADVANCEMENT_SELECTION = SerializableDataType.enumValue(AdvancementCommands.Selection.class);
 
     public static final SerializableDataType<ClickType> CLICK_TYPE = SerializableDataType.enumValue(ClickType.class, () -> ImmutableMap.of(
         "left", ClickType.LEFT,
@@ -180,7 +180,7 @@ public class ApoliDataTypes {
 
     public static final SerializableDataType<TextAlignment> TEXT_ALIGNMENT = SerializableDataType.enumValue(TextAlignment.class);
 
-    public static final SerializableDataType<Map<Identifier, Identifier>> IDENTIFIER_MAP = SerializableDataType.map(SerializableDataTypes.IDENTIFIER, SerializableDataTypes.IDENTIFIER);
+    public static final SerializableDataType<Map<ResourceLocation, ResourceLocation>> IDENTIFIER_MAP = SerializableDataType.map(SerializableDataTypes.IDENTIFIER, SerializableDataTypes.IDENTIFIER);
 
     public static final SerializableDataType<Pattern> REGEX = SerializableDataTypes.STRING.xmap(Pattern::compile, Pattern::pattern);
 
@@ -188,23 +188,23 @@ public class ApoliDataTypes {
 	 *  <b>Use {@link #REGEX_REPLACEMENT_MAP} instead for further functionality (e.g: referencing capture groups of the paired regex)</b>
 	 */
 	@Deprecated(forRemoval = true)
-    public static final SerializableDataType<Map<Pattern, Identifier>> REGEX_MAP = SerializableDataType.map(REGEX, SerializableDataTypes.IDENTIFIER);
+    public static final SerializableDataType<Map<Pattern, ResourceLocation>> REGEX_MAP = SerializableDataType.map(REGEX, SerializableDataTypes.IDENTIFIER);
 
 	public static final SerializableDataType<Map<Pattern, String>> REGEX_REPLACEMENT_MAP = SerializableDataType.map(REGEX, SerializableDataTypes.STRING);
 
     public static final SerializableDataType<GameMode> GAME_MODE = SerializableDataType.enumValue(GameMode.class);
 
     //  This is for keeping backwards compatibility to fields that used to accept strings as translation keys
-    public static final SerializableDataType<Text> DEFAULT_TRANSLATABLE_TEXT = SerializableDataType.of(
+    public static final SerializableDataType<Component> DEFAULT_TRANSLATABLE_TEXT = SerializableDataType.of(
 		new Codec<>() {
 
 			@Override
-			public <T> DataResult<com.mojang.datafixers.util.Pair<Text, T>> decode(DynamicOps<T> ops, T input) {
+			public <T> DataResult<com.mojang.datafixers.util.Pair<Component, T>> decode(DynamicOps<T> ops, T input) {
 
 				DataResult<String> inputString = ops.getStringValue(input);
 				if (inputString.isSuccess()) {
 					return inputString
-						.map(Text::translatable)
+						.map(Component::translatable)
 						.map(text -> com.mojang.datafixers.util.Pair.of(text, input));
 				}
 
@@ -215,12 +215,12 @@ public class ApoliDataTypes {
 			}
 
 			@Override
-			public <T> DataResult<T> encode(Text input, DynamicOps<T> ops, T prefix) {
+			public <T> DataResult<T> encode(Component input, DynamicOps<T> ops, T prefix) {
 				return SerializableDataTypes.TEXT.codec().encode(input, ops, prefix);
 			}
 
 		},
-		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC
+		ComponentSerialization.UNLIMITED_REGISTRY_PACKET_CODEC
 	);
 
     public static final SerializableDataType<StackClickPhase> STACK_CLICK_PHASE = SerializableDataType.enumValue(StackClickPhase.class);
@@ -231,7 +231,7 @@ public class ApoliDataTypes {
 
     public static final SerializableDataType<EnumSet<BlockUsagePhase>> BLOCK_USAGE_PHASE_SET = SerializableDataType.enumSet(BLOCK_USAGE_PHASE);
 
-    public static final SerializableDataType<EntityPose> ENTITY_POSE = SerializableDataType.enumValue(EntityPose.class);
+    public static final SerializableDataType<Pose> ENTITY_POSE = SerializableDataType.enumValue(Pose.class);
 
     public static final SerializableDataType<ArmPoseReference> ARM_POSE_REFERENCE = SerializableDataType.enumValue(ArmPoseReference.class);
 

@@ -12,14 +12,14 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.BlockUsagePhase;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.Direction;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
@@ -64,8 +64,8 @@ public class PreventBlockUsePowerType extends ActiveInteractionPowerType {
     private final EnumSet<BlockUsagePhase> usePhases;
     private final EnumSet<Direction> directions;
 
-    public PreventBlockUsePowerType(Optional<EntityAction> entityAction, Optional<BlockAction> blockAction, Optional<BlockCondition> blockCondition, EnumSet<BlockUsagePhase> usePhases, EnumSet<Direction> directions, Optional<ItemAction> heldItemAction, Optional<ItemCondition> heldItemCondition, Optional<ItemAction> resultItemAction, Optional<ItemStack> resultStack, EnumSet<Hand> hands, int priority, Optional<EntityCondition> condition) {
-        super(heldItemAction, heldItemCondition, resultItemAction, resultStack, hands, ActionResult.FAIL, priority, condition);
+    public PreventBlockUsePowerType(Optional<EntityAction> entityAction, Optional<BlockAction> blockAction, Optional<BlockCondition> blockCondition, EnumSet<BlockUsagePhase> usePhases, EnumSet<Direction> directions, Optional<ItemAction> heldItemAction, Optional<ItemCondition> heldItemCondition, Optional<ItemAction> resultItemAction, Optional<ItemStack> resultStack, EnumSet<InteractionHand> hands, int priority, Optional<EntityCondition> condition) {
+        super(heldItemAction, heldItemCondition, resultItemAction, resultStack, hands, InteractionResult.FAIL, priority, condition);
         this.blockCondition = blockCondition;
         this.entityAction = entityAction;
         this.blockAction = blockAction;
@@ -78,27 +78,27 @@ public class PreventBlockUsePowerType extends ActiveInteractionPowerType {
         return PowerTypes.PREVENT_BLOCK_USE;
     }
 
-    public void executeActions(BlockHitResult hitResult, Hand hand) {
+    public void executeActions(BlockHitResult hitResult, InteractionHand hand) {
 
         LivingEntity holder = getHolder();
 
-        blockAction.ifPresent(action -> action.execute(holder.getWorld(), hitResult.getBlockPos(), Optional.of(hitResult.getSide())));
+        blockAction.ifPresent(action -> action.execute(holder.level(), hitResult.blockPosition(), Optional.of(hitResult.getSide())));
         entityAction.ifPresent(action -> action.execute(holder));
 
-        if (holder instanceof PlayerEntity player) {
+        if (holder instanceof Player player) {
             this.performActorItemStuff(player, hand);
         }
 
     }
 
-    public boolean doesPrevent(BlockUsagePhase usePhase, BlockHitResult hitResult, ItemStack heldStack, Hand hand) {
+    public boolean doesPrevent(BlockUsagePhase usePhase, BlockHitResult hitResult, ItemStack heldStack, InteractionHand hand) {
         return usePhases.contains(usePhase)
             && directions.contains(hitResult.getSide())
             && super.shouldExecute(hand, heldStack)
-            && blockCondition.map(condition -> condition.test(getHolder().getWorld(), hitResult.getBlockPos())).orElse(true);
+            && blockCondition.map(condition -> condition.test(getHolder().level(), hitResult.blockPosition())).orElse(true);
     }
 
-    public static boolean doesPrevent(Entity holder, BlockUsagePhase usePhase, BlockHitResult hitResult, ItemStack heldStack, Hand hand) {
+    public static boolean doesPrevent(Entity holder, BlockUsagePhase usePhase, BlockHitResult hitResult, ItemStack heldStack, InteractionHand hand) {
 
         CallInstance<ActiveInteractionPowerType> aipci = new CallInstance<>();
         aipci.add(holder, PreventBlockUsePowerType.class, p -> p.doesPrevent(usePhase, hitResult, heldStack, hand));

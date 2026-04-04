@@ -10,7 +10,7 @@ public class DamageableItemConditionType extends ItemConditionType {
 
 	@Override
 	public boolean test(ItemConditionContext context) {
-		return context.stack().isDamageable();
+		return context.stack().isDamageableItem();
 	}
 
 	@Override

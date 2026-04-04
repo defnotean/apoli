@@ -1,19 +1,20 @@
 package io.github.apace100.apoli.component.item;
 
 import io.github.apace100.apoli.Apoli;
-import net.minecraft.component.ComponentType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 
 public class ApoliDataComponentTypes {
 
-    public static final ComponentType<ItemPowersComponent> POWERS = ComponentType.<ItemPowersComponent>builder()
+    public static final DataComponentType<ItemPowersComponent> POWERS = DataComponentType.<ItemPowersComponent>builder()
         .codec(ItemPowersComponent.CODEC)
         .packetCodec(ItemPowersComponent.PACKET_CODEC)
         .build();
 
     public static void register() {
-        Registry.register(Registries.DATA_COMPONENT_TYPE, Apoli.identifier("powers"), POWERS);
+        Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Apoli.identifier("powers"), POWERS);
     }
 
 }

@@ -7,7 +7,7 @@ import io.github.apace100.apoli.action.type.BlockActionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 public class AddBlockBlockActionType extends BlockActionType {
@@ -32,7 +32,7 @@ public class AddBlockBlockActionType extends BlockActionType {
     public void accept(BlockActionContext context) {
         context.direction()
             .map(context.pos()::offset)
-            .ifPresent(offsetPos -> context.world().setBlockState(offsetPos, blockState));
+            .ifPresent(offsetPos -> context.world().setBlock(offsetPos, blockState));
     }
 
     @Override

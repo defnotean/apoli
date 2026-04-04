@@ -7,23 +7,23 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.PowerManager;
 import io.github.apace100.apoli.power.type.RecipePowerType;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.recipe.CraftingRecipe;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.book.CraftingRecipeCategory;
-import net.minecraft.recipe.input.CraftingRecipeInput;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.world.World;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.CraftingRecipeCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.level.Level;
 
 import java.util.Objects;
 
-public record PowerCraftingRecipe(Identifier powerId, CraftingRecipe delegate) implements CraftingRecipe {
+public record PowerCraftingRecipe(ResourceLocation powerId, CraftingRecipe delegate) implements CraftingRecipe {
 
     @Override
     public CraftingRecipeCategory getCategory() {
@@ -31,7 +31,7 @@ public record PowerCraftingRecipe(Identifier powerId, CraftingRecipe delegate) i
     }
 
     @Override
-    public boolean matches(CraftingRecipeInput input, World world) {
+    public boolean matches(CraftingInput input, Level world) {
 
         if (!(input instanceof PowerCraftingObject pco)) {
             return false;
@@ -50,7 +50,7 @@ public record PowerCraftingRecipe(Identifier powerId, CraftingRecipe delegate) i
     }
 
     @Override
-    public ItemStack craft(CraftingRecipeInput input, RegistryWrapper.WrapperLookup lookup) {
+    public ItemStack craft(CraftingInput input, HolderLookup.Provider lookup) {
         return delegate().craft(input, lookup);
     }
 
@@ -60,8 +60,8 @@ public record PowerCraftingRecipe(Identifier powerId, CraftingRecipe delegate) i
     }
 
     @Override
-    public ItemStack getResult(RegistryWrapper.WrapperLookup registriesLookup) {
-        return delegate().getResult(registriesLookup);
+    public ItemStack getResultItem(HolderLookup.Provider registriesLookup) {
+        return delegate().getResultItem(registriesLookup);
     }
 
     @Override
@@ -75,12 +75,12 @@ public record PowerCraftingRecipe(Identifier powerId, CraftingRecipe delegate) i
     }
 
     @Override
-    public DefaultedList<ItemStack> getRemainder(CraftingRecipeInput input) {
+    public NonNullList<ItemStack> getRemainder(CraftingInput input) {
         return delegate().getRemainder(input);
     }
 
     @Override
-    public DefaultedList<Ingredient> getIngredients() {
+    public NonNullList<Ingredient> getIngredients() {
         return delegate().getIngredients();
     }
 
@@ -106,7 +106,7 @@ public record PowerCraftingRecipe(Identifier powerId, CraftingRecipe delegate) i
 
     private static PowerCraftingRecipe receive(RegistryByteBuf buf) {
 
-        Identifier powerId = buf.readIdentifier();
+        ResourceLocation powerId = buf.readIdentifier();
         Recipe<?> recipe = Recipe.PACKET_CODEC.decode(buf);
 
         if (recipe instanceof CraftingRecipe craftingRecipe) {
@@ -122,7 +122,7 @@ public record PowerCraftingRecipe(Identifier powerId, CraftingRecipe delegate) i
     public static class Serializer implements RecipeSerializer<PowerCraftingRecipe> {
 
         public static final MapCodec<PowerCraftingRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Identifier.CODEC.fieldOf("power").forGetter(PowerCraftingRecipe::powerId),
+            ResourceLocation.CODEC.fieldOf("power").forGetter(PowerCraftingRecipe::powerId),
             ApoliDataTypes.DISALLOWING_INTERNAL_CRAFTING_RECIPE.codec().fieldOf("recipe").forGetter(PowerCraftingRecipe::delegate)
         ).apply(instance, PowerCraftingRecipe::new));
 

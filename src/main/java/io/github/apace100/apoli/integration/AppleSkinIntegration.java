@@ -5,9 +5,9 @@ import io.github.apace100.apoli.power.type.EdibleItemPowerType;
 import io.github.apace100.apoli.power.type.ModifyFoodPowerType;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.apoli.util.modifier.ModifierUtil;
-import net.minecraft.component.type.FoodComponent;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import squeek.appleskin.api.AppleSkinApi;
 import squeek.appleskin.api.event.FoodValuesEvent;
 
@@ -20,7 +20,7 @@ public class AppleSkinIntegration implements AppleSkinApi {
 
         FoodValuesEvent.EVENT.register(event -> {
 
-            PlayerEntity player = event.player;
+            Player player = event.player;
             ItemStack stack = event.itemStack;
 
             EdibleItemPowerType.get(stack, player)
@@ -35,7 +35,7 @@ public class AppleSkinIntegration implements AppleSkinApi {
                 return;
             }
 
-            FoodComponent originalFoodComponent = !event.modifiedFoodComponent.equals(event.defaultFoodComponent)
+            FoodProperties originalFoodComponent = !event.modifiedFoodComponent.equals(event.defaultFoodComponent)
                 ? event.modifiedFoodComponent
                 : event.defaultFoodComponent;
 
@@ -51,7 +51,7 @@ public class AppleSkinIntegration implements AppleSkinApi {
             int newNutrition = (int) ModifierUtil.applyModifiers(player, nutritionModifiers, originalFoodComponent.nutrition());
             float newSaturation = (float) ModifierUtil.applyModifiers(player, saturationModifiers, originalFoodComponent.saturation());
 
-            event.modifiedFoodComponent = new FoodComponent(
+            event.modifiedFoodComponent = new FoodProperties(
                 newNutrition,
                 newSaturation,
                 originalFoodComponent.canAlwaysEat(),

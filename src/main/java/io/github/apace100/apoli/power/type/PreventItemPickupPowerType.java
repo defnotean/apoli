@@ -13,10 +13,10 @@ import io.github.apace100.apoli.util.InventoryUtil;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ItemEntity;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -80,14 +80,14 @@ public class PreventItemPickupPowerType extends PowerType implements Prioritized
     }
 
     public boolean doesPrevent(ItemStack stack, Entity thrower) {
-        return itemCondition.map(condition -> condition.test(getHolder().getWorld(), stack)).orElse(true)
+        return itemCondition.map(condition -> condition.test(getHolder().level(), stack)).orElse(true)
             && biEntityCondition.map(condition -> condition.test(getHolder(), thrower)).orElse(true);
     }
 
     public void executeActions(ItemEntity itemEntity, Entity thrower) {
 
-        StackReference stackReference = InventoryUtil.createStackReference(itemEntity.getStack());
-        itemAction.ifPresent(action -> action.execute(getHolder().getWorld(), stackReference));
+        SlotAccess stackReference = InventoryUtil.createStackReference(itemEntity.getStack());
+        itemAction.ifPresent(action -> action.execute(getHolder().level(), stackReference));
 
         biEntityActionThrower.ifPresent(action -> action.execute(thrower, getHolder()));
         biEntityActionItem.ifPresent(action -> action.execute(getHolder(), itemEntity));

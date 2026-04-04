@@ -4,7 +4,7 @@ import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.CustomToastData;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.protocol.CustomPayload;
 
 public record ShowToastS2CPacket(CustomToastData toastData) implements CustomPayload {
 

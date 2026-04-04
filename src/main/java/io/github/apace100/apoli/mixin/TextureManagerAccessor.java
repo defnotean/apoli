@@ -1,10 +1,10 @@
 package io.github.apace100.apoli.mixin;
 
-import net.minecraft.client.texture.AbstractTexture;
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.client.texture.TextureTickListener;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.Tickable;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -19,12 +19,12 @@ public interface TextureManagerAccessor {
     ResourceManager getResourceContainer();
 
     @Accessor
-    Map<Identifier, AbstractTexture> getTextures();
+    Map<ResourceLocation, AbstractTexture> getTextures();
 
     @Accessor
-    Set<TextureTickListener> getTickListeners();
+    Set<Tickable> getTickListeners();
 
     @Invoker
-    void callCloseTexture(Identifier id, AbstractTexture texture);
+    void callCloseTexture(ResourceLocation id, AbstractTexture texture);
 
 }

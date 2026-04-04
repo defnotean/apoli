@@ -9,8 +9,8 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.SavedBlockPosition;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -62,7 +62,7 @@ public class ActionOnBlockBreakPowerType extends PowerType {
     }
 
     public void executeActions(BlockPos pos, Direction direction) {
-        blockAction.ifPresent(action -> action.execute(getHolder().getWorld(), pos, Optional.of(direction)));
+        blockAction.ifPresent(action -> action.execute(getHolder().level(), pos, Optional.of(direction)));
         entityAction.ifPresent(action -> action.execute(getHolder()));
     }
 

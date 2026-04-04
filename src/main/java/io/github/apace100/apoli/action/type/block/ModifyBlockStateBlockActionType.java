@@ -13,15 +13,15 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.ResourceOperation;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.block.BlockState;
-import net.minecraft.registry.RegistryOps;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -76,7 +76,7 @@ public class ModifyBlockStateBlockActionType extends BlockActionType {
     @Override
     public void accept(BlockActionContext context) {
 
-        World world = context.world();
+        Level world = context.world();
         BlockPos pos = context.pos();
 
         BlockState blockState = world.getBlockState(pos);
@@ -91,7 +91,7 @@ public class ModifyBlockStateBlockActionType extends BlockActionType {
         }
 
         if (cycle) {
-            world.setBlockState(pos, blockState.cycle(blockProperty));
+            world.setBlock(pos, blockState.cycle(blockProperty));
             return;
         }
 
@@ -99,8 +99,8 @@ public class ModifyBlockStateBlockActionType extends BlockActionType {
             case EnumProperty<?> enumProp when enumValue.isPresent() && !enumValue.get().isEmpty() ->
                 setEnumProperty(enumProp, enumValue.get(), world, pos, blockState);
             case BooleanProperty boolProp when boolValue.isPresent() ->
-                world.setBlockState(pos, blockState.with(boolProp, boolValue.get()));
-            case IntProperty intProp when change.isPresent() -> {
+                world.setBlock(pos, blockState.with(boolProp, boolValue.get()));
+            case IntegerProperty intProp when change.isPresent() -> {
 
                 int newValue = switch (operation) {
                     case ADD ->
@@ -110,7 +110,7 @@ public class ModifyBlockStateBlockActionType extends BlockActionType {
                 };
 
                 if (intProp.getValues().contains(newValue)) {
-                    world.setBlockState(pos, blockState.with(intProp, newValue));
+                    world.setBlock(pos, blockState.with(intProp, newValue));
                 }
 
             }
@@ -126,16 +126,16 @@ public class ModifyBlockStateBlockActionType extends BlockActionType {
         return BlockActionTypes.MODIFY_BLOCK_STATE;
     }
 
-    private <T extends Enum<T> & StringIdentifiable> void setEnumProperty(EnumProperty<T> property, String name, World world, BlockPos pos, BlockState originalState) {
+    private <T extends Enum<T> & StringRepresentable> void setEnumProperty(EnumProperty<T> property, String name, Level world, BlockPos pos, BlockState originalState) {
         property.parse(name).ifPresentOrElse(
             propValue ->
-                world.setBlockState(pos, originalState.with(property, propValue)),
+                world.setBlock(pos, originalState.with(property, propValue)),
             () -> {
 
-                RegistryOps<JsonElement> jsonOps = world.getRegistryManager().getOps(JsonOps.INSTANCE);
+                RegistryOps<JsonElement> jsonOps = world.registryAccess().getOps(JsonOps.INSTANCE);
                 Optional<JsonElement> blockActionJson = BlockAction.DATA_TYPE.write(jsonOps, this.getAction()).result();
 
-                Apoli.LOGGER.warn("Couldn't set enum property \"{}\" of block at {} to \"{}\" (with block action {})! Expected value to be any of {}", property.getName(), pos.toShortString(), name, blockActionJson.map(JsonElement::toString).orElse("<unknown>"), property.getValues().stream().map(StringIdentifiable::asString).collect(Collectors.joining(", ")));
+                Apoli.LOGGER.warn("Couldn't set enum property \"{}\" of block at {} to \"{}\" (with block action {})! Expected value to be any of {}", property.getName(), pos.toShortString(), name, blockActionJson.map(JsonElement::toString).orElse("<unknown>"), property.getValues().stream().map(StringRepresentable::asString).collect(Collectors.joining(", ")));
 
             }
         );

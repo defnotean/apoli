@@ -7,7 +7,7 @@ import io.github.apace100.apoli.condition.type.DamageConditionType;
 import io.github.apace100.apoli.condition.type.DamageConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -32,7 +32,7 @@ public class AttackerDamageConditionType extends DamageConditionType {
 
     @Override
     public boolean test(DamageConditionContext context) {
-        Entity attacker = context.source().getAttacker();
+        Entity attacker = context.source().getEntity();
         return attacker != null && entityCondition
             .map(condition -> condition.test(attacker))
             .orElse(true);

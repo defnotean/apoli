@@ -8,8 +8,8 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.ArmPoseReference;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityPose;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Pose;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -33,12 +33,12 @@ public class PosePowerType extends PowerType implements Prioritized<PosePowerTyp
             .set("priority", powerType.getPriority())
     );
 
-    private final Optional<EntityPose> entityPose;
+    private final Optional<Pose> entityPose;
     private final Optional<ArmPoseReference> armPose;
 
     private final int priority;
 
-    public PosePowerType(Optional<EntityPose> entityPose, Optional<ArmPoseReference> armPose, int priority, Optional<EntityCondition> condition) {
+    public PosePowerType(Optional<Pose> entityPose, Optional<ArmPoseReference> armPose, int priority, Optional<EntityCondition> condition) {
         super(condition);
         this.entityPose = entityPose;
         this.armPose = armPose;
@@ -61,7 +61,7 @@ public class PosePowerType extends PowerType implements Prioritized<PosePowerTyp
             && super.isActive();
     }
 
-    public Optional<EntityPose> getEntityPose() {
+    public Optional<Pose> getEntityPose() {
         return entityPose;
     }
 
@@ -74,7 +74,7 @@ public class PosePowerType extends PowerType implements Prioritized<PosePowerTyp
             || this.getArmPose().isPresent();
     }
 
-    public static boolean hasEntityPose(Entity entity, EntityPose entityPose) {
+    public static boolean hasEntityPose(Entity entity, Pose entityPose) {
         return entity instanceof ModifiedPoseHolder poseHolder
             && poseHolder.apoli$getModifiedEntityPose().map(entityPose::equals).orElse(false);
     }

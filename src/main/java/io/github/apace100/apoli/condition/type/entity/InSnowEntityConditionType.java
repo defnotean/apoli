@@ -6,8 +6,8 @@ import io.github.apace100.apoli.condition.type.EntityConditionType;
 import io.github.apace100.apoli.condition.type.EntityConditionTypes;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.apoli.util.WorldUtil;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
 public class InSnowEntityConditionType extends EntityConditionType {
@@ -15,7 +15,7 @@ public class InSnowEntityConditionType extends EntityConditionType {
 	@Override
 	public boolean test(EntityConditionContext context) {
 		Entity entity = context.entity();
-		return WorldUtil.inSnow(entity.getWorld(), BlockPos.ofFloored(MiscUtil.getPoseDependentEyePos(entity)), entity.getBlockPos());
+		return WorldUtil.inSnow(entity.level(), BlockPos.ofFloored(MiscUtil.getPoseDependentEyePos(entity)), entity.blockPosition());
 	}
 
 	@Override

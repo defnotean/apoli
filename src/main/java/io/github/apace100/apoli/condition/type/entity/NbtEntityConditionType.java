@@ -7,8 +7,8 @@ import io.github.apace100.apoli.condition.type.EntityConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -26,15 +26,15 @@ public class NbtEntityConditionType extends EntityConditionType {
             .set("nbt", conditionType.nbt)
     );
 
-    private final NbtCompound nbt;
+    private final CompoundTag nbt;
 
-    public NbtEntityConditionType(NbtCompound nbt) {
+    public NbtEntityConditionType(CompoundTag nbt) {
         this.nbt = nbt;
     }
 
     @Override
     public boolean test(EntityConditionContext context) {
-        return NbtHelper.matches(nbt, context.entity().writeNbt(new NbtCompound()), true);
+        return NbtUtils.compareNbt(nbt, context.entity().save(new CompoundTag()), true);
     }
 
     @Override

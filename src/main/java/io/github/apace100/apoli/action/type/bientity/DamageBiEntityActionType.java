@@ -12,10 +12,10 @@ import io.github.apace100.apoli.util.modifier.ModifierUtil;
 import io.github.apace100.apoli.util.requirement.BiEntityRequirement;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class DamageBiEntityActionType extends BiEntityActionType {
                     Optional<Float> amount = data.get("amount");
                     return amount
                         .map(value -> DataResult.success(data))
-                        .orElseGet(() -> DataResult.error(() -> "Any of 'amount', 'modifier', or 'modifier' fields must be defined!"));
+                        .orElseGet(() -> DataResult.error(() -> "Any of 'amount', 'modifier', or 'modifiers' fields must be defined!"));
                 }
 
             }),
@@ -54,12 +54,12 @@ public class DamageBiEntityActionType extends BiEntityActionType {
             .set("modifiers", actionType.modifiers)
     );
 
-    private final RegistryKey<DamageType> damageType;
+    private final ResourceKey<DamageType> damageType;
     private final Optional<Float> amount;
 
     private final List<Modifier> modifiers;
 
-    public DamageBiEntityActionType(RegistryKey<DamageType> damageType, Optional<Float> amount, List<Modifier> modifiers) {
+    public DamageBiEntityActionType(ResourceKey<DamageType> damageType, Optional<Float> amount, List<Modifier> modifiers) {
         this.damageType = damageType;
         this.amount = amount;
         this.modifiers = modifiers;
@@ -73,7 +73,7 @@ public class DamageBiEntityActionType extends BiEntityActionType {
 
         this.amount
             .or(() -> getModifiedAmount(actor, target))
-            .ifPresent(amount -> target.damage(actor.getDamageSources().create(damageType, actor), amount));
+            .ifPresent(amount -> target.hurt(actor.damageSources().create(damageType, actor), amount));
 
     }
 

@@ -3,8 +3,8 @@ package io.github.apace100.apoli.util.modifier;
 import io.github.apace100.calio.data.SerializableData;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,7 +20,7 @@ public class ModifierUtil {
         return Modifier.of(operation, amount);
     }
 
-    public static Modifier fromAttributeModifier(EntityAttributeModifier attributeModifier) {
+    public static Modifier fromAttributeModifier(AttributeModifier attributeModifier) {
 
         ModifierOperation operation = switch (attributeModifier.operation()) {
             case ADD_VALUE ->

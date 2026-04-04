@@ -6,10 +6,10 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -23,8 +23,8 @@ public class ParticlePowerType extends PowerType {
             .add("offset_x", SerializableDataTypes.DOUBLE, 0.0D)
             .add("offset_y", SerializableDataTypes.DOUBLE, 0.0D)
             .add("offset_z", SerializableDataTypes.DOUBLE, 0.0D)
-            .addFunctionedDefault("offset", SerializableDataTypes.VECTOR, data -> new Vec3d(data.get("offset_x"), data.get("offset_y"), data.get("offset_z")))
-            .add("spread", SerializableDataTypes.VECTOR, new Vec3d(0.5, 0.5, 0.5))
+            .addFunctionedDefault("offset", SerializableDataTypes.VECTOR, data -> new Vec3(data.get("offset_x"), data.get("offset_y"), data.get("offset_z")))
+            .add("spread", SerializableDataTypes.VECTOR, new Vec3(0.5, 0.5, 0.5))
             .add("frequency", SerializableDataTypes.POSITIVE_INT)
             .add("count", SerializableDataTypes.NON_NEGATIVE_INT, 1)
             .add("speed", SerializableDataTypes.FLOAT, 0.0F)
@@ -58,10 +58,10 @@ public class ParticlePowerType extends PowerType {
     );
 
     private final Optional<BiEntityCondition> biEntityCondition;
-    private final ParticleEffect particleEffect;
+    private final ParticleOptions particleEffect;
 
-    private final Vec3d spread;
-    private final Vec3d offset;
+    private final Vec3 spread;
+    private final Vec3 offset;
 
     private final int frequency;
     private final int count;
@@ -72,7 +72,7 @@ public class ParticlePowerType extends PowerType {
     private final boolean visibleWhileInvisible;
     private final boolean force;
 
-    public ParticlePowerType(Optional<BiEntityCondition> biEntityCondition, ParticleEffect particleEffect, Vec3d offset, Vec3d spread, int frequency, int count, float speed, boolean visibleInFirstPerson, boolean visibleWhileInvisible, boolean force, Optional<EntityCondition> condition) {
+    public ParticlePowerType(Optional<BiEntityCondition> biEntityCondition, ParticleOptions particleEffect, Vec3 offset, Vec3 spread, int frequency, int count, float speed, boolean visibleInFirstPerson, boolean visibleWhileInvisible, boolean force, Optional<EntityCondition> condition) {
         super(condition);
         this.biEntityCondition = biEntityCondition;
         this.particleEffect = particleEffect;
@@ -91,20 +91,20 @@ public class ParticlePowerType extends PowerType {
         return PowerTypes.PARTICLE;
     }
 
-    public boolean doesApply(PlayerEntity viewer, boolean inFirstPerson) {
+    public boolean doesApply(Player viewer, boolean inFirstPerson) {
         LivingEntity holder = getHolder();
         return (!holder.isInvisibleTo(viewer) || this.isVisibleWhileInvisible())
             && (holder != viewer || (!inFirstPerson || this.isVisibleInFirstPerson()))
-            && (viewer.getBlockPos().isWithinDistance(holder.getPos(), this.shouldForce() ? 512 : 32))
-            && (holder.age % this.getFrequency() == 0)
+            && (viewer.blockPosition().isWithinDistance(holder.position(), this.shouldForce() ? 512 : 32))
+            && (holder.tickCount % this.getFrequency() == 0)
             && biEntityCondition.map(condition -> condition.test(viewer, holder)).orElse(true);
     }
 
-    public ParticleEffect getParticle() {
+    public ParticleOptions getParticle() {
         return particleEffect;
     }
 
-    public Vec3d getSpread() {
+    public Vec3 getSpread() {
         return spread;
     }
 
@@ -112,7 +112,7 @@ public class ParticlePowerType extends PowerType {
         return frequency;
     }
 
-    public Vec3d getOffset() {
+    public Vec3 getOffset() {
         return offset;
     }
 

@@ -8,11 +8,11 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -22,7 +22,7 @@ public class PlaySoundEntityActionType extends EntityActionType {
     public static final TypedDataObjectFactory<PlaySoundEntityActionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
             .add("sound", SerializableDataTypes.SOUND_EVENT)
-            .add("category", SerializableDataType.enumValue(SoundCategory.class).optional(), Optional.empty())
+            .add("category", SerializableDataType.enumValue(SoundSource.class).optional(), Optional.empty())
             .add("volume", SerializableDataTypes.FLOAT, 1.0F)
             .add("pitch", SerializableDataTypes.FLOAT, 1.0F),
         data -> new PlaySoundEntityActionType(
@@ -39,12 +39,12 @@ public class PlaySoundEntityActionType extends EntityActionType {
     );
 
     private final SoundEvent sound;
-    private final Optional<SoundCategory> category;
+    private final Optional<SoundSource> category;
 
     private final float volume;
     private final float pitch;
 
-    public PlaySoundEntityActionType(SoundEvent sound, Optional<SoundCategory> category, float volume, float pitch) {
+    public PlaySoundEntityActionType(SoundEvent sound, Optional<SoundSource> category, float volume, float pitch) {
         this.sound = sound;
         this.category = category;
         this.volume = volume;
@@ -55,9 +55,9 @@ public class PlaySoundEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         Entity entity = context.entity();
-        World world = entity.getWorld();
+        Level world = entity.level();
 
-        BlockPos blockPos = BlockPos.ofFloored(entity.getPos().add(context.offset()));
+        BlockPos blockPos = BlockPos.ofFloored(entity.position().add(context.offset()));
         world.playSound(null, blockPos, sound, category.orElseGet(entity::getSoundCategory), volume, pitch);
 
     }

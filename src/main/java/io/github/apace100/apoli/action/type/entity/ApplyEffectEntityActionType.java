@@ -8,8 +8,8 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.effect.MobEffectInstance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -28,17 +28,17 @@ public class ApplyEffectEntityActionType extends EntityActionType {
             .set("effects", actionType.effects)
     );
 
-    private final List<StatusEffectInstance> effects;
+    private final List<MobEffectInstance> effects;
 
-    public ApplyEffectEntityActionType(List<StatusEffectInstance> effects) {
+    public ApplyEffectEntityActionType(List<MobEffectInstance> effects) {
         this.effects = effects;
     }
 
     @Override
     public void accept(EntityActionContext context) {
 
-        if (context.entity() instanceof LivingEntity livingEntity && !livingEntity.getWorld().isClient()) {
-            effects.forEach(livingEntity::addStatusEffect);
+        if (context.entity() instanceof LivingEntity livingEntity && !livingEntity.level().isClientSide()) {
+            effects.forEach(livingEntity::addEffect);
         }
 
     }

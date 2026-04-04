@@ -5,7 +5,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -49,18 +49,18 @@ public class ExhaustOverTimePowerType extends PowerType {
     @Override
     public void serverTick() {
 
-        if (!(getHolder() instanceof PlayerEntity holderPlayer)) {
+        if (!(getHolder() instanceof Player holderPlayer)) {
             return;
         }
 
         if (isActive()) {
 
             if (startTicks == null) {
-                this.startTicks = holderPlayer.age % exhaustInterval;
+                this.startTicks = holderPlayer.tickCount % exhaustInterval;
                 this.endTicks = null;
             }
 
-            else if (holderPlayer.age % exhaustInterval == startTicks) {
+            else if (holderPlayer.tickCount % exhaustInterval == startTicks) {
                 holderPlayer.addExhaustion(exhaustion);
                 this.wasActive = true;
             }
@@ -71,10 +71,10 @@ public class ExhaustOverTimePowerType extends PowerType {
 
             if (endTicks == null) {
                 this.startTicks = null;
-                this.endTicks = holderPlayer.age % exhaustInterval;
+                this.endTicks = holderPlayer.tickCount % exhaustInterval;
             }
 
-            else if (holderPlayer.age % exhaustInterval == endTicks) {
+            else if (holderPlayer.tickCount % exhaustInterval == endTicks) {
                 this.wasActive = false;
             }
 

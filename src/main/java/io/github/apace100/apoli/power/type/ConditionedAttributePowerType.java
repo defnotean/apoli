@@ -63,11 +63,11 @@ public class ConditionedAttributePowerType extends AttributePowerType {
         if (isActive()) {
 
             if (startTicks == null) {
-                startTicks = getHolder().age % tickRate;
+                startTicks = getHolder().tickCount % tickRate;
                 endTicks = null;
             }
 
-            else if (!wasActive && getHolder().age % tickRate == startTicks) {
+            else if (!wasActive && getHolder().tickCount % tickRate == startTicks) {
                 addTemporaryModifiers(getHolder());
                 this.wasActive = true;
             }
@@ -78,10 +78,10 @@ public class ConditionedAttributePowerType extends AttributePowerType {
 
             if (endTicks == null) {
                 startTicks = null;
-                endTicks = getHolder().age % tickRate;
+                endTicks = getHolder().tickCount % tickRate;
             }
 
-            else if (getHolder().age % tickRate == endTicks) {
+            else if (getHolder().tickCount % tickRate == endTicks) {
                 removeModifiers(getHolder());
                 this.wasActive = false;
             }

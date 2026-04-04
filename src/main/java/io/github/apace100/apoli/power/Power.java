@@ -17,15 +17,15 @@ import io.github.apace100.calio.util.Validatable;
 import io.netty.handler.codec.DecoderException;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.Util;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -99,7 +99,7 @@ public class Power implements Validatable {
 			@Override
 			public Power decode(RegistryByteBuf buf) {
 
-                Identifier powerId = buf.readIdentifier();
+                ResourceLocation powerId = buf.readIdentifier();
                 SerializableData.Instance powerData = serializableData.receive(buf);
 
                 try {
@@ -175,15 +175,15 @@ public class Power implements Validatable {
     ));
 
 
-    private final Identifier id;
+    private final ResourceLocation id;
     private final PowerType powerType;
 
-    private final Text name;
-    private final Text description;
+    private final Component name;
+    private final Component description;
 
     private final boolean hidden;
 
-    protected Power(Identifier id, PowerType powerType, Optional<Text> name, Optional<Text> description, boolean hidden) {
+    protected Power(ResourceLocation id, PowerType powerType, Optional<Component> name, Optional<Component> description, boolean hidden) {
 
         this.id = id;
         this.powerType = powerType;
@@ -233,7 +233,7 @@ public class Power implements Validatable {
 
     }
 
-    public Identifier getId() {
+    public ResourceLocation getId() {
         return id;
     }
 
@@ -268,17 +268,17 @@ public class Power implements Validatable {
             .orElse(false);
     }
 
-    public MutableText getName() {
+    public MutableComponent getName() {
         return name.copy();
     }
 
-    public MutableText getDescription() {
+    public MutableComponent getDescription() {
         return description.copy();
     }
 
-    public record DataEntry(PowerConfiguration<?> typeConfig, PowerReference powerReference, NbtElement nbtData, Set<Identifier> sources) {
+    public record DataEntry(PowerConfiguration<?> typeConfig, PowerReference powerReference, Tag nbtData, Set<ResourceLocation> sources) {
 
-        private static final SerializableDataType<Set<Identifier>> MUTABLE_IDENTIFIERS = SerializableDataTypes.IDENTIFIER.list(1, Integer.MAX_VALUE).xmap(ObjectOpenHashSet::new, ObjectArrayList::new);
+        private static final SerializableDataType<Set<ResourceLocation>> MUTABLE_IDENTIFIERS = SerializableDataTypes.IDENTIFIER.list(1, Integer.MAX_VALUE).xmap(ObjectOpenHashSet::new, ObjectArrayList::new);
 
         public static final SerializableDataType<DataEntry> CODEC = SerializableDataType.compound(
             new SerializableData()
@@ -286,7 +286,7 @@ public class Power implements Validatable {
                 .addFunctionedDefault("type", PowerTypes.DATA_TYPE, data -> data.get("Factory"))
                 .add("Type", ApoliDataTypes.POWER_REFERENCE, null)
                 .addFunctionedDefault("id", ApoliDataTypes.POWER_REFERENCE, data -> data.get("Type"))
-                .add("Data", SerializableDataTypes.NBT_ELEMENT, new NbtCompound())
+                .add("Data", SerializableDataTypes.NBT_ELEMENT, new CompoundTag())
                 .addFunctionedDefault("data", SerializableDataTypes.NBT_ELEMENT, data -> data.get("Data"))
                 .add("Sources", MUTABLE_IDENTIFIERS, null)
                 .addFunctionedDefault("sources", MUTABLE_IDENTIFIERS, data -> data.get("Sources"))

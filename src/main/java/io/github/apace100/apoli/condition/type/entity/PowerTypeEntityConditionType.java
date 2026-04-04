@@ -10,7 +10,7 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.power.type.PowerType;
 import io.github.apace100.apoli.power.type.PowerTypes;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;

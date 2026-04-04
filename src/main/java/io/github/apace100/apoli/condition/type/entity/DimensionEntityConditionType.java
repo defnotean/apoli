@@ -7,8 +7,8 @@ import io.github.apace100.apoli.condition.type.EntityConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 public class DimensionEntityConditionType extends EntityConditionType {
@@ -23,15 +23,15 @@ public class DimensionEntityConditionType extends EntityConditionType {
             .set("dimension", conditionType.dimension)
     );
 
-    private final RegistryKey<World> dimension;
+    private final ResourceKey<Level> dimension;
 
-    public DimensionEntityConditionType(RegistryKey<World> dimension) {
+    public DimensionEntityConditionType(ResourceKey<Level> dimension) {
         this.dimension = dimension;
     }
 
     @Override
     public boolean test(EntityConditionContext context) {
-        return context.entity().getWorld().getRegistryKey().equals(dimension);
+        return context.entity().level().dimension().equals(dimension);
     }
 
     @Override

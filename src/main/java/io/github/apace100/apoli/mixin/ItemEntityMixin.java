@@ -7,14 +7,14 @@ import io.github.apace100.apoli.power.type.PreventItemPickupPowerType;
 import io.github.apace100.apoli.power.type.Prioritized;
 import io.github.apace100.apoli.util.InventoryUtil;
 import io.github.apace100.apoli.util.MiscUtil;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,12 +36,12 @@ public abstract class ItemEntityMixin extends Entity {
     @Shadow
     public abstract void setStack(ItemStack stack);
 
-    private ItemEntityMixin(EntityType<?> type, World world) {
+    private ItemEntityMixin(EntityType<?> type, Level world) {
         super(type, world);
     }
 
-    @WrapOperation(method = "onPlayerCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;insertStack(Lnet/minecraft/item/ItemStack;)Z"))
-    private boolean apoli$onItemPickup(PlayerInventory playerInventory, ItemStack stack, Operation<Boolean> original, PlayerEntity player) {
+    @WrapOperation(method = "playerTouch", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;add(Lnet/minecraft/world/item/ItemStack;)Z"))
+    private boolean apoli$onItemPickup(Inventory playerInventory, ItemStack stack, Operation<Boolean> original, Player player) {
 
         if (PreventItemPickupPowerType.doesPrevent(thisAsItemEntity(), player)) {
             return false;
@@ -49,7 +49,7 @@ public abstract class ItemEntityMixin extends Entity {
 
         else if (MiscUtil.hasSpaceInInventory(playerInventory, stack)) {
 
-            StackReference stackReference = InventoryUtil.createStackReference(stack);
+            SlotAccess stackReference = InventoryUtil.createStackReference(stack);
             Entity thrower = MiscUtil.getEntityByUuid(this.throwerUuid, this.getServer());
 
             Prioritized.CallInstance<ActionOnItemPickupPowerType> callInstance = ActionOnItemPickupPowerType.executeItemAction(thrower, stackReference, player);

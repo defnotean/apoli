@@ -1,8 +1,8 @@
 package io.github.apace100.apoli.util;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 
@@ -21,7 +21,7 @@ public enum Space {
      * @param yaw the yaw of local space
      * @return the transformation matrix from local to global space
      * */
-    private static Matrix3f getBaseTransformMatrixFromNormalizedDirectionVector(Vec3d vector, float yaw){
+    private static Matrix3f getBaseTransformMatrixFromNormalizedDirectionVector(Vec3 vector, float yaw){
         double xX, xZ, // X vector
             zX = 0.0D, zY = vector.getY(), zZ = 0.0D; // Z vector
 
@@ -40,8 +40,8 @@ public enum Space {
             // If the orientation vector points straight up or straight down, use the yaw to determine the X vector (it's "on the left")
             // The pitch doesn't affect the X vector as it's a rotation around that same vector
             float trigonometricYaw = -yaw * 0.0174532925F; // pi / 180 = 0.0174532925
-            xX = MathHelper.cos(trigonometricYaw);
-            xZ = -MathHelper.sin(trigonometricYaw);
+            xX = Mth.cos(trigonometricYaw);
+            xZ = -Mth.sin(trigonometricYaw);
         }
 
         Matrix3f res = new Matrix3f();
@@ -68,7 +68,7 @@ public enum Space {
      * @param baseYaw the yaw of the base (used in case the forward vector lacks information to infer the base)
      * @param normalizeBase whether to normalize the base, if so all three vectors of the base will be normalized, otherwise they'll all have the length of the input forward vector
      * */
-    public static void transformVectorToBase(Vec3d baseForwardVector, Vector3f vector, float baseYaw, boolean normalizeBase) {
+    public static void transformVectorToBase(Vec3 baseForwardVector, Vector3f vector, float baseYaw, boolean normalizeBase) {
 
         double baseScaleD = baseForwardVector.length();
         if (baseScaleD <= 0.007D){ // tweak value if too high, may be a bit too aggressive
@@ -76,7 +76,7 @@ public enum Space {
         } else {
             float baseScale = (float)baseScaleD;
 
-            Vec3d normalizedBase = baseForwardVector.normalize(); // the function called below assumes the base is normalized to simplify calculations (Y calculated as cross product of Z and X guaranteed to be normalized if X and Z are normalized)
+            Vec3 normalizedBase = baseForwardVector.normalize(); // the function called below assumes the base is normalized to simplify calculations (Y calculated as cross product of Z and X guaranteed to be normalized if X and Z are normalized)
 
             Matrix3f transformMatrix = getBaseTransformMatrixFromNormalizedDirectionVector(normalizedBase, baseYaw);
             if (!normalizeBase) // if the base wasn't supposed to get normalized, re-scale to compensate for the prior normalization
@@ -94,7 +94,7 @@ public enum Space {
      * @param entity the entity to align the local space to
      * */
     public void toGlobal(Vector3f vector, Entity entity){
-        Vec3d baseForwardVector;
+        Vec3 baseForwardVector;
 
         switch (this){
 
@@ -104,20 +104,20 @@ public enum Space {
             case LOCAL:
             case LOCAL_HORIZONTAL:
             case LOCAL_HORIZONTAL_NORMALIZED:
-                baseForwardVector = entity.getRotationVector();
+                baseForwardVector = entity.getLookAngle();
                 if (this != LOCAL) // horizontal
-                    baseForwardVector = new Vec3d(baseForwardVector.getX(), 0, baseForwardVector.getZ());
-                transformVectorToBase(baseForwardVector, vector, entity.getYaw(), this == LOCAL_HORIZONTAL_NORMALIZED);
+                    baseForwardVector = new Vec3(baseForwardVector.getX(), 0, baseForwardVector.getZ());
+                transformVectorToBase(baseForwardVector, vector, entity.getYRot(), this == LOCAL_HORIZONTAL_NORMALIZED);
                 break;
 
             case VELOCITY:
             case VELOCITY_NORMALIZED:
             case VELOCITY_HORIZONTAL:
             case VELOCITY_HORIZONTAL_NORMALIZED:
-                baseForwardVector = entity.getVelocity();
+                baseForwardVector = entity.getDeltaMovement();
                 if (this == VELOCITY_HORIZONTAL || this == VELOCITY_HORIZONTAL_NORMALIZED)
-                    baseForwardVector = new Vec3d(baseForwardVector.getX(), 0, baseForwardVector.getZ());
-                transformVectorToBase(baseForwardVector, vector, entity.getYaw(), this == VELOCITY_NORMALIZED || this == VELOCITY_HORIZONTAL_NORMALIZED);
+                    baseForwardVector = new Vec3(baseForwardVector.getX(), 0, baseForwardVector.getZ());
+                transformVectorToBase(baseForwardVector, vector, entity.getYRot(), this == VELOCITY_NORMALIZED || this == VELOCITY_HORIZONTAL_NORMALIZED);
                 break;
         }
     }

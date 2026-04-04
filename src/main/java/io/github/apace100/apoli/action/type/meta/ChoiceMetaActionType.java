@@ -7,14 +7,14 @@ import io.github.apace100.apoli.action.type.ActionType;
 import io.github.apace100.apoli.util.context.ActionContext;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
-import net.minecraft.util.collection.WeightedList;
+import net.minecraft.world.entity.ai.behavior.ShufflingList;
 
 import java.util.Iterator;
 import java.util.function.Function;
 
 public interface ChoiceMetaActionType<T extends ActionContext<?>, A extends Action<T, ? extends ActionType<T, A>>> {
 
-    WeightedList<A> actions();
+    ShufflingList<A> actions();
 
     default void executeActions(T context) {
 
@@ -27,7 +27,7 @@ public interface ChoiceMetaActionType<T extends ActionContext<?>, A extends Acti
 
     }
 
-    static <T extends ActionContext<?>, A extends Action<T, AT>, AT extends ActionType<T, A>, M extends ActionType<T, A> & ChoiceMetaActionType<T, A>> ActionConfiguration<M> createConfiguration(SerializableDataType<A> actionDataType, Function<WeightedList<A>, M> constructor) {
+    static <T extends ActionContext<?>, A extends Action<T, AT>, AT extends ActionType<T, A>, M extends ActionType<T, A> & ChoiceMetaActionType<T, A>> ActionConfiguration<M> createConfiguration(SerializableDataType<A> actionDataType, Function<ShufflingList<A>, M> constructor) {
         return ActionConfiguration.of(
             Apoli.identifier("choice"),
             new SerializableData()

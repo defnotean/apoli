@@ -10,7 +10,7 @@ import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class RelativeDurabilityItemConditionType extends ItemConditionType {
@@ -39,8 +39,8 @@ public class RelativeDurabilityItemConditionType extends ItemConditionType {
     @Override
     public boolean test(ItemConditionContext context) {
         ItemStack stack = context.stack();
-        return stack.isDamageable()
-            && comparison.compare(Math.abs((float) (stack.getMaxDamage() - stack.getDamage())) / (float) stack.getMaxDamage(), compareTo);
+        return stack.isDamageableItem()
+            && comparison.compare(Math.abs((float) (stack.getMaxDamage() - stack.getDamageValue())) / (float) stack.getMaxDamage(), compareTo);
     }
 
     @Override

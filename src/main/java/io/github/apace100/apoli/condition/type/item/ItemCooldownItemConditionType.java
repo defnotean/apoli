@@ -10,9 +10,9 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.player.ItemCooldownManager;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.ItemCooldownManager;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemCooldownItemConditionType extends ItemConditionType {
@@ -43,7 +43,7 @@ public class ItemCooldownItemConditionType extends ItemConditionType {
 
         ItemStack stack = context.stack();
 
-        if (!stack.isEmpty() && ((EntityLinkedItemStack) stack).apoli$getEntity(true) instanceof PlayerEntity player) {
+        if (!stack.isEmpty() && ((EntityLinkedItemStack) stack).apoli$getEntity(true) instanceof Player player) {
 
             ItemCooldownManager.Entry cooldownEntry = player.getItemCooldownManager().entries.get(stack.getItem());
             int cooldown = cooldownEntry != null

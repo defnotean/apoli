@@ -9,10 +9,10 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.core.Holder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -35,12 +35,12 @@ public class AttributeEntityConditionType extends EntityConditionType {
             .set("compare_to", conditionType.compareTo)
     );
 
-    private final RegistryEntry<EntityAttribute> attribute;
+    private final Holder<Attribute> attribute;
 
     private final Comparison comparison;
     private final double compareTo;
 
-    public AttributeEntityConditionType(RegistryEntry<EntityAttribute> attribute, Comparison comparison, double compareTo) {
+    public AttributeEntityConditionType(Holder<Attribute> attribute, Comparison comparison, double compareTo) {
         this.attribute = attribute;
         this.comparison = comparison;
         this.compareTo = compareTo;
@@ -50,8 +50,8 @@ public class AttributeEntityConditionType extends EntityConditionType {
     public boolean test(EntityConditionContext context) {
 
         if (context.entity() instanceof LivingEntity livingEntity) {
-            return Optional.ofNullable(livingEntity.getAttributeInstance(attribute))
-                .map(EntityAttributeInstance::getValue)
+            return Optional.ofNullable(livingEntity.getAttribute(attribute))
+                .map(AttributeInstance::getValue)
                 .map(value -> comparison.compare(value, compareTo))
                 .orElse(false);
         }

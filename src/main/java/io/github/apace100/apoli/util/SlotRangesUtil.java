@@ -7,11 +7,11 @@ import com.mojang.serialization.DynamicOps;
 import io.github.apace100.apoli.mixin.SlotRangesAccessor;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.inventory.SlotRange;
-import net.minecraft.inventory.SlotRanges;
+import net.minecraft.world.SlotRange;
+import net.minecraft.world.SlotRanges;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.List;
 import java.util.Objects;
@@ -39,7 +39,7 @@ public class SlotRangesUtil {
 		slotRange -> {
 			int index = SlotRangesAccessor.getSlotRanges().indexOf(slotRange);
 			return index == -1
-				? DataResult.error(() -> "Unknown slot range \"" + slotRange.asString() + "\"!")
+				? DataResult.error(() -> "Unknown slot range \"" + slotRange.getSerializedName() + "\"!")
 				: DataResult.success(index);
 		}
 	);
@@ -69,7 +69,7 @@ public class SlotRangesUtil {
 		slotRange -> {
 			int index = SlotRangesAccessor.getSlotRanges().indexOf(slotRange);
 			return index == -1
-				? DataResult.error(() -> "Unknown slot range \"" + slotRange.asString() + "\"!")
+				? DataResult.error(() -> "Unknown slot range \"" + slotRange.getSerializedName() + "\"!")
 				: DataResult.success(index);
 		}
 	);
@@ -120,7 +120,7 @@ public class SlotRangesUtil {
 
 	};
 
-	public static final PacketCodec<ByteBuf, SlotRange> PACKET_CODEC = PacketCodecs.STRING.xmap(SlotRanges::fromName, StringIdentifiable::asString);
+	public static final PacketCodec<ByteBuf, SlotRange> PACKET_CODEC = PacketCodecs.STRING.xmap(SlotRanges::fromName, StringRepresentable::asString);
 
 	public static DataResult<SlotRange> validateSingleSlot(SlotRange slotRange) {
 		return slotRange.getSlotCount() == 1

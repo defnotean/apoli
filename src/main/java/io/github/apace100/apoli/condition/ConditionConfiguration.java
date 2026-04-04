@@ -4,24 +4,24 @@ import io.github.apace100.apoli.condition.type.ConditionType;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.TypeConfiguration;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public record ConditionConfiguration<T extends ConditionType<?, ?>>(Identifier id, TypedDataObjectFactory<T> dataFactory) implements TypeConfiguration<T> {
+public record ConditionConfiguration<T extends ConditionType<?, ?>>(ResourceLocation id, TypedDataObjectFactory<T> dataFactory) implements TypeConfiguration<T> {
 
-	public static <T extends ConditionType<?, ?>> ConditionConfiguration<T> of(Identifier id, SerializableData serializableData, Function<SerializableData.Instance, T> fromData, BiFunction<T, SerializableData, SerializableData.Instance> toData) {
+	public static <T extends ConditionType<?, ?>> ConditionConfiguration<T> of(ResourceLocation id, SerializableData serializableData, Function<SerializableData.Instance, T> fromData, BiFunction<T, SerializableData, SerializableData.Instance> toData) {
 		TypedDataObjectFactory<T> dataFactory = TypedDataObjectFactory.simple(serializableData, fromData, toData);
 		return of(id, dataFactory);
 	}
 
-	public static <T extends ConditionType<?, ?>> ConditionConfiguration<T> of(Identifier id, TypedDataObjectFactory<T> dataFactory) {
+	public static <T extends ConditionType<?, ?>> ConditionConfiguration<T> of(ResourceLocation id, TypedDataObjectFactory<T> dataFactory) {
 		return new ConditionConfiguration<>(id, dataFactory);
 	}
 	
-	public static <T extends ConditionType<?, ?>> ConditionConfiguration<T> simple(Identifier id, Supplier<T> constructor) {
+	public static <T extends ConditionType<?, ?>> ConditionConfiguration<T> simple(ResourceLocation id, Supplier<T> constructor) {
 		return of(id, new SerializableData(), data -> constructor.get(), (t, serializableData) -> serializableData.instance());
 	}
 

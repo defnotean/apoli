@@ -2,13 +2,13 @@ package io.github.apace100.apoli.action.context;
 
 import io.github.apace100.apoli.condition.context.BlockConditionContext;
 import io.github.apace100.apoli.util.context.ActionContext;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 
 import java.util.Optional;
 
-public record BlockActionContext(ServerWorld world, BlockPos pos, Optional<Direction> direction) implements ActionContext<BlockConditionContext> {
+public record BlockActionContext(ServerLevel world, BlockPos pos, Optional<Direction> direction) implements ActionContext<BlockConditionContext> {
 
 	@Override
 	public BlockConditionContext forCondition() {

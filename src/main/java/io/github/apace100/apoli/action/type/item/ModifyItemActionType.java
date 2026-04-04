@@ -9,18 +9,19 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.loot.context.ApoliLootContextTypes;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.context.LootContext;
-import net.minecraft.loot.context.LootContextParameterSet;
-import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.loot.function.LootFunction;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootContextParameterSet;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import net.minecraft.core.registries.Registries;
 
 public class ModifyItemActionType extends ItemActionType {
 
@@ -34,28 +35,28 @@ public class ModifyItemActionType extends ItemActionType {
             .set("modifier", actionType.modifier)
     );
 
-    private final RegistryKey<LootFunction> modifier;
+    private final ResourceKey<LootItemFunction> modifier;
 
-    public ModifyItemActionType(RegistryKey<LootFunction> modifier) {
+    public ModifyItemActionType(ResourceKey<LootItemFunction> modifier) {
         this.modifier = modifier;
     }
 
     @Override
     public void accept(ItemActionContext context) {
 
-        ServerWorld world = context.world();
-        StackReference stackReference = context.stackReference();
+        ServerLevel world = context.world();
+        SlotAccess stackReference = context.stackReference();
 
         ItemStack oldStack = stackReference.get();
-        LootFunction itemModifier = world.getServer().getReloadableRegistries()
-            .getRegistryManager()
-            .get(RegistryKeys.ITEM_MODIFIER)
+        LootItemFunction itemModifier = world.getServer().getReloadableRegistries()
+            .registryAccess()
+            .get(Registries.ITEM_MODIFIER)
             .getOrThrow(modifier);
 
         LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(world)
-            .add(LootContextParameters.ORIGIN, world.getSpawnPos().toCenterPos())
-            .add(LootContextParameters.TOOL, oldStack)
-            .addOptional(LootContextParameters.THIS_ENTITY, ((EntityLinkedItemStack) oldStack).apoli$getEntity())
+            .add(LootContextParams.ORIGIN, world.getSpawnPos().toCenterPos())
+            .add(LootContextParams.TOOL, oldStack)
+            .addOptional(LootContextParams.THIS_ENTITY, ((EntityLinkedItemStack) oldStack).apoli$getEntity())
             .build(ApoliLootContextTypes.ANY);
 
         ItemStack newStack = itemModifier.apply(oldStack, new LootContext.Builder(lootContextParameterSet).build(Optional.empty()));

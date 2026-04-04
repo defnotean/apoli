@@ -3,11 +3,12 @@ package io.github.apace100.apoli.util;
 import com.mojang.serialization.DataResult;
 import io.github.apace100.apoli.recipe.ModifiedCraftingRecipe;
 import io.github.apace100.apoli.recipe.PowerCraftingRecipe;
-import net.minecraft.recipe.CraftingRecipe;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.registry.Registries;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.NotNull;
+import net.minecraft.core.registries.Registries;
 
 public class RecipeUtil {
 
@@ -28,7 +29,7 @@ public class RecipeUtil {
 	}
 
 	private static <R> DataResult<R> createInternalOnlyError(RecipeSerializer<?> serializer) {
-		return DataResult.error(() -> "Recipe type \"" + Registries.RECIPE_SERIALIZER.getId(serializer) + "\" is for internal use only!");
+		return DataResult.error(() -> "Recipe type \"" + BuiltInRegistries.RECIPE_SERIALIZER.getId(serializer) + "\" is for internal use only!");
 	}
 
 }

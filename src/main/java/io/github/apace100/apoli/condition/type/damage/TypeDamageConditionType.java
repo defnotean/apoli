@@ -7,8 +7,8 @@ import io.github.apace100.apoli.condition.type.DamageConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.NotNull;
 
 public class TypeDamageConditionType extends DamageConditionType {
@@ -23,15 +23,15 @@ public class TypeDamageConditionType extends DamageConditionType {
             .set("damage_type", conditionType.damageType)
     );
 
-    private final RegistryKey<DamageType> damageType;
+    private final ResourceKey<DamageType> damageType;
 
-    public TypeDamageConditionType(RegistryKey<DamageType> damageType) {
+    public TypeDamageConditionType(ResourceKey<DamageType> damageType) {
         this.damageType = damageType;
     }
 
     @Override
     public boolean test(DamageConditionContext context) {
-        return context.source().isOf(damageType);
+        return context.source().is(damageType);
     }
 
     @Override

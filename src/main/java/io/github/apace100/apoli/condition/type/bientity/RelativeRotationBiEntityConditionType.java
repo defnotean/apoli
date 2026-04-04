@@ -11,11 +11,11 @@ import io.github.apace100.apoli.util.requirement.BiEntityRequirement;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
@@ -64,8 +64,8 @@ public class RelativeRotationBiEntityConditionType extends BiEntityConditionType
     @Override
     public boolean test(BiEntityConditionContext context) {
 
-        Vec3d actorRotation = actorRotationType.getRotation(context.actor());
-        Vec3d targetRotation = targetRotationType.getRotation(context.target());
+        Vec3 actorRotation = actorRotationType.getRotation(context.actor());
+        Vec3 targetRotation = targetRotationType.getRotation(context.target());
 
         actorRotation = reduceAxes(actorRotation, axes);
         targetRotation = reduceAxes(targetRotation, axes);
@@ -84,34 +84,34 @@ public class RelativeRotationBiEntityConditionType extends BiEntityConditionType
         return BiEntityConditionTypes.RELATIVE_ROTATION;
     }
 
-    private static double getAngleBetween(Vec3d a, Vec3d b) {
+    private static double getAngleBetween(Vec3 a, Vec3 b) {
         double dot = a.dotProduct(b);
         return dot / (a.length() * b.length());
     }
 
-    private static Vec3d reduceAxes(Vec3d vector, EnumSet<Direction.Axis> axesToKeep) {
-        return new Vec3d(
+    private static Vec3 reduceAxes(Vec3 vector, EnumSet<Direction.Axis> axesToKeep) {
+        return new Vec3(
             axesToKeep.contains(Direction.Axis.X) ? vector.x : 0,
             axesToKeep.contains(Direction.Axis.Y) ? vector.y : 0,
             axesToKeep.contains(Direction.Axis.Z) ? vector.z : 0
         );
     }
 
-    private static Vec3d getBodyRotationVector(Entity entity) {
+    private static Vec3 getBodyRotationVector(Entity entity) {
 
         if (!(entity instanceof LivingEntity livingEntity)) {
             return entity.getRotationVec(1.0f);
         }
 
-        float f = livingEntity.getPitch() * ((float) Math.PI / 180);
-        float g = -livingEntity.getYaw() * ((float) Math.PI / 180);
+        float f = livingEntity.getXRot() * ((float) Math.PI / 180);
+        float g = -livingEntity.getYRot() * ((float) Math.PI / 180);
 
-        float h = MathHelper.cos(g);
-        float i = MathHelper.sin(g);
-        float j = MathHelper.cos(f);
-        float k = MathHelper.sin(f);
+        float h = Mth.cos(g);
+        float i = Mth.sin(g);
+        float j = Mth.cos(f);
+        float k = Mth.sin(f);
 
-        return new Vec3d(i * j, -k, h * j);
+        return new Vec3(i * j, -k, h * j);
 
     }
 
@@ -120,12 +120,12 @@ public class RelativeRotationBiEntityConditionType extends BiEntityConditionType
         HEAD(e -> e.getRotationVec(1.0F)),
         BODY(RelativeRotationBiEntityConditionType::getBodyRotationVector);
 
-        private final Function<Entity, Vec3d> function;
-        RotationType(Function<Entity, Vec3d> function) {
+        private final Function<Entity, Vec3> function;
+        RotationType(Function<Entity, Vec3> function) {
             this.function = function;
         }
 
-        public Vec3d getRotation(Entity entity) {
+        public Vec3 getRotation(Entity entity) {
             return function.apply(entity);
         }
 

@@ -6,8 +6,8 @@ import io.github.apace100.apoli.util.keybinding.KeyBindingReference;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.util.TriState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.KeyMapping;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -25,7 +25,7 @@ public interface Active {
     void onUse();
 
     @Environment(EnvType.CLIENT)
-    static <P extends PowerType & Active> void integrateCallback(MinecraftClient client) {
+    static <P extends PowerType & Active> void integrateCallback(Minecraft client) {
 
         if (client.player == null) {
             return;
@@ -43,7 +43,7 @@ public interface Active {
 
             KeyBindingReference keyBindingReference = activePowerType.getKey();
             TriState keyPressed = keyBindingReference.asKeyBinding()
-                .map(KeyBinding::isPressed)
+                .map(KeyMapping::isPressed)
                 .map(TriState::of)
                 .orElse(TriState.DEFAULT);
 

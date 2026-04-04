@@ -6,7 +6,7 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.KeyMapping;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -58,7 +58,7 @@ public record KeyBindingReference(String id, boolean continuous) {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Optional<KeyBinding> asKeyBinding() {
+	public Optional<KeyMapping> asKeyBinding() {
 		return KeyBindingUtil.getKeyBinding(id());
 	}
 

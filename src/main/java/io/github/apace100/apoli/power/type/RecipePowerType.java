@@ -12,11 +12,11 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.recipe.CraftingRecipe;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.recipe.RecipeManager;
-import net.minecraft.server.DataPackContents;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.server.ReloadableServerResources;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -58,12 +58,12 @@ public class RecipePowerType extends PowerType implements Prioritized<RecipePowe
         return recipe;
     }
 
-    public static void registerPowerRecipes(DataPackContents dataPackContents) {
+    public static void registerPowerRecipes(ReloadableServerResources dataPackContents) {
 
         RecipeManager recipeManager = dataPackContents.getRecipeManager();
 
-        Map<Identifier, RecipeEntry<?>> recipeEntriesById = new Object2ObjectOpenHashMap<>(((RecipeManagerAccessor) recipeManager).getRecipesById());
-        Object2IntMap<Identifier> priorityEntries = new Object2IntOpenHashMap<>();
+        Map<ResourceLocation, RecipeHolder<?>> recipeEntriesById = new Object2ObjectOpenHashMap<>(((RecipeManagerAccessor) recipeManager).getRecipesById());
+        Object2IntMap<ResourceLocation> priorityEntries = new Object2IntOpenHashMap<>();
 
         for (Power power : PowerManager.values()) {
 
@@ -71,12 +71,12 @@ public class RecipePowerType extends PowerType implements Prioritized<RecipePowe
                 continue;
             }
 
-            Identifier powerId = power.getId();
+            ResourceLocation powerId = power.getId();
             CraftingRecipe craftingRecipe = recipePowerType.getRecipe();
 
             //  Only register the power recipe if no other recipes have the same ID
             if (!priorityEntries.containsKey(powerId) || priorityEntries.getInt(powerId) < recipePowerType.getPriority()) {
-                recipeEntriesById.put(powerId, new RecipeEntry<>(powerId, new PowerCraftingRecipe(powerId, craftingRecipe)));
+                recipeEntriesById.put(powerId, new RecipeHolder<>(powerId, new PowerCraftingRecipe(powerId, craftingRecipe)));
             }
 
             priorityEntries.put(powerId, recipePowerType.getPriority());

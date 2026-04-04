@@ -18,9 +18,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -31,7 +31,7 @@ import java.util.Map;
 @Environment(EnvType.CLIENT)
 public class ApoliClient implements ClientModInitializer {
 
-	public static KeyBinding showPowersOnUsabilityHint;
+	public static KeyMapping showPowersOnUsabilityHint;
 
 	public static final Map<String, Boolean> lastKeyBindingStates = new HashMap<>();
 	public static boolean shouldReloadWorldRenderer = false;
@@ -39,7 +39,7 @@ public class ApoliClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 
-		showPowersOnUsabilityHint = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.apoli.usability_hint.show_powers", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, "category." + Apoli.MODID));
+		showPowersOnUsabilityHint = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.apoli.usability_hint.show_powers", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, "category." + Apoli.MODID));
 		ModPacketsS2C.register();
 
 		ApoliClassDataClient.registerAll();
@@ -54,7 +54,7 @@ public class ApoliClient implements ClientModInitializer {
 
 	public static <P extends PowerType & Active> void performActivePowerTypes(List<P> activePowerTypes) {
 
-		List<Identifier> powerTypeIds = activePowerTypes
+		List<ResourceLocation> powerTypeIds = activePowerTypes
 			.stream()
 			.peek(pt -> {if (pt.isActive()) {pt.onUse();}})
 			.map(PowerType::getPower)
@@ -71,7 +71,7 @@ public class ApoliClient implements ClientModInitializer {
 	 * 	Add aliases to {@link KeyBindingUtil#ALIASES} instead.
 	 */
 	@Deprecated(forRemoval = true)
-	public static void registerPowerKeybinding(String keyId, KeyBinding keyBinding) {
+	public static void registerPowerKeybinding(String keyId, KeyMapping keyBinding) {
 		KeyBindingUtil.ALIASES.addAlias(keyId, keyBinding.getTranslationKey());
 	}
 
@@ -80,7 +80,7 @@ public class ApoliClient implements ClientModInitializer {
 	 */
 	@Deprecated(forRemoval = true)
 	@Nullable
-	public static KeyBinding getKeyBinding(String keyBindingId) {
+	public static KeyMapping getKeyBinding(String keyBindingId) {
 		return KeyBindingUtil.getKeyBinding(keyBindingId).orElse(null);
 	}
 

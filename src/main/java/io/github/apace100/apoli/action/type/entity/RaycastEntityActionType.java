@@ -15,20 +15,20 @@ import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.apoli.util.Space;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.projectile.ProjectileUtil;
-import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.RaycastContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -118,7 +118,7 @@ public class RaycastEntityActionType extends EntityActionType {
     private final RaycastContext.ShapeType shapeType;
     private final RaycastContext.FluidHandling fluidHandling;
 
-    private final Optional<Vec3d> direction;
+    private final Optional<Vec3> direction;
     private final Space space;
 
     private final Optional<Double> entityDistance;
@@ -136,7 +136,7 @@ public class RaycastEntityActionType extends EntityActionType {
     private final boolean entity;
     private final boolean block;
 
-    public RaycastEntityActionType(Optional<EntityAction> beforeAction, Optional<EntityAction> hitAction, Optional<EntityAction> missAction, Optional<BiEntityAction> biEntityAction, Optional<BlockAction> blockAction, Optional<BiEntityCondition> biEntityCondition, RaycastContext.ShapeType shapeType, RaycastContext.FluidHandling fluidHandling, Optional<Vec3d> direction, Space space, Optional<Double> entityDistance, Optional<Double> blockDistance, Optional<Double> distance, Optional<String> commandAtHit, Optional<String> commandAlongRay, Optional<Double> commandHitOffset, double commandStep, boolean commandAlongRayOnlyOnHit, boolean entity, boolean block) {
+    public RaycastEntityActionType(Optional<EntityAction> beforeAction, Optional<EntityAction> hitAction, Optional<EntityAction> missAction, Optional<BiEntityAction> biEntityAction, Optional<BlockAction> blockAction, Optional<BiEntityCondition> biEntityCondition, RaycastContext.ShapeType shapeType, RaycastContext.FluidHandling fluidHandling, Optional<Vec3> direction, Space space, Optional<Double> entityDistance, Optional<Double> blockDistance, Optional<Double> distance, Optional<String> commandAtHit, Optional<String> commandAlongRay, Optional<Double> commandHitOffset, double commandStep, boolean commandAlongRayOnlyOnHit, boolean entity, boolean block) {
         this.beforeAction = beforeAction;
         this.hitAction = hitAction;
         this.missAction = missAction;
@@ -167,12 +167,12 @@ public class RaycastEntityActionType extends EntityActionType {
 
         beforeAction.ifPresent(action -> action.execute(entity));
 
-        Vec3d origin = MiscUtil.getPoseDependentEyePos(entity).add(context.offset());
-        Vec3d direction = this.direction
+        Vec3 origin = MiscUtil.getPoseDependentEyePos(entity).add(context.offset());
+        Vec3 direction = this.direction
             .map(dir -> transformDirection(entity, dir))
             .orElseGet(() -> entity.getRotationVec(1.0F));
 
-        Vec3d destination = origin.add(direction.multiply(distance));
+        Vec3 destination = origin.add(direction.multiply(distance));
         HitResult hitResult = null;
 
         if (this.entity) {
@@ -193,7 +193,7 @@ public class RaycastEntityActionType extends EntityActionType {
 
         if (hit && commandAtHit.isPresent()) {
 
-            Vec3d hitPos = hitResult.getPos();
+            Vec3 hitPos = hitResult.position();
             Offset offset = this.getOffset(entity, hitResult, direction);
 
             hitPos = hitPos.subtract(offset.direction().multiply(offset.amount()));
@@ -202,14 +202,14 @@ public class RaycastEntityActionType extends EntityActionType {
         }
 
         if (commandAlongRay.isPresent() && (!commandAlongRayOnlyOnHit || hit)) {
-            this.executeCommandAtSteps(entity, origin, hit ? hitResult.getPos() : destination);
+            this.executeCommandAtSteps(entity, origin, hit ? hitResult.position() : destination);
         }
 
         if (hit) {
 
             switch (hitResult) {
                 case BlockHitResult blockResult ->
-                    blockAction.ifPresent(action -> action.execute(entity.getWorld(), blockResult.getBlockPos(), Optional.of(blockResult.getSide())));
+                    blockAction.ifPresent(action -> action.execute(entity.level(), blockResult.blockPosition(), Optional.of(blockResult.getSide())));
                 case EntityHitResult entityResult ->
                     biEntityAction.ifPresent(action -> action.execute(entity, entityResult.getEntity()));
                 default -> {
@@ -232,16 +232,16 @@ public class RaycastEntityActionType extends EntityActionType {
         return EntityActionTypes.RAYCAST;
     }
 
-    private record Offset(Vec3d direction, double amount) {
+    private record Offset(Vec3 direction, double amount) {
 
     }
 
-    private EntityHitResult entityRaycast(Entity caster, Vec3d origin, Vec3d destination) {
+    private EntityHitResult entityRaycast(Entity caster, Vec3 origin, Vec3 destination) {
 
-        Vec3d ray = destination.subtract(origin);
-        Box box = caster.getBoundingBox().stretch(ray).expand(1.0D);
+        Vec3 ray = destination.subtract(origin);
+        AABB box = caster.getBoundingBox().stretch(ray).expand(1.0D);
 
-        Predicate<Entity> intersectPredicate = EntityPredicates.EXCEPT_SPECTATOR
+        Predicate<Entity> intersectPredicate = EntitySelector.EXCEPT_SPECTATOR
             .and(intersected -> biEntityCondition
                 .map(condition -> condition.test(caster, intersected))
                 .orElse(true));
@@ -257,21 +257,21 @@ public class RaycastEntityActionType extends EntityActionType {
 
     }
 
-    private BlockHitResult blockRaycast(Entity caster, Vec3d origin, Vec3d destination) {
+    private BlockHitResult blockRaycast(Entity caster, Vec3 origin, Vec3 destination) {
         RaycastContext context = new RaycastContext(origin, destination, shapeType, fluidHandling, caster);
-        return caster.getWorld().raycast(context);
+        return caster.level().raycast(context);
     }
 
-    private Vec3d transformDirection(Entity entity, Vec3d direction) {
+    private Vec3 transformDirection(Entity entity, Vec3 direction) {
 
         Vector3f normalizedDirection = new Vector3f((float) direction.getX(), (float) direction.getY(), (float) direction.getZ()).normalize();
         space.toGlobal(normalizedDirection, entity);
 
-        return new Vec3d(normalizedDirection);
+        return new Vec3(normalizedDirection);
 
     }
 
-    private Offset getOffset(Entity entity, HitResult hitResult, Vec3d direction) {
+    private Offset getOffset(Entity entity, HitResult hitResult, Vec3 direction) {
 
         if (commandHitOffset.isPresent()) {
             return new Offset(direction, commandHitOffset.get());
@@ -279,7 +279,7 @@ public class RaycastEntityActionType extends EntityActionType {
 
         else {
 
-            Vec3d offsetDirection = direction;
+            Vec3 offsetDirection = direction;
             double offset = 0.0D;
 
             if (hitResult instanceof BlockHitResult blockResult) {
@@ -298,7 +298,7 @@ public class RaycastEntityActionType extends EntityActionType {
                         double offsetZ = hitSide.getOffsetZ();
 
                         offset = entity.getWidth() / 2;
-                        offsetDirection = new Vec3d(offsetX, offsetY, offsetZ).negate();
+                        offsetDirection = new Vec3(offsetX, offsetY, offsetZ).negate();
 
                     }
                 }
@@ -315,7 +315,7 @@ public class RaycastEntityActionType extends EntityActionType {
     private static boolean overrideHitResult(Entity caster, @Nullable HitResult prev, HitResult next) {
         return prev == null
             || prev.getType() == HitResult.Type.MISS
-            || prev.squaredDistanceTo(caster) > next.squaredDistanceTo(caster);
+            || prev.distanceToSqr(caster) > next.distanceToSqr(caster);
     }
 
     private double getReach(Entity entity) {
@@ -337,16 +337,16 @@ public class RaycastEntityActionType extends EntityActionType {
     private double getEntityReach(Entity entity) {
         return entityDistance
             .or(() -> distance)
-            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE, 1.0));
+            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, Attributes.PLAYER_ENTITY_INTERACTION_RANGE, 1.0));
     }
 
     private double getBlockReach(Entity entity) {
         return blockDistance
             .or(() -> distance)
-            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE, 1.0));
+            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, Attributes.PLAYER_BLOCK_INTERACTION_RANGE, 1.0));
     }
 
-    private void executeCommandAtSteps(Entity entity, Vec3d origin, Vec3d destination) {
+    private void executeCommandAtSteps(Entity entity, Vec3 origin, Vec3 destination) {
 
         MinecraftServer server = entity.getServer();
         String commandAlongRay = this.commandAlongRay.orElse("");
@@ -355,7 +355,7 @@ public class RaycastEntityActionType extends EntityActionType {
             return;
         }
 
-        Vec3d direction = destination.subtract(origin).normalize();
+        Vec3 direction = destination.subtract(origin).normalize();
         double distance = origin.distanceTo(destination);
 
         ServerCommandSource commandSource = entity.getCommandSource()
@@ -363,15 +363,15 @@ public class RaycastEntityActionType extends EntityActionType {
             .withLevel(Apoli.config.executeCommand.permissionLevel);
 
         if (Apoli.config.executeCommand.showOutput) {
-            commandSource = commandSource.withOutput(entity instanceof ServerPlayerEntity serverPlayer && serverPlayer.networkHandler != null
+            commandSource = commandSource.withOutput(entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
                 ? serverPlayer
                 : server);
         }
 
         for (double steps = 0; steps < distance; steps += commandStep) {
 
-            Vec3d offsetPos = direction.multiply(steps);
-            Vec3d newPos = origin.add(offsetPos);
+            Vec3 offsetPos = direction.multiply(steps);
+            Vec3 newPos = origin.add(offsetPos);
 
             server.getCommandManager().executeWithPrefix(commandSource.withPosition(newPos), commandAlongRay);
 
@@ -379,7 +379,7 @@ public class RaycastEntityActionType extends EntityActionType {
 
     }
 
-    private void executeCommandAtHit(Entity entity, Vec3d hitPos) {
+    private void executeCommandAtHit(Entity entity, Vec3 hitPos) {
 
         MinecraftServer server = entity.getServer();
         String commandAtHit = this.commandAtHit.orElse("");
@@ -394,7 +394,7 @@ public class RaycastEntityActionType extends EntityActionType {
             .withLevel(Apoli.config.executeCommand.permissionLevel);
 
         if (Apoli.config.executeCommand.showOutput) {
-            commandSource = commandSource.withOutput(entity instanceof ServerPlayerEntity serverPlayer && serverPlayer.networkHandler != null
+            commandSource = commandSource.withOutput(entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
                 ? serverPlayer
                 : server);
         }

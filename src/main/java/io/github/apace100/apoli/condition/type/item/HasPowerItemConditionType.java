@@ -11,7 +11,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerReference;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.component.type.AttributeModifierSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -31,10 +31,10 @@ public class HasPowerItemConditionType extends ItemConditionType {
             .set("power", conditionType.power)
     );
 
-    private final Optional<AttributeModifierSlot> slot;
+    private final Optional<EquipmentSlotGroup> slot;
     private final PowerReference power;
 
-    public HasPowerItemConditionType(Optional<AttributeModifierSlot> slot, PowerReference power) {
+    public HasPowerItemConditionType(Optional<EquipmentSlotGroup> slot, PowerReference power) {
         this.slot = slot;
         this.power = power;
     }

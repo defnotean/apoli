@@ -12,16 +12,16 @@ import io.github.apace100.apoli.util.InventoryUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.FoodComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.UseAction;
-import net.minecraft.world.World;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +38,7 @@ public class EdibleItemPowerType extends PowerType implements Prioritized<Edible
             .add("item_condition", ItemCondition.DATA_TYPE.optional(), Optional.empty())
             .add("food_component", SerializableDataTypes.FOOD_COMPONENT)
             .add("result_stack", SerializableDataTypes.ITEM_STACK.optional(), Optional.empty())
-            .add("consume_animation", SerializableDataType.enumValue(UseAction.class), UseAction.EAT)
+            .add("consume_animation", SerializableDataType.enumValue(UseAnim.class), UseAnim.EAT)
             .add("consume_sound", SerializableDataTypes.SOUND_EVENT, SoundEvents.ENTITY_GENERIC_EAT)
             .add("priority", SerializableDataTypes.INT, 0),
         (data, condition) -> new EdibleItemPowerType(
@@ -71,14 +71,14 @@ public class EdibleItemPowerType extends PowerType implements Prioritized<Edible
 
     private final Optional<ItemCondition> itemCondition;
 
-    private final FoodComponent foodComponent;
+    private final FoodProperties foodComponent;
     private final Optional<ItemStack> resultStack;
-    private final UseAction consumeAnimation;
+    private final UseAnim consumeAnimation;
     private final SoundEvent consumeSoundEvent;
 
     private final int priority;
 
-    public EdibleItemPowerType(Optional<EntityAction> entityAction, Optional<ItemAction> consumedItemAction, Optional<ItemAction> resultItemAction, Optional<ItemCondition> itemCondition, FoodComponent foodComponent, Optional<ItemStack> resultStack, UseAction consumeAnimation, SoundEvent consumeSoundEvent, int priority, Optional<EntityCondition> condition) {
+    public EdibleItemPowerType(Optional<EntityAction> entityAction, Optional<ItemAction> consumedItemAction, Optional<ItemAction> resultItemAction, Optional<ItemCondition> itemCondition, FoodProperties foodComponent, Optional<ItemStack> resultStack, UseAnim consumeAnimation, SoundEvent consumeSoundEvent, int priority, Optional<EntityCondition> condition) {
         super(condition);
         this.entityAction = entityAction;
         this.consumedItemAction = consumedItemAction;
@@ -103,7 +103,7 @@ public class EdibleItemPowerType extends PowerType implements Prioritized<Edible
 
     public boolean doesApply(ItemStack stack) {
         return itemCondition
-            .map(condition -> condition.test(getHolder().getWorld(), stack))
+            .map(condition -> condition.test(getHolder().level(), stack))
             .orElse(true);
     }
 
@@ -111,28 +111,28 @@ public class EdibleItemPowerType extends PowerType implements Prioritized<Edible
         entityAction.ifPresent(action -> action.execute(getHolder()));
     }
 
-    public StackReference executeItemActions(StackReference consumedStackReference) {
+    public SlotAccess executeItemActions(SlotAccess consumedStackReference) {
 
         LivingEntity holder = getHolder();
-        World world = holder.getWorld();
+        Level world = holder.level();
 
         consumedItemAction.ifPresent(action -> action.execute(world, consumedStackReference));
 
-        StackReference resultStackReference = this.resultStack
+        SlotAccess resultStackReference = this.resultStack
             .map(ItemStack::copy)
             .map(InventoryUtil::createStackReference)
-            .orElse(StackReference.EMPTY);
+            .orElse(SlotAccess.EMPTY);
 
         resultItemAction.ifPresent(action -> action.execute(world, resultStackReference));
         return resultStackReference;
 
     }
 
-    public FoodComponent getFoodComponent() {
+    public FoodProperties getFoodComponent() {
         return foodComponent;
     }
 
-    public UseAction getConsumeAnimation() {
+    public UseAnim getConsumeAnimation() {
         return consumeAnimation;
     }
 
@@ -145,7 +145,7 @@ public class EdibleItemPowerType extends PowerType implements Prioritized<Edible
             .stream()
             .filter(p -> p.doesApply(stack))
             .max(Comparator.comparing(EdibleItemPowerType::getPriority))
-            .filter(p -> !stack.contains(DataComponentTypes.FOOD) || p.getPriority() > 1);
+            .filter(p -> !stack.contains(DataComponents.FOOD) || p.getPriority() > 1);
     }
 
     public static Optional<EdibleItemPowerType> get(ItemStack stack) {

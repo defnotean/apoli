@@ -5,12 +5,12 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.github.apace100.apoli.access.BlockCollisionSpliteratorAccess;
 import io.github.apace100.apoli.access.BlockStateCollisionShapeAccess;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.BlockCollisionSpliterator;
-import net.minecraft.world.BlockView;
+import net.minecraft.world.level.BlockGetter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,8 +31,8 @@ public abstract class BlockCollisionSpliteratorMixin<T> extends AbstractIterator
         this.apoli$getOriginalShapes = getOriginalShapes;
     }
 
-    @WrapOperation(method = "computeNext", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getCollisionShape(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/ShapeContext;)Lnet/minecraft/util/shape/VoxelShape;"))
-    private VoxelShape apoli$overrideCollisionShapeQuery(BlockState state, BlockView world, BlockPos pos, ShapeContext context, Operation<VoxelShape> original) {
+    @WrapOperation(method = "computeNext", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getCollisionShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/CollisionContext;)Lnet/minecraft/world/phys/shapes/VoxelShape;"))
+    private VoxelShape apoli$overrideCollisionShapeQuery(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context, Operation<VoxelShape> original) {
         return state instanceof BlockStateCollisionShapeAccess shapeAccess && this.apoli$shouldGetOriginalShapes()
             ? shapeAccess.apoli$getOriginalCollisionShape(world, pos, context)
             : original.call(state, world, pos, context);

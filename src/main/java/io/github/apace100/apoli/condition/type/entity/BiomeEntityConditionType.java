@@ -8,23 +8,24 @@ import io.github.apace100.apoli.condition.type.EntityConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
-import net.minecraft.entity.Entity;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.registries.Registries;
 
 public class BiomeEntityConditionType extends EntityConditionType {
 
     public static final TypedDataObjectFactory<BiomeEntityConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
             .add("condition", BiomeCondition.DATA_TYPE.optional(), Optional.empty())
-            .add("biome", SerializableDataType.registryKey(RegistryKeys.BIOME).optional(), Optional.empty())
-            .add("biomes", SerializableDataType.registryKey(RegistryKeys.BIOME).list().optional(), Optional.empty()),
+            .add("biome", SerializableDataType.registryKey(Registries.BIOME).optional(), Optional.empty())
+            .add("biomes", SerializableDataType.registryKey(Registries.BIOME).list().optional(), Optional.empty()),
         data -> new BiomeEntityConditionType(
             data.get("condition"),
             data.get("biome"),
@@ -38,10 +39,10 @@ public class BiomeEntityConditionType extends EntityConditionType {
 
     private final Optional<BiomeCondition> biomeCondition;
 
-    private final Optional<RegistryKey<Biome>> biome;
-    private final Optional<List<RegistryKey<Biome>>> biomes;
+    private final Optional<ResourceKey<Biome>> biome;
+    private final Optional<List<ResourceKey<Biome>>> biomes;
 
-    public BiomeEntityConditionType(Optional<BiomeCondition> biomeCondition, Optional<RegistryKey<Biome>> biome, Optional<List<RegistryKey<Biome>>> biomes) {
+    public BiomeEntityConditionType(Optional<BiomeCondition> biomeCondition, Optional<ResourceKey<Biome>> biome, Optional<List<ResourceKey<Biome>>> biomes) {
         this.biomeCondition = biomeCondition;
         this.biome = biome;
         this.biomes = biomes;
@@ -52,12 +53,12 @@ public class BiomeEntityConditionType extends EntityConditionType {
 
         Entity entity = context.entity();
 
-        RegistryEntry<Biome> biomeEntry = entity.getWorld().getBiome(entity.getBlockPos());
-        RegistryKey<Biome> biomeKey = biomeEntry.getKey().orElseThrow();
+        Holder<Biome> biomeEntry = entity.level().getBiome(entity.blockPosition());
+        ResourceKey<Biome> biomeKey = biomeEntry.getKey().orElseThrow();
 
         return biome.map(biomeKey::equals).orElse(true)
             && biomes.map(keys -> keys.contains(biomeKey)).orElse(true)
-            && biomeCondition.map(condition -> condition.test(entity.getBlockPos(), biomeEntry)).orElse(true);
+            && biomeCondition.map(condition -> condition.test(entity.blockPosition(), biomeEntry)).orElse(true);
 
     }
 

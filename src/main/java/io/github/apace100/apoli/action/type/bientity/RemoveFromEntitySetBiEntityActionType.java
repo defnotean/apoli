@@ -11,7 +11,7 @@ import io.github.apace100.apoli.power.PowerReference;
 import io.github.apace100.apoli.power.type.EntitySetPowerType;
 import io.github.apace100.apoli.util.requirement.BiEntityRequirement;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 public class RemoveFromEntitySetBiEntityActionType extends BiEntityActionType {

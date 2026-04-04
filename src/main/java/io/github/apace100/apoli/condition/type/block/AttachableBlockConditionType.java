@@ -4,9 +4,9 @@ import io.github.apace100.apoli.condition.ConditionConfiguration;
 import io.github.apace100.apoli.condition.context.BlockConditionContext;
 import io.github.apace100.apoli.condition.type.BlockConditionType;
 import io.github.apace100.apoli.condition.type.BlockConditionTypes;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 public class AttachableBlockConditionType extends BlockConditionType {
@@ -14,7 +14,7 @@ public class AttachableBlockConditionType extends BlockConditionType {
     @Override
     public boolean test(BlockConditionContext context) {
 
-        World world = context.world();
+        Level world = context.world();
         BlockPos pos = context.pos();
 
         for (Direction direction : Direction.values()) {

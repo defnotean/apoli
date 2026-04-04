@@ -9,8 +9,8 @@ import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerReference;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -38,7 +38,7 @@ public class RemovePowerEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         Entity entity = context.entity();
-        List<Identifier> sources = PowerHolderComponent.getOptional(entity)
+        List<ResourceLocation> sources = PowerHolderComponent.getOptional(entity)
             .stream()
             .map(component -> component.getSources(power))
             .flatMap(Collection::stream)

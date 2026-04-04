@@ -10,9 +10,9 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 
 public class InBlockAnywhereEntityConditionType extends EntityConditionType {
@@ -58,7 +58,7 @@ public class InBlockAnywhereEntityConditionType extends EntityConditionType {
 
         Entity entity = context.entity();
 
-        Box boundingBox = entity.getBoundingBox();
+        AABB boundingBox = entity.getBoundingBox();
         BlockPos.Mutable mutablePos = new BlockPos.Mutable();
 
         BlockPos minPos = BlockPos.ofFloored(boundingBox.minX + 0.001D, boundingBox.minY + 0.001D, boundingBox.minZ + 0.001D);
@@ -71,7 +71,7 @@ public class InBlockAnywhereEntityConditionType extends EntityConditionType {
 
                     mutablePos.set(x, y, z);
 
-                    if (blockCondition.test(entity.getWorld(), mutablePos)) {
+                    if (blockCondition.test(entity.level(), mutablePos)) {
                         ++matches;
                     }
 

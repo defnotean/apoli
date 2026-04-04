@@ -11,18 +11,18 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.keybinding.KeyBindingReference;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.component.EnchantmentEffectComponentTypes;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.screen.ScreenHandlerFactory;
-import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
-import net.minecraft.text.Text;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.core.component.EnchantmentEffectComponentTypes;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Inventories;
+import net.minecraft.world.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.network.chat.Component;
+import net.minecraft.core.NonNullList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -32,7 +32,7 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
 
     public static final TypedDataObjectFactory<InventoryPowerType> DATA_FACTORY = PowerType.createConditionedDataFactory(
         new SerializableData()
-            .add("title", ApoliDataTypes.DEFAULT_TRANSLATABLE_TEXT, Text.translatable("container.inventory"))
+            .add("title", ApoliDataTypes.DEFAULT_TRANSLATABLE_TEXT, Component.translatable("container.inventory"))
             .add("container_type", ApoliDataTypes.CONTAINER_TYPE, ApoliContainerTypes.GENERIC_3X3)
             .add("drop_on_death_filter", ItemCondition.DATA_TYPE.optional(), Optional.empty())
             .add("key", ApoliDataTypes.BACKWARDS_COMPATIBLE_KEY, KeyBindingReference.NONE)
@@ -56,7 +56,7 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
             .set("recoverable", powerType.recoverable)
     );
 
-    private final Text containerTitle;
+    private final Component containerTitle;
     private final ContainerType containerType;
 
     private final Optional<ItemCondition> dropOnDeathFilter;
@@ -65,12 +65,12 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
     private final boolean shouldDropOnDeath;
     private final boolean recoverable;
 
-    private final DefaultedList<ItemStack> container;
-    private final ScreenHandlerFactory containerHandlerFactory;
+    private final NonNullList<ItemStack> container;
+    private final MenuProvider containerHandlerFactory;
 
     private boolean dirty;
 
-    public InventoryPowerType(Text containerTitle, ContainerType containerType, Optional<ItemCondition> dropOnDeathFilter, KeyBindingReference key, boolean shouldDropOnDeath, boolean recoverable, Optional<EntityCondition> condition) {
+    public InventoryPowerType(Component containerTitle, ContainerType containerType, Optional<ItemCondition> dropOnDeathFilter, KeyBindingReference key, boolean shouldDropOnDeath, boolean recoverable, Optional<EntityCondition> condition) {
         super(condition);
         this.containerTitle = containerTitle;
         this.containerType = containerType;
@@ -78,7 +78,7 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
         this.key = key;
         this.shouldDropOnDeath = shouldDropOnDeath;
         this.recoverable = recoverable;
-        this.container = DefaultedList.ofSize(containerType.size(), ItemStack.EMPTY);
+        this.container = NonNullList.ofSize(containerType.size(), ItemStack.EMPTY);
         this.containerHandlerFactory = containerType.create(this);
         this.setTicking(true);
     }
@@ -100,8 +100,8 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
     @Override
     public void onUse() {
 
-        if (this.isActive() && getHolder() instanceof PlayerEntity player) {
-            player.openHandledScreen(new SimpleNamedScreenHandlerFactory(containerHandlerFactory, containerTitle));
+        if (this.isActive() && getHolder() instanceof Player player) {
+            player.openMenu(new SimpleMenuProvider(containerHandlerFactory, containerTitle));
         }
 
     }
@@ -118,24 +118,24 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
     }
 
     @Override
-    public NbtCompound toTag() {
+    public CompoundTag toTag() {
 
-        NbtCompound tag = new NbtCompound();
-        Inventories.writeNbt(tag, container, getHolder().getRegistryManager());
+        CompoundTag tag = new CompoundTag();
+        Inventories.save(tag, container, getHolder().registryAccess());
 
         return tag;
 
     }
 
     @Override
-    public void fromTag(NbtElement tag) {
+    public void fromTag(Tag tag) {
 
-        if (!(tag instanceof NbtCompound rootNbt)) {
+        if (!(tag instanceof CompoundTag rootNbt)) {
             return;
         }
 
         this.clear();
-        Inventories.readNbt(rootNbt, container, getHolder().getRegistryManager());
+        Inventories.load(rootNbt, container, getHolder().registryAccess());
 
     }
 
@@ -194,7 +194,7 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
     }
 
     @Override
-    public boolean canPlayerUse(PlayerEntity player) {
+    public boolean canPlayerUse(Player player) {
         return player == getHolder();
     }
 
@@ -209,15 +209,15 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
         return key;
     }
 
-    public DefaultedList<ItemStack> getContainer() {
+    public NonNullList<ItemStack> getContainer() {
         return container;
     }
 
-    public Text getContainerTitle() {
+    public Component getContainerTitle() {
         return containerTitle;
     }
 
-    public ScreenHandlerFactory getContainerHandlerFactory() {
+    public MenuProvider getContainerHandlerFactory() {
         return containerHandlerFactory;
     }
 
@@ -227,12 +227,12 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
 
     public boolean shouldDropOnDeath(ItemStack stack) {
         return shouldDropOnDeath()
-            && dropOnDeathFilter.map(condition -> condition.test(getHolder().getWorld(), stack)).orElse(true);
+            && dropOnDeathFilter.map(condition -> condition.test(getHolder().level(), stack)).orElse(true);
     }
 
     public void dropItemsOnDeath() {
 
-        if (!(getHolder() instanceof PlayerEntity playerEntity) || playerEntity.getWorld().isClient()) {
+        if (!(getHolder() instanceof Player playerEntity) || playerEntity.level().isClientSide()) {
             return;
         }
 
@@ -245,7 +245,7 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
 
             this.removeStack(i);
             if (!EnchantmentHelper.hasAnyEnchantmentsWith(currentStack, EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
-                playerEntity.dropItem(currentStack, true, false);
+                playerEntity.spawnAtLocation(currentStack, true, false);
             }
 
         }
@@ -254,7 +254,7 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
 
     public void dropItemsOnLost() {
 
-        if (!(getHolder() instanceof PlayerEntity playerEntity) || playerEntity.getWorld().isClient()) {
+        if (!(getHolder() instanceof Player playerEntity) || playerEntity.level().isClientSide()) {
             return;
         }
 

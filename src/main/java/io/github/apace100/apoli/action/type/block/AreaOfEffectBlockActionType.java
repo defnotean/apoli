@@ -11,7 +11,7 @@ import io.github.apace100.apoli.util.Shape;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -53,7 +53,7 @@ public class AreaOfEffectBlockActionType extends BlockActionType {
     @Override
     public void accept(BlockActionContext context) {
 
-        World world = context.world();
+        Level world = context.world();
 
         shape.getBlockPositions(context.pos(), radius)
             .stream()

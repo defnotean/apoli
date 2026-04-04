@@ -13,19 +13,19 @@ import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectListIterator;
-import net.minecraft.component.type.AttributeModifierSlot;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -88,7 +88,7 @@ public class ItemPowersComponent {
         return entries.stream();
     }
 
-    public void appendTooltip(AttributeModifierSlot modifierSlot, Item.TooltipContext context, Consumer<Text> tooltip, TooltipType type) {
+    public void appendTooltip(EquipmentSlotGroup modifierSlot, Item.TooltipContext context, Consumer<Component> tooltip, TooltipFlag type) {
 
         for (Entry entry : entries) {
 
@@ -97,25 +97,25 @@ public class ItemPowersComponent {
                 continue;
             }
 
-            tooltip.accept(Text
+            tooltip.accept(Component
                 .translatable("tooltip.apoli.stack_power.name", power.getName())
-                .formatted(entry.negative()
-                    ? Formatting.RED
-                    : Formatting.YELLOW));
+                .withStyle(entry.negative()
+                    ? ChatFormatting.RED
+                    : ChatFormatting.YELLOW));
 
             if (!type.isAdvanced()) {
                 continue;
             }
 
-            tooltip.accept(Text
+            tooltip.accept(Component
                 .translatable("tooltip.apoli.stack_power.description", power.getDescription())
-                .formatted(Formatting.GRAY));
+                .withStyle(ChatFormatting.GRAY));
 
         }
 
     }
 
-    public int matchingSlots(AttributeModifierSlot modifierSlot) {
+    public int matchingSlots(EquipmentSlotGroup modifierSlot) {
         return (int) entries
             .stream()
             .map(Entry::slot)
@@ -123,7 +123,7 @@ public class ItemPowersComponent {
             .count();
     }
 
-    public boolean containsSlot(AttributeModifierSlot modifierSlot) {
+    public boolean containsSlot(EquipmentSlotGroup modifierSlot) {
         return entries
             .stream()
             .map(Entry::slot)
@@ -140,7 +140,7 @@ public class ItemPowersComponent {
 
     public static void onChangeEquipment(LivingEntity entity, EquipmentSlot equipmentSlot, ItemStack previousStack, ItemStack currentStack) {
 
-        Identifier sourceId = Apoli.identifier("item/" + equipmentSlot.getName());
+        ResourceLocation sourceId = Apoli.identifier("item/" + equipmentSlot.getName());
         if (ItemStack.areEqual(previousStack, currentStack) || !PowerHolderComponent.KEY.isProvidedBy(entity)) {
             return;
         }
@@ -173,18 +173,18 @@ public class ItemPowersComponent {
 
     }
 
-    public record Entry(Identifier powerId, AttributeModifierSlot slot, boolean hidden, boolean negative) {
+    public record Entry(ResourceLocation powerId, EquipmentSlotGroup slot, boolean hidden, boolean negative) {
 
         public static final MapCodec<Entry> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Identifier.CODEC.fieldOf("power").forGetter(Entry::powerId),
-            AttributeModifierSlot.CODEC.fieldOf("slot").forGetter(Entry::slot),
+            ResourceLocation.CODEC.fieldOf("power").forGetter(Entry::powerId),
+            EquipmentSlotGroup.CODEC.fieldOf("slot").forGetter(Entry::slot),
             Codec.BOOL.optionalFieldOf("hidden", false).forGetter(Entry::hidden),
             Codec.BOOL.optionalFieldOf("negative", false).forGetter(Entry::negative)
         ).apply(instance, Entry::new));
 
         public static final PacketCodec<ByteBuf, Entry> PACKET_CODEC = PacketCodec.tuple(
-            Identifier.PACKET_CODEC, Entry::powerId,
-            AttributeModifierSlot.PACKET_CODEC, Entry::slot,
+            ResourceLocation.PACKET_CODEC, Entry::powerId,
+            EquipmentSlotGroup.PACKET_CODEC, Entry::slot,
             PacketCodecs.BOOL, Entry::hidden,
             PacketCodecs.BOOL, Entry::negative,
             Entry::new
@@ -236,12 +236,12 @@ public class ItemPowersComponent {
             this.entries.addAll(baseItemPowers.entries);
         }
 
-        public Builder add(EnumSet<AttributeModifierSlot> slots, Identifier powerId, boolean hidden, boolean negative) {
+        public Builder add(EnumSet<EquipmentSlotGroup> slots, ResourceLocation powerId, boolean hidden, boolean negative) {
 
-            NbtCompound entryNbt = new NbtCompound();
-            for (AttributeModifierSlot slot : slots) {
+            CompoundTag entryNbt = new CompoundTag();
+            for (EquipmentSlotGroup slot : slots) {
 
-                entryNbt.putString("slot", slot.asString());
+                entryNbt.putString("slot", slot.getSerializedName());
                 entryNbt.putString("power", powerId.toString());
                 entryNbt.putBoolean("hidden", hidden);
                 entryNbt.putBoolean("negative", negative);
@@ -256,11 +256,11 @@ public class ItemPowersComponent {
 
         }
 
-        public Builder remove(EnumSet<AttributeModifierSlot> slots, Identifier powerId) {
+        public Builder remove(EnumSet<EquipmentSlotGroup> slots, ResourceLocation powerId) {
             return remove(slots, powerId, modifierSlot -> {});
         }
 
-        public Builder remove(EnumSet<AttributeModifierSlot> slots, Identifier powerId, Consumer<Collection<Entry>> removalCallback) {
+        public Builder remove(EnumSet<EquipmentSlotGroup> slots, ResourceLocation powerId, Consumer<Collection<Entry>> removalCallback) {
 
             ObjectListIterator<Entry> entryIterator = entries.iterator();
             ObjectLinkedOpenHashSet<Entry> removedEntries = new ObjectLinkedOpenHashSet<>();

@@ -10,15 +10,15 @@ import io.github.apace100.apoli.power.type.PowerType;
 import io.github.apace100.apoli.util.GainedPowerCriterion;
 import io.github.apace100.calio.data.SerializableData;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 public class PowerHolderComponentImpl implements PowerHolderComponent {
 
     private final ConcurrentHashMap<Power, PowerType> powers = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Power, Set<Identifier>> powerSources = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Power, Set<ResourceLocation>> powerSources = new ConcurrentHashMap<>();
 
     private final LivingEntity owner;
 
@@ -45,7 +45,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public boolean hasPower(Power power, Identifier source) {
+    public boolean hasPower(Power power, ResourceLocation source) {
         return powerSources.containsKey(power) && powerSources.get(power).contains(source);
     }
 
@@ -83,7 +83,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public List<Identifier> getSources(Power power) {
+    public List<ResourceLocation> getSources(Power power) {
 
         if (powerSources.containsKey(power)) {
             return List.copyOf(powerSources.get(power));
@@ -96,7 +96,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public boolean removePower(Power power, Identifier source) {
+    public boolean removePower(Power power, ResourceLocation source) {
 
         ConcurrentHashMap.KeySetView<Power, Boolean> powersToRemove = ConcurrentHashMap.newKeySet();
         boolean result = this.removePower(power, source, powersToRemove::add);
@@ -108,9 +108,9 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
 
     }
 
-    protected boolean removePower(Power power, Identifier source, Consumer<Power> adder) {
+    protected boolean removePower(Power power, ResourceLocation source, Consumer<Power> adder) {
 
-        Set<Identifier> sources = powerSources.getOrDefault(power, new ObjectOpenHashSet<>());
+        Set<ResourceLocation> sources = powerSources.getOrDefault(power, new ObjectOpenHashSet<>());
         if (!sources.remove(source)) {
             return false;
         }
@@ -134,7 +134,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public int removeAllPowersFromSource(Identifier source) {
+    public int removeAllPowersFromSource(ResourceLocation source) {
         //noinspection MappingBeforeCount
         return (int) this.getPowersFromSource(source)
             .stream()
@@ -144,7 +144,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public List<Power> getPowersFromSource(Identifier source) {
+    public List<Power> getPowersFromSource(ResourceLocation source) {
         return powerSources.entrySet()
             .stream()
             .filter(e -> e.getValue().contains(source))
@@ -153,7 +153,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public boolean addPower(Power power, Identifier source) {
+    public boolean addPower(Power power, ResourceLocation source) {
 
         ConcurrentHashMap<Power, PowerType> powersToAdd = new ConcurrentHashMap<>();
         boolean result = this.addPower(power, source, powersToAdd::put);
@@ -163,7 +163,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
             powerTypeToAdd.onAdded();
             powerTypeToAdd.onGained();
 
-            if (owner instanceof ServerPlayerEntity serverPlayer) {
+            if (owner instanceof ServerPlayer serverPlayer) {
                 GainedPowerCriterion.INSTANCE.trigger(serverPlayer, powerToAdd);
             }
 
@@ -173,9 +173,9 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
 
     }
 
-    protected boolean addPower(Power power, Identifier source, BiConsumer<Power, PowerType> adder) {
+    protected boolean addPower(Power power, ResourceLocation source, BiConsumer<Power, PowerType> adder) {
 
-        Set<Identifier> sources = powerSources.computeIfAbsent(power, pt -> new ObjectOpenHashSet<>());
+        Set<ResourceLocation> sources = powerSources.computeIfAbsent(power, pt -> new ObjectOpenHashSet<>());
         if (!sources.add(source)) {
             return false;
         }
@@ -225,21 +225,21 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public void readFromNbt(@NotNull NbtCompound compoundTag, RegistryWrapper.WrapperLookup lookup) {
+    public void readFromNbt(@NotNull CompoundTag compoundTag, HolderLookup.Provider lookup) {
 
         powers.clear();
         powerSources.clear();
 
-        NbtList powersTag = compoundTag.getList("powers", NbtElement.COMPOUND_TYPE);
+        ListTag powersTag = compoundTag.getList("powers", Tag.TAG_COMPOUND);
 
         //  Migrate compound NBTs from the old 'Powers' NBT path to the new 'powers' NBT path
         if (compoundTag.contains("Powers")) {
-            powersTag.addAll(compoundTag.getList("Powers", NbtElement.COMPOUND_TYPE));
+            powersTag.addAll(compoundTag.getList("Powers", Tag.TAG_COMPOUND));
         }
 
         for (int i = 0; i < powersTag.size(); i++) {
 
-            NbtCompound powerTag = powersTag.getCompound(i);
+            CompoundTag powerTag = powersTag.getCompound(i);
 
             try {
 
@@ -263,7 +263,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
                     catch (ClassCastException cce) {
                         //  Occurs when the power was overridden by a data pack since last resource reload,
                         //  where the overridden power may encode/decode different NBT types
-                        Apoli.LOGGER.warn("Data type of power \"{}\" has changed, skipping data for that power on entity {} (UUID: {})", powerReference.id(), owner.getName().getString(), owner.getUuidAsString());
+                        Apoli.LOGGER.warn("Data type of power \"{}\" has changed, skipping data for that power on entity {} (UUID: {})", powerReference.id(), owner.getName().getString(), owner.getStringUUID());
                     }
 
                     powers.put(power, powerType);
@@ -272,13 +272,13 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
                 }
 
                 catch (Throwable t) {
-                    Apoli.LOGGER.warn("Unregistered power \"{}\" found on entity {} (UUID: {}), skipping...", powerReference.id(), owner.getName().getString(), owner.getUuidAsString());
+                    Apoli.LOGGER.warn("Unregistered power \"{}\" found on entity {} (UUID: {}), skipping...", powerReference.id(), owner.getName().getString(), owner.getStringUUID());
                 }
 
             }
 
             catch (Throwable t) {
-                Apoli.LOGGER.warn("Error trying to decode NBT element ({}) at index {} into a power from NBT of entity {} (UUID: {}) (skipping): {}", powerTag, i, owner.getName().getString(), owner.getUuidAsString(), t.getMessage());
+                Apoli.LOGGER.warn("Error trying to decode NBT element ({}) at index {} into a power from NBT of entity {} (UUID: {}) (skipping): {}", powerTag, i, owner.getName().getString(), owner.getStringUUID(), t.getMessage());
             }
 
         }
@@ -286,16 +286,16 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public void writeToNbt(@NotNull NbtCompound compoundTag, RegistryWrapper.WrapperLookup lookup) {
+    public void writeToNbt(@NotNull CompoundTag compoundTag, HolderLookup.Provider lookup) {
 
-        NbtList powersTag = new NbtList();
+        ListTag powersTag = new ListTag();
         powers.forEach((power, powerType) -> {
 
             PowerConfiguration<?> typeConfig = power.getType().getConfig();
             PowerReference powerReference = PowerReference.of(power.getId());
 
             Power.DataEntry.CODEC.codec().encodeStart(lookup.getOps(NbtOps.INSTANCE), new Power.DataEntry(typeConfig, powerReference, powerType.toTag(), powerSources.get(power)))
-                .mapError(err -> "Error encoding power \"" + power.getId() + "\" to NBT of entity " + owner.getName().getString() + " (UUID: " + owner.getUuidAsString() + ") (skipping): " + err)
+                .mapError(err -> "Error encoding power \"" + power.getId() + "\" to NBT of entity " + owner.getName().getString() + " (UUID: " + owner.getStringUUID() + ") (skipping): " + err)
                 .resultOrPartial(Apoli.LOGGER::warn)
                 .ifPresent(powersTag::add);
 
@@ -306,7 +306,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public void writeSyncPacket(RegistryByteBuf buf, ServerPlayerEntity recipient) {
+    public void writeSyncPacket(RegistryByteBuf buf, ServerPlayer recipient) {
         buf.writeVarInt(0);
         PowerHolderComponent.super.writeSyncPacket(buf, recipient);
     }

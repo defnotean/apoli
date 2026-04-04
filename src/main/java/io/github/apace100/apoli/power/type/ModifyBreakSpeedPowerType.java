@@ -8,7 +8,7 @@ import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.calio.data.SerializableData;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -52,7 +52,7 @@ public class ModifyBreakSpeedPowerType extends ValueModifyingPowerType {
 
     public boolean doesApply(BlockPos pos) {
         return blockCondition
-            .map(condition -> condition.test(getHolder().getWorld(), pos))
+            .map(condition -> condition.test(getHolder().level(), pos))
             .orElse(true);
     }
 

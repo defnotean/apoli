@@ -7,9 +7,9 @@ import io.github.apace100.apoli.condition.type.ItemConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 
 public class CustomDataItemConditionType extends ItemConditionType {
@@ -24,15 +24,15 @@ public class CustomDataItemConditionType extends ItemConditionType {
             .set("nbt", conditionType.nbt)
     );
 
-    private final NbtCompound nbt;
+    private final CompoundTag nbt;
 
-    public CustomDataItemConditionType(NbtCompound nbt) {
+    public CustomDataItemConditionType(CompoundTag nbt) {
         this.nbt = nbt;
     }
 
     @Override
     public boolean test(ItemConditionContext context) {
-        return context.stack().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).matches(nbt);
+        return context.stack().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.DEFAULT).matches(nbt);
     }
 
     @Override

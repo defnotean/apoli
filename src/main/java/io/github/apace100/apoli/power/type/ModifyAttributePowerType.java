@@ -6,8 +6,8 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.core.Holder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -27,9 +27,9 @@ public class ModifyAttributePowerType extends ValueModifyingPowerType {
             .set("attribute", powerType.attribute)
     );
 
-    private final RegistryEntry<EntityAttribute> attribute;
+    private final Holder<Attribute> attribute;
 
-    public ModifyAttributePowerType(RegistryEntry<EntityAttribute> attribute, List<Modifier> modifiers, Optional<EntityCondition> condition) {
+    public ModifyAttributePowerType(Holder<Attribute> attribute, List<Modifier> modifiers, Optional<EntityCondition> condition) {
         super(modifiers, condition);
         this.attribute = attribute;
     }
@@ -39,7 +39,7 @@ public class ModifyAttributePowerType extends ValueModifyingPowerType {
         return PowerTypes.MODIFY_ATTRIBUTE;
     }
 
-    public RegistryEntry<EntityAttribute> getAttribute() {
+    public Holder<Attribute> getAttribute() {
         return attribute;
     }
 
