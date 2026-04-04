@@ -72,7 +72,7 @@ public interface DistanceFromCoordinatesMetaConditionType {
 //					return resultOnWrongDimension().get();
 //				}
 
-				BlockPos spawnPos = world.getSpawnPos();
+				BlockPos spawnPos = world.getSharedSpawnPos();
 
 				x = spawnPos.getX();
 				y = spawnPos.getY();

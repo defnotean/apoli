@@ -190,7 +190,7 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
 
     @Unique
     private boolean apoli$hasObstructedOriginalSpawnPoint() {
-        ServerLevel spawnPointWorld = this.server.getWorld(spawnPointDimension);
+        ServerLevel spawnPointWorld = this.server.getLevel(spawnPointDimension);
         return spawnPointPosition != null
             && spawnPointWorld != null
             && findRespawnPosition(spawnPointWorld, this.spawnPointPosition, this.spawnAngle, this.spawnForced, true).isEmpty();

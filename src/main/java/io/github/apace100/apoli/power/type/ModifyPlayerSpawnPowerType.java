@@ -122,8 +122,8 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
             return;
         }
 
-        if (!serverPlayer.isDisconnected() && serverPlayer.getSpawnPointPosition() != null && !serverPlayer.isSpawnForced()) {
-            serverPlayer.setSpawnPoint(Level.OVERWORLD, null, 0F, false, false);
+        if (!serverPlayer.isDisconnected() && serverPlayer.getRespawnPosition() != null && !serverPlayer.isRespawnForced()) {
+            serverPlayer.setRespawnPosition(Level.OVERWORLD, null, 0F, false, false);
         }
 
     }
@@ -173,7 +173,7 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
         }
 
         MinecraftServer server = serverPlayer.server;
-        ServerLevel targetDimension = server.getWorld(dimensionKey);
+        ServerLevel targetDimension = server.getLevel(dimensionKey);
 
         if (targetDimension == null) {
             return Optional.empty();
@@ -183,10 +183,10 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
         int range = 64;
 
         AtomicReference<Vec3> newSpawnPointVec = new AtomicReference<>();
-        BlockPos dimensionSpawnPos = serverPlayer.getServerWorld().getSpawnPos();
+        BlockPos dimensionSpawnPos = serverPlayer.serverLevel().getSharedSpawnPos();
 
         BlockPos.Mutable newSpawnPointPos = new BlockPos.Mutable();
-        BlockPos.Mutable mutableDimensionSpawnPos = spawnStrategy.apply(dimensionSpawnPos, center, dimensionDistanceMultiplier).mutableCopy();
+        BlockPos.Mutable mutableDimensionSpawnPos = spawnStrategy.apply(dimensionSpawnPos, center, dimensionDistanceMultiplier).mutable();
 
         this.getBiomePos(targetDimension, mutableDimensionSpawnPos).ifPresent(mutableDimensionSpawnPos::set);
         this.getSpawnPos(targetDimension, mutableDimensionSpawnPos, range).ifPresent(newSpawnPointVec::set);
@@ -348,7 +348,7 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
 
         //  The valid spawn position and (mutable) starting position
         Vec3 spawnPos;
-        BlockPos.Mutable mutableStartPos = startPos.mutableCopy();
+        BlockPos.Mutable mutableStartPos = startPos.mutable();
 
         //  The current position
         int x = startPos.getX();
@@ -363,7 +363,7 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
 
         //  The min and max Y values of the target dimension
         int maxY = targetDimension.getLogicalHeight();
-        int minY = targetDimension.getDimensionEntry().value().minY();
+        int minY = targetDimension.dimensionTypeRegistration().value().minY();
 
         while (upOffset < maxY || downOffset > minY) {
 

@@ -17,7 +17,7 @@ public interface RandomChanceMetaConditionType {
     float chance();
 
     default boolean testCondition() {
-        return Random.create().nextFloat() < chance();
+        return RandomSource.create().nextFloat() < chance();
     }
 
     static <T extends ConditionContext, C extends Condition<T, CT>, CT extends ConditionType<T, C>, M extends ConditionType<T, C> & RandomChanceMetaConditionType> ConditionConfiguration<M> createConfiguration(Function<Float, M> constructor) {

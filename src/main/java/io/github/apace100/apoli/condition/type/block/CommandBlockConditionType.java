@@ -67,7 +67,7 @@ public class CommandBlockConditionType extends BlockConditionType {
         String blockTranslationKey = blockState.getBlock().getTranslationKey();
         ServerCommandSource commandSource = new ServerCommandSource(
             Apoli.config.executeCommand.showOutput ? server : CommandOutput.DUMMY,
-            pos.toCenterPos(),
+            pos.getCenter(),
             Vec2f.ZERO,
             serverWorld,
             Apoli.config.executeCommand.permissionLevel,

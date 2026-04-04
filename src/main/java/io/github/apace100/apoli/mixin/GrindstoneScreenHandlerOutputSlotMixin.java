@@ -20,13 +20,12 @@ public abstract class GrindstoneScreenHandlerOutputSlotMixin {
 
     @Final
     @Shadow
-    // TODO: Resolve intermediary name for field_16780 (GrindstoneMenu reference in anonymous inner class)
-    GrindstoneMenu field_16780;
+    GrindstoneMenu this$0;
 
     @ModifyReturnValue(method = "getExperience(Lnet/minecraft/world/Level;)I", at = @At("RETURN"))
     private int apoli$modifyExperience(int original, Level world) {
 
-        if (!(field_16780 instanceof PowerModifiedGrindstone powerModifiedGrindstone)) {
+        if (!(this$0 instanceof PowerModifiedGrindstone powerModifiedGrindstone)) {
             return original;
         }
 

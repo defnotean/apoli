@@ -12,7 +12,7 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.monster.PathAwareEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
@@ -103,7 +103,7 @@ public class RandomTeleportEntityActionType extends EntityActionType {
             return;
         }
 
-        Random random = Random.create();
+        RandomSource random = RandomSource.create();
         boolean succeeded = false;
 
         double x, y, z;
@@ -139,27 +139,27 @@ public class RandomTeleportEntityActionType extends EntityActionType {
 
     private boolean attemptToTeleport(Entity entity, ServerLevel serverWorld, double destX, double destY, double destZ) {
 
-        BlockPos.Mutable destBlockPos = BlockPos.ofFloored(destX, destY, destZ).mutableCopy();
+        BlockPos.Mutable destBlockPos = BlockPos.ofFloored(destX, destY, destZ).mutable();
         boolean foundSurface = false;
 
         if (heightmapType.isPresent()) {
 
-            destBlockPos.set(serverWorld.getTopPosition(heightmapType.get(), destBlockPos).down());
+            destBlockPos.set(serverWorld.getHeightmapPos(heightmapType.get(), destBlockPos).below());
             foundSurface = this.shouldLandOnBlock(serverWorld, destBlockPos);
 
             if (foundSurface) {
-                destBlockPos.set(destBlockPos.up());
+                destBlockPos.set(destBlockPos.above());
             }
 
         }
 
         for (double decrements = 0; !foundSurface && decrements < areaHeight / 2; ++decrements) {
 
-            destBlockPos.set(destBlockPos.down());
+            destBlockPos.set(destBlockPos.below());
             foundSurface = this.shouldLandOnBlock(serverWorld, destBlockPos);
 
             if (foundSurface) {
-                destBlockPos.set(destBlockPos.up());
+                destBlockPos.set(destBlockPos.above());
             }
 
         }
@@ -191,7 +191,7 @@ public class RandomTeleportEntityActionType extends EntityActionType {
             return false;
         }
 
-        if (entity instanceof PathAwareEntity pathAwareEntity) {
+        if (entity instanceof PathfinderMob pathAwareEntity) {
             pathAwareEntity.getNavigation().stop();
         }
 

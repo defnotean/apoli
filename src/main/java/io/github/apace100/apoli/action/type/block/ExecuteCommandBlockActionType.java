@@ -48,7 +48,7 @@ public class ExecuteCommandBlockActionType extends BlockActionType {
         MinecraftServer server = world.getServer();
         ServerCommandSource commandSource = new ServerCommandSource(
             Apoli.config.executeCommand.showOutput ? server : CommandOutput.DUMMY,
-            pos.toCenterPos(),
+            pos.getCenter(),
             Vec2f.ZERO,
             world,
             Apoli.config.executeCommand.permissionLevel,

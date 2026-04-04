@@ -188,7 +188,7 @@ public class InventoryUtil {
         ItemEntity itemEntity = new ItemEntity(thrower.level(), thrower.getX(), yOffset, thrower.getZ(), itemStack);
         itemEntity.setPickupDelay(pickupDelay);
 
-        Random random = Random.create();
+        RandomSource random = RandomSource.create();
 
         float f;
         float g;

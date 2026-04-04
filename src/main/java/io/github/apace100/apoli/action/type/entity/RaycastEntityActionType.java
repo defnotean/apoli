@@ -239,7 +239,7 @@ public class RaycastEntityActionType extends EntityActionType {
     private EntityHitResult entityRaycast(Entity caster, Vec3 origin, Vec3 destination) {
 
         Vec3 ray = destination.subtract(origin);
-        AABB box = caster.getBoundingBox().stretch(ray).expand(1.0D);
+        AABB box = caster.getBoundingBox().expandTowards(ray).inflate(1.0D);
 
         Predicate<Entity> intersectPredicate = EntitySelector.EXCEPT_SPECTATOR
             .and(intersected -> biEntityCondition

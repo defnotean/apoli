@@ -24,7 +24,7 @@ public interface RandomChanceMetaActionType<T extends ActionContext<?>, A extend
 
     default void executeAction(T context) {
 
-        if (Random.create().nextFloat() < chance()) {
+        if (RandomSource.create().nextFloat() < chance()) {
             successAction().accept(context);
         }
 

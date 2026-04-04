@@ -213,9 +213,9 @@ public abstract class GameRendererMixin {
     private Set<BlockPos> getEyePos(float rangeX, float rangeY, float rangeZ) {
         Vec3 pos = camera.getFocusedEntity().position().add(0, camera.getFocusedEntity().getEyeHeight(camera.getFocusedEntity().getPose()), 0);
         AABB cameraBox = new AABB(pos, pos);
-        cameraBox = cameraBox.expand(rangeX, rangeY, rangeZ);
+        cameraBox = cameraBox.inflate(rangeX, rangeY, rangeZ);
         HashSet<BlockPos> set = new HashSet<>();
-        BlockPos.stream(cameraBox).forEach(p -> set.add(p.toImmutable()));
+        BlockPos.betweenClosedStream(cameraBox).forEach(p -> set.add(p.immutable()));
         return set;
     }
 

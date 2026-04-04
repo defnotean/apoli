@@ -75,7 +75,7 @@ public class ExplodeBlockActionType extends BlockActionType {
 
         MiscUtil.createExplosion(
             world,
-            pos.toCenterPos(),
+            pos.getCenter(),
             power,
             createFire,
             destructionType,

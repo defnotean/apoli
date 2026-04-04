@@ -54,7 +54,7 @@ public class ModifyItemActionType extends ItemActionType {
             .getOrThrow(modifier);
 
         LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(world)
-            .add(LootContextParams.ORIGIN, world.getSpawnPos().toCenterPos())
+            .add(LootContextParams.ORIGIN, world.getSharedSpawnPos().getCenter())
             .add(LootContextParams.TOOL, oldStack)
             .addOptional(LootContextParams.THIS_ENTITY, ((EntityLinkedItemStack) oldStack).apoli$getEntity())
             .build(ApoliLootContextTypes.ANY);
