@@ -19,7 +19,7 @@ import net.minecraft.client.renderer.RenderTickCounter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -48,7 +48,7 @@ public abstract class GameRendererMixin {
     Minecraft client;
 
     @Shadow
-    protected abstract void loadPostProcessor(ResourceLocation identifier);
+    protected abstract void loadPostProcessor(Identifier identifier);
 
     @Shadow
     PostEffectProcessor postProcessor;
@@ -63,7 +63,7 @@ public abstract class GameRendererMixin {
     public abstract void disablePostProcessor();
 
     @Unique
-    private ResourceLocation apoli$currentlyLoadedShader;
+    private Identifier apoli$currentlyLoadedShader;
 
     @Inject(at = @At("TAIL"), method = "onCameraEntitySet")
     private void apoli$loadShaderFromPowerOnCameraEntity(Entity entity, CallbackInfo ci) {
@@ -74,7 +74,7 @@ public abstract class GameRendererMixin {
             .max(Comparator.comparing(ShaderPowerType::getPriority))
             .ifPresent(p -> {
 
-                ResourceLocation shaderLocation = p.getShaderLocation();
+                Identifier shaderLocation = p.getShaderLocation();
 
                 loadPostProcessor(shaderLocation);
                 apoli$currentlyLoadedShader = shaderLocation;
@@ -92,7 +92,7 @@ public abstract class GameRendererMixin {
             .filter(p -> resourceManager.getResource(p.getShaderLocation()).isPresent())
             .max(Comparator.comparing(ShaderPowerType::getPriority))
             .ifPresent(p -> {
-                ResourceLocation shaderLocation = p.getShaderLocation();
+                Identifier shaderLocation = p.getShaderLocation();
                 if (shaderLocation != apoli$currentlyLoadedShader) {
                     loadPostProcessor(shaderLocation);
                     apoli$currentlyLoadedShader = shaderLocation;
@@ -134,7 +134,7 @@ public abstract class GameRendererMixin {
     @Inject(at = @At("HEAD"), method = "togglePostEffect", cancellable = true)
     private void disableShaderToggle(CallbackInfo ci) {
         PowerHolderComponent.withPowerType(client.getCameraEntity(), ShaderPowerType.class, p -> true, shaderPower -> {
-            ResourceLocation shaderLoc = shaderPower.getShaderLocation();
+            Identifier shaderLoc = shaderPower.getShaderLocation();
             if(!shaderPower.isToggleable() && apoli$currentlyLoadedShader == shaderLoc) {
                 ci.cancel();
             }

@@ -11,7 +11,7 @@ import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeMatcher;
 import net.minecraft.stats.RecipeBook;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -23,7 +23,7 @@ public abstract class RecipeResultCollectionMixin {
 
         if (original && recipeEntry.value() instanceof PowerCraftingRecipe pcr && recipeBook instanceof PowerCraftingObject pco && pco.apoli$getPlayer() != null) {
 
-            ResourceLocation powerId = pcr.powerId();
+            Identifier powerId = pcr.powerId();
             PowerHolderComponent component = PowerHolderComponent.KEY.get(pco.apoli$getPlayer());
 
             return PowerManager.getOptional(powerId)

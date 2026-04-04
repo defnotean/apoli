@@ -6,14 +6,14 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.protocol.CustomPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
-public record SyncPowerDataS2CPacket(int entityId, ResourceLocation powerTypeId, CompoundTag powerData) implements CustomPayload {
+public record SyncPowerDataS2CPacket(int entityId, Identifier powerTypeId, CompoundTag powerData) implements CustomPayload {
 
     public static final Id<SyncPowerDataS2CPacket> PACKET_ID = new Id<>(Apoli.identifier("s2c/sync_power_data"));
     public static final PacketCodec<RegistryByteBuf, SyncPowerDataS2CPacket> PACKET_CODEC = PacketCodec.tuple(
         PacketCodecs.VAR_INT, SyncPowerDataS2CPacket::entityId,
-        ResourceLocation.PACKET_CODEC, SyncPowerDataS2CPacket::powerTypeId,
+        Identifier.PACKET_CODEC, SyncPowerDataS2CPacket::powerTypeId,
         PacketCodecs.NBT_COMPOUND, SyncPowerDataS2CPacket::powerData,
         SyncPowerDataS2CPacket::new
     );

@@ -40,7 +40,7 @@ import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.world.inventory.ClickType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.GameMode;
@@ -180,7 +180,7 @@ public class ApoliDataTypes {
 
     public static final SerializableDataType<TextAlignment> TEXT_ALIGNMENT = SerializableDataType.enumValue(TextAlignment.class);
 
-    public static final SerializableDataType<Map<ResourceLocation, ResourceLocation>> IDENTIFIER_MAP = SerializableDataType.map(SerializableDataTypes.IDENTIFIER, SerializableDataTypes.IDENTIFIER);
+    public static final SerializableDataType<Map<Identifier, Identifier>> IDENTIFIER_MAP = SerializableDataType.map(SerializableDataTypes.IDENTIFIER, SerializableDataTypes.IDENTIFIER);
 
     public static final SerializableDataType<Pattern> REGEX = SerializableDataTypes.STRING.xmap(Pattern::compile, Pattern::pattern);
 
@@ -188,7 +188,7 @@ public class ApoliDataTypes {
 	 *  <b>Use {@link #REGEX_REPLACEMENT_MAP} instead for further functionality (e.g: referencing capture groups of the paired regex)</b>
 	 */
 	@Deprecated(forRemoval = true)
-    public static final SerializableDataType<Map<Pattern, ResourceLocation>> REGEX_MAP = SerializableDataType.map(REGEX, SerializableDataTypes.IDENTIFIER);
+    public static final SerializableDataType<Map<Pattern, Identifier>> REGEX_MAP = SerializableDataType.map(REGEX, SerializableDataTypes.IDENTIFIER);
 
 	public static final SerializableDataType<Map<Pattern, String>> REGEX_REPLACEMENT_MAP = SerializableDataType.map(REGEX, SerializableDataTypes.STRING);
 

@@ -38,7 +38,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ladysnake.cca.api.v3.entity.EntityComponentFactoryRegistry;
@@ -129,8 +129,8 @@ public class Apoli implements ModInitializer, EntityComponentInitializer {
 
 	}
 
-	public static ResourceLocation identifier(String path) {
-		return ResourceLocation.parse(MODID, path);
+	public static Identifier identifier(String path) {
+		return Identifier.parse(MODID, path);
 	}
 
 	public static boolean onServerSide() {

@@ -16,7 +16,7 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.server.ReloadableServerResources;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -62,8 +62,8 @@ public class RecipePowerType extends PowerType implements Prioritized<RecipePowe
 
         RecipeManager recipeManager = dataPackContents.getRecipeManager();
 
-        Map<ResourceLocation, RecipeHolder<?>> recipeEntriesById = new Object2ObjectOpenHashMap<>(((RecipeManagerAccessor) recipeManager).getRecipesById());
-        Object2IntMap<ResourceLocation> priorityEntries = new Object2IntOpenHashMap<>();
+        Map<Identifier, RecipeHolder<?>> recipeEntriesById = new Object2ObjectOpenHashMap<>(((RecipeManagerAccessor) recipeManager).getRecipesById());
+        Object2IntMap<Identifier> priorityEntries = new Object2IntOpenHashMap<>();
 
         for (Power power : PowerManager.values()) {
 
@@ -71,7 +71,7 @@ public class RecipePowerType extends PowerType implements Prioritized<RecipePowe
                 continue;
             }
 
-            ResourceLocation powerId = power.getId();
+            Identifier powerId = power.getId();
             CraftingRecipe craftingRecipe = recipePowerType.getRecipe();
 
             //  Only register the power recipe if no other recipes have the same ID

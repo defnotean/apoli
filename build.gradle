@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.15-SNAPSHOT'
+	id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -94,27 +94,27 @@ dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	// MC 26.1 is deobfuscated - no mappings needed
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	//	Cardinal Components
-	include(modApi("org.ladysnake.cardinal-components-api:cardinal-components-base:${project.cca_version}") {
+	include(api("org.ladysnake.cardinal-components-api:cardinal-components-base:${project.cca_version}") {
 		exclude(group: "net.fabricmc.fabric-api")
 	})
-	include(modApi("org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cca_version}") {
+	include(api("org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cca_version}") {
 		exclude(group: "net.fabricmc.fabric-api")
 	})
 
 	//	PlayerAbilityLib
-	include(modApi("io.github.ladysnake:PlayerAbilityLib:${project.pal_version}"))
+	include(api("io.github.ladysnake:PlayerAbilityLib:${project.pal_version}"))
 
 	//	Calio
-	include(modApi("io.github.apace100:calio:${project.calio_version}"))
+	include(api("io.github.apace100:calio:${project.calio_version}"))
 
 	//	Cloth Config
-	include(modApi("me.shedaniel.cloth:cloth-config-fabric:${project.clothconfig_version}") {
+	include(api("me.shedaniel.cloth:cloth-config-fabric:${project.clothconfig_version}") {
 		exclude(group: "net.fabricmc.fabric-api")
 	})
 
@@ -122,13 +122,13 @@ dependencies {
 	implementation("com.terraformersmc:modmenu:${project.modmenu_version}")
 
 	//	AdditionalEntityAttributes - no 26.1 build available
-	//	include(modApi("maven.modrinth:additionalentityattributes:${project.aea_version}"))
+	//	include(api("maven.modrinth:additionalentityattributes:${project.aea_version}"))
 
 	//	Appleskin - no 26.1 build available
-	//	modCompileOnly("squeek.appleskin:appleskin-fabric:${appleskin_version}:api") {
+	//	compileOnly("squeek.appleskin:appleskin-fabric:${appleskin_version}:api") {
 	//		transitive = false
 	//	}
-	//	modCompileOnly "squeek.appleskin:appleskin-fabric:${appleskin_version}"
+	//	compileOnly "squeek.appleskin:appleskin-fabric:${appleskin_version}"
 
 }
 

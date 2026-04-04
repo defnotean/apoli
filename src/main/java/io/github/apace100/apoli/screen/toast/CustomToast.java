@@ -12,7 +12,7 @@ import net.minecraft.client.toast.ToastManager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.OrderedText;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class CustomToast implements PositionAwareToast {
     private final List<OrderedText> title;
     private final List<OrderedText> description;
     private final ItemStack iconStack;
-    private final ResourceLocation texture;
+    private final Identifier texture;
 
     private final int duration;
 
@@ -42,7 +42,7 @@ public class CustomToast implements PositionAwareToast {
         this(toastData.title(), toastData.description(), toastData.texture(), toastData.iconStack(), (int) ((toastData.duration() / 20.0) * 1000.0));
     }
 
-    public CustomToast(Component title, Component description, ResourceLocation texture, ItemStack iconStack, int duration) {
+    public CustomToast(Component title, Component description, Identifier texture, ItemStack iconStack, int duration) {
 
         TextRenderer textRenderer = Minecraft.getInstance().textRenderer;
         int maxWidth = this.getWidth() - 33;

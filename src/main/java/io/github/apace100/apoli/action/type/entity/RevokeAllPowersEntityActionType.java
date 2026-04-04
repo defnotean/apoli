@@ -8,7 +8,7 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 public class RevokeAllPowersEntityActionType extends EntityActionType {
@@ -23,9 +23,9 @@ public class RevokeAllPowersEntityActionType extends EntityActionType {
             .set("source", actionType.source)
     );
 
-    private final ResourceLocation source;
+    private final Identifier source;
 
-    public RevokeAllPowersEntityActionType(ResourceLocation source) {
+    public RevokeAllPowersEntityActionType(Identifier source) {
         this.source = source;
     }
 

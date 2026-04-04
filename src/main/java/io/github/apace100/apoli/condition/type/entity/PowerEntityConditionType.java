@@ -10,7 +10,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerReference;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -32,11 +32,11 @@ public class PowerEntityConditionType extends EntityConditionType {
     );
 
     private final PowerReference power;
-    private final Optional<ResourceLocation> source;
+    private final Optional<Identifier> source;
 
     private final Function<PowerHolderComponent, Boolean> powerChecker;
 
-    public PowerEntityConditionType(PowerReference power, Optional<ResourceLocation> source) {
+    public PowerEntityConditionType(PowerReference power, Optional<Identifier> source) {
         this.power = power;
         this.source = source;
         this.powerChecker = component -> source

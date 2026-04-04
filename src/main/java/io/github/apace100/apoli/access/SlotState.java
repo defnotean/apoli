@@ -1,10 +1,10 @@
 package io.github.apace100.apoli.access;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Optional;
 
 public interface SlotState {
-    Optional<ResourceLocation> apoli$getState();
-    void apoli$setState(ResourceLocation state);
+    Optional<Identifier> apoli$getState();
+    void apoli$setState(Identifier state);
 }

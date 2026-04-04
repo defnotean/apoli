@@ -8,11 +8,11 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import io.github.apace100.calio.registry.DataObjectFactory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
-public record CustomToastData(Component title, Component description, ResourceLocation texture, ItemStack iconStack, int duration) {
+public record CustomToastData(Component title, Component description, Identifier texture, ItemStack iconStack, int duration) {
 
-    public static final ResourceLocation DEFAULT_TEXTURE = Apoli.identifier("toast/custom");
+    public static final Identifier DEFAULT_TEXTURE = Apoli.identifier("toast/custom");
 
     public static final DataObjectFactory<CustomToastData> FACTORY = DataObjectFactory.simple(
         new SerializableData()

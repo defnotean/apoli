@@ -20,8 +20,8 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.ResourceLocationException;
+import net.minecraft.resources.Identifier;
+import net.minecraft.IdentifierException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -92,7 +92,7 @@ public class ReplaceLootTablePowerType extends PowerType implements Prioritized<
 
     public boolean hasReplacement(ResourceKey<LootTable> lootTableKey) {
 
-        ResourceLocation id = lootTableKey.getValue();
+        Identifier id = lootTableKey.getValue();
         String idString = id.toString();
 
         for (var replacement : replacements.keySet()) {
@@ -136,13 +136,13 @@ public class ReplaceLootTablePowerType extends PowerType implements Prioritized<
                 try {
 
                     String replaced = matcher.replaceAll(replacement);
-                    ResourceKey<LootTable> replacedKey = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(replaced));
+                    ResourceKey<LootTable> replacedKey = ResourceKey.create(Registries.LOOT_TABLE, Identifier.parse(replaced));
 
                     return Optional.of(replacedKey);
 
                 }
 
-                catch (ResourceLocationException e) {
+                catch (IdentifierException e) {
                     Apoli.LOGGER.warn("Error trying to parse replacement string \"{}\" in power \"{}\": {}", replacement, this.getPower().getId(), e.getMessage());
                 }
 

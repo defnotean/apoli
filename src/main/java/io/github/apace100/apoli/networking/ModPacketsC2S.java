@@ -16,7 +16,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerConfigurationNetworkHandler;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class ModPacketsC2S {
 
@@ -85,7 +85,7 @@ public class ModPacketsC2S {
         ServerPlayer player = context.player();
         PowerHolderComponent component = PowerHolderComponent.KEY.get(player);
 
-        for (ResourceLocation powerId : payload.powerIds()) {
+        for (Identifier powerId : payload.powerIds()) {
 
             PowerType powerType = PowerManager.getOptional(powerId)
                 .map(component::getPowerType)

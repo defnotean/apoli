@@ -10,7 +10,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerReference;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 public class GrantPowerEntityActionType extends EntityActionType {
@@ -29,9 +29,9 @@ public class GrantPowerEntityActionType extends EntityActionType {
     );
 
     private final PowerReference power;
-    private final ResourceLocation source;
+    private final Identifier source;
 
-    public GrantPowerEntityActionType(PowerReference power, ResourceLocation source) {
+    public GrantPowerEntityActionType(PowerReference power, Identifier source) {
         this.power = power;
         this.source = source;
     }

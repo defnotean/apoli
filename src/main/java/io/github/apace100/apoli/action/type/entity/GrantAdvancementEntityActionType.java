@@ -17,7 +17,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerAdvancementLoader;
 import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -41,12 +41,12 @@ public class GrantAdvancementEntityActionType extends EntityActionType {
             .set("criteria", actionType.criteria)
     );
 
-    private final ResourceLocation advancementId;
+    private final Identifier advancementId;
     private final AdvancementCommands.Selection selection;
 
     private final List<String> criteria;
 
-    public GrantAdvancementEntityActionType(ResourceLocation advancementId, AdvancementCommands.Selection selection, List<String> criteria) {
+    public GrantAdvancementEntityActionType(Identifier advancementId, AdvancementCommands.Selection selection, List<String> criteria) {
         this.advancementId = advancementId;
         this.selection = selection;
         this.criteria = criteria;

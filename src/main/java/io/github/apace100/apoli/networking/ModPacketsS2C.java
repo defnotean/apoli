@@ -22,7 +22,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Map;
 import java.util.Optional;
@@ -144,7 +144,7 @@ public class ModPacketsS2C {
     private static void onPowerSync(SyncPowerDataS2CPacket payload, ClientPlayNetworking.Context context) {
 
         LocalPlayer player = context.player();
-        ResourceLocation powerTypeId = payload.powerTypeId();
+        Identifier powerTypeId = payload.powerTypeId();
 
         if (!PowerManager.contains(powerTypeId)) {
             Apoli.LOGGER.warn("Received packet for syncing unknown power \"{}\"!", powerTypeId);
@@ -178,7 +178,7 @@ public class ModPacketsS2C {
     private static void onPowerSyncInBulk(SyncBulkPowerDataS2CPacket payload, ClientPlayNetworking.Context context) {
 
         Entity entity = context.player().level().getEntityById(payload.entityId());
-        Map<ResourceLocation, Tag> powerAndData = payload.powerAndData();
+        Map<Identifier, Tag> powerAndData = payload.powerAndData();
 
         if (entity == null) {
             Apoli.LOGGER.warn("Received packet for syncing {} power(s) to unknown entity!", powerAndData.size());
@@ -192,9 +192,9 @@ public class ModPacketsS2C {
         }
 
         int invalidPowers = 0;
-        for (Map.Entry<ResourceLocation, Tag> entry : powerAndData.entrySet()) {
+        for (Map.Entry<Identifier, Tag> entry : powerAndData.entrySet()) {
 
-            ResourceLocation powerTypeId = entry.getKey();
+            Identifier powerTypeId = entry.getKey();
             Tag powerTypeData = entry.getValue();
 
             if (!PowerManager.contains(powerTypeId)) {

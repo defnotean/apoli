@@ -13,7 +13,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderTickCounter;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 import java.util.Comparator;
@@ -71,7 +71,7 @@ public class PowerHudRenderer implements GameHudRender {
                 HudRender hudRender = entry.getValue().get();
 
                 //  Draw the background texture of the resource bar
-                ResourceLocation spriteLocation = hudRender.getSpriteLocation();
+                Identifier spriteLocation = hudRender.getSpriteLocation();
                 context.drawTexture(spriteLocation, x.get(), y.get(), 0, 0, BAR_WIDTH, 5);
 
                 int barV = BAR_HEIGHT + hudRender.getBarIndex() * BAR_INDEX_OFFSET;

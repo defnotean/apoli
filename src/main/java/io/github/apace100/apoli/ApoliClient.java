@@ -20,7 +20,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -54,7 +54,7 @@ public class ApoliClient implements ClientModInitializer {
 
 	public static <P extends PowerType & Active> void performActivePowerTypes(List<P> activePowerTypes) {
 
-		List<ResourceLocation> powerTypeIds = activePowerTypes
+		List<Identifier> powerTypeIds = activePowerTypes
 			.stream()
 			.peek(pt -> {if (pt.isActive()) {pt.onUse();}})
 			.map(PowerType::getPower)

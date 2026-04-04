@@ -25,7 +25,7 @@ import net.minecraft.server.packs.resources.DependencyTracker;
 import net.minecraft.server.packs.resources.LifecycledResourceManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,7 +39,7 @@ import net.minecraft.core.registries.Registries;
 //  TODO: Rename this to 'modify_entity_type_tag' -eggohito
 public class ModifyTypeTagPowerType extends PowerType {
 
-    private static final Map<ResourceLocation, Collection<ResourceLocation>> ENTITY_TYPE_SUB_TAGS = new ConcurrentHashMap<>();
+    private static final Map<Identifier, Collection<Identifier>> ENTITY_TYPE_SUB_TAGS = new ConcurrentHashMap<>();
     private static final String ENTITY_TYPE_TAG_PATH = Registries.getTagPath(Registries.ENTITY_TYPE);
 
     public static final TypedDataObjectFactory<ModifyTypeTagPowerType> DATA_FACTORY = PowerType.createConditionedDataFactory(
@@ -83,7 +83,7 @@ public class ModifyTypeTagPowerType extends PowerType {
     }
 
     @ApiStatus.Internal
-    public static <T> void setTagCache(String directory, TagEntry.ValueGetter<T> valueGetter, DependencyTracker<ResourceLocation, TagLoader.TagDependencies> dependencyTracker) {
+    public static <T> void setTagCache(String directory, TagEntry.ValueGetter<T> valueGetter, DependencyTracker<Identifier, TagLoader.TagDependencies> dependencyTracker) {
 
         if (ENTITY_TYPE_TAG_PATH.equals(directory)) {
             dependencyTracker.traverse((id, dependencies) -> dependencies.entries()

@@ -15,7 +15,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerAdvancementLoader;
 import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -40,12 +40,12 @@ public class RevokeAdvancementEntityActionType extends EntityActionType {
             .set("criteria", actionType.criteria)
     );
 
-    private final Optional<ResourceLocation> advancementId;
+    private final Optional<Identifier> advancementId;
     private final AdvancementCommands.Selection selection;
 
     private final List<String> criteria;
 
-    public RevokeAdvancementEntityActionType(Optional<ResourceLocation> advancementId, AdvancementCommands.Selection selection, List<String> criteria) {
+    public RevokeAdvancementEntityActionType(Optional<Identifier> advancementId, AdvancementCommands.Selection selection, List<String> criteria) {
         this.advancementId = advancementId;
         this.selection = selection;
         this.criteria = criteria;
@@ -67,7 +67,7 @@ public class RevokeAdvancementEntityActionType extends EntityActionType {
 
         else if (advancementId.isPresent()) {
 
-            ResourceLocation actualAdvancementId = advancementId.get();
+            Identifier actualAdvancementId = advancementId.get();
             AdvancementHolder advancementEntry = advancementLoader.get(actualAdvancementId);
 
             if (advancementEntry == null) {

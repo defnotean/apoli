@@ -25,7 +25,7 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -140,7 +140,7 @@ public class ItemPowersComponent {
 
     public static void onChangeEquipment(LivingEntity entity, EquipmentSlot equipmentSlot, ItemStack previousStack, ItemStack currentStack) {
 
-        ResourceLocation sourceId = Apoli.identifier("item/" + equipmentSlot.getName());
+        Identifier sourceId = Apoli.identifier("item/" + equipmentSlot.getName());
         if (ItemStack.areEqual(previousStack, currentStack) || !PowerHolderComponent.KEY.isProvidedBy(entity)) {
             return;
         }
@@ -173,17 +173,17 @@ public class ItemPowersComponent {
 
     }
 
-    public record Entry(ResourceLocation powerId, EquipmentSlotGroup slot, boolean hidden, boolean negative) {
+    public record Entry(Identifier powerId, EquipmentSlotGroup slot, boolean hidden, boolean negative) {
 
         public static final MapCodec<Entry> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("power").forGetter(Entry::powerId),
+            Identifier.CODEC.fieldOf("power").forGetter(Entry::powerId),
             EquipmentSlotGroup.CODEC.fieldOf("slot").forGetter(Entry::slot),
             Codec.BOOL.optionalFieldOf("hidden", false).forGetter(Entry::hidden),
             Codec.BOOL.optionalFieldOf("negative", false).forGetter(Entry::negative)
         ).apply(instance, Entry::new));
 
         public static final PacketCodec<ByteBuf, Entry> PACKET_CODEC = PacketCodec.tuple(
-            ResourceLocation.PACKET_CODEC, Entry::powerId,
+            Identifier.PACKET_CODEC, Entry::powerId,
             EquipmentSlotGroup.PACKET_CODEC, Entry::slot,
             PacketCodecs.BOOL, Entry::hidden,
             PacketCodecs.BOOL, Entry::negative,
@@ -236,7 +236,7 @@ public class ItemPowersComponent {
             this.entries.addAll(baseItemPowers.entries);
         }
 
-        public Builder add(EnumSet<EquipmentSlotGroup> slots, ResourceLocation powerId, boolean hidden, boolean negative) {
+        public Builder add(EnumSet<EquipmentSlotGroup> slots, Identifier powerId, boolean hidden, boolean negative) {
 
             CompoundTag entryNbt = new CompoundTag();
             for (EquipmentSlotGroup slot : slots) {
@@ -256,11 +256,11 @@ public class ItemPowersComponent {
 
         }
 
-        public Builder remove(EnumSet<EquipmentSlotGroup> slots, ResourceLocation powerId) {
+        public Builder remove(EnumSet<EquipmentSlotGroup> slots, Identifier powerId) {
             return remove(slots, powerId, modifierSlot -> {});
         }
 
-        public Builder remove(EnumSet<EquipmentSlotGroup> slots, ResourceLocation powerId, Consumer<Collection<Entry>> removalCallback) {
+        public Builder remove(EnumSet<EquipmentSlotGroup> slots, Identifier powerId, Consumer<Collection<Entry>> removalCallback) {
 
             ObjectListIterator<Entry> entryIterator = entries.iterator();
             ObjectLinkedOpenHashSet<Entry> removedEntries = new ObjectLinkedOpenHashSet<>();

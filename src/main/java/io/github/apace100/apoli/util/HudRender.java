@@ -18,7 +18,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
@@ -27,7 +27,7 @@ import java.util.Optional;
 
 public class HudRender implements Comparable<HudRender>, Validatable {
 
-    public static final ResourceLocation DEFAULT_SPRITE = Apoli.identifier("textures/gui/resource_bar.png");
+    public static final Identifier DEFAULT_SPRITE = Apoli.identifier("textures/gui/resource_bar.png");
     public static final HudRender DONT_RENDER = new HudRender(null, DEFAULT_SPRITE, false, false, 0, 0, 0);
 
     public static final DataObjectFactory<HudRender> FACTORY = new SimpleDataObjectFactory<>(
@@ -133,7 +133,7 @@ public class HudRender implements Comparable<HudRender>, Validatable {
     });
 
     private final Optional<EntityCondition> condition;
-    private final ResourceLocation spriteLocation;
+    private final Identifier spriteLocation;
 
     private final boolean shouldRender;
     private final boolean inverted;
@@ -142,7 +142,7 @@ public class HudRender implements Comparable<HudRender>, Validatable {
     private final int iconIndex;
     private final int order;
 
-    public HudRender(Optional<EntityCondition> condition, ResourceLocation spriteLocation, boolean shouldRender, boolean inverted, int barIndex, int iconIndex, int order) {
+    public HudRender(Optional<EntityCondition> condition, Identifier spriteLocation, boolean shouldRender, boolean inverted, int barIndex, int iconIndex, int order) {
         this.condition = condition;
         this.spriteLocation = spriteLocation;
         this.shouldRender = shouldRender;
@@ -169,7 +169,7 @@ public class HudRender implements Comparable<HudRender>, Validatable {
         return this.condition;
     }
 
-    public ResourceLocation getSpriteLocation() {
+    public Identifier getSpriteLocation() {
         return spriteLocation;
     }
 

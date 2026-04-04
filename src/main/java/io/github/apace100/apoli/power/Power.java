@@ -24,7 +24,7 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.Util;
 import org.jetbrains.annotations.NotNull;
 
@@ -99,7 +99,7 @@ public class Power implements Validatable {
 			@Override
 			public Power decode(RegistryByteBuf buf) {
 
-                ResourceLocation powerId = buf.readIdentifier();
+                Identifier powerId = buf.readIdentifier();
                 SerializableData.Instance powerData = serializableData.receive(buf);
 
                 try {
@@ -175,7 +175,7 @@ public class Power implements Validatable {
     ));
 
 
-    private final ResourceLocation id;
+    private final Identifier id;
     private final PowerType powerType;
 
     private final Component name;
@@ -183,7 +183,7 @@ public class Power implements Validatable {
 
     private final boolean hidden;
 
-    protected Power(ResourceLocation id, PowerType powerType, Optional<Component> name, Optional<Component> description, boolean hidden) {
+    protected Power(Identifier id, PowerType powerType, Optional<Component> name, Optional<Component> description, boolean hidden) {
 
         this.id = id;
         this.powerType = powerType;
@@ -233,7 +233,7 @@ public class Power implements Validatable {
 
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
 
@@ -276,9 +276,9 @@ public class Power implements Validatable {
         return description.copy();
     }
 
-    public record DataEntry(PowerConfiguration<?> typeConfig, PowerReference powerReference, Tag nbtData, Set<ResourceLocation> sources) {
+    public record DataEntry(PowerConfiguration<?> typeConfig, PowerReference powerReference, Tag nbtData, Set<Identifier> sources) {
 
-        private static final SerializableDataType<Set<ResourceLocation>> MUTABLE_IDENTIFIERS = SerializableDataTypes.IDENTIFIER.list(1, Integer.MAX_VALUE).xmap(ObjectOpenHashSet::new, ObjectArrayList::new);
+        private static final SerializableDataType<Set<Identifier>> MUTABLE_IDENTIFIERS = SerializableDataTypes.IDENTIFIER.list(1, Integer.MAX_VALUE).xmap(ObjectOpenHashSet::new, ObjectArrayList::new);
 
         public static final SerializableDataType<DataEntry> CODEC = SerializableDataType.compound(
             new SerializableData()

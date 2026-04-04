@@ -5,7 +5,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -29,12 +29,12 @@ public class ShaderPowerType extends PowerType implements Prioritized<ShaderPowe
             .set("priority", powerType.getPriority())
     );
 
-    private final ResourceLocation shaderLocation;
+    private final Identifier shaderLocation;
 
     private final boolean toggleable;
     private final int priority;
 
-    public ShaderPowerType(ResourceLocation shaderLocation, boolean toggleable, int priority, Optional<EntityCondition> condition) {
+    public ShaderPowerType(Identifier shaderLocation, boolean toggleable, int priority, Optional<EntityCondition> condition) {
         super(condition);
         this.shaderLocation = shaderLocation;
         this.toggleable = toggleable;
@@ -51,7 +51,7 @@ public class ShaderPowerType extends PowerType implements Prioritized<ShaderPowe
         return priority;
     }
 
-    public ResourceLocation getShaderLocation() {
+    public Identifier getShaderLocation() {
         return shaderLocation;
     }
 

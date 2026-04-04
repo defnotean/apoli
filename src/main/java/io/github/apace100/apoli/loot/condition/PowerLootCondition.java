@@ -9,16 +9,16 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Optional;
 
-public record PowerLootCondition(LootContext.EntityTarget target, PowerReference power, Optional<ResourceLocation> sourceId) implements LootItemCondition {
+public record PowerLootCondition(LootContext.EntityTarget target, PowerReference power, Optional<Identifier> sourceId) implements LootItemCondition {
 
     public static final MapCodec<PowerLootCondition> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
         LootContext.EntityTarget.CODEC.optionalFieldOf("entity", LootContext.EntityTarget.THIS).forGetter(PowerLootCondition::target),
         ApoliDataTypes.POWER_REFERENCE.codec().fieldOf("power").forGetter(PowerLootCondition::power),
-        ResourceLocation.CODEC.optionalFieldOf("source").forGetter(PowerLootCondition::sourceId)
+        Identifier.CODEC.optionalFieldOf("source").forGetter(PowerLootCondition::sourceId)
     ).apply(instance, PowerLootCondition::new));
 
     @Override

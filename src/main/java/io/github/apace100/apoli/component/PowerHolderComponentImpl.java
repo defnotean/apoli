@@ -18,7 +18,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 public class PowerHolderComponentImpl implements PowerHolderComponent {
 
     private final ConcurrentHashMap<Power, PowerType> powers = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Power, Set<ResourceLocation>> powerSources = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Power, Set<Identifier>> powerSources = new ConcurrentHashMap<>();
 
     private final LivingEntity owner;
 
@@ -45,7 +45,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public boolean hasPower(Power power, ResourceLocation source) {
+    public boolean hasPower(Power power, Identifier source) {
         return powerSources.containsKey(power) && powerSources.get(power).contains(source);
     }
 
@@ -83,7 +83,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public List<ResourceLocation> getSources(Power power) {
+    public List<Identifier> getSources(Power power) {
 
         if (powerSources.containsKey(power)) {
             return List.copyOf(powerSources.get(power));
@@ -96,7 +96,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public boolean removePower(Power power, ResourceLocation source) {
+    public boolean removePower(Power power, Identifier source) {
 
         ConcurrentHashMap.KeySetView<Power, Boolean> powersToRemove = ConcurrentHashMap.newKeySet();
         boolean result = this.removePower(power, source, powersToRemove::add);
@@ -108,9 +108,9 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
 
     }
 
-    protected boolean removePower(Power power, ResourceLocation source, Consumer<Power> adder) {
+    protected boolean removePower(Power power, Identifier source, Consumer<Power> adder) {
 
-        Set<ResourceLocation> sources = powerSources.getOrDefault(power, new ObjectOpenHashSet<>());
+        Set<Identifier> sources = powerSources.getOrDefault(power, new ObjectOpenHashSet<>());
         if (!sources.remove(source)) {
             return false;
         }
@@ -134,7 +134,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public int removeAllPowersFromSource(ResourceLocation source) {
+    public int removeAllPowersFromSource(Identifier source) {
         //noinspection MappingBeforeCount
         return (int) this.getPowersFromSource(source)
             .stream()
@@ -144,7 +144,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public List<Power> getPowersFromSource(ResourceLocation source) {
+    public List<Power> getPowersFromSource(Identifier source) {
         return powerSources.entrySet()
             .stream()
             .filter(e -> e.getValue().contains(source))
@@ -153,7 +153,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public boolean addPower(Power power, ResourceLocation source) {
+    public boolean addPower(Power power, Identifier source) {
 
         ConcurrentHashMap<Power, PowerType> powersToAdd = new ConcurrentHashMap<>();
         boolean result = this.addPower(power, source, powersToAdd::put);
@@ -173,9 +173,9 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
 
     }
 
-    protected boolean addPower(Power power, ResourceLocation source, BiConsumer<Power, PowerType> adder) {
+    protected boolean addPower(Power power, Identifier source, BiConsumer<Power, PowerType> adder) {
 
-        Set<ResourceLocation> sources = powerSources.computeIfAbsent(power, pt -> new ObjectOpenHashSet<>());
+        Set<Identifier> sources = powerSources.computeIfAbsent(power, pt -> new ObjectOpenHashSet<>());
         if (!sources.add(source)) {
             return false;
         }

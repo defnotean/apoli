@@ -5,7 +5,7 @@ import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.mixin.LootContextTypesAccessor;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.LootContextParamSet;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class ApoliLootContextTypes {
 
@@ -26,10 +26,10 @@ public class ApoliLootContextTypes {
 
     private ApoliLootContextTypes() {}
 
-    private static LootContextParamSet register(ResourceLocation id, LootContextParamSet.Builder lootContextTypeBuilder) {
+    private static LootContextParamSet register(Identifier id, LootContextParamSet.Builder lootContextTypeBuilder) {
 
         LootContextParamSet lootContextType = lootContextTypeBuilder.build();
-        BiMap<ResourceLocation, LootContextParamSet> idAndLootContextTypeMap = LootContextTypesAccessor.getMap();
+        BiMap<Identifier, LootContextParamSet> idAndLootContextTypeMap = LootContextTypesAccessor.getMap();
 
         if (idAndLootContextTypeMap.containsKey(id)) {
             throw new IllegalStateException("Loot table parameter set \"" + id + "\" is already registered!");

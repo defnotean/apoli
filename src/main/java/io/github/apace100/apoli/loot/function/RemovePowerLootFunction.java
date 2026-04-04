@@ -20,7 +20,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.*;
 
@@ -28,13 +28,13 @@ public class RemovePowerLootFunction extends LootItemConditionalFunction {
 
     public static final MapCodec<RemovePowerLootFunction> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> addConditionsField(instance).and(instance.group(
         SerializableDataTypes.ATTRIBUTE_MODIFIER_SLOT_SET.codec().optionalFieldOf("slot", EnumSet.allOf(EquipmentSlotGroup.class)).forGetter(RemovePowerLootFunction::slots),
-        ResourceLocation.CODEC.fieldOf("power").forGetter(RemovePowerLootFunction::powerId)
+        Identifier.CODEC.fieldOf("power").forGetter(RemovePowerLootFunction::powerId)
     )).apply(instance, RemovePowerLootFunction::new));
 
     private final EnumSet<EquipmentSlotGroup> slots;
-    private final ResourceLocation powerId;
+    private final Identifier powerId;
 
-    private RemovePowerLootFunction(List<LootItemCondition> conditions, EnumSet<EquipmentSlotGroup> slots, ResourceLocation powerId) {
+    private RemovePowerLootFunction(List<LootItemCondition> conditions, EnumSet<EquipmentSlotGroup> slots, Identifier powerId) {
         super(conditions);
         this.slots = slots;
         this.powerId = powerId;
@@ -86,14 +86,14 @@ public class RemovePowerLootFunction extends LootItemConditionalFunction {
             return;
         }
 
-        Map<ResourceLocation, Collection<Power>> revokedPowers = new HashMap<>();
+        Map<Identifier, Collection<Power>> revokedPowers = new HashMap<>();
         for (ItemPowersComponent.Entry entry : removedEntries) {
 
             EquipmentSlotGroup modifierSlot = entry.slot();
 
             for (EquipmentSlot slot : EquipmentSlot.values()) {
 
-                ResourceLocation sourceId = Apoli.identifier("item/" + slot.getName());
+                Identifier sourceId = Apoli.identifier("item/" + slot.getName());
 
                 if (!revokedPowers.containsKey(sourceId) && modifierSlot.matches(slot)) {
                     revokedPowers
@@ -115,7 +115,7 @@ public class RemovePowerLootFunction extends LootItemConditionalFunction {
         return slots;
     }
 
-    public ResourceLocation powerId() {
+    public Identifier powerId() {
         return powerId;
     }
 

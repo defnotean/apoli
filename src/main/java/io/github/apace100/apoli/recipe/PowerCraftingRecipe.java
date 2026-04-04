@@ -17,13 +17,13 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.CraftingRecipeCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.level.Level;
 
 import java.util.Objects;
 
-public record PowerCraftingRecipe(ResourceLocation powerId, CraftingRecipe delegate) implements CraftingRecipe {
+public record PowerCraftingRecipe(Identifier powerId, CraftingRecipe delegate) implements CraftingRecipe {
 
     @Override
     public CraftingRecipeCategory getCategory() {
@@ -106,7 +106,7 @@ public record PowerCraftingRecipe(ResourceLocation powerId, CraftingRecipe deleg
 
     private static PowerCraftingRecipe receive(RegistryByteBuf buf) {
 
-        ResourceLocation powerId = buf.readIdentifier();
+        Identifier powerId = buf.readIdentifier();
         Recipe<?> recipe = Recipe.PACKET_CODEC.decode(buf);
 
         if (recipe instanceof CraftingRecipe craftingRecipe) {
@@ -122,7 +122,7 @@ public record PowerCraftingRecipe(ResourceLocation powerId, CraftingRecipe deleg
     public static class Serializer implements RecipeSerializer<PowerCraftingRecipe> {
 
         public static final MapCodec<PowerCraftingRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("power").forGetter(PowerCraftingRecipe::powerId),
+            Identifier.CODEC.fieldOf("power").forGetter(PowerCraftingRecipe::powerId),
             ApoliDataTypes.DISALLOWING_INTERNAL_CRAFTING_RECIPE.codec().fieldOf("recipe").forGetter(PowerCraftingRecipe::delegate)
         ).apply(instance, PowerCraftingRecipe::new));
 

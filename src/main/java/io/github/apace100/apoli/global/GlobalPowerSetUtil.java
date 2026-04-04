@@ -5,7 +5,7 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.Power;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class GlobalPowerSetUtil {
 
-    public static final ResourceLocation POWER_SOURCE = Apoli.identifier("global");
+    public static final Identifier POWER_SOURCE = Apoli.identifier("global");
 
     public static List<GlobalPowerSet> getApplicableSets(EntityType<?> type) {
         return GlobalPowerSetManager.values()
@@ -23,7 +23,7 @@ public class GlobalPowerSetUtil {
             .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    public static Set<ResourceLocation> getPowerIds(List<GlobalPowerSet> powerSets) {
+    public static Set<Identifier> getPowerIds(List<GlobalPowerSet> powerSets) {
         return powerSets.stream()
             .flatMap(gps -> gps.getPowers().stream())
             .map(Power::getId)

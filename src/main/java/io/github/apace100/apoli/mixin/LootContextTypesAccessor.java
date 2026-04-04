@@ -3,7 +3,7 @@ package io.github.apace100.apoli.mixin;
 import com.google.common.collect.BiMap;
 import net.minecraft.world.level.storage.loot.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.BuiltInLootContextParamSets;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface LootContextTypesAccessor {
 
     @Accessor("MAP")
-    static BiMap<ResourceLocation, LootContextParamSet> getMap() {
+    static BiMap<Identifier, LootContextParamSet> getMap() {
         throw new AssertionError();
     }
 

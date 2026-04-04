@@ -18,7 +18,7 @@ import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.CraftingResultSlot;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,7 +60,7 @@ public class ModifyCraftingPowerType extends PowerType implements Prioritized<Mo
             .set("priority", powerType.getPriority())
     );
 
-    private final Optional<ResourceLocation> recipeId;
+    private final Optional<Identifier> recipeId;
 
     private final Optional<EntityAction> entityAction;
     private final Optional<BlockAction> blockAction;
@@ -73,7 +73,7 @@ public class ModifyCraftingPowerType extends PowerType implements Prioritized<Mo
     private final Optional<ItemStack> resultStack;
     private final int priority;
 
-    public ModifyCraftingPowerType(Optional<ResourceLocation> recipeId, Optional<EntityAction> entityAction, Optional<BlockAction> blockAction, Optional<ItemAction> itemAction, Optional<ItemAction> itemActionAfterCrafting, Optional<ItemCondition> itemCondition, Optional<ItemStack> resultStack, int priority, Optional<EntityCondition> condition) {
+    public ModifyCraftingPowerType(Optional<Identifier> recipeId, Optional<EntityAction> entityAction, Optional<BlockAction> blockAction, Optional<ItemAction> itemAction, Optional<ItemAction> itemActionAfterCrafting, Optional<ItemCondition> itemCondition, Optional<ItemStack> resultStack, int priority, Optional<EntityCondition> condition) {
         super(condition);
         this.recipeId = recipeId;
         this.entityAction = entityAction;
@@ -95,7 +95,7 @@ public class ModifyCraftingPowerType extends PowerType implements Prioritized<Mo
         return priority;
     }
 
-    public boolean doesApply(ResourceLocation targetRecipeId, ItemStack originalResultStack) {
+    public boolean doesApply(Identifier targetRecipeId, ItemStack originalResultStack) {
         return recipeId.map(targetRecipeId::equals).orElse(true)
             && itemCondition.map(condition -> condition.test(getHolder().level(), originalResultStack)).orElse(true);
     }

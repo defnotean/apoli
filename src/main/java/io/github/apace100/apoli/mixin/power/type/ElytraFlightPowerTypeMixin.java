@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -23,8 +23,8 @@ public abstract class ElytraFlightPowerTypeMixin {
 			|| PowerHolderComponent.hasPowerType(entity, ElytraFlightPowerType.class, ElytraFlightPowerType::shouldRenderElytra);
 	}
 
-	@WrapOperation(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;getArmorCutoutNoCull(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"))
-	private RenderType apoli$overrideElytraTexture(ResourceLocation texture, Operation<RenderType> original, PoseStack matrices, MultiBufferSource vertexConsumerProvider, int i, LivingEntity entity) {
+	@WrapOperation(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;getArmorCutoutNoCull(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/RenderType;"))
+	private RenderType apoli$overrideElytraTexture(Identifier texture, Operation<RenderType> original, PoseStack matrices, MultiBufferSource vertexConsumerProvider, int i, LivingEntity entity) {
 		return original.call(PowerHolderComponent.getPowerTypes(entity, ElytraFlightPowerType.class)
 			.stream()
 			.findFirst()

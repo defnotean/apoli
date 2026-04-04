@@ -5,7 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,7 +18,7 @@ public class MultiplePower extends Power {
 
 		@Override
 		public MultiplePower decode(RegistryByteBuf buf) {
-			Set<ResourceLocation> subPowerIds = buf.readCollection(ObjectLinkedOpenHashSet::new, FriendlyByteBuf::readIdentifier);
+			Set<Identifier> subPowerIds = buf.readCollection(ObjectLinkedOpenHashSet::new, FriendlyByteBuf::readIdentifier);
 			return new MultiplePower(power, subPowerIds);
 
 		}
@@ -30,9 +30,9 @@ public class MultiplePower extends Power {
 
 	};
 
-    private ImmutableSet<ResourceLocation> subPowerIds;
+    private ImmutableSet<Identifier> subPowerIds;
 
-    MultiplePower(Power basePower, Set<ResourceLocation> subPowerIds) {
+    MultiplePower(Power basePower, Set<Identifier> subPowerIds) {
         super(basePower);
         this.subPowerIds = ImmutableSet.copyOf(subPowerIds);
     }
@@ -42,11 +42,11 @@ public class MultiplePower extends Power {
 		this.subPowerIds = ImmutableSet.of();
     }
 
-    public ImmutableSet<ResourceLocation> getSubPowerIds() {
+    public ImmutableSet<Identifier> getSubPowerIds() {
         return subPowerIds;
     }
 
-    void setSubPowerIds(Set<ResourceLocation> subPowerIds) {
+    void setSubPowerIds(Set<Identifier> subPowerIds) {
         this.subPowerIds = ImmutableSet.copyOf(subPowerIds);
     }
 

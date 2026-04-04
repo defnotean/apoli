@@ -15,7 +15,7 @@ import io.github.apace100.apoli.util.PowerUtil;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Collection;
 import java.util.List;
@@ -88,15 +88,15 @@ public record PowerSuggestionProvider(Function<CommandContext<ServerCommandSourc
 
 		try {
 
-			Stream.Builder<ResourceLocation> powerIds = Stream.builder();
+			Stream.Builder<Identifier> powerIds = Stream.builder();
 			Collection<Entity> entities = getter().apply(context);
 
 			for (Entity entity : entities) {
 
 				PowerHolderComponent powerComponent = PowerHolderComponent.KEY.get(entity);
-				for (Map.Entry<ResourceLocation, Power> powerEntry : PowerManager.entrySet()) {
+				for (Map.Entry<Identifier, Power> powerEntry : PowerManager.entrySet()) {
 
-					ResourceLocation id = powerEntry.getKey();
+					Identifier id = powerEntry.getKey();
 					Power power = powerEntry.getValue();
 
 					try {

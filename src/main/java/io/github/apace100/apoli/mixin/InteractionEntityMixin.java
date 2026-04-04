@@ -6,7 +6,7 @@ import com.llamalad7.mixinextras.sugar.ref.LocalFloatRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.type.*;
-import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
+import net.minecraft.advancements.criterion.PlayerHurtEntityTrigger;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.damagesource.DamageSource;
@@ -25,7 +25,7 @@ public abstract class InteractionEntityMixin extends Entity {
         super(type, world);
     }
 
-    @WrapWithCondition(method = "handleAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/critereon/PlayerHurtEntityTrigger;trigger(Lnet/minecraft/server/network/ServerPlayer;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;FFZ)V"))
+    @WrapWithCondition(method = "handleAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/criterion/PlayerHurtEntityTrigger;trigger(Lnet/minecraft/server/network/ServerPlayer;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;FFZ)V"))
     private boolean apoli$cacheDamageData(PlayerHurtEntityTrigger criterion, ServerPlayer player, Entity entity, DamageSource source, float dealt, float taken, boolean blocked, @Share("damageSource") LocalRef<DamageSource> damageSourceRef, @Share("damageDealt") LocalFloatRef damageDealtRef, @Share("damageTaken") LocalFloatRef damageTakenRef) {
 
         damageSourceRef.set(source);

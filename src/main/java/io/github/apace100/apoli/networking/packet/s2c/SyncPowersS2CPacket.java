@@ -7,14 +7,14 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.protocol.CustomPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public record SyncPowersS2CPacket(Map<ResourceLocation, Power> powersById) implements CustomPayload {
+public record SyncPowersS2CPacket(Map<Identifier, Power> powersById) implements CustomPayload {
 
     public static final Id<SyncPowersS2CPacket> PACKET_ID = new Id<>(Apoli.identifier("s2c/sync_power_registry"));
     public static final PacketCodec<RegistryByteBuf, SyncPowersS2CPacket> PACKET_CODEC = PacketCodec.of(SyncPowersS2CPacket::write, SyncPowersS2CPacket::read);

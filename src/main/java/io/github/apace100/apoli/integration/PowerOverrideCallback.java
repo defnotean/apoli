@@ -2,7 +2,7 @@ package io.github.apace100.apoli.integration;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  *  This callback is invoked for each power that is overridden. It will pass the ID of the power being overridden.
@@ -20,6 +20,6 @@ public interface PowerOverrideCallback {
         }
     );
 
-    void onPowerOverride(ResourceLocation id);
+    void onPowerOverride(Identifier id);
 
 }

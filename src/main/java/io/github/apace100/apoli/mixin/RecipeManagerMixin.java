@@ -7,7 +7,7 @@ import io.github.apace100.apoli.recipe.ModifiedCraftingRecipe;
 import io.github.apace100.apoli.util.RecipeUtil;
 import net.minecraft.world.item.crafting.*;;
 import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,7 +22,7 @@ public abstract class RecipeManagerMixin {
     private Optional<RecipeHolder<?>> apoli$modifyCraftingRecipe(Optional<RecipeHolder<?>> original, RecipeType<?> type, RecipeInput input, Level world) {
         return original.map(entry -> {
 
-            ResourceLocation id = entry.id();
+            Identifier id = entry.id();
             Recipe<?> recipe = entry.value();
 
             if (recipe instanceof CraftingRecipe craftingRecipe && ModifiedCraftingRecipe.canModify(id, craftingRecipe, input)) {
@@ -36,7 +36,7 @@ public abstract class RecipeManagerMixin {
         });
     }
 
-    @ModifyExpressionValue(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At(value = "NEW", target = "(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/world/item/crafting/Recipe;)Lnet/minecraft/world/item/crafting/RecipeHolder;"))
+    @ModifyExpressionValue(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At(value = "NEW", target = "(Lnet/minecraft/resources/Identifier;Lnet/minecraft/world/item/crafting/Recipe;)Lnet/minecraft/world/item/crafting/RecipeHolder;"))
     private RecipeHolder<?> apoli$validateRecipe(RecipeHolder<?> original, @Local Recipe<?> recipe) {
         return RecipeUtil.validateRecipe(recipe)
             .map(r -> original)

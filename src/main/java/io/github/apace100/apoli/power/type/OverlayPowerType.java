@@ -24,7 +24,7 @@ import net.minecraft.client.resource.metadata.TextureResourceMetadata;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSpriteAtlasHolder;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +34,7 @@ import java.util.Set;
 //  TODO: Drop the old 'texture' field -eggohito
 public class OverlayPowerType extends PowerType {
 
-    public static final ResourceLocation ATLAS_TEXTURE = Apoli.identifier("textures/atlas/overlay.png");
+    public static final Identifier ATLAS_TEXTURE = Apoli.identifier("textures/atlas/overlay.png");
 
     public static final TypedDataObjectFactory<OverlayPowerType> DATA_FACTORY = createConditionedDataFactory(
         new SerializableData()
@@ -76,7 +76,7 @@ public class OverlayPowerType extends PowerType {
             .set("priority", powerType.getPriority())
     );
 
-    private final ResourceLocation spriteId;
+    private final Identifier spriteId;
 
     private final DrawMode drawMode;
     private final DrawPhase drawPhase;
@@ -94,7 +94,7 @@ public class OverlayPowerType extends PowerType {
     private boolean initRender = true;
     private boolean invalidTexture;
 
-    public OverlayPowerType(ResourceLocation spriteId, DrawMode drawMode, DrawPhase drawPhase, float strength, float red, float green, float blue, boolean hideWithHud, boolean visibleInThirdPerson, int priority, Optional<EntityCondition> condition) {
+    public OverlayPowerType(Identifier spriteId, DrawMode drawMode, DrawPhase drawPhase, float strength, float red, float green, float blue, boolean hideWithHud, boolean visibleInThirdPerson, int priority, Optional<EntityCondition> condition) {
         super(condition);
         this.spriteId = spriteId;
         this.drawMode = drawMode;
@@ -211,7 +211,7 @@ public class OverlayPowerType extends PowerType {
         }
 
         TextureAtlasSprite sprite = overlaySpriteHolder.apoli$getSprite(spriteId);
-        ResourceLocation textureToDraw = sprite.getAtlasId();
+        Identifier textureToDraw = sprite.getAtlasId();
 
         float minU = sprite.getMinU();
         float maxU = sprite.getMaxU();
@@ -253,7 +253,7 @@ public class OverlayPowerType extends PowerType {
         }
 
         @Override
-        public TextureAtlasSprite getSprite(ResourceLocation objectId) {
+        public TextureAtlasSprite getSprite(Identifier objectId) {
             return super.getSprite(objectId);
         }
 

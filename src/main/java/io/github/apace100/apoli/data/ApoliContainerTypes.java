@@ -11,7 +11,7 @@ import net.minecraft.world.inventory.DispenserMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.HopperMenu;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -20,7 +20,7 @@ import net.minecraft.core.registries.Registries;
 public class ApoliContainerTypes {
 
 	public static final IdentifierAlias ALIASES = new IdentifierAlias();
-	public static final SerializableDataType<ContainerType> REGISTRY_DATA_TYPE = SerializableDataType.registry(ApoliRegistries.CONTAINER_TYPE, Apoli.MODID, ALIASES, (containerTypes, id) -> "Container type \"" + id + "\" is undefined! Expected to be any of " + containerTypes.getIds().stream().map(ResourceLocation::toString).collect(Collectors.joining(", ")));
+	public static final SerializableDataType<ContainerType> REGISTRY_DATA_TYPE = SerializableDataType.registry(ApoliRegistries.CONTAINER_TYPE, Apoli.MODID, ALIASES, (containerTypes, id) -> "Container type \"" + id + "\" is undefined! Expected to be any of " + containerTypes.getIds().stream().map(Identifier::toString).collect(Collectors.joining(", ")));
 
 	//	Presets for generic container screen handlers
 	public static final PresetContainerType GENERIC_3X3 = register("generic_3x3", new PresetContainerType(3, 3, (inventory, columns, rows) -> (syncId, playerInventory, player) -> new DispenserMenu(syncId, playerInventory, inventory)));

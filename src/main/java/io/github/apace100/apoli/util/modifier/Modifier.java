@@ -35,7 +35,7 @@ public class Modifier implements Comparable<Modifier> {
      *  <p>e.g:</p>
      *  <pre>
      *      Modifier modifier = Modifier.of({@linkplain ModifierOperation#SET_TOTAL}, data -> data
-     *          .set("resource", {@linkplain io.github.apace100.apoli.power.PowerReference#of(net.minecraft.util.ResourceLocation) PowerReference.of(ResourceLocation.parse("example:resource"))})
+     *          .set("resource", {@linkplain io.github.apace100.apoli.power.PowerReference#of(net.minecraft.util.Identifier) PowerReference.of(Identifier.parse("example:resource"))})
      *          .set("modifier", {@linkplain #of(ModifierOperation, double) Modifier.of(}{@linkplain ModifierOperation#ADD_BASE_EARLY}{@linkplain #of(ModifierOperation, double), 1.0)});
      *  </pre>
      *

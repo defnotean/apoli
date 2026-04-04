@@ -7,7 +7,7 @@ import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.calio.data.SerializableData;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.List;
@@ -111,7 +111,7 @@ public abstract class ValueModifyingPowerType extends PowerType {
         );
     }
 
-    public static <T extends ValueModifyingPowerType> PowerConfiguration<T> createModifyingConfiguration(ResourceLocation id, BiFunction<List<Modifier>, Optional<EntityCondition>, T> constructor) {
+    public static <T extends ValueModifyingPowerType> PowerConfiguration<T> createModifyingConfiguration(Identifier id, BiFunction<List<Modifier>, Optional<EntityCondition>, T> constructor) {
         return PowerConfiguration.of(id, createConditionedModifyingRequiredDataFactory(new SerializableData(), (data, modifiers, condition) -> constructor.apply(modifiers, condition), (t, serializableData) -> serializableData.instance()));
     }
 

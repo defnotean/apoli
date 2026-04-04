@@ -16,7 +16,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -33,9 +33,9 @@ public class AdvancementEntityConditionType extends EntityConditionType {
             .set("advancement", conditionType.advancement)
     );
 
-    private final ResourceLocation advancement;
+    private final Identifier advancement;
 
-    public AdvancementEntityConditionType(ResourceLocation advancement) {
+    public AdvancementEntityConditionType(Identifier advancement) {
         this.advancement = advancement;
     }
 

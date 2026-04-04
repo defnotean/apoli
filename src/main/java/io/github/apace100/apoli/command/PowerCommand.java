@@ -25,7 +25,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Collection;
 import java.util.List;
@@ -39,7 +39,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public class PowerCommand {
 
-	public static ResourceLocation POWER_SOURCE = Apoli.identifier("command");
+	public static Identifier POWER_SOURCE = Apoli.identifier("command");
 
 	public static void register(CommandNode<ServerCommandSource> baseNode) {
 
@@ -79,7 +79,7 @@ public class PowerCommand {
 			List<LivingEntity> targets = PowerHolderArgumentType.getHolders(context, "targets");
 			Power power = PowerArgumentType.getPower(context, "power");
 
-			ResourceLocation source = specifiedSource
+			Identifier source = specifiedSource
 				? IdentifierArgumentType.getIdentifier(context, "source")
 				: POWER_SOURCE;
 
@@ -150,7 +150,7 @@ public class PowerCommand {
 			List<LivingEntity> targets = PowerHolderArgumentType.getHolders(context, "targets");
 			Power power = PowerArgumentType.getPower(context, "power");
 
-			ResourceLocation source = specifiedSource
+			Identifier source = specifiedSource
 				? IdentifierArgumentType.getIdentifier(context, "source")
 				: POWER_SOURCE;
 
@@ -202,7 +202,7 @@ public class PowerCommand {
 		public static int executeAll(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
 
 			List<LivingEntity> targets = PowerHolderArgumentType.getHolders(context, "targets");
-			ResourceLocation source = IdentifierArgumentType.getIdentifier(context, "source");
+			Identifier source = IdentifierArgumentType.getIdentifier(context, "source");
 
 			ServerCommandSource commandSource = context.getDirectEntity();
 			List<LivingEntity> processedTargets = new ObjectArrayList<>();
@@ -370,10 +370,10 @@ public class PowerCommand {
 			ServerCommandSource commandSource = context.getDirectEntity();
 			PowerHolderComponent powerComponent = PowerHolderComponent.KEY.get(target);
 
-			List<ResourceLocation> sources = powerComponent.getSources(power);
+			List<Identifier> sources = powerComponent.getSources(power);
 			String joinedSources = sources
 				.stream()
-				.map(ResourceLocation::toString)
+				.map(Identifier::toString)
 				.collect(Collectors.joining(", "));
 
 			if (sources.isEmpty()) {
@@ -411,7 +411,7 @@ public class PowerCommand {
 
 			for (LivingEntity target : targets) {
 
-				Map<ResourceLocation, Collection<Power>> powers = PowerHolderComponent.KEY.get(target).getSources(power)
+				Map<Identifier, Collection<Power>> powers = PowerHolderComponent.KEY.get(target).getSources(power)
 					.stream()
 					.collect(Collectors.toMap(Function.identity(), id -> ObjectOpenHashSet.of(power), MiscUtil.mergeCollections()));
 
@@ -485,7 +485,7 @@ public class PowerCommand {
 			for (Entity target : targets) {
 
 				PowerHolderComponent component = PowerHolderComponent.KEY.get(target);
-				List<ResourceLocation> sources = component.getPowers(false)
+				List<Identifier> sources = component.getPowers(false)
 					.stream()
 					.map(component::getSources)
 					.flatMap(Collection::stream)

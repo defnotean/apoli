@@ -10,7 +10,7 @@ import io.github.apace100.apoli.power.type.VariableIntPowerType;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.apoli.util.modifier.ModifierUtil;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -30,7 +30,7 @@ public class PowerUtil {
 
 				Power power = powerType.getPower();
 
-				ResourceLocation powerTypeId = power.getType().getConfig().id();
+				Identifier powerTypeId = power.getType().getConfig().id();
 				StringBuilder powerString = new StringBuilder();
 
 				if (power instanceof SubPower subPower) {

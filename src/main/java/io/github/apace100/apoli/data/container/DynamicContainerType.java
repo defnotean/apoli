@@ -8,10 +8,10 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.Inventory;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 //	TODO: Finish implementation for dynamic container types -eggohito
-public record DynamicContainerType(TextAlignment titleAlignment, ResourceLocation texture, int columns, int rows) implements ContainerType {
+public record DynamicContainerType(TextAlignment titleAlignment, Identifier texture, int columns, int rows) implements ContainerType {
 
 	public static final TypedDataObjectFactory<DynamicContainerType> DATA_FACTORY = TypedDataObjectFactory.simple(
 		new SerializableData()

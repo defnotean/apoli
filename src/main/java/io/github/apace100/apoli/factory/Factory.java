@@ -3,11 +3,11 @@ package io.github.apace100.apoli.factory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.util.Validatable;
 import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface Factory {
 
-    ResourceLocation getSerializerId();
+    Identifier getSerializerId();
 
     SerializableData getSerializableData();
 
@@ -21,7 +21,7 @@ public interface Factory {
             return this.getFactory().getSerializableData();
         }
 
-        default ResourceLocation getSerializerId() {
+        default Identifier getSerializerId() {
             return this.getFactory().getSerializerId();
         }
 

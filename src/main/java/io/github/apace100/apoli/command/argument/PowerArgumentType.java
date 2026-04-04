@@ -19,13 +19,13 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType<ResourceLocation> {
+public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType<Identifier> {
 
     public static final DynamicCommandExceptionType POWER_NOT_RESOURCE = new DynamicCommandExceptionType(
         o -> Component.stringifiedTranslatable("commands.apoli.power_not_resource", o)
@@ -44,7 +44,7 @@ public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType
     }
 
     public static Power getPower(CommandContext<ServerCommandSource> context, String argumentName) throws CommandSyntaxException {
-        ResourceLocation powerId = context.getArgument(argumentName, ResourceLocation.class);
+        Identifier powerId = context.getArgument(argumentName, Identifier.class);
         return PowerManager.getOptional(powerId).orElseThrow(() -> POWER_NOT_FOUND.create(powerId));
     }
 
@@ -60,14 +60,14 @@ public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType
     }
 
     @Override
-    public ResourceLocation parse(StringReader reader) throws CommandSyntaxException {
-        return ResourceLocation.fromCommandInputNonEmpty(reader);
+    public Identifier parse(StringReader reader) throws CommandSyntaxException {
+        return Identifier.fromCommandInputNonEmpty(reader);
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
 
-        Stream<ResourceLocation> powerIds = PowerManager.entrySet()
+        Stream<Identifier> powerIds = PowerManager.entrySet()
             .stream()
             .filter(e -> powerTarget() != PowerTarget.RESOURCE || PowerUtil.validateResource(e.getValue().getType()).isSuccess())
             .map(Map.Entry::getKey);

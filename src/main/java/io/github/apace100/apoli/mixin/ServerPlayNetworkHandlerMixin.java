@@ -26,7 +26,7 @@ public class ServerPlayNetworkHandlerMixin {
         ((EndRespawningEntity)this.player).apoli$setEndRespawning(true);
     }
 
-    @Inject(method = "handleClientCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/critereon/ChangedDimensionTrigger;trigger(Lnet/minecraft/server/network/ServerPlayer;Lnet/minecraft/core/ResourceKey;Lnet/minecraft/core/ResourceKey;)V"))
+    @Inject(method = "handleClientCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/criterion/ChangedDimensionTrigger;trigger(Lnet/minecraft/server/network/ServerPlayer;Lnet/minecraft/core/ResourceKey;Lnet/minecraft/core/ResourceKey;)V"))
     private void undoEndRespawnStatus(ClientStatusC2SPacket packet, CallbackInfo ci) {
         ((EndRespawningEntity)this.player).apoli$setEndRespawning(false);
     }

@@ -28,7 +28,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.Util;
 import net.minecraft.util.profiling.Profiler;
@@ -40,13 +40,13 @@ import net.minecraft.core.registries.Registries;
 
 public class GlobalPowerSetManager extends IdentifiableMultiJsonDataLoader implements IdentifiableResourceReloadListener {
 
-    public static final Set<ResourceLocation> DEPENDENCIES = Util.make(new HashSet<>(), set -> set.add(Apoli.identifier("powers")));
-    public static final ResourceLocation ID = Apoli.identifier("global_powers");
+    public static final Set<Identifier> DEPENDENCIES = Util.make(new HashSet<>(), set -> set.add(Apoli.identifier("powers")));
+    public static final Identifier ID = Apoli.identifier("global_powers");
 
-    private static final Object2ObjectOpenHashMap<ResourceLocation, GlobalPowerSet> SETS_BY_ID = new Object2ObjectOpenHashMap<>();
-    private static final ObjectOpenHashSet<ResourceLocation> DISABLED_SETS = new ObjectOpenHashSet<>();
+    private static final Object2ObjectOpenHashMap<Identifier, GlobalPowerSet> SETS_BY_ID = new Object2ObjectOpenHashMap<>();
+    private static final ObjectOpenHashSet<Identifier> DISABLED_SETS = new ObjectOpenHashSet<>();
 
-    private static final Map<ResourceLocation, Integer> LOADING_PRIORITIES = new HashMap<>();
+    private static final Map<Identifier, Integer> LOADING_PRIORITIES = new HashMap<>();
     private static final Gson GSON = new GsonBuilder()
         .disableHtmlEscaping()
         .setPrettyPrinting()
@@ -81,7 +81,7 @@ public class GlobalPowerSetManager extends IdentifiableMultiJsonDataLoader imple
         Apoli.LOGGER.info("Reading global power sets from data packs...");
         startBuilding();
 
-        Map<ResourceLocation, List<PrioritizedEntry<GlobalPowerSet>>> loadedGlobalPowerSets = new Object2ObjectLinkedOpenHashMap<>();
+        Map<Identifier, List<PrioritizedEntry<GlobalPowerSet>>> loadedGlobalPowerSets = new Object2ObjectLinkedOpenHashMap<>();
         prepared.forEach((packName, id, jsonElement) -> {
 
             try {
@@ -112,7 +112,7 @@ public class GlobalPowerSetManager extends IdentifiableMultiJsonDataLoader imple
                     List<String> invalidPowers = globalPowerSet.validate()
                         .stream()
                         .map(Power::getId)
-                        .map(ResourceLocation::toString)
+                        .map(Identifier::toString)
                         .toList();
 
                     if (!invalidPowers.isEmpty()) {
@@ -166,7 +166,7 @@ public class GlobalPowerSetManager extends IdentifiableMultiJsonDataLoader imple
     }
 
     @Override
-    public void onReject(String packName, ResourceLocation resourceId) {
+    public void onReject(String packName, Identifier resourceId) {
 
         if (!contains(resourceId)) {
             disable(resourceId);
@@ -175,12 +175,12 @@ public class GlobalPowerSetManager extends IdentifiableMultiJsonDataLoader imple
     }
 
     @Override
-    public ResourceLocation getFabricId() {
+    public Identifier getFabricId() {
         return ID;
     }
 
     @Override
-    public Collection<ResourceLocation> getFabricDependencies() {
+    public Collection<Identifier> getFabricDependencies() {
         return DEPENDENCIES;
     }
 
@@ -220,30 +220,30 @@ public class GlobalPowerSetManager extends IdentifiableMultiJsonDataLoader imple
 
     }
 
-    public static DataResult<GlobalPowerSet> getResult(ResourceLocation id) {
+    public static DataResult<GlobalPowerSet> getResult(Identifier id) {
         return contains(id)
             ? DataResult.success(SETS_BY_ID.get(id))
             : DataResult.error(() -> "Couldn't get global power set from ID \"" + id + "\", as it wasn't registered!");
     }
 
-    public static Optional<GlobalPowerSet> getOptional(ResourceLocation id) {
+    public static Optional<GlobalPowerSet> getOptional(Identifier id) {
         return getResult(id).result();
     }
 
     @Nullable
-    public static GlobalPowerSet getNullable(ResourceLocation id) {
+    public static GlobalPowerSet getNullable(Identifier id) {
         return SETS_BY_ID.get(id);
     }
 
-    public static GlobalPowerSet get(ResourceLocation id) {
+    public static GlobalPowerSet get(Identifier id) {
         return getResult(id).getOrThrow();
     }
 
-    public static Set<Map.Entry<ResourceLocation, GlobalPowerSet>> entrySet() {
+    public static Set<Map.Entry<Identifier, GlobalPowerSet>> entrySet() {
         return new ObjectOpenHashSet<>(SETS_BY_ID.entrySet());
     }
 
-    public static Set<ResourceLocation> keySet() {
+    public static Set<Identifier> keySet() {
         return new ObjectOpenHashSet<>(SETS_BY_ID.keySet());
     }
 
@@ -251,11 +251,11 @@ public class GlobalPowerSetManager extends IdentifiableMultiJsonDataLoader imple
         return new ObjectOpenHashSet<>(SETS_BY_ID.values());
     }
 
-    public static boolean isDisabled(ResourceLocation id) {
+    public static boolean isDisabled(Identifier id) {
         return DISABLED_SETS.contains(id);
     }
 
-    public static boolean contains(ResourceLocation id) {
+    public static boolean contains(Identifier id) {
         return SETS_BY_ID.containsKey(id);
     }
 
@@ -263,11 +263,11 @@ public class GlobalPowerSetManager extends IdentifiableMultiJsonDataLoader imple
         return SETS_BY_ID.size();
     }
 
-    private static GlobalPowerSet remove(ResourceLocation id) {
+    private static GlobalPowerSet remove(Identifier id) {
         return SETS_BY_ID.remove(id);
     }
 
-    public static void disable(ResourceLocation id) {
+    public static void disable(Identifier id) {
         remove(id);
         DISABLED_SETS.add(id);
     }

@@ -27,7 +27,7 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.model.PlayerEntityModel;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.core.ColorHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -43,7 +43,7 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
     }
 
     @WrapOperation(method = "renderPlayerArm", at = {@At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelPart;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/VertexConsumer;II)V", ordinal = 0), @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelPart;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/VertexConsumer;II)V", ordinal = 1)})
-    private void apoli$makeArmAndSleeveTransparent(ModelPart instance, PoseStack matrices, VertexConsumer vertices, int light, int overlay, Operation<Void> original, PoseStack mMatrices, MultiBufferSource mVertexConsumers, int mLight, AbstractClientPlayer mPlayer, @Local ResourceLocation skinTextureId) {
+    private void apoli$makeArmAndSleeveTransparent(ModelPart instance, PoseStack matrices, VertexConsumer vertices, int light, int overlay, Operation<Void> original, PoseStack mMatrices, MultiBufferSource mVertexConsumers, int mLight, AbstractClientPlayer mPlayer, @Local Identifier skinTextureId) {
 
         List<ModelColorPowerType> modelColorPowers = PowerHolderComponent.getPowerTypes(mPlayer, ModelColorPowerType.class);
         if (modelColorPowers.isEmpty()) {
