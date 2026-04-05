@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(CapeLayer.class)
 public class CapeFeatureRendererMixin {
 
-    @Inject(at = @At("HEAD"), method = "render", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "submit", cancellable = true)
     private void preventCapeRendering(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, AbstractClientPlayer abstractClientPlayerEntity, float f, float g, float h, float j, float k, float l, CallbackInfo ci) {
         if(PowerHolderComponent.getPowerTypes(abstractClientPlayerEntity, ElytraFlightPowerType.class).stream().anyMatch(ElytraFlightPowerType::shouldRenderElytra)) {
             ci.cancel();

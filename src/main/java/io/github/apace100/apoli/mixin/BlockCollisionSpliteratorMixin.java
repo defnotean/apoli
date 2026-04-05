@@ -31,7 +31,7 @@ public abstract class BlockCollisionSpliteratorMixin<T> extends AbstractIterator
         this.apoli$getOriginalShapes = getOriginalShapes;
     }
 
-    @WrapOperation(method = "computeNext", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getCollisionShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/CollisionContext;)Lnet/minecraft/world/phys/shapes/VoxelShape;"))
+    @WrapOperation(method = "computeNext", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getCollisionShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/shapes/CollisionContext;)Lnet/minecraft/world/phys/shapes/VoxelShape;"))
     private VoxelShape apoli$overrideCollisionShapeQuery(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context, Operation<VoxelShape> original) {
         return state instanceof BlockStateCollisionShapeAccess shapeAccess && this.apoli$shouldGetOriginalShapes()
             ? shapeAccess.apoli$getOriginalCollisionShape(world, pos, context)

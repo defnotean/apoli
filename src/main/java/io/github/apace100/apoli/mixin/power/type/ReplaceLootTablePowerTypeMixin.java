@@ -80,7 +80,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 	public static abstract class NestedReplacer {
 
 		@SuppressWarnings("unchecked")
-		@WrapOperation(method = "generateLoot", at = @At(value = "INVOKE", target = "Lcom/mojang/datafixers/util/Either;map(Ljava/util/function/Function;Ljava/util/function/Function;)Ljava/lang/Object;"))
+		@WrapOperation(method = "createItemStack", at = @At(value = "INVOKE", target = "Lcom/mojang/datafixers/util/Either;map(Ljava/util/function/Function;Ljava/util/function/Function;)Ljava/lang/Object;"))
 		private <T, L extends ResourceKey<LootTable>, R extends LootTable> T replaceGetter(Either<L, R> either, Function<? super L, ? extends T> leftFunction, Function<? super R, ? extends T> rightFunction, Operation<T> original, Consumer<ItemStack> stackConsumer, LootContext lootContext) {
 
 			ReloadableServerRegistries.Holder lookup = lootContext.getLevel().getServer().reloadableRegistries();
@@ -213,14 +213,14 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 
 		@Shadow
 		@Final
-		private LootParams parameters;
+		private LootParams params;
 
 		@Unique
 		private final Set<ResourceKey<LootTable>> apoli$replacedTables = new ObjectOpenHashSet<>();
 
 		@Override
 		public ContextKeySet apoli$getType() {
-			return ((LootContextTypeHolder) this.parameters).apoli$getType();
+			return ((LootContextTypeHolder) this.params).apoli$getType();
 		}
 
 		@Override

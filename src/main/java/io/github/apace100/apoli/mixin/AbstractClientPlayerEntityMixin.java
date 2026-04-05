@@ -27,7 +27,7 @@ public abstract class AbstractClientPlayerEntityMixin extends Player {
         return PowerHolderComponent.modify(this, ModifyFovPowerType.class, original);
     }
 
-    @WrapOperation(method = "getFieldOfViewModifier", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Mth;lerp(FFF)F"))
+    @WrapOperation(method = "getFieldOfViewModifier", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(FFF)F"))
     private float apoli$modifyFov(float delta, float start, float end, Operation<Float> original) {
 
         List<ModifyFovPowerType> mfps = PowerHolderComponent.getPowerTypes(this, ModifyFovPowerType.class);

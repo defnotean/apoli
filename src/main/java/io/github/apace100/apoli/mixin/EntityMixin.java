@@ -101,7 +101,7 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
 
     }
 
-    @Inject(method = "checkFallDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;onLandedUpon(Lnet/minecraft/world/Level;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;F)V"))
+    @Inject(method = "checkFallDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;onLandedUpon(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;F)V"))
     private void invokeActionOnLand(CallbackInfo ci) {
         PowerHolderComponent.withPowerTypes((Entity) (Object) this, ActionOnLandPowerType.class, p -> true, ActionOnLandPowerType::executeAction);
     }
@@ -141,7 +141,7 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
     }
 
     //  TODO: Use MixinExtras' @WrapMethod from its new beta releases -eggohito
-    @Inject(method = "moveTowardsClosestSpace", at = @At(value = "NEW", target = "()Lnet/minecraft/core/BlockPos$Mutable;"), cancellable = true)
+    @Inject(method = "moveTowardsClosestSpace", at = @At(value = "NEW", target = "()Lnet/minecraft/core/BlockPos$MutableBlockPos;"), cancellable = true)
     protected void apoli$ignorePhasingEntities(double x, double y, double z, CallbackInfo ci, @Local BlockPos pos) {
 
         if (PowerHolderComponent.hasPowerType((Entity) (Object) this, PhasingPowerType.class, p -> p.doesApply(pos))) {

@@ -98,14 +98,14 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayer imple
         preventSprintingRef.set(PowerHolderComponent.hasPowerType(this, PreventSprintingPowerType.class));
     }
 
-    @ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/LocalPlayer;canStartSprinting()Z"))
+    @ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;canStartSprinting()Z"))
     private boolean apoli$allowActivePowerSprinting(boolean original, @Share("sprintingPowers") LocalRef<List<SprintingPowerType>> sprintingPowersRef, @Share("preventSprinting") LocalBooleanRef preventSprintingRef) {
         return original || (((LocalPlayer) (Object) this).input.hasForwardImpulse() && sprintingPowersRef.get()
             .stream()
             .anyMatch(SprintingPowerType::shouldRequireInput));
     }
 
-    @Inject(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/LocalPlayer;isSprinting()Z"))
+    @Inject(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSprinting()Z"))
     private void apoli$allowPassivePowerSprinting(CallbackInfo ci, @Share("sprintingPowers") LocalRef<List<SprintingPowerType>> sprintingPowersRef, @Share("preventSprinting") LocalBooleanRef preventSprintingRef) {
 
         if (this.isSprinting() || preventSprintingRef.get()) {
@@ -120,13 +120,13 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayer imple
 
     // TODO: MC 26.1 removed LocalPlayer.canSprint(). The sprint cancel logic now uses
     // shouldStopSwimSprinting() and shouldStopRunSprinting(). This needs reimplementing.
-    // @ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/LocalPlayer;canSprint()Z"))
+    // @ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;canSprint()Z"))
     // private boolean apoli$accountForSprintingPowersWhenCancelling(boolean original, @Share("sprintingPowers") LocalRef<List<SprintingPowerType>> sprintingPowersRef, @Share("preventSprinting") LocalBooleanRef preventSprintingRef) {
     //     return (original || !sprintingPowersRef.get().isEmpty())
     //         && !preventSprintingRef.get();
     // }
 
-    @ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/LocalPlayer;isShiftKeyDown()Z"))
+    @ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isShiftKeyDown()Z"))
     private boolean apoli$forceSneakingPose(boolean original) {
         return original || PosePowerType.hasEntityPose(this, Pose.CROUCHING);
     }

@@ -31,7 +31,7 @@ import java.util.List;
 @Mixin(MultiPlayerGameMode.class)
 public abstract class ClientPlayerInteractionManagerMixin {
 
-    @WrapOperation(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;onUse(Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"))
+    @WrapOperation(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;useWithoutItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"))
     private InteractionResult apoli$beforeUseBlock(BlockState state, Level world, Player player, BlockHitResult hitResult, Operation<InteractionResult> original, LocalPlayer mPlayer, InteractionHand mHand, @Share("zeroPriority$useBlock") LocalRef<InteractionResult> zeroPriority$useBlockRef) {
 
         ItemStack stackInHand = player.getItemInHand(mHand);
@@ -143,7 +143,7 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
     }
 
-    @WrapOperation(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;onUseWithItem(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"))
+    @WrapOperation(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;useItemOn(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"))
     private InteractionResult apoli$beforeItemUseOnBlock(BlockState state, ItemStack stack, Level world, Player player, InteractionHand hand, BlockHitResult hitResult, Operation<InteractionResult> original, @Share("zeroPriority$itemUseOnBlock") LocalRef<InteractionResult> zeroPriority$itemUseOnBlockRef) {
 
         ItemStack stackInHand = player.getItemInHand(hand);

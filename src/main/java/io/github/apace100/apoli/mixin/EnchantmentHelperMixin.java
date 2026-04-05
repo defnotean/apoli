@@ -16,27 +16,27 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(EnchantmentHelper.class)
 public class EnchantmentHelperMixin {
 
-    @WrapOperation(method = "getLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/ItemEnchantments;getLevel(Lnet/minecraft/core/Holder;)I"))
+    @WrapOperation(method = "getItemEnchantmentLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/ItemEnchantments;getLevel(Lnet/minecraft/core/Holder;)I"))
     private static int apoli$modifyEnchantmentsOnLevelQuery(ItemEnchantments enchantmentsComponent, Holder<Enchantment> enchantment, Operation<Integer> original, Holder<Enchantment> mEnchantment, ItemStack stack) {
         return original.call(ModifyEnchantmentLevelPowerType.getAndUpdateModifiedEnchantments(stack, enchantmentsComponent), enchantment);
     }
 
-    @ModifyVariable(method = "forEachEnchantment(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/enchantment/EnchantmentHelper$Consumer;)V", at = @At("STORE"))
+    @ModifyVariable(method = "runIterationOnItem(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/enchantment/EnchantmentHelper$EnchantmentVisitor;)V", at = @At("STORE"))
     private static ItemEnchantments apoli$modifyEnchantmentsOnForEach(ItemEnchantments original, ItemStack stack) {
         return ModifyEnchantmentLevelPowerType.getAndUpdateModifiedEnchantments(stack, original);
     }
 
-    @ModifyExpressionValue(method = "forEachEnchantment(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/enchantment/EnchantmentHelper$ContextAwareConsumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z"))
+    @ModifyExpressionValue(method = "runIterationOnItem(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/enchantment/EnchantmentHelper$EnchantmentInSlotVisitor;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z"))
     private static boolean apoli$allowWorkableEmptiesInForEach(boolean original, ItemStack stack) {
         return original && !ModifyEnchantmentLevelPowerType.isWorkableEmptyStack(stack);
     }
 
-    @ModifyVariable(method = "forEachEnchantment(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/enchantment/EnchantmentHelper$ContextAwareConsumer;)V", at = @At("STORE"))
+    @ModifyVariable(method = "runIterationOnItem(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/enchantment/EnchantmentHelper$EnchantmentInSlotVisitor;)V", at = @At("STORE"))
     private static ItemEnchantments apoli$modifyEnchantmentsOnForEachWithContext(ItemEnchantments original, ItemStack stack) {
         return ModifyEnchantmentLevelPowerType.getAndUpdateModifiedEnchantments(stack, original);
     }
 
-    @ModifyVariable(method = "hasAnyEnchantmentsIn", at = @At("STORE"))
+    @ModifyVariable(method = "hasAnyEnchantments", at = @At("STORE"))
     private static ItemEnchantments apoli$modifyEnchantmentsOnInTagQuery(ItemEnchantments original, ItemStack stack) {
         return ModifyEnchantmentLevelPowerType.getAndUpdateModifiedEnchantments(stack, original);
     }

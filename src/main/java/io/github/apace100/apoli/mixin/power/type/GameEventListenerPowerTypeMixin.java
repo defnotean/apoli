@@ -25,7 +25,7 @@ public abstract class GameEventListenerPowerTypeMixin {
 	@Mixin(VibrationSystem.User.class)
 	public interface CustomCallbackHandler {
 
-		@WrapOperation(method = "canAccept", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Holder;is(Lnet/minecraft/tags/TagKey;)Z", ordinal = 0))
+		@WrapOperation(method = "canReceiveVibration", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Holder;is(Lnet/minecraft/tags/TagKey;)Z", ordinal = 0))
 		private boolean apoli$acceptsGameEvent(Holder<GameEvent> gameEvent, TagKey<GameEvent> gameEventTag, Operation<Boolean> original) {
 
 			if ((VibrationSystem.User) this instanceof GameEventListenerPowerType.Callback powerCallback) {
@@ -40,23 +40,21 @@ public abstract class GameEventListenerPowerTypeMixin {
 
 	}
 
-	@Mixin(VibrationSystem.Ticker.class)
-	public interface ParticleAppearanceHandler {
-
-		@WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;spawnParticles(Lnet/minecraft/core/particles/ParticleOptions;DDDIDDDD)I"))
-		private static boolean apoli$onlyShowParticleWhenSpecified(ServerLevel world, ParticleOptions particle, double x, double y, double z, int count, double deltaX, double deltaY, double deltaZ, double speed, VibrationSystem.Data listenerData) {
-
-			if (listenerData instanceof GameEventListenerPowerType.ListenerData powerListenerData) {
-				return powerListenerData.shouldShowParticle();
-			}
-
-			else {
-				return true;
-			}
-
-		}
-
-	}
+	// TODO: MC 26.1 - VibrationSystem.Ticker.tick no longer calls ServerLevel.spawnParticles directly.
+	// The particle spawning was moved to tryReloadVibrationParticle, and spawnParticles is no longer called there.
+	// This injection needs to be reimplemented targeting the new particle rendering pipeline.
+	// @Mixin(VibrationSystem.Ticker.class)
+	// public interface ParticleAppearanceHandler {
+	// 	@WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;spawnParticles(Lnet/minecraft/core/particles/ParticleOptions;DDDIDDDD)I"))
+	// 	private static boolean apoli$onlyShowParticleWhenSpecified(ServerLevel world, ParticleOptions particle, double x, double y, double z, int count, double deltaX, double deltaY, double deltaZ, double speed, VibrationSystem.Data listenerData) {
+	// 		if (listenerData instanceof GameEventListenerPowerType.ListenerData powerListenerData) {
+	// 			return powerListenerData.shouldShowParticle();
+	// 		}
+	// 		else {
+	// 			return true;
+	// 		}
+	// 	}
+	// }
 
 	@Mixin(Entity.class)
 	public static abstract class EventHandlerUpdater {

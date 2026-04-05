@@ -87,20 +87,19 @@ public abstract class ItemStackMixinClient implements DataComponentHolder {
     // @Inject(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;appendTooltip(...)V", shift = At.Shift.AFTER))
     // private void apoli$appendUnusableTooltip(...) { ... }
 
-    @WrapOperation(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;appendTooltip(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/item/Item$TooltipContext;Ljava/util/function/Consumer;Lnet/minecraft/world/item/tooltip/TooltipFlag;)V"))
-    private void apoli$appendPowerTooltips(ItemStack stack, DataComponentType<?> componentType, Item.TooltipContext context, Consumer<Component> tooltipConsumer, TooltipFlag type, Operation<Void> original, Item.TooltipContext mContext, @Nullable Player player, @Local List<Component> tooltip) {
-
-        original.call(stack, componentType, context, tooltipConsumer, type);
-
-        if (componentType == DataComponents.LORE) {
-            PowerHolderComponent.getPowerTypes(player, TooltipPowerType.class)
-                .stream()
-                .filter(p -> p.doesApply((ItemStack) (Object) this))
-                .sorted(Comparator.comparing(TooltipPowerType::getOrder))
-                .forEach(p -> p.processTooltips(tooltipConsumer));
-        }
-
-    }
+    // TODO: MC 26.1 removed ItemStack.appendTooltip(). The tooltip system now uses
+    // addDetailsToTooltip() with a different signature. Power tooltips need reimplementing.
+    // @WrapOperation(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;appendTooltip(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/item/Item$TooltipContext;Ljava/util/function/Consumer;Lnet/minecraft/world/item/TooltipFlag;)V"))
+    // private void apoli$appendPowerTooltips(ItemStack stack, DataComponentType<?> componentType, Item.TooltipContext context, Consumer<Component> tooltipConsumer, TooltipFlag type, Operation<Void> original, Item.TooltipContext mContext, @Nullable Player player, @Local List<Component> tooltip) {
+    //     original.call(stack, componentType, context, tooltipConsumer, type);
+    //     if (componentType == DataComponents.LORE) {
+    //         PowerHolderComponent.getPowerTypes(player, TooltipPowerType.class)
+    //             .stream()
+    //             .filter(p -> p.doesApply((ItemStack) (Object) this))
+    //             .sorted(Comparator.comparing(TooltipPowerType::getOrder))
+    //             .forEach(p -> p.processTooltips(tooltipConsumer));
+    //     }
+    // }
 
     // TODO: MC 26.1 changed addAttributeTooltips signature and removed applyAttributeModifier.
     // The attribute tooltip system was restructured. Needs reimplementing.

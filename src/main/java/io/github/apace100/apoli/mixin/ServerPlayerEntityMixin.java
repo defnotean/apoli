@@ -131,7 +131,7 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
         prevSelectedStackLocRef.set(this.getInventory().getSelectedItem().copy());
     }
 
-    @ModifyArg(method = "drop", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/ItemEntity;"))
+    @ModifyArg(method = "drop", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"))
     private ItemStack checkItemUsageStopping(ItemStack original, @Share("prevSelectedStack") LocalRef<ItemStack> prevSelectedStackLocRef) {
 
         ItemStack prevSelectedStack = prevSelectedStackLocRef.get();

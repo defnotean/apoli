@@ -46,7 +46,7 @@ public abstract class ModifyHarvestPowerTypeMixin {
 	public abstract static class HarvestabilityProxy {
 
 		@Shadow
-		protected ServerLevel world;
+		protected ServerLevel level;
 
 		@Shadow
 		@Final
@@ -54,10 +54,10 @@ public abstract class ModifyHarvestPowerTypeMixin {
 
 		@Inject(method = "destroyBlock", at = @At("HEAD"))
 		private void apoli$cacheBreakingBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir, @Share(value = "breakingBlock", namespace = Apoli.MODID) LocalRef<SavedBlockPosition> breakingBlockRef) {
-			breakingBlockRef.set(new SavedBlockPosition(this.world, pos));
+			breakingBlockRef.set(new SavedBlockPosition(this.level, pos));
 		}
 
-		@WrapOperation(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;canHarvest(Lnet/minecraft/world/level/block/state/BlockState;)Z"))
+		@WrapOperation(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;canHarvest(Lnet/minecraft/world/level/block/state/BlockState;)Z"))
 		private boolean apoli$modifyHarvest(ServerPlayer player, BlockState state, Operation<Boolean> original, @Share(value = "breakingBlock", namespace = Apoli.MODID) LocalRef<SavedBlockPosition> breakingBlockRef, @Share(value = "modifiedHarvest", namespace = Apoli.MODID) LocalBooleanRef modifiedHarvestRef) {
 
 			boolean result = PowerHolderComponent.getPowerTypes(this.player, ModifyHarvestPowerType.class)

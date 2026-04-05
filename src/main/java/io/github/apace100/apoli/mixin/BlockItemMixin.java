@@ -70,7 +70,7 @@ public class BlockItemMixin {
 
     }
 
-    @Inject(method = "place(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/Level;getBlockState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;"))
+    @Inject(method = "place(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getBlockState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;"))
     private void apoli$actionOnBlockPlace(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir, @Local Player user, @Local BlockPos toPos, @Local ItemStack stack, @Share("aipci") LocalRef<Prioritized.CallInstance<ActiveInteractionPowerType>> aipciRef) {
 
         if (user == null) {
@@ -114,7 +114,7 @@ public class BlockItemMixin {
 
     }
 
-    @WrapOperation(method = "useOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;use(Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
+    @WrapOperation(method = "useOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;use(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
     private InteractionResult apoli$preventItemUseIfFoodBlockItem(BlockItem instance, Level world, Player user, InteractionHand hand, Operation<InteractionResult> original) {
         ItemStack handStack = user.getItemInHand(hand);
         return PowerHolderComponent.hasPowerType(user, PreventItemUsePowerType.class, p -> p.doesPrevent(handStack))

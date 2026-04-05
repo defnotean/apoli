@@ -46,7 +46,7 @@ import java.util.WeakHashMap;
 public class ServerPlayerInteractionManagerMixin {
 
     @Shadow
-    protected ServerLevel world;
+    protected ServerLevel level;
 
     @Shadow
     @Final
@@ -72,7 +72,7 @@ public class ServerPlayerInteractionManagerMixin {
         PowerHolderComponent.withPowerTypes(this.player, ActionOnBlockBreakPowerType.class, powerType -> powerType.doesApply(breakingBlockRef.get(), harvestedSuccessfully), powerType -> powerType.executeActions(pos, apoli$blockBreakDirection));
     }
 
-    @WrapOperation(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;onUse(Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"))
+    @WrapOperation(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;useWithoutItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"))
     private InteractionResult apoli$beforeUseBlock(BlockState state, Level world, Player player, BlockHitResult hitResult, Operation<InteractionResult> original, ServerPlayer mPlayer, Level mWorld, ItemStack mStack, InteractionHand mHand, @Share("zeroPriority$onBlock") LocalRef<InteractionResult> zeroPriority$onBlockRef, @Share("zeroPriority$itemOnBlock") LocalRef<InteractionResult> zeroPriority$itemOnBlockRef) {
 
         ItemStack stackInHand = player.getItemInHand(mHand);
@@ -127,7 +127,7 @@ public class ServerPlayerInteractionManagerMixin {
 
     }
 
-    @ModifyReturnValue(method = "useItemOn", at = @At(value = "RETURN", ordinal = 0), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;getMainHandItem()Lnet/minecraft/world/item/ItemStack;")))
+    @ModifyReturnValue(method = "useItemOn", at = @At(value = "RETURN", ordinal = 0), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getMainHandItem()Lnet/minecraft/world/item/ItemStack;")))
     private InteractionResult apoli$afterUseBlock(InteractionResult original, ServerPlayer player, Level world, ItemStack stack, InteractionHand hand, BlockHitResult hitResult, @Share("zeroPriority$onBlock") LocalRef<InteractionResult> zeroPriority$onBlockRef) {
 
         InteractionResult zeroPriority$onBlock = zeroPriority$onBlockRef.get();
@@ -182,7 +182,7 @@ public class ServerPlayerInteractionManagerMixin {
 
     }
 
-    @WrapOperation(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;onUseWithItem(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"))
+    @WrapOperation(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;useItemOn(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"))
     private InteractionResult apoli$beforeItemUseOnBlock(BlockState state, ItemStack stack, Level world, Player player, InteractionHand hand, BlockHitResult hitResult, Operation<InteractionResult> original, @Share("zeroPriority$itemOnBlock") LocalRef<InteractionResult> zeroPriority$itemOnBlockRef) {
 
         BlockUsagePhase usePhase = BlockUsagePhase.ITEM;

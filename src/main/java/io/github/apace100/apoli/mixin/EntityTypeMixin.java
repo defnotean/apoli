@@ -33,16 +33,19 @@ public abstract class EntityTypeMixin implements EntityLinkedType {
         this.apoli$currentEntity.set(new WeakReference<>(entity));
     }
 
-    @ModifyReturnValue(method = "isIn(Lnet/minecraft/tags/TagKey;)Z", at = @At("RETURN"))
-    private boolean apoli$inTagProxy(boolean original, TagKey<EntityType<?>> tag) {
-        return original
-            || ModifyTypeTagPowerType.doesApply(this.apoli$getEntity(), tag);
-    }
+    // TODO: MC 26.1 - EntityType.isIn(TagKey) and isIn(HolderSet) were removed.
+    // Tag checking is now done through the Holder API (builtInRegistryHolder().is(TagKey)).
+    // These injections need to be reimplemented targeting the Holder.is() pathway.
+    // @ModifyReturnValue(method = "isIn(Lnet/minecraft/tags/TagKey;)Z", at = @At("RETURN"))
+    // private boolean apoli$inTagProxy(boolean original, TagKey<EntityType<?>> tag) {
+    //     return original
+    //         || ModifyTypeTagPowerType.doesApply(this.apoli$getEntity(), tag);
+    // }
 
-    @ModifyReturnValue(method = "isIn(Lnet/minecraft/core/HolderSet;)Z", at = @At("RETURN"))
-    private boolean apoli$inTagEntryListProxy(boolean original, HolderSet<EntityType<?>> entryList) {
-        return original
-            || ModifyTypeTagPowerType.doesApply(this.apoli$getEntity(), entryList);
-    }
+    // @ModifyReturnValue(method = "isIn(Lnet/minecraft/core/HolderSet;)Z", at = @At("RETURN"))
+    // private boolean apoli$inTagEntryListProxy(boolean original, HolderSet<EntityType<?>> entryList) {
+    //     return original
+    //         || ModifyTypeTagPowerType.doesApply(this.apoli$getEntity(), entryList);
+    // }
 
 }

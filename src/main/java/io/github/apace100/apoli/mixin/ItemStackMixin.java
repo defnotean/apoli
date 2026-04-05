@@ -95,7 +95,7 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
 
     }
 
-    @WrapOperation(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;use(Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
+    @WrapOperation(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;use(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
     private InteractionResult apoli$onItemUse(Item item, Level world, Player user, InteractionHand hand, Operation<InteractionResult> original) {
 
         //  region  Prevent item use
@@ -147,7 +147,7 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
 
     }
 
-    @WrapOperation(method = "onUseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;usageTick(Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;I)V"))
+    @WrapOperation(method = "onUseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;onUseTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;I)V"))
     private void apoli$actionOnItemDuringUse(Item item, Level world, LivingEntity user, ItemStack stack, int remainingUseTicks, Operation<Void> original, @Share("usingStackReference") LocalRef<SlotAccess> sharedUsingStackReference) {
 
         ActionOnItemUsePowerType.TriggerType triggerType = ActionOnItemUsePowerType.TriggerType.DURING;
@@ -167,7 +167,7 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
 
     }
 
-    @WrapOperation(method = "releaseUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;onStoppedUsing(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/LivingEntity;I)V"))
+    @WrapOperation(method = "releaseUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;releaseUsing(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;I)V"))
     private void apoli$actionOnItemStoppedUsing(Item item, ItemStack stack, Level world, LivingEntity user, int remainingUseTicks, Operation<Void> original, @Share("stoppedUsingStackReference") LocalRef<SlotAccess> sharedStoppedUsingStackReference) {
 
         ActionOnItemUsePowerType.TriggerType triggerType = ActionOnItemUsePowerType.TriggerType.STOP;
@@ -187,7 +187,7 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
 
     }
 
-    @WrapOperation(method = "finishUsingItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;finishUsing(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/LivingEntity;)Lnet/minecraft/world/item/ItemStack;"))
+    @WrapOperation(method = "finishUsingItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;finishUsingItem(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;)Lnet/minecraft/world/item/ItemStack;"))
     private ItemStack apoli$onFinishItemUse(Item item, ItemStack stack, Level world, LivingEntity user, Operation<ItemStack> original) {
 
         //  region  Action on item before finish using
@@ -241,7 +241,7 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
             .orElse(original);
     }
 
-    @WrapOperation(method = "isUsedOnRelease", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;isUsedOnRelease(Lnet/minecraft/world/item/ItemStack;)Z"))
+    @WrapOperation(method = "useOnRelease", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;useOnRelease(Lnet/minecraft/world/item/ItemStack;)Z"))
     private boolean apoli$useOnReleaseIfCustomFood(Item item, ItemStack stack, Operation<Boolean> original) {
         return EdibleItemPowerType.get(stack).isEmpty()
             ? original.call(item, stack)

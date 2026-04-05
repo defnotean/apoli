@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(ToastManager.ToastInstance.class)
 public abstract class ToastManagerEntryMixin {
 
-    @WrapOperation(method = "draw", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix3x2fStack;translate(FF)Lorg/joml/Matrix3x2f;"))
+    @WrapOperation(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix3x2fStack;translate(FF)Lorg/joml/Matrix3x2f;"))
     private org.joml.Matrix3x2f apoli$capturePosition(Matrix3x2fStack stack, float x, float y, Operation<org.joml.Matrix3x2f> original, @Share("toastX") LocalIntRef sharedToastX, @Share("toastY") LocalIntRef sharedToastY) {
 
         sharedToastX.set((int) x);
@@ -26,7 +26,7 @@ public abstract class ToastManagerEntryMixin {
 
     }
 
-    @WrapOperation(method = "draw", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/Toast;extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/gui/Font;J)V"))
+    @WrapOperation(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/Toast;extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/gui/Font;J)V"))
     private void apoli$drawAsPositionAwareToast(Toast toast, GuiGraphicsExtractor context, Font font, long startTime, Operation<Void> original, @Share("toastX") LocalIntRef sharedToastX, @Share("toastY") LocalIntRef sharedToastY) {
         if (toast instanceof PositionAwareToast positionAwareToast) {
             positionAwareToast.extractRenderStatePositionAware(sharedToastX.get(), sharedToastY.get(), context, font, startTime);

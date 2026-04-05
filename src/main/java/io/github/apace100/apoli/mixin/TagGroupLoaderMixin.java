@@ -17,11 +17,11 @@ public abstract class TagGroupLoaderMixin<T> {
 
     @Shadow
     @Final
-    private String dataType;
+    private String directory;
 
     @ModifyReturnValue(method = "build", at = @At("RETURN"))
     private Map<Identifier, List<T>> apoli$rebuildTagsInTags(Map<Identifier, List<T>> original) {
-        ModifyTypeTagPowerType.setTagCache(dataType, original);
+        ModifyTypeTagPowerType.setTagCache(directory, original);
         return original;
     }
 

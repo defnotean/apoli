@@ -17,19 +17,22 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(WingsLayer.class)
 public abstract class ElytraFlightPowerTypeMixin {
 
-	@ModifyExpressionValue(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;is(Lnet/minecraft/world/item/Item;)Z"))
-	private boolean apoli$wearingElytraProxy(boolean original, PoseStack matrices, MultiBufferSource vertexConsumerProvider, int i, LivingEntity entity) {
-		return original
-			|| PowerHolderComponent.hasPowerType(entity, ElytraFlightPowerType.class, ElytraFlightPowerType::shouldRenderElytra);
-	}
+	// TODO: MC 26.1 - WingsLayer.render() is now submit() and takes HumanoidRenderState instead of LivingEntity.
+	// The rendering pipeline changed from entity-based to render-state-based.
+	// These injections need to be reimplemented using the new render state API.
+	// @ModifyExpressionValue(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/HumanoidRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;is(Lnet/minecraft/world/item/Item;)Z"))
+	// private boolean apoli$wearingElytraProxy(boolean original, PoseStack matrices, MultiBufferSource vertexConsumerProvider, int i, LivingEntity entity) {
+	// 	return original
+	// 		|| PowerHolderComponent.hasPowerType(entity, ElytraFlightPowerType.class, ElytraFlightPowerType::shouldRenderElytra);
+	// }
 
-	@WrapOperation(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;getArmorCutoutNoCull(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/RenderType;"))
-	private RenderType apoli$overrideElytraTexture(Identifier texture, Operation<RenderType> original, PoseStack matrices, MultiBufferSource vertexConsumerProvider, int i, LivingEntity entity) {
-		return original.call(PowerHolderComponent.getPowerTypes(entity, ElytraFlightPowerType.class)
-			.stream()
-			.findFirst()
-			.flatMap(ElytraFlightPowerType::getTextureLocation)
-			.orElse(texture));
-	}
+	// @WrapOperation(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/HumanoidRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/rendertype/RenderType;getArmorCutoutNoCull(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;"))
+	// private RenderType apoli$overrideElytraTexture(Identifier texture, Operation<RenderType> original, PoseStack matrices, MultiBufferSource vertexConsumerProvider, int i, LivingEntity entity) {
+	// 	return original.call(PowerHolderComponent.getPowerTypes(entity, ElytraFlightPowerType.class)
+	// 		.stream()
+	// 		.findFirst()
+	// 		.flatMap(ElytraFlightPowerType::getTextureLocation)
+	// 		.orElse(texture));
+	// }
 
 }

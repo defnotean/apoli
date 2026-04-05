@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(PhantomSpawner.class)
 public class PhantomSpawnerMixin {
 
-    @ModifyExpressionValue(method = "spawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/stats/ServerStatsCounter;getStat(Lnet/minecraft/stats/Stat;)I"))
+    @ModifyExpressionValue(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/stats/ServerStatsCounter;getStat(Lnet/minecraft/stats/Stat;)I"))
     private int apoli$modifyEffectiveTimeSinceRestValue(int original, ServerLevel world, boolean spawnMonsters, boolean spawnAnimals, @Local ServerPlayer player) {
         return (int) PowerHolderComponent.modify(player, ModifyInsomniaTicksPowerType.class, original);
     }

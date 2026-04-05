@@ -73,7 +73,6 @@
 		"internal.DefaultAttributeRegistryAccessor",
 		"power.type.GameEventListenerPowerTypeMixin$CustomCallbackHandler",
 		"power.type.GameEventListenerPowerTypeMixin$EventHandlerUpdater",
-		"power.type.GameEventListenerPowerTypeMixin$ParticleAppearanceHandler",
 		"power.type.ModifyHarvestPowerTypeMixin$BlockBreakingDeltaProxy",
 		"power.type.ModifyHarvestPowerTypeMixin$HarvestabilityProxy",
 		"power.type.ReplaceLootTablePowerTypeMixin$LootContextCache",
