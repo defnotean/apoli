@@ -70,7 +70,6 @@
 		"StatusEffectMixin",
 		"TagGroupLoaderMixin",
 		"TextCodecsMixin",
-		"TextCodecsMixin$FuzzyCodecMixin",
 		"TranslatableTextContentAccessor",
 		"WeightedListEntryAccessor",
 		"internal.DefaultAttributeContainerAccessor",
