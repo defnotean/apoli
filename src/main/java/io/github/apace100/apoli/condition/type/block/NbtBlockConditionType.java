@@ -18,7 +18,7 @@ public class NbtBlockConditionType extends BlockConditionType {
 
     public static final TypedDataObjectFactory<NbtBlockConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("nbt", SerializableDataTypes.NBT_COMPOUND),
+            .add("nbt", SerializableDataTypes.NBT),
         data -> new NbtBlockConditionType(
             data.get("nbt")
         ),

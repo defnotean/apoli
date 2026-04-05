@@ -463,7 +463,7 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
             ItemStack newStack = newStackRef.get();
             ItemStack resultStack = resultStackRef.get();
 
-            if (resultStackRef == SlotAccess.EMPTY) {
+            if (resultStackRef == null) {
                 result = newStack;
                 break modifyCustomFood;
             }
@@ -473,12 +473,12 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
                 break modifyCustomFood;
             }
 
-            else if (ItemStack.areEqual(resultStack, newStack)) {
-                newStack.increment(1);
+            else if (ItemStack.matches(resultStack, newStack)) {
+                newStack.grow(1);
             }
 
             else if ((LivingEntity) (Object) this instanceof Player player && !player.isCreative()) {
-                player.getInventory().offerOrDrop(resultStack);
+                player.getInventory().addItem(resultStack);
             }
 
             else {

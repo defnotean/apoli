@@ -44,7 +44,7 @@ public class BrightnessEntityConditionType extends EntityConditionType {
         Entity entity = context.entity();
         Level world = entity.level();
 
-        return comparison.compare(world.getBrightness(BlockPos.ofFloored(MiscUtil.getPoseDependentEyePos(entity))), compareTo)
+        return comparison.compare(world.getBrightness(BlockPos.containing(MiscUtil.getPoseDependentEyePos(entity))), compareTo)
             || comparison.compare(world.getBrightness(entity.blockPosition()), compareTo);
 
     }

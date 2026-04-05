@@ -59,15 +59,16 @@ public class AddVelocityBiEntityActionType extends BiEntityActionType {
         Entity target = context.target();
 
         Vector3f velocityCopy = new Vector3f(velocity);
-        TriConsumer<Float, Float, Float> method = set
-            ? target::setDeltaMovement
-            : target::push;
 
         Vec3 referenceVec = reference.apply(actor, target);
         Space.transformVectorToBase(referenceVec, velocityCopy, actor.getYRot(), true);  //  Vector normalized by method
 
-        method.accept(velocityCopy.x(), velocityCopy.y(), velocityCopy.z());
-        target.hasImpulse = true;
+        if (set) {
+            target.setDeltaMovement(velocityCopy.x(), velocityCopy.y(), velocityCopy.z());
+        } else {
+            target.push(velocityCopy.x(), velocityCopy.y(), velocityCopy.z());
+        }
+        target.hurtMarked = true;
 
     }
 

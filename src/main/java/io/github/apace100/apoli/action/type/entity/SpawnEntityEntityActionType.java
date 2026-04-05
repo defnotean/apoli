@@ -25,7 +25,7 @@ public class SpawnEntityEntityActionType extends EntityActionType {
             .add("entity_type", SerializableDataTypes.ENTITY_TYPE)
             .add("entity_action", EntityAction.DATA_TYPE.optional(), Optional.empty())
             .add("bientity_action", BiEntityAction.DATA_TYPE.optional(), Optional.empty())
-            .add("tag", SerializableDataTypes.NBT_COMPOUND, new CompoundTag()),
+            .add("tag", SerializableDataTypes.NBT, new CompoundTag()),
         data -> new SpawnEntityEntityActionType(
             data.get("entity_type"),
             data.get("entity_action"),
@@ -76,7 +76,7 @@ public class SpawnEntityEntityActionType extends EntityActionType {
         }
 
         Entity actualEntityToSpawn = entityToSpawn.get();
-        serverWorld.spawnNewEntityAndPassengers(actualEntityToSpawn);
+        serverWorld.tryAddFreshEntityWithPassengers(actualEntityToSpawn);
 
         entityAction.ifPresent(action -> action.execute(actualEntityToSpawn));
         biEntityAction.ifPresent(action -> action.execute(entity, actualEntityToSpawn));

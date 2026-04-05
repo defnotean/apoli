@@ -25,7 +25,7 @@ public class SlotRangesUtil {
 
 			for (SlotRange slotRange : slotRanges) {
 
-				IntList slotIds = slotRange.getSlotIds();
+				IntList slotIds = slotRange.slots();
 
 				if (slotIds.size() == 1 && Objects.equals(slotIds.getFirst(), id)) {
 					return DataResult.success(slotRange);
@@ -51,7 +51,7 @@ public class SlotRangesUtil {
 
 			for (SlotRange slotRange : slotRanges) {
 
-				IntList slotIds = slotRange.getSlotIds();
+				IntList slotIds = slotRange.slots();
 
 				for (int slotId : slotIds) {
 

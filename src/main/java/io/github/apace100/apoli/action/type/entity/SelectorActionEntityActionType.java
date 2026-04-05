@@ -64,12 +64,12 @@ public class SelectorActionEntityActionType extends EntityActionType {
             return;
         }
 
-        CommandSourceStack commandSource = entity.getCommandSource()
-            .withOutput(CommandSource.DUMMY)
+        CommandSourceStack commandSource = entity.createCommandSourceStack()
+            .withSource(CommandSource.NULL)
             .withLevel(Apoli.config.executeCommand.permissionLevel);
 
         if (Apoli.config.executeCommand.showOutput) {
-            commandSource = commandSource.withOutput(entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
+            commandSource = commandSource.withSource(entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
                 ? serverPlayer
                 : server);
         }

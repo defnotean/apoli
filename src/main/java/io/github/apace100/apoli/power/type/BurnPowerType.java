@@ -56,7 +56,7 @@ public class BurnPowerType extends PowerType {
             }
 
             else if (getHolder().tickCount % interval == startTicks) {
-                getHolder().setOnFireFor(burnDuration);
+                getHolder().igniteForSeconds(burnDuration);
                 this.wasActive = true;
             }
 

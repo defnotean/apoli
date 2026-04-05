@@ -100,7 +100,7 @@ public class RelativeRotationBiEntityConditionType extends BiEntityConditionType
     private static Vec3 getBodyRotationVector(Entity entity) {
 
         if (!(entity instanceof LivingEntity livingEntity)) {
-            return entity.getRotationVec(1.0f);
+            return entity.getViewVector(1.0f);
         }
 
         float f = livingEntity.getXRot() * ((float) Math.PI / 180);
@@ -117,7 +117,7 @@ public class RelativeRotationBiEntityConditionType extends BiEntityConditionType
 
     public enum RotationType {
 
-        HEAD(e -> e.getRotationVec(1.0F)),
+        HEAD(e -> e.getViewVector(1.0F)),
         BODY(RelativeRotationBiEntityConditionType::getBodyRotationVector);
 
         private final Function<Entity, Vec3> function;

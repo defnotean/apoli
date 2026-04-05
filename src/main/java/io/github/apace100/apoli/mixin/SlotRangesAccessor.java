@@ -10,7 +10,7 @@ import java.util.List;
 @Mixin(SlotRanges.class)
 public interface SlotRangesAccessor {
 
-    @Accessor("SLOT_RANGES")
+    @Accessor("SLOTS")
     static List<SlotRange> getSlotRanges() {
         throw new AssertionError();
     }

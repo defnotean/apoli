@@ -30,10 +30,10 @@ public class ScrollingTextWidget extends AbstractStringWidget {
     @Override
     public void renderWidget(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 
-        int left = this.getX() + 2;
-        int right = this.getX() + this.getWidth() - 2;
-        int top = this.getY();
-        int bottom = this.getY() + this.getHeight();
+        int left = this.x() + 2;
+        int right = this.x() + this.getWidth() - 2;
+        int top = this.y();
+        int bottom = this.y() + this.getHeight();
 
         drawScrollingText(context, getFont(), this.getMessage(), textAlignment, left, top, right, bottom, getTextColor(), hasShadow);
 

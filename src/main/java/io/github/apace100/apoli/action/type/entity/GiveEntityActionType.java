@@ -25,7 +25,7 @@ public class GiveEntityActionType extends EntityActionType {
     public static final TypedDataObjectFactory<GiveEntityActionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
             .add("item_action", ItemAction.DATA_TYPE.optional(), Optional.empty())
-            .add("preferred_slot", SerializableDataTypes.ATTRIBUTE_MODIFIER_SLOT.optional(), Optional.empty())
+            .add("preferred_slot", SerializableDataTypes.EQUIPMENT_SLOT_GROUP.optional(), Optional.empty())
             .add("stack", SerializableDataTypes.ITEM_STACK),
         data -> new GiveEntityActionType(
             data.get("item_action"),
@@ -68,7 +68,7 @@ public class GiveEntityActionType extends EntityActionType {
             EquipmentSlotGroup actualPreferredSlot = preferredSlot.get();
             for (EquipmentSlot slot : EquipmentSlot.values()) {
 
-                if (!actualPreferredSlot.matches(slot)) {
+                if (!actualPreferredSlot.test(slot)) {
                     continue;
                 }
 
@@ -78,12 +78,12 @@ public class GiveEntityActionType extends EntityActionType {
                     return;
                 }
 
-                else if (ItemStack.areEqual(stackInSlot, stackToGive) && stackInSlot.getCount() < stackInSlot.getMaxCount()) {
+                else if (ItemStack.matches(stackInSlot, stackToGive) && stackInSlot.getCount() < stackInSlot.getMaxStackSize()) {
 
-                    int itemsToGive = Math.min(stackInSlot.getMaxCount() - stackInSlot.getCount(), stackToGive.getCount());
+                    int itemsToGive = Math.min(stackInSlot.getMaxStackSize() - stackInSlot.getCount(), stackToGive.getCount());
 
-                    stackInSlot.increment(itemsToGive);
-                    stackToGive.decrement(itemsToGive);
+                    stackInSlot.grow(itemsToGive);
+                    stackToGive.shrink(itemsToGive);
 
                     if (stackToGive.isEmpty()) {
                         return;
@@ -96,7 +96,7 @@ public class GiveEntityActionType extends EntityActionType {
         }
 
         if (entity instanceof Player player) {
-            player.getInventory().offerOrDrop(stackToGive);
+            player.getInventory().addItem(stackToGive);
         }
 
         else {

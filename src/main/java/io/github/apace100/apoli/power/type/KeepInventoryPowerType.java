@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
 
 public class KeepInventoryPowerType extends PowerType {
 
-    private static final ObjectOpenHashSet<Integer> DEFAULT_SLOTS = ObjectOpenHashSet.of(SlotRanges.fromName("inventory.*"), SlotRanges.fromName("hotbar.*"), SlotRanges.fromName("armor.*"))
+    private static final ObjectOpenHashSet<Integer> DEFAULT_SLOTS = ObjectOpenHashSet.of(SlotRanges.nameToIds("inventory.*"), SlotRanges.nameToIds("hotbar.*"), SlotRanges.nameToIds("armor.*"))
         .stream()
         .map(SlotRange::getSlotIds)
         .map(IntCollection::intStream)

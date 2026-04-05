@@ -37,7 +37,7 @@ public class FireProjectilePowerType extends ActiveCooldownPowerType {
             .add("projectile_action", EntityAction.DATA_TYPE.optional(), Optional.empty())
             .add("shooter_action", EntityAction.DATA_TYPE.optional(), Optional.empty())
             .add("entity_type", SerializableDataTypes.ENTITY_TYPE)
-            .add("tag", SerializableDataTypes.NBT_COMPOUND, new CompoundTag())
+            .add("tag", SerializableDataTypes.NBT, new CompoundTag())
             .add("sound", SerializableDataTypes.SOUND_EVENT.optional(), Optional.empty())
             .add("key", ApoliDataTypes.BACKWARDS_COMPATIBLE_KEY, KeyBindingReference.NONE)
             .add("hud_render", HudRender.DATA_TYPE, HudRender.DONT_RENDER)
@@ -289,13 +289,13 @@ public class FireProjectilePowerType extends ActiveCooldownPowerType {
         if (!tag.isEmpty()) {
 
             CompoundTag mergedTag = entityToSpawn.save(new CompoundTag());
-            mergedTag.copyFrom(tag);
+            mergedTag.merge(tag);
 
             entityToSpawn.load(mergedTag);
 
         }
 
-        serverWorld.spawnNewEntityAndPassengers(entityToSpawn);
+        serverWorld.tryAddFreshEntityWithPassengers(entityToSpawn);
 
         projectileAction.ifPresent(action -> action.execute(entityToSpawn));
         shooterAction.ifPresent(action -> action.execute(holder));

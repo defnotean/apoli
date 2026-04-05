@@ -43,7 +43,7 @@ public enum ArmPoseReference {
                 case TOOT_HORN ->
                     HumanoidModel.ArmPose.TOOT_HORN;
                 case THROW_SPEAR ->
-                    HumanoidModel.ArmPose.THROW_SPEAR;
+                    HumanoidModel.ArmPose.THROW_TRIDENT;
                 case BOW_AND_ARROW ->
                     HumanoidModel.ArmPose.BOW_AND_ARROW;
                 case CROSSBOW_HOLD ->

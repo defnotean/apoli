@@ -74,7 +74,7 @@ public class PhasingPowerType extends PowerType {
 
     public boolean shouldPhase(VoxelShape shape, BlockPos pos) {
         LivingEntity holder = getHolder();
-        return (holder.getY() < (double) pos.getY() + shape.getMax(Direction.Axis.Y) - (holder.onGround() ? 8.05 / 16.0 : 0.0015) || this.shouldPhaseDown())
+        return (holder.getY() < (double) pos.y() + shape.getMax(Direction.Axis.Y) - (holder.onGround() ? 8.05 / 16.0 : 0.0015) || this.shouldPhaseDown())
             && this.doesApply(pos);
     }
 

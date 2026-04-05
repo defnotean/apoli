@@ -154,7 +154,10 @@ public class ModifyFoodPowerType extends PowerType {
             .flatMap(p -> p.getEatTicksModifiers().stream())
             .toList();
 
-        return OptionalInt.of((int) ModifierUtil.applyModifiers(entity, modifiers, foodComponent.getEatTicks()));
+        int eatTicks = Optional.ofNullable(stack.get(DataComponents.CONSUMABLE))
+            .map(net.minecraft.world.item.component.Consumable::consumeTicks)
+            .orElse(32);
+        return OptionalInt.of((int) ModifierUtil.applyModifiers(entity, modifiers, eatTicks));
 
     }
 

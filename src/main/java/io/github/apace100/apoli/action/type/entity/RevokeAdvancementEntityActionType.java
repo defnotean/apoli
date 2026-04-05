@@ -59,7 +59,7 @@ public class RevokeAdvancementEntityActionType extends EntityActionType {
         }
 
         MinecraftServer server = serverPlayer.server;
-        ServerAdvancementManager advancementLoader = server.getAdvancementLoader();
+        ServerAdvancementManager advancementLoader = server.getAdvancements();
 
         if (selection == AdvancementCommands.Mode.EVERYTHING) {
             AdvancementUtil.processAdvancements(advancementLoader.getAdvancements(), AdvancementCommands.Action.REVOKE, serverPlayer);

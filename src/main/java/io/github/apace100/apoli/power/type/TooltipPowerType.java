@@ -237,8 +237,8 @@ public class TooltipPowerType extends PowerType {
         }
 
         ListIterator<Component> textIterator = texts.listIterator();
-        CommandSourceStack source = holder.getCommandSource()
-            .withOutput(serverWorld.getServer())
+        CommandSourceStack source = holder.createCommandSourceStack()
+            .withSource(serverWorld.getServer())
             .withLevel(Apoli.config.executeCommand.permissionLevel);
 
         while (textIterator.hasNext()) {

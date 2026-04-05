@@ -37,8 +37,8 @@ public class AddXpEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         if (context.entity() instanceof Player player) {
-            player.addExperience(points);
-            player.addExperienceLevels(levels);
+            player.giveExperiencePoints(points);
+            player.giveExperienceLevels(levels);
         }
 
     }

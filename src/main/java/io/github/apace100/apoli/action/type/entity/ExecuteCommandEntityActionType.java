@@ -44,9 +44,9 @@ public class ExecuteCommandEntityActionType extends EntityActionType {
         }
 
         MinecraftServer server = serverWorld.getServer();
-        CommandSourceStack commandSource = entity.getCommandSource()
+        CommandSourceStack commandSource = entity.createCommandSourceStack()
             .withLevel(Apoli.config.executeCommand.permissionLevel)
-            .withOutput(CommandSource.DUMMY);
+            .withSource(CommandSource.NULL);
 
         if (Apoli.config.executeCommand.showOutput) {
 
@@ -54,11 +54,11 @@ public class ExecuteCommandEntityActionType extends EntityActionType {
                 ? serverPlayer
                 : server;
 
-            commandSource = commandSource.withOutput(output);
+            commandSource = commandSource.withSource(output);
 
         }
 
-        server.getCommands().executeWithPrefix(commandSource, command);
+        server.getCommands().performPrefixedCommand(commandSource, command);
 
     }
 

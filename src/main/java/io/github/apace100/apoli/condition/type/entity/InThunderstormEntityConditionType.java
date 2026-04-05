@@ -15,7 +15,7 @@ public class InThunderstormEntityConditionType extends EntityConditionType {
 	@Override
 	public boolean test(EntityConditionContext context) {
 		Entity entity = context.entity();
-		return WorldUtil.inThunderstorm(entity.level(), BlockPos.ofFloored(MiscUtil.getPoseDependentEyePos(entity)), entity.blockPosition());
+		return WorldUtil.inThunderstorm(entity.level(), BlockPos.containing(MiscUtil.getPoseDependentEyePos(entity)), entity.blockPosition());
 	}
 
 	@Override

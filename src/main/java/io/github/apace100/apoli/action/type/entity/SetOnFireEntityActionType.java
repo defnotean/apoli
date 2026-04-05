@@ -29,7 +29,7 @@ public class SetOnFireEntityActionType extends EntityActionType {
 
     @Override
     public void accept(EntityActionContext context) {
-        context.entity().setOnFireFor(duration);
+        context.entity().igniteForSeconds(duration);
     }
 
     @Override

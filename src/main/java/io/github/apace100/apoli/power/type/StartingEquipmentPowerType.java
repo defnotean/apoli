@@ -81,7 +81,7 @@ public class StartingEquipmentPowerType extends PowerType {
             if (!given) {
 
                 if (holder instanceof Player player) {
-                    player.getInventory().offerOrDrop(stack);
+                    player.getInventory().addItem(stack);
                 }
 
                 else {

@@ -16,7 +16,7 @@ public class MergeCustomDataItemActionType extends ItemActionType {
 
     public static final TypedDataObjectFactory<MergeCustomDataItemActionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("nbt", SerializableDataTypes.NBT_COMPOUND),
+            .add("nbt", SerializableDataTypes.NBT),
         data -> new MergeCustomDataItemActionType(
             data.get("nbt")
         ),
@@ -32,7 +32,7 @@ public class MergeCustomDataItemActionType extends ItemActionType {
 
     @Override
     public void accept(ItemActionContext context) {
-        CustomData.set(DataComponents.CUSTOM_DATA, context.stackReference().get(), oldNbt -> oldNbt.copyFrom(nbt));
+        CustomData.set(DataComponents.CUSTOM_DATA, context.stackReference().get(), oldNbt -> oldNbt.merge(nbt));
     }
 
     @Override

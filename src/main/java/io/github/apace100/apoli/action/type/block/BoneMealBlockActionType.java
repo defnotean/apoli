@@ -47,7 +47,7 @@ public class BoneMealBlockActionType extends BlockActionType {
         Optional<Direction> optDirection = context.direction();
         ItemStack stack = ItemStack.EMPTY;
 
-        if (BoneMealItem.useOnFertilizable(stack, world, pos)) {
+        if (BoneMealItem.growCrop(stack, world, pos)) {
             boneMealEvent(world, pos);
         }
 
@@ -56,9 +56,9 @@ public class BoneMealBlockActionType extends BlockActionType {
             Direction direction = optDirection.get();
 
             BlockState blockState = world.getBlockState(pos);
-            BlockPos offsetPos = pos.offset(direction);
+            BlockPos offsetPos = pos.relative(direction);
 
-            if (blockState.isSideSolidFullSquare(world, pos, direction) && BoneMealItem.useOnGround(stack, world, offsetPos, direction)) {
+            if (blockState.isFaceSturdy(world, pos, direction) && BoneMealItem.growWaterPlant(stack, world, offsetPos, direction)) {
                 boneMealEvent(world, offsetPos);
             }
 
@@ -74,7 +74,7 @@ public class BoneMealBlockActionType extends BlockActionType {
     private void boneMealEvent(Level world, BlockPos pos) {
 
         if (showEffects && !world.isClientSide()) {
-            world.syncWorldEvent(LevelEvent.BONE_MEAL_USED, pos, 0);
+            world.globalLevelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, pos, 0);
         }
 
     }

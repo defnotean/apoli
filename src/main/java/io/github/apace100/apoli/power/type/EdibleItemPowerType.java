@@ -39,7 +39,7 @@ public class EdibleItemPowerType extends PowerType implements Prioritized<Edible
             .add("food_component", SerializableDataTypes.FOOD_COMPONENT)
             .add("result_stack", SerializableDataTypes.ITEM_STACK.optional(), Optional.empty())
             .add("consume_animation", SerializableDataType.enumValue(ItemUseAnimation.class), ItemUseAnimation.EAT)
-            .add("consume_sound", SerializableDataTypes.SOUND_EVENT, SoundEvents.ENTITY_GENERIC_EAT)
+            .add("consume_sound", SerializableDataTypes.SOUND_EVENT, SoundEvents.GENERIC_EAT.value())
             .add("priority", SerializableDataTypes.INT, 0),
         (data, condition) -> new EdibleItemPowerType(
             data.get("entity_action"),
@@ -121,7 +121,7 @@ public class EdibleItemPowerType extends PowerType implements Prioritized<Edible
         SlotAccess resultStackReference = this.resultStack
             .map(ItemStack::copy)
             .map(InventoryUtil::createStackReference)
-            .orElse(SlotAccess.EMPTY);
+            .orElseGet(() -> InventoryUtil.createStackReference(ItemStack.EMPTY));
 
         resultItemAction.ifPresent(action -> action.execute(world, resultStackReference));
         return resultStackReference;
@@ -145,7 +145,7 @@ public class EdibleItemPowerType extends PowerType implements Prioritized<Edible
             .stream()
             .filter(p -> p.doesApply(stack))
             .max(Comparator.comparing(EdibleItemPowerType::getPriority))
-            .filter(p -> !stack.contains(DataComponents.FOOD) || p.getPriority() > 1);
+            .filter(p -> !stack.has(DataComponents.FOOD) || p.getPriority() > 1);
     }
 
     public static Optional<EdibleItemPowerType> get(ItemStack stack) {

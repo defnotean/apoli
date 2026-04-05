@@ -21,7 +21,7 @@ public class AttachableBlockConditionType extends BlockConditionType {
 
             BlockPos offsetPos = pos.offset(direction);
 
-            if (world.isChunkLoaded(offsetPos) && world.getBlockState(offsetPos).isSideSolidFullSquare(world, pos, direction.getOpposite())) {
+            if (world.hasChunkAt(offsetPos) && world.getBlockState(offsetPos).isFaceSturdy(world, pos, direction.getOpposite())) {
                 return true;
             }
 

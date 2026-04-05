@@ -91,7 +91,7 @@ public class ModifyBlockStateBlockActionType extends BlockActionType {
         }
 
         if (cycle) {
-            world.setBlock(pos, blockState.cycle(blockProperty));
+            world.setBlock(pos, blockState.cycle(blockProperty), 3);
             return;
         }
 
@@ -99,18 +99,18 @@ public class ModifyBlockStateBlockActionType extends BlockActionType {
             case EnumProperty<?> enumProp when enumValue.isPresent() && !enumValue.get().isEmpty() ->
                 setEnumProperty(enumProp, enumValue.get(), world, pos, blockState);
             case BooleanProperty boolProp when boolValue.isPresent() ->
-                world.setBlock(pos, blockState.with(boolProp, boolValue.get()));
+                world.setBlock(pos, blockState.setValue(boolProp, boolValue.get()), 3);
             case IntegerProperty intProp when change.isPresent() -> {
 
                 int newValue = switch (operation) {
                     case ADD ->
-                        Optional.ofNullable(blockState.get(intProp)).orElse(0) + change.get();
+                        Optional.ofNullable(blockState.getValue(intProp)).orElse(0) + change.get();
                     case SET ->
                         change.get();
                 };
 
-                if (intProp.getValues().contains(newValue)) {
-                    world.setBlock(pos, blockState.with(intProp, newValue));
+                if (intProp.getPossibleValues().contains(newValue)) {
+                    world.setBlock(pos, blockState.setValue(intProp, newValue), 3);
                 }
 
             }
@@ -127,15 +127,15 @@ public class ModifyBlockStateBlockActionType extends BlockActionType {
     }
 
     private <T extends Enum<T> & StringRepresentable> void setEnumProperty(EnumProperty<T> property, String name, Level world, BlockPos pos, BlockState originalState) {
-        property.parse(name).ifPresentOrElse(
+        property.getValue(name).ifPresentOrElse(
             propValue ->
-                world.setBlock(pos, originalState.with(property, propValue)),
+                world.setBlock(pos, originalState.setValue(property, propValue), 3),
             () -> {
 
-                RegistryOps<JsonElement> jsonOps = world.registryAccess().getOps(JsonOps.INSTANCE);
+                RegistryOps<JsonElement> jsonOps = world.registryAccess().createSerializationContext(JsonOps.INSTANCE);
                 Optional<JsonElement> blockActionJson = BlockAction.DATA_TYPE.write(jsonOps, this.getAction()).result();
 
-                Apoli.LOGGER.warn("Couldn't set enum property \"{}\" of block at {} to \"{}\" (with block action {})! Expected value to be any of {}", property.getName(), pos.toShortString(), name, blockActionJson.map(JsonElement::toString).orElse("<unknown>"), property.getValues().stream().map(StringRepresentable::asString).collect(Collectors.joining(", ")));
+                Apoli.LOGGER.warn("Couldn't set enum property \"{}\" of block at {} to \"{}\" (with block action {})! Expected value to be any of {}", property.getName(), pos.toShortString(), name, blockActionJson.map(JsonElement::toString).orElse("<unknown>"), property.getPossibleValues().stream().map(StringRepresentable::getSerializedName).collect(Collectors.joining(", ")));
 
             }
         );

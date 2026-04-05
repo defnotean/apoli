@@ -37,7 +37,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
             .add("bientity_condition", BiEntityCondition.DATA_TYPE.optional(), Optional.empty())
             .add("block_action", BlockAction.DATA_TYPE.optional(), Optional.empty())
             .add("block_condition", BlockCondition.DATA_TYPE.optional(), Optional.empty())
-            .add("event", SerializableDataTypes.GAME_EVENT_ENTRY, null)
+            .add("event", SerializableDataTypes.GAME_EVENT, null)
             .addFunctionedDefault("events", SerializableDataTypes.GAME_EVENT_ENTRIES, data -> MiscUtil.singletonListOrEmpty(data.get("event")))
             .add("event_tag", SerializableDataTypes.GAME_EVENT_TAG.optional(), Optional.empty())
             .add("trigger_order", SerializableDataType.enumValue(GameEventListener.DeliveryMode.class), GameEventListener.DeliveryMode.UNSPECIFIED)

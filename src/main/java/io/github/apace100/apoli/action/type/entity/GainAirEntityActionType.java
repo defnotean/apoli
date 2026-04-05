@@ -32,7 +32,7 @@ public class GainAirEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         if (context.entity() instanceof LivingEntity livingEntity) {
-            livingEntity.setAir(Math.min(livingEntity.getAir() + value, livingEntity.getMaxAir()));
+            livingEntity.setAirSupply(Math.min(livingEntity.getAirSupply() + value, livingEntity.getMaxAirSupply()));
         }
 
     }

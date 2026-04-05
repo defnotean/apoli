@@ -56,7 +56,7 @@ public class AdjacentBlockConditionType extends BlockConditionType {
 
             BlockPos offsetPos = pos.offset(direction);
 
-            if (world.isChunkLoaded(offsetPos) && adjacentCondition.test(world, offsetPos)) {
+            if (world.hasChunkAt(offsetPos) && adjacentCondition.test(world, offsetPos)) {
                 matches++;
             }
 

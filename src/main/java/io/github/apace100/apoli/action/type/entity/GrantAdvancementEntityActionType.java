@@ -62,7 +62,7 @@ public class GrantAdvancementEntityActionType extends EntityActionType {
             return;
         }
 
-        ServerAdvancementManager advancementLoader = server.getAdvancementLoader();
+        ServerAdvancementManager advancementLoader = server.getAdvancements();
         if (selection == AdvancementCommands.Mode.EVERYTHING) {
             AdvancementUtil.processAdvancements(advancementLoader.getAdvancements(), AdvancementCommands.Action.GRANT, serverPlayerEntity);
         }
@@ -75,7 +75,7 @@ public class GrantAdvancementEntityActionType extends EntityActionType {
             }
 
             else if (criteria.isEmpty()) {
-                AdvancementUtil.processAdvancements(AdvancementUtil.selectEntries(server.getAdvancementLoader().getManager(), advancementEntry, selection), AdvancementCommands.Action.GRANT, serverPlayerEntity);
+                AdvancementUtil.processAdvancements(AdvancementUtil.selectEntries(server.getAdvancements().getManager(), advancementEntry, selection), AdvancementCommands.Action.GRANT, serverPlayerEntity);
             }
 
             else {

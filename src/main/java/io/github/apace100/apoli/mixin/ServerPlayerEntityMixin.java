@@ -201,7 +201,7 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
     private ItemStack checkItemUsageStopping(ItemStack original, @Share("prevSelectedStack") LocalRef<ItemStack> prevSelectedStackLocRef) {
 
         ItemStack prevSelectedStack = prevSelectedStackLocRef.get();
-        if (!this.isUsingItem() || ItemStack.areEqual(prevSelectedStack, this.getInventory().getMainHandItem())) {
+        if (!this.isUsingItem() || ItemStack.matches(prevSelectedStack, this.getInventory().getMainHandItem())) {
             return original;
         }
 

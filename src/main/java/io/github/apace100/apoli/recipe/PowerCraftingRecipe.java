@@ -53,7 +53,7 @@ public class PowerCraftingRecipe implements CraftingRecipe {
 
         return matchingPowerType && world.getRecipeManager().get(powerId())
             .filter(entry -> Objects.equals(this, entry.value()))
-            .map(entry -> delegate().matches(input, world))
+            .map(entry -> delegate().test(input, world))
             .orElse(false);
 
     }

@@ -78,7 +78,7 @@ public class RemoveEnchantmentItemActionType extends ItemActionType {
         ItemStack stack = stackReference.get();
         RegistryAccess dynamicRegistries = world.registryAccess();
 
-        if (!stack.hasEnchantments()) {
+        if (!stack.isEnchanted()) {
             return;
         }
 
@@ -110,7 +110,7 @@ public class RemoveEnchantmentItemActionType extends ItemActionType {
         }
 
         stack.set(DataComponents.ENCHANTMENTS, newEnchantments.build());
-        if (resetRepairCost && !stack.hasEnchantments()) {
+        if (resetRepairCost && !stack.isEnchanted()) {
             stack.set(DataComponents.REPAIR_COST, 0);
         }
 

@@ -35,7 +35,7 @@ public class BlockActionAtEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         Entity entity = context.entity();
-        BlockPos blockPos = BlockPos.ofFloored(entity.position().add(context.offset()));
+        BlockPos blockPos = BlockPos.containing(entity.position().add(context.offset()));
 
         blockAction.execute(entity.level(), blockPos, Optional.empty());
 

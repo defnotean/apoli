@@ -82,7 +82,7 @@ public enum ModifierOperation implements IModifierOperation {
 
         Stream<Double> values = dataList.stream().map(data -> {
 
-            Collection<Modifier> modifiers = data.getOrElseGet("modifier", ObjectArrayList::new);
+            Collection<Modifier> modifiers = data.isPresent("modifier") ? data.get("modifier") : new ObjectArrayList<>();
             Optional<PowerReference> resource = Optional.ofNullable(data.get("resource"));
 
             double amount = resource

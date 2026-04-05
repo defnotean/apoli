@@ -26,8 +26,8 @@ public class ExplodeEntityActionType extends EntityActionType {
             .add("destruction_type", SerializableDataTypes.DESTRUCTION_TYPE, Explosion.BlockInteraction.DESTROY)
             .add("damage_self", SerializableDataTypes.BOOLEAN, true)
             .add("create_fire", SerializableDataTypes.BOOLEAN, false)
-            .add("power", SerializableDataTypes.NON_NEGATIVE_FLOAT)
-            .add("indestructible_resistance", SerializableDataTypes.NON_NEGATIVE_FLOAT, 10.0F),
+            .add("power", SerializableDataTypes.FLOAT)
+            .add("indestructible_resistance", SerializableDataTypes.FLOAT, 10.0F),
         data -> new ExplodeEntityActionType(
             data.get("destructible"),
             data.get("indestructible"),
@@ -87,13 +87,13 @@ public class ExplodeEntityActionType extends EntityActionType {
             entity.level(),
             damageSelf ? null : entity,
             Explosion.createDamageSource(entity.level(), entity),
-            entity.position().getX(),
-            entity.position().getY(),
-            entity.position().getZ(),
+            entity.position().x(),
+            entity.position().y(),
+            entity.position().z(),
             power,
             createFire,
             destructionType,
-            MiscUtil.createExplosionBehavior(behaviorCondition, indestructibleResistance)
+            MiscUtil.createExplosionDamageCalculator(behaviorCondition, indestructibleResistance)
         );
 
     }

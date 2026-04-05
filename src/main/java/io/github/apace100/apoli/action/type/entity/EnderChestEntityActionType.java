@@ -22,7 +22,7 @@ public class EnderChestEntityActionType extends EntityActionType {
             MenuProvider handlerFactory = (syncId, playerInventory, _player) -> ChestMenu.threeRows(syncId, playerInventory, player.getEnderChestInventory());
             player.openMenu(new SimpleMenuProvider(handlerFactory, Component.translatable("container.enderchest")));
 
-            player.incrementStat(Stats.OPEN_ENDERCHEST);
+            player.awardStat(Stats.OPEN_ENDERCHEST);
 
         }
 

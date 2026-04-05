@@ -23,7 +23,7 @@ public class GainedPowerCriterion extends SimpleCriterionTrigger<GainedPowerCrit
     }
 
     public void trigger(ServerPlayer player, Power power) {
-        this.trigger(player, conditions -> conditions.matches(power));
+        this.trigger(player, conditions -> conditions.test(power));
     }
 
     public record Conditions(Optional<ContextAwarePredicate> player, Identifier powerId) implements SimpleCriterionTrigger.SimpleInstance {

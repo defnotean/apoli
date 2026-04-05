@@ -51,7 +51,7 @@ public class CanSeeBiEntityConditionType extends BiEntityConditionType {
         Vec3 targetEyePos = target.getEyePosition();
 
         ClipContext ClipContext = new ClipContext(actorEyePos, targetEyePos, shapeType, fluidHandling, actor);
-        return actor.level().raycast(ClipContext).getType() == HitResult.Type.MISS;
+        return actor.level().clip(ClipContext).getType() == HitResult.Type.MISS;
 
     }
 

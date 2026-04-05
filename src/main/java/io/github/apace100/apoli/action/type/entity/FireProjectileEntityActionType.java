@@ -30,7 +30,7 @@ public class FireProjectileEntityActionType extends EntityActionType {
             .add("entity_type", SerializableDataTypes.ENTITY_TYPE)
             .add("projectile_action", EntityAction.DATA_TYPE.optional(), Optional.empty())
             .add("bientity_action", BiEntityAction.DATA_TYPE.optional(), Optional.empty())
-            .add("tag", SerializableDataTypes.NBT_COMPOUND, new CompoundTag())
+            .add("tag", SerializableDataTypes.NBT, new CompoundTag())
             .add("divergence", SerializableDataTypes.FLOAT, 1.0F)
             .add("speed", SerializableDataTypes.FLOAT, 1.5F)
             .add("count", SerializableDataTypes.INT, 1),
@@ -134,13 +134,13 @@ public class FireProjectileEntityActionType extends EntityActionType {
             if (!tag.isEmpty()) {
 
                 CompoundTag mergedNbt = entityToSpawn.save(new CompoundTag());
-                mergedNbt.copyFrom(tag);
+                mergedNbt.merge(tag);
 
                 entityToSpawn.load(mergedNbt);
 
             }
 
-            serverWorld.spawnNewEntityAndPassengers(entityToSpawn);
+            serverWorld.tryAddFreshEntityWithPassengers(entityToSpawn);
             projectileAction.ifPresent(action -> action.execute(entityToSpawn));
             //  Execute the bientity_action with the shooter as actor and projectile as target
             final Entity spawnedFinal = entityToSpawn;

@@ -133,7 +133,7 @@ public class ItemOnItemPowerType extends PowerType implements Prioritized<ItemOn
         if (holder instanceof Player player && (resultStack.isPresent() || resultItemAction.isPresent())) {
 
             if (slot.hasStack()) {
-                player.getInventory().offerOrDrop(resultStackReference.get());
+                player.getInventory().addItem(resultStackReference.get());
             }
 
             else {

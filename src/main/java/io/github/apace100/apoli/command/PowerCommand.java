@@ -545,7 +545,7 @@ public class PowerCommand {
 			Power power = PowerArgumentType.getPower(context, "power");
 			CommandSourceStack commandSource = context.getDirectEntity();
 
-			return Power.DATA_TYPE.write(commandSource.registryAccess().getOps(JsonOps.INSTANCE), power)
+			return Power.DATA_TYPE.write(commandSource.registryAccess().createSerializationContext(JsonOps.INSTANCE), power)
 				.ifSuccess(powerJson -> commandSource.sendFeedback(() -> new JsonTextFormatter(indent).apply(powerJson), false))
 				.ifError(error -> commandSource.sendError(Component.literal(error.message())))
 				.mapOrElse(jsonElement -> 1, error -> 0);

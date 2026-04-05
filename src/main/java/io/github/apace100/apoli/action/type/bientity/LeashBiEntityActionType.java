@@ -20,7 +20,7 @@ public class LeashBiEntityActionType extends BiEntityActionType {
 
         if (target instanceof Leashable leashable && target instanceof CustomLeashable customLeashable && !leashable.isLeashed()) {
             customLeashable.apoli$setCustomLeashed(true);
-            leashable.attachLeash(actor, true);
+            leashable.setLeashedTo(actor, true);
         }
 
     }

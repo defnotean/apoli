@@ -31,8 +31,8 @@ public class AddBlockBlockActionType extends BlockActionType {
     @Override
     public void accept(BlockActionContext context) {
         context.direction()
-            .map(context.pos()::offset)
-            .ifPresent(offsetPos -> context.world().setBlock(offsetPos, blockState));
+            .map(context.pos()::relative)
+            .ifPresent(offsetPos -> context.world().setBlock(offsetPos, blockState, 3));
     }
 
     @Override

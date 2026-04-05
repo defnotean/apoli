@@ -72,7 +72,7 @@ public class ApoliClient implements ClientModInitializer {
 	 */
 	@Deprecated(forRemoval = true)
 	public static void registerPowerKeybinding(String keyId, KeyMapping keyBinding) {
-		KeyBindingUtil.ALIASES.addAlias(keyId, keyBinding.getTranslationKey());
+		KeyBindingUtil.ALIASES.addAlias(keyId, keyBinding.getDescriptionId());
 	}
 
 	/**

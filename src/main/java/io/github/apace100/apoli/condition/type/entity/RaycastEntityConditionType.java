@@ -115,7 +115,7 @@ public class RaycastEntityConditionType extends EntityConditionType {
         Vec3 origin = MiscUtil.getPoseDependentEyePos(entity);
         Vec3 direction = this.direction
             .map(dir -> transformDirection(entity, dir))
-            .orElseGet(() -> entity.getRotationVec(1.0F));
+            .orElseGet(() -> entity.getViewVector(1.0F));
 
         Vec3 destination;
         HitResult hitResult = null;
@@ -165,30 +165,30 @@ public class RaycastEntityConditionType extends EntityConditionType {
         Vec3 ray = destination.subtract(origin);
         AABB box = caster.getBoundingBox().expandTowards(ray).inflate(1.0D);
 
-        Predicate<Entity> intersectPredicate = EntitySelector.EXCEPT_SPECTATOR
+        Predicate<Entity> intersectPredicate = EntitySelector.NO_SPECTATORS
             .and(intersected -> matchBiEntityCondition
                 .map(condition -> condition.test(caster, intersected))
                 .orElse(true));
 
-        return ProjectileUtil.raycast(
+        return ProjectileUtil.clip(
             caster,
             origin,
             destination,
             box,
             intersectPredicate,
-            ray.lengthSquared()
+            ray.lengthSqr()
         );
 
     }
 
     private BlockHitResult blockRaycast(Entity caster, Vec3 origin, Vec3 destination) {
         ClipContext context = new ClipContext(origin, destination, shapeType, fluidHandling, caster);
-        return caster.level().raycast(context);
+        return caster.level().clip(context);
     }
 
     private Vec3 transformDirection(Entity entity, Vec3 direction) {
 
-        Vector3f normalizedDirection = new Vector3f((float) direction.getX(), (float) direction.getY(), (float) direction.getZ()).normalize();
+        Vector3f normalizedDirection = new Vector3f((float) direction.x(), (float) direction.y(), (float) direction.z()).normalize();
         space.toGlobal(normalizedDirection, entity);
 
         return new Vec3(normalizedDirection);

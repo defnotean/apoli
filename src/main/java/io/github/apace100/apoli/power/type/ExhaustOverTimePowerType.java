@@ -61,7 +61,7 @@ public class ExhaustOverTimePowerType extends PowerType {
             }
 
             else if (holderPlayer.tickCount % exhaustInterval == startTicks) {
-                holderPlayer.addExhaustion(exhaustion);
+                holderPlayer.causeFoodExhaustion(exhaustion);
                 this.wasActive = true;
             }
 

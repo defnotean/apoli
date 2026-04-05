@@ -10,7 +10,7 @@ public class ExtinguishEntityActionType extends EntityActionType {
 
 	@Override
 	public void accept(EntityActionContext context) {
-		context.entity().extinguishWithSound();
+		context.entity().extinguishFire();
 	}
 
 	@Override

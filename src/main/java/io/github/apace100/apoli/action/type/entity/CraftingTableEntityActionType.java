@@ -8,7 +8,7 @@ import io.github.apace100.apoli.action.type.EntityActionTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.MenuProvider;
+import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.stats.Stats;
 import net.minecraft.network.chat.Component;
@@ -21,7 +21,7 @@ public class CraftingTableEntityActionType extends EntityActionType {
 
         if (context.entity() instanceof Player player) {
 
-            MenuProvider handlerFactory = (syncId, playerInventory, _player) -> {
+            MenuConstructor handlerFactory = (syncId, playerInventory, _player) -> {
 
                 CraftingMenu craftingScreenHandler = new CraftingMenu(syncId, playerInventory, ContainerLevelAccess.create(player.level(), player.blockPosition()));
                 ((ScreenHandlerUsabilityOverride) craftingScreenHandler).apoli$canUse(true);
@@ -31,7 +31,7 @@ public class CraftingTableEntityActionType extends EntityActionType {
             };
 
             player.openMenu(new SimpleMenuProvider(handlerFactory, Component.translatable("container.crafting")));
-            player.incrementStat(Stats.INTERACT_WITH_CRAFTING_TABLE);
+            player.awardStat(Stats.INTERACT_WITH_CRAFTING_TABLE);
 
         }
 

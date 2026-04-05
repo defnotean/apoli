@@ -49,7 +49,7 @@ public class AdvancementEntityConditionType extends EntityConditionType {
         MinecraftServer server = player.getServer();
         if (server != null) {
 
-            AdvancementHolder advancementEntry = server.getAdvancementLoader().get(advancement);
+            AdvancementHolder advancementEntry = server.getAdvancements().get(advancement);
             if (advancementEntry == null) {
                 //  TODO: Throw an exception and pass it to the factory instance to be caught instead -eggohito
                 Apoli.LOGGER.warn("Advancement \"{}\" did not exist, but was referenced in an \"advancement\" entity condition!", advancement);

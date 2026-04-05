@@ -13,6 +13,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec2;
@@ -43,22 +45,22 @@ public class ExecuteCommandBlockActionType extends BlockActionType {
         BlockPos pos = context.pos();
 
         BlockState blockState = world.getBlockState(pos);
-        String blockTranslationKey = blockState.getBlock().getTranslationKey();
+        String blockDescriptionId = blockState.getBlock().getDescriptionId();
 
         MinecraftServer server = world.getServer();
         CommandSourceStack commandSource = new CommandSourceStack(
-            Apoli.config.executeCommand.showOutput ? server : CommandSource.DUMMY,
+            Apoli.config.executeCommand.showOutput ? server : CommandSource.NULL,
             pos.getCenter(),
             Vec2.ZERO,
             world,
-            Apoli.config.executeCommand.permissionLevel,
-            blockTranslationKey,
-            Component.translatable(blockTranslationKey),
+            LevelBasedPermissionSet.forLevel(PermissionLevel.byId(Apoli.config.executeCommand.permissionLevel)),
+            blockDescriptionId,
+            Component.translatable(blockDescriptionId),
             server,
             null
         );
 
-        server.getCommands().executeWithPrefix(commandSource, command);
+        server.getCommands().performPrefixedCommand(commandSource, command);
 
     }
 

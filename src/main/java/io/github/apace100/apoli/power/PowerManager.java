@@ -154,7 +154,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
     private static void updateData(Entity entity, boolean initialize) {
 
-        RegistryOps<JsonElement> jsonOps = entity.registryAccess().getOps(JsonOps.INSTANCE);
+        RegistryOps<JsonElement> jsonOps = entity.registryAccess().createSerializationContext(JsonOps.INSTANCE);
         PowerHolderComponent component = PowerHolderComponent.KEY.getNullable(entity);
 
         if (component == null) {

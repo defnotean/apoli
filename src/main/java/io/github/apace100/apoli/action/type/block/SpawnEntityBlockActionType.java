@@ -23,7 +23,7 @@ public class SpawnEntityBlockActionType extends BlockActionType {
         new SerializableData()
             .add("entity_type", SerializableDataTypes.ENTITY_TYPE)
             .add("entity_action", EntityAction.DATA_TYPE.optional(), Optional.empty())
-            .add("tag", SerializableDataTypes.NBT_COMPOUND, new CompoundTag()),
+            .add("tag", SerializableDataTypes.NBT, new CompoundTag()),
         data -> new SpawnEntityBlockActionType(
             data.get("entity_type"),
             data.get("entity_action"),
@@ -52,8 +52,8 @@ public class SpawnEntityBlockActionType extends BlockActionType {
         ServerLevel world = context.world();
         BlockPos pos = context.pos();
 
-        MiscUtil.getEntityWithPassengers(world, entityType, tag, pos.toBottomCenterPos(), Optional.empty(), Optional.empty()).ifPresent(entity -> {
-            world.spawnNewEntityAndPassengers(entity);
+        MiscUtil.getEntityWithPassengers(world, entityType, tag, pos.getBottomCenter(), Optional.empty(), Optional.empty()).ifPresent(entity -> {
+            world.tryAddFreshEntityWithPassengers(entity);
             entityAction.ifPresent(action -> action.execute(entity));
         });
 

@@ -36,7 +36,7 @@ public class HeightBlockConditionType extends BlockConditionType {
 
     @Override
     public boolean test(BlockConditionContext context) {
-        return comparison.compare(context.pos().getY(), compareTo);
+        return comparison.compare(context.pos().y(), compareTo);
     }
 
     @Override

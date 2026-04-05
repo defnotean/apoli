@@ -18,7 +18,7 @@ public class EquippedItemEntityConditionType extends EntityConditionType {
     public static final TypedDataObjectFactory<EquippedItemEntityConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
             .add("item_condition", ItemCondition.DATA_TYPE)
-            .add("equipment_slot", SerializableDataTypes.ATTRIBUTE_MODIFIER_SLOT),
+            .add("equipment_slot", SerializableDataTypes.EQUIPMENT_SLOT_GROUP),
         data -> new EquippedItemEntityConditionType(
             data.get("item_condition"),
             data.get("equipment_slot")
@@ -46,7 +46,7 @@ public class EquippedItemEntityConditionType extends EntityConditionType {
 
         for (EquipmentSlot slot : EquipmentSlot.values()) {
 
-            if (equipmentSlot.matches(slot) && itemCondition.test(livingEntity.level(), livingEntity.getItemBySlot(slot))) {
+            if (equipmentSlot.test(slot) && itemCondition.test(livingEntity.level(), livingEntity.getItemBySlot(slot))) {
                 return true;
             }
 

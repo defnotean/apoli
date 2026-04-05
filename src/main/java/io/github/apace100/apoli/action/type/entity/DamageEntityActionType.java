@@ -11,8 +11,11 @@ import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.apoli.util.modifier.ModifierUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.resources.ResourceKey;
@@ -69,11 +72,11 @@ public class DamageEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         Entity entity = context.entity();
-        DamageSources damageSources = entity.damageSources();
+        Holder<DamageType> holder = entity.level().registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(damageType);
 
         this.amount
             .or(() -> getModifiedAmount(entity))
-            .ifPresent(amount -> entity.hurt(damageSources.create(damageType), amount));
+            .ifPresent(amount -> entity.hurt(new DamageSource(holder), amount));
 
     }
 

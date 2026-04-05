@@ -12,7 +12,7 @@ public class MovementBlockingBlockConditionType extends BlockConditionType {
     @Override
     public boolean test(BlockConditionContext context) {
         BlockState blockState = context.blockState();
-        return blockState.blocksMovement()
+        return blockState.blocksMotion()
             && !blockState.getCollisionShape(context.world(), context.pos()).isEmpty();
     }
 

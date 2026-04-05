@@ -52,14 +52,15 @@ public class AddVelocityEntityActionType extends EntityActionType {
         Entity entity = context.entity();
 
         Vector3f velocityCopy = new Vector3f(velocity);
-        TriConsumer<Float, Float, Float> method = set
-            ? entity::setDeltaMovement
-            : entity::push;
-
         space.toGlobal(velocityCopy, entity);
-        method.accept(velocityCopy.x(), velocityCopy.y(), velocityCopy.z());
 
-        entity.hasImpulse = true;
+        if (set) {
+            entity.setDeltaMovement(velocityCopy.x(), velocityCopy.y(), velocityCopy.z());
+        } else {
+            entity.push(velocityCopy.x(), velocityCopy.y(), velocityCopy.z());
+        }
+
+        entity.hurtMarked = true;
 
     }
 

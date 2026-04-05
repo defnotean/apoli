@@ -63,10 +63,10 @@ public class CommandEntityConditionType extends EntityConditionType {
         MinecraftServer server = serverWorld.getServer();
         AtomicInteger result = new AtomicInteger();
 
-        CommandSourceStack commandSource = entity.getCommandSource()
+        CommandSourceStack commandSource = entity.createCommandSourceStack()
             .withReturnValueConsumer((successful, returnValue) -> result.set(returnValue))
             .withLevel(Apoli.config.executeCommand.permissionLevel)
-            .withOutput(CommandSource.DUMMY);
+            .withSource(CommandSource.NULL);
 
         if (Apoli.config.executeCommand.showOutput) {
 
@@ -74,11 +74,11 @@ public class CommandEntityConditionType extends EntityConditionType {
                 ? serverPlayer
                 : server;
 
-            commandSource = commandSource.withOutput(output);
+            commandSource = commandSource.withSource(output);
 
         }
 
-        server.getCommands().executeWithPrefix(commandSource, command);
+        server.getCommands().performPrefixedCommand(commandSource, command);
         return comparison.compare(result.get(), compareTo);
 
     }

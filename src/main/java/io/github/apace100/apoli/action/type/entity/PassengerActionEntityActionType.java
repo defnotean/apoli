@@ -57,13 +57,13 @@ public class PassengerActionEntityActionType extends EntityActionType {
 
         Entity entity = context.entity();
 
-        if (!entity.hasPassengers()) {
+        if (!entity.isVehicle()) {
             return;
         }
 
         Iterable<Entity> passengers = recursive
-            ? entity.getPassengersDeep()
-            : entity.getPassengerList();
+            ? entity.getPassengersAndSelf()
+            : entity.getPassengers();
 
         for (Entity passenger : passengers) {
 

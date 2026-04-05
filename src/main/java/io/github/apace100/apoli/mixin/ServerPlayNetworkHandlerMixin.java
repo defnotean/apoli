@@ -34,14 +34,14 @@ public class ServerPlayNetworkHandlerMixin {
     @Inject(method = "handleSetCarriedItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ServerboundSetCarriedItemPacket;getSlot()I", ordinal = 0))
     private void callActionOnUseStopBySwitching(ServerboundSetCarriedItemPacket packet, CallbackInfo ci) {
         if(player.isUsingItem()) {
-            ActionOnItemUsePowerType.executeActions(player, SlotAccess.of(player.getInventory(), this.player.getInventory().selectedSlot), player.getUseItem(), ActionOnItemUsePowerType.TriggerType.STOP, PriorityPhase.ALL);
+            ActionOnItemUsePowerType.executeActions(player, SlotAccess.of(player.getInventory(), this.player.getInventory().selected), player.getUseItem(), ActionOnItemUsePowerType.TriggerType.STOP, PriorityPhase.ALL);
         }
     }
 
     @Inject(method = "onPlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;stopUsingItem()V"))
     private void callActionOnUseStopBySwappingHands(ServerboundPlayerActionPacket packet, CallbackInfo ci) {
         if(player.isUsingItem()) {
-            ActionOnItemUsePowerType.executeActions(player, SlotAccess.of(player.getInventory(), this.player.getInventory().selectedSlot), player.getUseItem(), ActionOnItemUsePowerType.TriggerType.STOP, PriorityPhase.ALL);
+            ActionOnItemUsePowerType.executeActions(player, SlotAccess.of(player.getInventory(), this.player.getInventory().selected), player.getUseItem(), ActionOnItemUsePowerType.TriggerType.STOP, PriorityPhase.ALL);
         }
     }
 }

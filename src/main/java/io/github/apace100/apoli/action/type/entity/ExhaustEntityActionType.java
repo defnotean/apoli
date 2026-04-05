@@ -32,7 +32,7 @@ public class ExhaustEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         if (context.entity() instanceof Player player) {
-            player.addExhaustion(amount);
+            player.causeFoodExhaustion(amount);
         }
 
     }

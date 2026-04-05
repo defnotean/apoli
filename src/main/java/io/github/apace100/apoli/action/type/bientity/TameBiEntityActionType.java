@@ -18,10 +18,10 @@ public class TameBiEntityActionType extends BiEntityActionType {
         if (context.actor() instanceof Player playerActor) {
 
             switch (context.target()) {
-                case TamableAnimal tameableTarget when !tameableTarget.isTamed() ->
-                    tameableTarget.setOwner(playerActor);
-                case AbstractHorse horseLikeTarget when !horseLikeTarget.isTame() ->
-                    horseLikeTarget.bondWithPlayer(playerActor);
+                case TamableAnimal tameableTarget when !tameableTarget.isTame() ->
+                    tameableTarget.tame(playerActor);
+                case AbstractHorse horseLikeTarget when !horseLikeTarget.isTamed() ->
+                    horseLikeTarget.tameWithName(playerActor);
                 default -> {
 
                 }

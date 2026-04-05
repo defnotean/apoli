@@ -50,15 +50,15 @@ public abstract class EntityParticleMixin extends Entity {
                 .multiply(this.getWidth(), this.getEyeHeight(this.getPose()), this.getWidth());
             Vec3 particlePos = this
                 .position()
-                .add(particlePower.getOffsetX(), particlePower.getOffsetY(), particlePower.getOffsetZ());
+                .add(particlePower.getX(), particlePower.getY(), particlePower.getZ());
 
             if (particlePower.getCount() == 0) {
 
-                velocityX = spread.getX() * particlePower.getSpeed();
-                velocityY = spread.getY() * particlePower.getSpeed();
-                velocityZ = spread.getZ() * particlePower.getSpeed();
+                velocityX = spread.x() * particlePower.getSpeed();
+                velocityY = spread.y() * particlePower.getSpeed();
+                velocityZ = spread.z() * particlePower.getSpeed();
 
-                this.level().addParticle(particlePower.getParticle(), particlePower.shouldForce(), particlePos.getX(), particlePos.getY(), particlePos.getZ(), velocityX, velocityY, velocityZ);
+                this.level().addParticle(particlePower.getParticle(), particlePower.shouldForce(), particlePos.x(), particlePos.y(), particlePos.z(), velocityX, velocityY, velocityZ);
 
             } else {
 
@@ -71,7 +71,7 @@ public abstract class EntityParticleMixin extends Entity {
                     velocityY = (2.0 * this.random.nextDouble() - 1.0) * particlePower.getSpeed();
                     velocityZ = (2.0 * this.random.nextDouble() - 1.0) * particlePower.getSpeed();
 
-                    this.level().addParticle(particlePower.getParticle(), particlePower.shouldForce(), newParticlePos.getX(), newParticlePos.getY(), newParticlePos.getZ(), velocityX, velocityY, velocityZ);
+                    this.level().addParticle(particlePower.getParticle(), particlePower.shouldForce(), newParticlePos.x(), newParticlePos.y(), newParticlePos.z(), velocityX, velocityY, velocityZ);
 
                 }
 

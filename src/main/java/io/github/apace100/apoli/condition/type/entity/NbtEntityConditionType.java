@@ -18,7 +18,7 @@ public class NbtEntityConditionType extends EntityConditionType {
 
     public static final TypedDataObjectFactory<NbtEntityConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("nbt", SerializableDataTypes.NBT_COMPOUND),
+            .add("nbt", SerializableDataTypes.NBT),
         data -> new NbtEntityConditionType(
             data.get("nbt")
         ),

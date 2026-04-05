@@ -29,31 +29,31 @@ public final class SavedBlockPosition extends BlockInWorld {
     }
 
     public SavedBlockPosition(LevelReader world, BlockPos pos) {
-        this(world, pos, _pos -> world.isChunkLoaded(_pos) ? world.getBlockState(pos) : null, world::getBlockEntity);
+        this(world, pos, _pos -> world.hasChunkAt(_pos) ? world.getBlockState(pos) : null, world::getBlockEntity);
     }
 
     public static SavedBlockPosition fromLootContext(LootContext context) {
 
         Vec3 origin = Optional
-            .ofNullable(context.get(LootContextParams.ORIGIN))
+            .ofNullable(context.getOptionalParameter(LootContextParams.ORIGIN))
             .orElse(Vec3.ZERO);
 
         return new SavedBlockPosition(
-            context.level(),
-            BlockPos.ofFloored(origin),
-            context.get(LootContextParams.BLOCK_STATE),
-            context.get(LootContextParams.BLOCK_ENTITY)
+            context.getLevel(),
+            BlockPos.containing(origin),
+            context.getOptionalParameter(LootContextParams.BLOCK_STATE),
+            context.getOptionalParameter(LootContextParams.BLOCK_ENTITY)
         );
 
     }
 
     @Override
-    public BlockState getBlockState() {
+    public BlockState getState() {
         return blockState;
     }
 
     @Override
-    public BlockEntity getBlockEntity() {
+    public BlockEntity getEntity() {
         return blockEntity;
     }
 

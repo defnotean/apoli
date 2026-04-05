@@ -8,9 +8,9 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.core.Holder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -19,8 +19,8 @@ public class ClearEffectEntityActionType extends EntityActionType {
 
     public static final TypedDataObjectFactory<ClearEffectEntityActionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("effect", SerializableDataTypes.STATUS_EFFECT_ENTRY, null)
-            .addFunctionedDefault("effects", SerializableDataTypes.STATUS_EFFECT_ENTRIES, data -> MiscUtil.singletonListOrEmpty(data.get("effect"))),
+            .add("effect", SerializableDataTypes.STATUS_EFFECT, null)
+            .addFunctionedDefault("effects", SerializableDataTypes.STATUS_EFFECTS, data -> MiscUtil.singletonListOrEmpty(data.get("effect"))),
         data -> new ClearEffectEntityActionType(
             data.get("effects")
         ),
@@ -28,9 +28,9 @@ public class ClearEffectEntityActionType extends EntityActionType {
             .set("effects", actionType.effects)
     );
 
-    private final List<Holder<MobEffect>> effects;
+    private final List<MobEffect> effects;
 
-    public ClearEffectEntityActionType(List<Holder<MobEffect>> effects) {
+    public ClearEffectEntityActionType(List<MobEffect> effects) {
         this.effects = effects;
     }
 
@@ -44,7 +44,7 @@ public class ClearEffectEntityActionType extends EntityActionType {
             }
 
             else {
-                effects.forEach(livingEntity::removeStatusEffect);
+                effects.forEach(effect -> livingEntity.removeEffect(Holder.direct(effect)));
             }
 
         }

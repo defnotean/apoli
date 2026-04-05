@@ -299,9 +299,9 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
             return;
         }
 
-        double dx = apoli$prevPos.x - this.getX();
-        double dy = apoli$prevPos.y - this.getY();
-        double dz = apoli$prevPos.z - this.getZ();
+        double dx = apoli$prevPos.x - this.x();
+        double dy = apoli$prevPos.y - this.y();
+        double dz = apoli$prevPos.z - this.z();
 
         this.apoli$horizontalMovementValue = Math.sqrt(dx * dx + dz * dz);
         this.apoli$verticalMovementValue = Math.sqrt(dy * dy);

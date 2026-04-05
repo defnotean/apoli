@@ -15,10 +15,15 @@ public interface TypedDataObjectFactory<T> extends DataObjectFactory<T> {
 	static <T> TypedDataObjectFactory<T> simple(SerializableData serializableData, Function<SerializableData.Instance, T> fromData, BiFunction<T, SerializableData, SerializableData.Instance> toData) {
 		CompoundSerializableDataType<T> dataType = SerializableDataType.compound(serializableData, fromData, toData);
 		return new TypedDataObjectFactory<>() {
-			
+
 			@Override
 			public CompoundSerializableDataType<T> getDataType() {
 				return dataType;
+			}
+
+			@Override
+			public SerializableData getData() {
+				return serializableData;
 			}
 
 			@Override
@@ -29,6 +34,11 @@ public interface TypedDataObjectFactory<T> extends DataObjectFactory<T> {
 			@Override
 			public T fromData(SerializableData.Instance data) {
 				return fromData.apply(data);
+			}
+
+			@Override
+			public SerializableData.Instance toData(T t) {
+				return toData.apply(t, serializableData);
 			}
 
 			@Override

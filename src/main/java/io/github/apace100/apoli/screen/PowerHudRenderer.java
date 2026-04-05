@@ -45,7 +45,7 @@ public class PowerHudRenderer implements GameHudRender {
         }
 
         int yOffset = 49;
-        if (player.isSubmergedIn(FluidTags.WATER) || player.getAir() < player.getMaxAir()) {
+        if (player.isSubmergedIn(FluidTags.WATER) || player.getAirSupply() < player.getMaxAirSupply()) {
             yOffset += 10;
         }
 

@@ -43,7 +43,7 @@ public class DamageItemActionType extends ItemActionType {
         if (ignoreUnbreaking) {
 
             if (amount >= stack.getMaxDamage()) {
-                stack.decrement(1);
+                stack.shrink(1);
             }
 
             else {

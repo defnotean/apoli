@@ -170,7 +170,7 @@ public class RaycastEntityActionType extends EntityActionType {
         Vec3 origin = MiscUtil.getPoseDependentEyePos(entity).add(context.offset());
         Vec3 direction = this.direction
             .map(dir -> transformDirection(entity, dir))
-            .orElseGet(() -> entity.getRotationVec(1.0F));
+            .orElseGet(() -> entity.getViewVector(1.0F));
 
         Vec3 destination = origin.add(direction.multiply(distance));
         HitResult hitResult = null;
@@ -241,30 +241,30 @@ public class RaycastEntityActionType extends EntityActionType {
         Vec3 ray = destination.subtract(origin);
         AABB box = caster.getBoundingBox().expandTowards(ray).inflate(1.0D);
 
-        Predicate<Entity> intersectPredicate = EntitySelector.EXCEPT_SPECTATOR
+        Predicate<Entity> intersectPredicate = EntitySelector.NO_SPECTATORS
             .and(intersected -> biEntityCondition
                 .map(condition -> condition.test(caster, intersected))
                 .orElse(true));
 
-        return ProjectileUtil.raycast(
+        return ProjectileUtil.clip(
             caster,
             origin,
             destination,
             box,
             intersectPredicate,
-            ray.lengthSquared()
+            ray.lengthSqr()
         );
 
     }
 
     private BlockHitResult blockRaycast(Entity caster, Vec3 origin, Vec3 destination) {
         ClipContext context = new ClipContext(origin, destination, shapeType, fluidHandling, caster);
-        return caster.level().raycast(context);
+        return caster.level().clip(context);
     }
 
     private Vec3 transformDirection(Entity entity, Vec3 direction) {
 
-        Vector3f normalizedDirection = new Vector3f((float) direction.getX(), (float) direction.getY(), (float) direction.getZ()).normalize();
+        Vector3f normalizedDirection = new Vector3f((float) direction.x(), (float) direction.y(), (float) direction.z()).normalize();
         space.toGlobal(normalizedDirection, entity);
 
         return new Vec3(normalizedDirection);
@@ -293,12 +293,12 @@ public class RaycastEntityActionType extends EntityActionType {
                         offset = 0;
                     default -> {
 
-                        double offsetX = hitSide.getOffsetX();
-                        double offsetY = hitSide.getOffsetY();
-                        double offsetZ = hitSide.getOffsetZ();
+                        double offsetX = hitSide.getX();
+                        double offsetY = hitSide.getY();
+                        double offsetZ = hitSide.getZ();
 
                         offset = entity.getWidth() / 2;
-                        offsetDirection = new Vec3(offsetX, offsetY, offsetZ).negate();
+                        offsetDirection = new Vec3(offsetX, offsetY, offsetZ).reverse();
 
                     }
                 }
@@ -358,12 +358,12 @@ public class RaycastEntityActionType extends EntityActionType {
         Vec3 direction = destination.subtract(origin).normalize();
         double distance = origin.distanceTo(destination);
 
-        CommandSourceStack commandSource = entity.getCommandSource()
-            .withOutput(CommandSource.DUMMY)
+        CommandSourceStack commandSource = entity.createCommandSourceStack()
+            .withSource(CommandSource.NULL)
             .withLevel(Apoli.config.executeCommand.permissionLevel);
 
         if (Apoli.config.executeCommand.showOutput) {
-            commandSource = commandSource.withOutput(entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
+            commandSource = commandSource.withSource(entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
                 ? serverPlayer
                 : server);
         }
@@ -373,7 +373,7 @@ public class RaycastEntityActionType extends EntityActionType {
             Vec3 offsetPos = direction.multiply(steps);
             Vec3 newPos = origin.add(offsetPos);
 
-            server.getCommands().executeWithPrefix(commandSource.withPosition(newPos), commandAlongRay);
+            server.getCommands().performPrefixedCommand(commandSource.withPosition(newPos), commandAlongRay);
 
         }
 
@@ -388,18 +388,18 @@ public class RaycastEntityActionType extends EntityActionType {
             return;
         }
 
-        CommandSourceStack commandSource = entity.getCommandSource()
-            .withOutput(CommandSource.DUMMY)
+        CommandSourceStack commandSource = entity.createCommandSourceStack()
+            .withSource(CommandSource.NULL)
             .withPosition(hitPos)
             .withLevel(Apoli.config.executeCommand.permissionLevel);
 
         if (Apoli.config.executeCommand.showOutput) {
-            commandSource = commandSource.withOutput(entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
+            commandSource = commandSource.withSource(entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
                 ? serverPlayer
                 : server);
         }
 
-        server.getCommands().executeWithPrefix(commandSource, commandAtHit);
+        server.getCommands().performPrefixedCommand(commandSource, commandAtHit);
 
     }
 

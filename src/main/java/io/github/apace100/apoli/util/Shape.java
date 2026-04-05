@@ -2,6 +2,7 @@ package io.github.apace100.apoli.util;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -25,7 +26,7 @@ public enum Shape {
                 for (int z = -radius; z <= radius; z++) {
 
                     if (this.getBlockDistance(x, y, z) <= radius) {
-                        blockPositions.add(new BlockPos(center.add(x, y, z)));
+                        blockPositions.add(new BlockPos(center.offset(x, y, z)));
                     }
 
                 }
@@ -44,11 +45,11 @@ public enum Shape {
         double diameter = radius * 2;
         double x, y, z;
 
-        for (Entity entity : world.getNonSpectatingEntities(Entity.class, AABB.of(center, diameter, diameter, diameter))) {
+        for (Entity entity : world.getEntities((Entity) null, AABB.ofSize(center, diameter, diameter, diameter), EntitySelector.NO_SPECTATORS)) {
 
-            x = Math.abs(entity.getX() - center.getX());
-            y = Math.abs(entity.getY() - center.getY());
-            z = Math.abs(entity.getZ() - center.getZ());
+            x = Math.abs(entity.getX() - center.x());
+            y = Math.abs(entity.getY() - center.y());
+            z = Math.abs(entity.getZ() - center.z());
 
             if (this.getDistance(x, y, z) <= radius + 1) {
                 entities.add(entity);

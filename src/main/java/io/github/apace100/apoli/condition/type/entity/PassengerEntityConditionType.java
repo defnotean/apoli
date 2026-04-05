@@ -48,7 +48,7 @@ public class PassengerEntityConditionType extends EntityConditionType {
     public boolean test(EntityConditionContext context) {
 
         Entity entity = context.entity();
-        long matches = entity.getPassengerList()
+        long matches = entity.getPassengers()
             .stream()
             .filter(passenger -> biEntityCondition.map(condition -> condition.test(passenger, entity)).orElse(true))
             .count();

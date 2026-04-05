@@ -111,13 +111,13 @@ public class RandomTeleportEntityActionType extends EntityActionType {
         for (int i = 0; i < attempts; i++) {
 
             x = entity.getX() + (random.nextDouble() - 0.5) * areaWidth;
-            y = Mth.clamp(entity.getY() + (random.nextInt(Math.max((int) areaHeight, 1)) - (areaHeight / 2)), serverWorld.getBottomY(), serverWorld.getBottomY() + (serverWorld.getLogicalHeight() - 1));
+            y = Mth.clamp(entity.getY() + (random.nextInt(Math.max((int) areaHeight, 1)) - (areaHeight / 2)), serverWorld.getMinY(), serverWorld.getMinY() + (serverWorld.getLogicalHeight() - 1));
             z = entity.getZ() + (random.nextDouble() - 0.5) * areaWidth;
 
             if (this.attemptToTeleport(entity, serverWorld, x, y, z)) {
 
                 successAction.ifPresent(action -> action.execute(entity));
-                entity.onLanding();
+                entity.resetFallDistance();
 
                 succeeded = true;
                 break;
@@ -139,7 +139,7 @@ public class RandomTeleportEntityActionType extends EntityActionType {
 
     private boolean attemptToTeleport(Entity entity, ServerLevel serverWorld, double destX, double destY, double destZ) {
 
-        BlockPos.Mutable destBlockPos = BlockPos.ofFloored(destX, destY, destZ).mutable();
+        BlockPos.Mutable destBlockPos = BlockPos.containing(destX, destY, destZ).mutable();
         boolean foundSurface = false;
 
         if (heightmapType.isPresent()) {
@@ -168,9 +168,9 @@ public class RandomTeleportEntityActionType extends EntityActionType {
             return false;
         }
 
-        destX = landingOffset.getX() == 0 ? destX : Mth.floor(destX) + landingOffset.getX();
-        destY = destBlockPos.getY() + landingOffset.getY();
-        destZ = landingOffset.getZ() == 0 ? destZ : Mth.floor(destZ) + landingOffset.getZ();
+        destX = landingOffset.x() == 0 ? destX : Mth.floor(destX) + landingOffset.x();
+        destY = destBlockPos.y() + landingOffset.y();
+        destZ = landingOffset.z() == 0 ? destZ : Mth.floor(destZ) + landingOffset.z();
 
         destBlockPos.set(destX, destY, destZ);
 
@@ -179,7 +179,7 @@ public class RandomTeleportEntityActionType extends EntityActionType {
         double prevZ = entity.getZ();
 
         ChunkPos destChunkPos = new ChunkPos(destBlockPos);
-        if (!loadedChunksOnly && !serverWorld.isChunkLoaded(destChunkPos.x, destChunkPos.z)) {
+        if (!loadedChunksOnly && !serverWorld.hasChunkAt(destChunkPos.x, destChunkPos.z)) {
             serverWorld.getChunkSource().addTicket(TicketType.POST_TELEPORT, destChunkPos, 0, entity.getId());
             serverWorld.getChunk(destChunkPos.x, destChunkPos.z);
         }
@@ -202,13 +202,13 @@ public class RandomTeleportEntityActionType extends EntityActionType {
     private boolean shouldLandOnBlock(Level world, BlockPos pos) {
         return landingBlockCondition
             .map(condition -> condition.test(world, pos))
-            .orElseGet(() -> world.getBlockState(pos).blocksMovement());
+            .orElseGet(() -> world.getBlockState(pos).blocksMotion());
     }
 
     private boolean shouldLand(Entity entity) {
         return landingCondition
             .map(condition -> condition.test(entity))
-            .orElseGet(() -> entity.level().isSpaceEmpty(entity) && !entity.level().containsFluid(entity.getBoundingBox()));
+            .orElseGet(() -> entity.level().noCollision(entity) && !entity.level().containsAnyLiquid(entity.getBoundingBox()));
     }
 
 }

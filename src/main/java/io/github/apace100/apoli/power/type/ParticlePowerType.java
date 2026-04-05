@@ -117,15 +117,15 @@ public class ParticlePowerType extends PowerType {
     }
 
     public double getOffsetX() {
-        return getOffset().getX();
+        return getOffset().x();
     }
 
     public double getOffsetY() {
-        return getOffset().getY();
+        return getOffset().y();
     }
 
     public double getOffsetZ() {
-        return getOffset().getZ();
+        return getOffset().z();
     }
 
     public int getCount() {

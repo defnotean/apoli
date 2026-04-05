@@ -150,7 +150,7 @@ public abstract class ItemStackMixinClient implements DataComponentHolder {
                 apoli$tooltip.add(baseText);
                 apoli$tooltip.add(Component.empty());
 
-                Component keyBindingText = KeyBindingUtil.getLocalizedName(keyBinding.getTranslationKey()).styled(style -> style
+                Component keyBindingText = KeyBindingUtil.getLocalizedName(keyBinding.getDescriptionId()).styled(style -> style
                     .withColor(ChatFormatting.YELLOW)
                     .withItalic(keyBinding.isUnbound()));
 

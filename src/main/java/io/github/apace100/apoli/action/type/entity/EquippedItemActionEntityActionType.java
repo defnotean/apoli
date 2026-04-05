@@ -18,7 +18,7 @@ public class EquippedItemActionEntityActionType extends EntityActionType {
 
     public static final TypedDataObjectFactory<EquippedItemActionEntityActionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("equipment_slot", SerializableDataTypes.ATTRIBUTE_MODIFIER_SLOT)
+            .add("equipment_slot", SerializableDataTypes.EQUIPMENT_SLOT_GROUP)
             .add("item_action", ItemAction.DATA_TYPE),
         data -> new EquippedItemActionEntityActionType(
             data.get("equipment_slot"),
@@ -46,7 +46,7 @@ public class EquippedItemActionEntityActionType extends EntityActionType {
 
         for (EquipmentSlot slot : EquipmentSlot.values()) {
 
-            if (equipmentSlot.matches(slot)) {
+            if (equipmentSlot.test(slot)) {
                 itemAction.execute(livingEntity.level(), SlotAccess.of(livingEntity, slot));
             }
 

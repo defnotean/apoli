@@ -30,7 +30,7 @@ public class SetBlockBlockActionType extends BlockActionType {
 
     @Override
     public void accept(BlockActionContext context) {
-        context.world().setBlock(context.pos(), blockState);
+        context.world().setBlock(context.pos(), blockState, 3);
     }
 
     @Override

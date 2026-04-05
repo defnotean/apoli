@@ -57,7 +57,7 @@ public final class MiscUtil {
     }
 
     public static void createExplosion(Level world, Entity entity, Vec3 pos, float power, boolean createFire, Explosion.BlockInteraction destructionType, ExplosionDamageCalculator behavior) {
-        createExplosion(world, entity, null, pos.getX(), pos.getY(), pos.getZ(), power, createFire, destructionType, behavior);
+        createExplosion(world, entity, null, pos.x(), pos.y(), pos.z(), power, createFire, destructionType, behavior);
     }
 
     public static void createExplosion(Level world, @Nullable Entity entity, @Nullable DamageSource damageSource, double x, double y, double z, float power, boolean createFire, Explosion.BlockInteraction destructionType, ExplosionDamageCalculator behavior) {
@@ -146,7 +146,7 @@ public final class MiscUtil {
 
         CompoundTag entityToSpawnNbt = new CompoundTag();
         if (entityNbt != null && !entityNbt.isEmpty()) {
-            entityToSpawnNbt.copyFrom(entityNbt);
+            entityToSpawnNbt.merge(entityNbt);
         }
 
         entityToSpawnNbt.putString("id", BuiltInRegistries.ENTITY_TYPE.getId(entityType).toString());
@@ -164,7 +164,7 @@ public final class MiscUtil {
         }
 
         if ((entityNbt == null || entityNbt.isEmpty()) && entityToSpawn instanceof Mob mobToSpawn) {
-            mobToSpawn.initialize(serverWorld, serverWorld.getLocalDifficulty(BlockPos.ofFloored(pos)), EntitySpawnReason.COMMAND, null);
+            mobToSpawn.initialize(serverWorld, serverWorld.getLocalDifficulty(BlockPos.containing(pos)), EntitySpawnReason.COMMAND, null);
         }
 
         return Optional.of(entityToSpawn);
@@ -195,9 +195,9 @@ public final class MiscUtil {
         BlockPos.Mutable mutable = new BlockPos.Mutable();
 
         for(int i = 0; i < 8; ++i) {
-            double d = playerEntity.getX() + (double)(((float)((i >> 0) % 2) - 0.5F) * playerEntity.getWidth() * 0.8F);
+            double d = playerEntity.x() + (double)(((float)((i >> 0) % 2) - 0.5F) * playerEntity.getWidth() * 0.8F);
             double e = playerEntity.getEyeY() + (double)(((float)((i >> 1) % 2) - 0.5F) * 0.1F);
-            double f = playerEntity.getZ() + (double)(((float)((i >> 2) % 2) - 0.5F) * playerEntity.getWidth() * 0.8F);
+            double f = playerEntity.z() + (double)(((float)((i >> 2) % 2) - 0.5F) * playerEntity.getWidth() * 0.8F);
             mutable.set(d, e, f);
             BlockState blockState = playerEntity.level().getBlockState(mutable);
             if (blockState.getRenderType() != RenderShape.INVISIBLE && blockState.shouldBlockVision(playerEntity.level(), mutable)) {
@@ -387,7 +387,7 @@ public final class MiscUtil {
 
         IntSet slotIdSet = new IntOpenHashSet();
         for (SlotRange slotRange : slotRanges) {
-            slotIdSet.addAll(slotRange.getSlotIds());
+            slotIdSet.addAll(slotRange.slots());
         }
 
         return slotIdSet;

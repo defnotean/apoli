@@ -217,7 +217,7 @@ public class ItemPowersComponent {
     public static void onChangeEquipment(LivingEntity entity, EquipmentSlot equipmentSlot, ItemStack previousStack, ItemStack currentStack) {
 
         Identifier sourceId = Apoli.identifier("item/" + equipmentSlot.getName());
-        if (ItemStack.areEqual(previousStack, currentStack) || !PowerHolderComponent.KEY.isProvidedBy(entity)) {
+        if (ItemStack.matches(previousStack, currentStack) || !PowerHolderComponent.KEY.isProvidedBy(entity)) {
             return;
         }
 
@@ -226,7 +226,7 @@ public class ItemPowersComponent {
 
         for (Entry prevEntry : prevStackPowers.entries) {
             PowerManager.getOptional(prevEntry.powerId())
-                .filter(power -> prevEntry.slot().matches(equipmentSlot))
+                .filter(power -> prevEntry.slot().test(equipmentSlot))
                 .ifPresent(revokedPowers::add);
         }
 
@@ -235,7 +235,7 @@ public class ItemPowersComponent {
 
         for (Entry currEntry : currStackPowers.entries) {
             PowerManager.getOptional(currEntry.powerId())
-                .filter(power -> currEntry.slot().matches(equipmentSlot))
+                .filter(power -> currEntry.slot().test(equipmentSlot))
                 .ifPresent(grantedPowers::add);
         }
 

@@ -12,8 +12,11 @@ import io.github.apace100.apoli.util.modifier.ModifierUtil;
 import io.github.apace100.apoli.util.requirement.BiEntityRequirement;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.NotNull;
@@ -71,9 +74,11 @@ public class DamageBiEntityActionType extends BiEntityActionType {
         Entity actor = context.actor();
         Entity target = context.target();
 
+        Holder<DamageType> holder = target.level().registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(damageType);
+
         this.amount
             .or(() -> getModifiedAmount(actor, target))
-            .ifPresent(amount -> target.hurt(actor.damageSources().create(damageType, actor), amount));
+            .ifPresent(amount -> target.hurt(new DamageSource(holder, actor), amount));
 
     }
 

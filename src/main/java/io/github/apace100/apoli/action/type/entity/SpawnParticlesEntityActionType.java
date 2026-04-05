@@ -83,7 +83,7 @@ public class SpawnParticlesEntityActionType extends EntityActionType {
         serverWorld.players()
             .stream()
             .filter(player -> biEntityCondition.map(condition -> condition.test(entity, player)).orElse(true))
-            .forEach(player -> serverWorld.spawnParticles(player, particle, force, pos.getX(), pos.getY(), pos.getZ(), count, delta.getX(), delta.getY(), delta.getZ(), speed));
+            .forEach(player -> serverWorld.spawnParticles(player, particle, force, pos.x(), pos.y(), pos.z(), count, delta.x(), delta.y(), delta.z(), speed));
 
     }
 

@@ -16,7 +16,7 @@ public class CustomDataItemConditionType extends ItemConditionType {
 
     public static final TypedDataObjectFactory<CustomDataItemConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("nbt", SerializableDataTypes.NBT_COMPOUND),
+            .add("nbt", SerializableDataTypes.NBT),
         data -> new CustomDataItemConditionType(
             data.get("nbt")
         ),
@@ -32,7 +32,7 @@ public class CustomDataItemConditionType extends ItemConditionType {
 
     @Override
     public boolean test(ItemConditionContext context) {
-        return context.stack().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.DEFAULT).matches(nbt);
+        return context.stack().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.DEFAULT).test(nbt);
     }
 
     @Override

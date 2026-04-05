@@ -25,19 +25,19 @@ public record BlockConditionContext(SavedBlockPosition savedBlockPosition) imple
 	}
 
 	public Level world() {
-		return (Level) savedBlockPosition().level();
+		return (Level) savedBlockPosition().getLevel();
 	}
 
 	public BlockPos pos() {
-		return savedBlockPosition().blockPosition();
+		return savedBlockPosition().getPos();
 	}
 
 	public BlockState blockState() {
-		return savedBlockPosition().getBlockState();
+		return savedBlockPosition().getState();
 	}
 
 	public Optional<BlockEntity> blockEntity() {
-		return Optional.ofNullable(savedBlockPosition().getBlockEntity());
+		return Optional.ofNullable(savedBlockPosition().getEntity());
 	}
 
 }

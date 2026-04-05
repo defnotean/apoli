@@ -45,7 +45,7 @@ public class ModifyItemCooldownItemActionType extends ItemActionType {
             return;
         }
 
-        ItemCooldowns cooldownManager = player.getItemCooldowns();
+        ItemCooldowns cooldownManager = player.getCooldowns();
         ItemCooldowns.Entry cooldownEntry = cooldownManager.entries.get(stack.getItem());
 
         int oldDuration = cooldownEntry != null

@@ -36,7 +36,7 @@ public class AirEntityConditionType extends EntityConditionType {
 
     @Override
     public boolean test(EntityConditionContext context) {
-        return comparison.compare(context.entity().getAir(), compareTo);
+        return comparison.compare(context.entity().getAirSupply(), compareTo);
     }
 
     @Override

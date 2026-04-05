@@ -83,7 +83,7 @@ public abstract class InteractionPowerType extends PowerType {
             }
 
             else {
-                actor.getInventory().offerOrDrop(resultStackReference.get());
+                actor.getInventory().addItem(resultStackReference.get());
             }
 
         }
@@ -93,7 +93,7 @@ public abstract class InteractionPowerType extends PowerType {
     protected static SlotAccess getHeldStackReference(Player player, InteractionHand hand) {
 
         Inventory playerInventory = player.getInventory();
-        int selectedSlot = playerInventory.selectedSlot;
+        int selectedSlot = playerInventory.selected;
 
         if (hand == InteractionHand.MAIN_HAND && Inventory.isValidHotbarIndex(selectedSlot)) {
             return SlotAccess.of(playerInventory, selectedSlot);
@@ -104,7 +104,7 @@ public abstract class InteractionPowerType extends PowerType {
         }
 
         else {
-            return SlotAccess.EMPTY;
+            return null;
         }
 
     }

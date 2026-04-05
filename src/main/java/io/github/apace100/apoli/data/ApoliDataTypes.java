@@ -337,9 +337,9 @@ public class ApoliDataTypes {
 			data.get("z")
 		),
 		(vec3i, serializableData) -> serializableData.instance()
-			.set("x", vec3i.getX())
-			.set("y", vec3i.getY())
-			.set("z", vec3i.getZ())
+			.set("x", vec3i.x())
+			.set("y", vec3i.y())
+			.set("z", vec3i.z())
 	);
 
 	public static final SerializableDataType<Vector3f> VECTOR_3_FLOAT = SerializableDataType.compound(

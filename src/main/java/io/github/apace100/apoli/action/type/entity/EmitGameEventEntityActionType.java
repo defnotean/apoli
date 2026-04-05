@@ -15,7 +15,7 @@ public class EmitGameEventEntityActionType extends EntityActionType {
 
     public static final TypedDataObjectFactory<EmitGameEventEntityActionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("event", SerializableDataTypes.GAME_EVENT_ENTRY),
+            .add("event", SerializableDataTypes.GAME_EVENT),
         data -> new EmitGameEventEntityActionType(
             data.get("event")
         ),
@@ -31,7 +31,7 @@ public class EmitGameEventEntityActionType extends EntityActionType {
 
     @Override
     public void accept(EntityActionContext context) {
-        context.entity().emitGameEvent(event);
+        context.entity().gameEvent(event);
     }
 
     @Override

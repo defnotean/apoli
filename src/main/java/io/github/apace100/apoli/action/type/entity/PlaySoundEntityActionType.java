@@ -57,7 +57,7 @@ public class PlaySoundEntityActionType extends EntityActionType {
         Entity entity = context.entity();
         Level world = entity.level();
 
-        BlockPos blockPos = BlockPos.ofFloored(entity.position().add(context.offset()));
+        BlockPos blockPos = BlockPos.containing(entity.position().add(context.offset()));
         world.playSound(null, blockPos, sound, category.orElseGet(entity::getSoundCategory), volume, pitch);
 
     }

@@ -45,7 +45,7 @@ public class ItemCooldownItemConditionType extends ItemConditionType {
 
         if (!stack.isEmpty() && ((EntityLinkedItemStack) stack).apoli$getEntity(true) instanceof Player player) {
 
-            ItemCooldowns.Entry cooldownEntry = player.getItemCooldowns().entries.get(stack.getItem());
+            ItemCooldowns.Entry cooldownEntry = player.getCooldowns().entries.get(stack.getItem());
             int cooldown = cooldownEntry != null
                 ? Math.abs(cooldownEntry.endTick - cooldownEntry.startTick)
                 : 0;

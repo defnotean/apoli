@@ -51,7 +51,7 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
             .add("biome_tag", SerializableDataType.tagKey(Registries.BIOME).optional(), Optional.empty())
             .add("spawn_strategy", SerializableDataType.enumValue(SpawnStrategy.class), SpawnStrategy.DEFAULT)
             .add("respawn_sound", SerializableDataTypes.SOUND_EVENT.optional(), Optional.empty())
-            .add("dimension_distance_multiplier", SerializableDataTypes.NON_NEGATIVE_FLOAT, 1.0F)
+            .add("dimension_distance_multiplier", SerializableDataTypes.FLOAT, 1.0F)
             .add("priority", SerializableDataTypes.INT, 0),
         (data, condition) -> new ModifyPlayerSpawnPowerType(
             data.get("dimension"),
@@ -157,11 +157,11 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
         Vec3 placement = DismountHelper.findRespawnPos(serverPlayer.getType(), spawnPointDimension, spawnPointPosition, true);
         if (placement == null) {
             Apoli.LOGGER.warn("Power \"{}\" could not find a suitable spawn point for player {}! Teleporting to the found location directly...", this.getPower().getId(), serverPlayer.getName().getString());
-            serverPlayer.teleport(spawnPointDimension, spawnPointPosition.getX(), spawnPointPosition.getY(), spawnPointPosition.getZ(), pitch, yaw);
+            serverPlayer.teleport(spawnPointDimension, spawnPointPosition.x(), spawnPointPosition.y(), spawnPointPosition.z(), pitch, yaw);
         }
 
         else {
-            serverPlayer.teleport(spawnPointDimension, placement.getX(), placement.getY(), placement.getZ(), pitch, yaw);
+            serverPlayer.teleport(spawnPointDimension, placement.x(), placement.y(), placement.z(), pitch, yaw);
         }
 
     }
@@ -325,7 +325,7 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
         BlockPos structurePos = targetStructure.get().getLeft();
         Structure structure = targetStructure.get().getRight();
 
-        ChunkPos chunkPos = new ChunkPos(structurePos.getX() >> 4, structurePos.getZ() >> 4);
+        ChunkPos chunkPos = new ChunkPos(structurePos.x() >> 4, structurePos.z() >> 4);
         SectionPos chunkSectionPos = SectionPos.from(chunkPos, 0);
 
         return Optional.ofNullable(targetDimension.getStructureAccessor().getStructureStart(chunkSectionPos, structure, targetDimension.getChunk(structurePos)))
@@ -344,15 +344,15 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
         int segmentLength = 1;
 
         //  The center of the structure/dimension
-        int center = startPos.getY();
+        int center = startPos.y();
 
         //  The valid spawn position and (mutable) starting position
         Vec3 spawnPos;
         BlockPos.Mutable mutableStartPos = startPos.mutable();
 
         //  The current position
-        int x = startPos.getX();
-        int z = startPos.getZ();
+        int x = startPos.x();
+        int z = startPos.z();
 
         //  Determines how much of the current segment has been passed
         int segmentPassed = 0;
@@ -432,7 +432,7 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
             BlockPos.Mutable mut = new BlockPos.Mutable();
             multiplier = Math.max(multiplier, 1F);
 
-            return mut.set(blockPos.getX() * multiplier, blockPos.getY(), blockPos.getZ() * multiplier);
+            return mut.set(blockPos.x() * multiplier, blockPos.y(), blockPos.z() * multiplier);
 
         });
 

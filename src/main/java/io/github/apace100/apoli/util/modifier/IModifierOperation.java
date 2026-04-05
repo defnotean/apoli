@@ -11,7 +11,7 @@ import net.minecraft.core.registries.Registries;
 
 public interface IModifierOperation {
 
-    SerializableDataType<IModifierOperation> DATA_TYPE = SerializableDataType.registry(ApoliRegistries.MODIFIER_OPERATION, Apoli.MODID, true);
+    SerializableDataType<IModifierOperation> DATA_TYPE = SerializableDataType.registry(IModifierOperation.class, ApoliRegistries.MODIFIER_OPERATION, Apoli.MODID, true);
 
     /**
      *  @return the serializable data of the modifier instance that this operation needs to operate.

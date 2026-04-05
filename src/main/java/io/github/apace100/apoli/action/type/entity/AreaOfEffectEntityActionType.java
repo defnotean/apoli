@@ -63,7 +63,7 @@ public class AreaOfEffectEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         Entity actor = context.entity();
-        Vec3 lerpedPos = actor.getLerpedPos(1.0F);
+        Vec3 lerpedPos = actor.getPosition(1.0F);
 
         shape.getEntities(actor.level(), lerpedPos.lerp(actor.position().add(context.offset()), 1.0), radius)
             .stream()

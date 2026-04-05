@@ -64,9 +64,9 @@ public class CommandBlockConditionType extends BlockConditionType {
         MinecraftServer server = serverWorld.getServer();
         AtomicInteger result = new AtomicInteger();
 
-        String blockTranslationKey = blockState.getBlock().getTranslationKey();
+        String blockTranslationKey = blockState.getBlock().getDescriptionId();
         CommandSourceStack commandSource = new CommandSourceStack(
-            Apoli.config.executeCommand.showOutput ? server : CommandSource.DUMMY,
+            Apoli.config.executeCommand.showOutput ? server : CommandSource.NULL,
             pos.getCenter(),
             Vec2.ZERO,
             serverWorld,
@@ -78,7 +78,7 @@ public class CommandBlockConditionType extends BlockConditionType {
         );
 
         commandSource = commandSource.withReturnValueConsumer((successful, returnValue) -> result.set(returnValue));
-        server.getCommands().executeWithPrefix(commandSource, command);
+        server.getCommands().performPrefixedCommand(commandSource, command);
 
         return comparison.compare(result.get(), compareTo);
 

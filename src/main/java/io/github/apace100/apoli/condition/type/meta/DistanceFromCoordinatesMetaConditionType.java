@@ -80,18 +80,18 @@ public interface DistanceFromCoordinatesMetaConditionType {
                         if (resultOnWrongDimension().isPresent() && !world.dimension().equals(respawnDimension)) {
                             return resultOnWrongDimension().get();
                         }
-                        x = spawnPos.getX();
-                        y = spawnPos.getY();
-                        z = spawnPos.getZ();
+                        x = spawnPos.x();
+                        y = spawnPos.y();
+                        z = spawnPos.z();
                         break;
                     }
                 }
 
                 //  No player-specific spawn set — fall back to world spawn
                 BlockPos worldSpawn = world.getSharedSpawnPos();
-                x = worldSpawn.getX();
-                y = worldSpawn.getY();
-                z = worldSpawn.getZ();
+                x = worldSpawn.x();
+                y = worldSpawn.y();
+                z = worldSpawn.z();
 
             }
 
@@ -113,18 +113,18 @@ public interface DistanceFromCoordinatesMetaConditionType {
                         if (resultOnWrongDimension().isPresent() && !world.dimension().equals(respawnDimension)) {
                             return resultOnWrongDimension().get();
                         }
-                        x = spawnPos.getX();
-                        y = spawnPos.getY();
-                        z = spawnPos.getZ();
+                        x = spawnPos.x();
+                        y = spawnPos.y();
+                        z = spawnPos.z();
                         break;
                     }
                 }
 
                 //  No natural spawn set — fall back to world spawn
                 BlockPos worldSpawn = world.getSharedSpawnPos();
-                x = worldSpawn.getX();
-                y = worldSpawn.getY();
-                z = worldSpawn.getZ();
+                x = worldSpawn.x();
+                y = worldSpawn.y();
+                z = worldSpawn.z();
 
             }
 
@@ -136,9 +136,9 @@ public interface DistanceFromCoordinatesMetaConditionType {
                 }
 
                 BlockPos spawnPos = world.getSharedSpawnPos();
-                x = spawnPos.getX();
-                y = spawnPos.getY();
-                z = spawnPos.getZ();
+                x = spawnPos.x();
+                y = spawnPos.y();
+                z = spawnPos.z();
 
             }
 
@@ -148,18 +148,18 @@ public interface DistanceFromCoordinatesMetaConditionType {
 
         }
 
-        x += offset().getX();
-        y += offset().getY();
-        z += offset().getZ();
+        x += offset().x();
+        y += offset().y();
+        z += offset().z();
 
         if (scaleReferenceToDimension() && (x != 0 || z != 0)) {
             x /= coordinateScale;
             z /= coordinateScale;
         }
 
-        double xDistance = ignoreX() ? 0 : Math.abs(pos.getX() - x);
-        double yDistance = ignoreY() ? 0 : Math.abs(pos.getY() - y);
-        double zDistance = ignoreZ() ? 0 : Math.abs(pos.getZ() - z);
+        double xDistance = ignoreX() ? 0 : Math.abs(pos.x() - x);
+        double yDistance = ignoreY() ? 0 : Math.abs(pos.y() - y);
+        double zDistance = ignoreZ() ? 0 : Math.abs(pos.z() - z);
 
         if (scaleDistanceToDimension()) {
             xDistance *= coordinateScale;

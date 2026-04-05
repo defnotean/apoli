@@ -18,7 +18,7 @@ public class EquippableItemConditionType extends ItemConditionType {
 
     public static final TypedDataObjectFactory<EquippableItemConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("equipment_slot", SerializableDataTypes.ATTRIBUTE_MODIFIER_SLOT.optional(), Optional.empty()),
+            .add("equipment_slot", SerializableDataTypes.EQUIPMENT_SLOT_GROUP.optional(), Optional.empty()),
         data -> new EquippableItemConditionType(
             data.get("equipment_slot")
         ),
@@ -36,7 +36,7 @@ public class EquippableItemConditionType extends ItemConditionType {
     public boolean test(ItemConditionContext context) {
         Equippable equipment = context.stack().get(DataComponents.EQUIPPABLE);
         return equipment != null
-            && equipmentSlot.map(slot -> slot.matches(equipment.slot())).orElse(true);
+            && equipmentSlot.map(slot -> slot.test(equipment.slot())).orElse(true);
     }
 
     @Override

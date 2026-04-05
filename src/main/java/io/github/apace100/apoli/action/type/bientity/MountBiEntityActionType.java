@@ -19,7 +19,7 @@ public class MountBiEntityActionType extends BiEntityActionType {
         Entity actor = context.actor();
         Entity target = context.target();
 
-        actor.startRiding(target, true);
+        actor.startRiding(target, true, false);
 
         if (target instanceof ServerPlayer targetPlayer) {
             ServerPlayNetworking.send(targetPlayer, new MountPlayerS2CPacket(actor.getId(), target.getId()));

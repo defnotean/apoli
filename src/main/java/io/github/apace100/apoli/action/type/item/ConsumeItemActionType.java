@@ -29,7 +29,7 @@ public class ConsumeItemActionType extends ItemActionType {
 
     @Override
     public void accept(ItemActionContext context) {
-        context.stackReference().get().decrement(amount);
+        context.stackReference().get().shrink(amount);
     }
 
     @Override

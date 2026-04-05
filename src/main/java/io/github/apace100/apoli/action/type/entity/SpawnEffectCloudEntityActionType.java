@@ -70,7 +70,7 @@ public class SpawnEffectCloudEntityActionType extends EntityActionType {
             return;
         }
 
-        AreaEffectCloud aec = new AreaEffectCloud(entity.level(), pos.getX(), pos.getY(), pos.getZ());
+        AreaEffectCloud aec = new AreaEffectCloud(entity.level(), pos.x(), pos.y(), pos.z());
 
         if (entity instanceof LivingEntity living) {
             aec.setOwner(living);

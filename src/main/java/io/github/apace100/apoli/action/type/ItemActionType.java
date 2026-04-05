@@ -13,7 +13,7 @@ public abstract class ItemActionType extends ActionType<ItemActionContext, ItemA
 
 	@Override
 	public boolean shouldExecute(ItemActionContext context) {
-		return context.stackReference() != SlotAccess.EMPTY;
+		return context.stackReference() != null && !context.stackReference().get().isEmpty();
 	}
 
 }

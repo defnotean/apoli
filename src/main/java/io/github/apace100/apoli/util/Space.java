@@ -23,15 +23,15 @@ public enum Space {
      * */
     private static Matrix3f getBaseTransformMatrixFromNormalizedDirectionVector(Vec3 vector, float yaw){
         double xX, xZ, // X vector
-            zX = 0.0D, zY = vector.getY(), zZ = 0.0D; // Z vector
+            zX = 0.0D, zY = vector.y(), zZ = 0.0D; // Z vector
 
         if (Math.abs(zY) != 1.0F) { // Z not vertical, can infer X from it
             // Z
-            zX = vector.getX();
-            zZ = vector.getZ();
+            zX = vector.x();
+            zZ = vector.z();
             // X (orthogonal to the projection of Z on the global XZ plane)
-            xX = vector.getZ();
-            xZ = -vector.getX();
+            xX = vector.z();
+            xZ = -vector.x();
             // Normalize X
             float xFactor = (float)(1 / Math.sqrt(xX * xX + xZ * xZ));
             xX *= xFactor;
@@ -106,7 +106,7 @@ public enum Space {
             case LOCAL_HORIZONTAL_NORMALIZED:
                 baseForwardVector = entity.getLookAngle();
                 if (this != LOCAL) // horizontal
-                    baseForwardVector = new Vec3(baseForwardVector.getX(), 0, baseForwardVector.getZ());
+                    baseForwardVector = new Vec3(baseForwardVector.x(), 0, baseForwardVector.z());
                 transformVectorToBase(baseForwardVector, vector, entity.getYRot(), this == LOCAL_HORIZONTAL_NORMALIZED);
                 break;
 
@@ -116,7 +116,7 @@ public enum Space {
             case VELOCITY_HORIZONTAL_NORMALIZED:
                 baseForwardVector = entity.getDeltaMovement();
                 if (this == VELOCITY_HORIZONTAL || this == VELOCITY_HORIZONTAL_NORMALIZED)
-                    baseForwardVector = new Vec3(baseForwardVector.getX(), 0, baseForwardVector.getZ());
+                    baseForwardVector = new Vec3(baseForwardVector.x(), 0, baseForwardVector.z());
                 transformVectorToBase(baseForwardVector, vector, entity.getYRot(), this == VELOCITY_NORMALIZED || this == VELOCITY_HORIZONTAL_NORMALIZED);
                 break;
         }

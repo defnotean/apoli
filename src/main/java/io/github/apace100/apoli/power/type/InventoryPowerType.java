@@ -259,7 +259,7 @@ public class InventoryPowerType extends PowerType implements Active, Container {
         }
 
         for (int i = 0; i < container.size(); ++i) {
-            playerEntity.getInventory().offerOrDrop(this.getStack(i));
+            playerEntity.getInventory().addItem(this.getStack(i));
         }
 
     }

@@ -43,7 +43,7 @@ public class OffsetBlockActionType extends BlockActionType {
 
     @Override
     public void accept(BlockActionContext context) {
-        blockAction.execute(context.world(), context.pos().add(offset), context.direction());
+        blockAction.execute(context.world(), context.pos().offset(offset), context.direction());
     }
 
     @Override

@@ -188,7 +188,7 @@ public class Power implements Validatable {
         this.id = id;
         this.powerType = powerType;
 
-        String baseTranslationKey = Util.createTranslationKey("power", id);
+        String baseTranslationKey = Util.makeDescriptionId("power", id);
 
         this.name = TextUtil.forceTranslatable(baseTranslationKey + ".name", name);
         this.description = TextUtil.forceTranslatable(baseTranslationKey + ".description", description);
@@ -286,8 +286,8 @@ public class Power implements Validatable {
                 .addFunctionedDefault("type", PowerTypes.DATA_TYPE, data -> data.get("Factory"))
                 .add("Type", ApoliDataTypes.POWER_REFERENCE, null)
                 .addFunctionedDefault("id", ApoliDataTypes.POWER_REFERENCE, data -> data.get("Type"))
-                .add("Data", SerializableDataTypes.NBT_ELEMENT, new CompoundTag())
-                .addFunctionedDefault("data", SerializableDataTypes.NBT_ELEMENT, data -> data.get("Data"))
+                .add("Data", SerializableDataTypes.NBT, new CompoundTag())
+                .addFunctionedDefault("data", SerializableDataTypes.NBT, data -> data.get("Data"))
                 .add("Sources", MUTABLE_IDENTIFIERS, null)
                 .addFunctionedDefault("sources", MUTABLE_IDENTIFIERS, data -> data.get("Sources"))
                 .validate(MiscUtil.validateAllFieldsPresent("type", "id", "data", "sources")),

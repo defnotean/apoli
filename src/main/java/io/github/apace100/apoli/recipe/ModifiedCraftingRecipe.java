@@ -55,7 +55,7 @@ public class ModifiedCraftingRecipe implements CraftingRecipe {
 
     @Override
     public boolean matches(CraftingInput input, Level world) {
-        return delegate().matches(input, world);
+        return delegate().test(input, world);
     }
 
     @Override

@@ -25,8 +25,8 @@ public class ExplodeBlockActionType extends BlockActionType {
             .add("indestructible", BlockCondition.DATA_TYPE, null)
             .add("destruction_type", SerializableDataTypes.DESTRUCTION_TYPE, Explosion.BlockInteraction.DESTROY)
             .add("create_fire", SerializableDataTypes.BOOLEAN, false)
-            .add("power", SerializableDataTypes.NON_NEGATIVE_FLOAT)
-            .add("indestructible_resistance", SerializableDataTypes.NON_NEGATIVE_FLOAT, 10.0F),
+            .add("power", SerializableDataTypes.FLOAT)
+            .add("indestructible_resistance", SerializableDataTypes.FLOAT, 10.0F),
         data -> new ExplodeBlockActionType(
             data.get("destructible"),
             data.get("indestructible"),
@@ -79,7 +79,7 @@ public class ExplodeBlockActionType extends BlockActionType {
             power,
             createFire,
             destructionType,
-            MiscUtil.createExplosionBehavior(behaviorCondition, indestructibleResistance)
+            MiscUtil.createExplosionDamageCalculator(behaviorCondition, indestructibleResistance)
         );
 
     }

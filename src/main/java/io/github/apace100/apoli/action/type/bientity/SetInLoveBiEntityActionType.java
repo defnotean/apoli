@@ -15,7 +15,7 @@ public class SetInLoveBiEntityActionType extends BiEntityActionType {
     public void accept(BiEntityActionContext context) {
 
         if (context.target() instanceof Animal animalTarget && context.actor() instanceof Player playerActor) {
-            animalTarget.lovePlayer(playerActor);
+            animalTarget.setInLove(playerActor);
         }
 
     }

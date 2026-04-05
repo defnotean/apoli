@@ -22,7 +22,7 @@ public class PreventGameEventPowerType extends PowerType {
     public static final TypedDataObjectFactory<PreventGameEventPowerType> DATA_FACTORY = PowerType.createConditionedDataFactory(
         new SerializableData()
             .add("entity_action", EntityAction.DATA_TYPE.optional(), Optional.empty())
-            .add("event", SerializableDataTypes.GAME_EVENT_ENTRY, null)
+            .add("event", SerializableDataTypes.GAME_EVENT, null)
             .addFunctionedDefault("events", SerializableDataTypes.GAME_EVENT_ENTRIES, data -> MiscUtil.singletonListOrEmpty(data.get("event")))
             .add("event_tag", SerializableDataTypes.GAME_EVENT_TAG.optional(), Optional.empty()),
         (data, condition) -> new PreventGameEventPowerType(

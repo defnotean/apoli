@@ -79,7 +79,7 @@ public class ModifyEnchantmentLevelPowerType extends ValueModifyingPowerType {
 
             SlotAccess stackReference = holder.getStackReference(slot);
 
-            if (stackReference != SlotAccess.EMPTY && isWorkableEmptyStack(holder, stackReference)) {
+            if (stackReference != null && isWorkableEmptyStack(holder, stackReference)) {
                 stackReference.set(ItemStack.EMPTY);
             }
 
@@ -102,7 +102,7 @@ public class ModifyEnchantmentLevelPowerType extends ValueModifyingPowerType {
             SlotAccess stackReference = holder.getStackReference(slot);
             ItemStack stack = stackReference.get();
 
-            if (stackReference == SlotAccess.EMPTY) {
+            if (stackReference == null) {
                 continue;
             }
 
