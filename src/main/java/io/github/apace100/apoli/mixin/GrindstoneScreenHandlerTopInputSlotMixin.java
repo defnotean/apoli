@@ -22,7 +22,7 @@ public class GrindstoneScreenHandlerTopInputSlotMixin {
         this.apoli$grindstoneHandler = grindstoneScreenHandler;
     }
 
-    @ModifyReturnValue(method = "canInsert", at = @At("RETURN"))
+    @ModifyReturnValue(method = "mayPlace", at = @At("RETURN"))
     private boolean apoli$allowStackInTopSlotViaPower(boolean original, ItemStack stack) {
         return original
             || ModifyGrindstonePowerType.allowsInTopSlot(apoli$grindstoneHandler, stack);
