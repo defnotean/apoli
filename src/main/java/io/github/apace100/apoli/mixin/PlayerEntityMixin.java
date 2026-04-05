@@ -145,12 +145,13 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
         PowerHolderComponent.withPowerTypes(this, KeepInventoryPowerType.class, p -> true, KeepInventoryPowerType::restoreSavedItems);
     }
 
-    // TODO: MC 26.1 renamed Player.canEquip -> LivingEntity.canEquipWithDispenser
-    @ModifyReturnValue(method = "canEquipWithDispenser", at = @At("RETURN"))
-    private boolean apoli$preventArmorDispensing(boolean original, ItemStack stack) {
-        return original
-            && !PowerHolderComponent.hasPowerType(this, RestrictArmorPowerType.class, p -> p.doesRestrict(stack, this.getEquipmentSlotForItem(stack)));
-    }
+    // TODO: MC 26.1 - canEquipWithDispenser is on LivingEntity, not Player.
+    // Armor restriction is handled by EquipmentMixin on Equippable instead.
+    // @ModifyReturnValue(method = "canDispenserEquipIntoSlot", at = @At("RETURN"))
+    // private boolean apoli$preventArmorDispensing(boolean original, ItemStack stack) {
+    //     return original
+    //         && !PowerHolderComponent.hasPowerType(this, RestrictArmorPowerType.class, p -> p.doesRestrict(stack, this.getEquipmentSlotForItem(stack)));
+    // }
 
     @WrapOperation(method = "interactOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/InteractionResult;"))
     private InteractionResult apoli$beforeEntityUse(Entity entity, Player player, InteractionHand hand, Vec3 hitVec, Operation<InteractionResult> original, @Share("zeroPriority$onEntity") LocalRef<InteractionResult> sharedZeroPriority$onEntity) {
