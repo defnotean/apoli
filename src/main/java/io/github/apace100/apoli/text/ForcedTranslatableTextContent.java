@@ -18,7 +18,11 @@ public class ForcedTranslatableTextContent extends TranslatableContents {
 	public static final MapCodec<ForcedTranslatableTextContent> FORCED_TRANSLATABLE_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("translate").forGetter(ForcedTranslatableTextContent::getKey),
 		ComponentSerialization.CODEC.fieldOf("alt_text").forGetter(ForcedTranslatableTextContent::getTextFallback),
-		TranslatableTextContentAccessor.getArgumentCodec().listOf().optionalFieldOf("with").forGetter(content -> TranslatableTextContentAccessor.callToOptionalList(content.getArgs()))
+		TranslatableTextContentAccessor.getArgumentCodec().listOf().optionalFieldOf("with").forGetter(content -> {
+			Object[] args = content.getArgs();
+			if (args.length == 0) return Optional.empty();
+			return Optional.of(List.of(args));
+		})
 	).apply(instance, ForcedTranslatableTextContent::new));
 
 	// MC 26.1: ComponentContents.Type removed. Registration now uses MapCodec directly.
@@ -31,7 +35,7 @@ public class ForcedTranslatableTextContent extends TranslatableContents {
 	}
 
 	private ForcedTranslatableTextContent(String key, Component textFallback, Optional<List<Object>> args) {
-		this(key, textFallback, TranslatableTextContentAccessor.callToArray(args));
+		this(key, textFallback, args.map(list -> list.toArray(new Object[0])).orElse(new Object[0]));
 	}
 
 	@Override

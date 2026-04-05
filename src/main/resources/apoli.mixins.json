@@ -71,7 +71,6 @@
 		"TagGroupLoaderMixin",
 		"TextCodecsMixin",
 		"TranslatableTextContentAccessor",
-		"WeightedListEntryAccessor",
 		"internal.DefaultAttributeContainerAccessor",
 		"internal.DefaultAttributeRegistryAccessor",
 		"power.type.GameEventListenerPowerTypeMixin$CustomCallbackHandler",

@@ -19,7 +19,7 @@ import java.util.Map;
 @Mixin(DefaultAttributes.class)
 public interface DefaultAttributeRegistryAccessor {
 
-    @Accessor("DEFAULT_ATTRIBUTE_REGISTRY")
+    @Accessor("SUPPLIERS")
     static Map<EntityType<? extends LivingEntity>, AttributeSupplier> apoli$getRegistry() {
         throw new AssertionError();
     }

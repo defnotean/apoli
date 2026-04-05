@@ -9,7 +9,7 @@ import java.util.Map;
 @Mixin(KeyMapping.class)
 public interface KeyBindingAccessor {
 
-    @Accessor("KEYS_BY_ID")
+    @Accessor("ALL")
     static Map<String, KeyMapping> getKeysById() {
         throw new AssertionError();
     }
