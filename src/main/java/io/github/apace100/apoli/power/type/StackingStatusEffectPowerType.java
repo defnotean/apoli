@@ -115,7 +115,7 @@ public class StackingStatusEffectPowerType extends StatusEffectPowerType {
         for (MobEffectInstance effectInstance : effects) {
 
             int duration = Math.max(0, durationPerStack * currentStack);
-            effectInstance = new MobEffectInstance(effectInstance.getEffectType(), duration, effectInstance.getAmplifier(), effectInstance.isAmbient(), effectInstance.shouldShowParticles(), effectInstance.shouldShowIcon());
+            effectInstance = new MobEffectInstance(effectInstance.getEffect(), duration, effectInstance.getAmplifier(), effectInstance.isAmbient(), effectInstance.shouldShowParticles(), effectInstance.shouldShowIcon());
 
             getHolder().addEffect(effectInstance);
 
@@ -125,7 +125,7 @@ public class StackingStatusEffectPowerType extends StatusEffectPowerType {
 
     @Override
     public Tag toTag() {
-        return IntTag.of(currentStack);
+        return IntTag.valueOf(currentStack);
     }
 
     @Override

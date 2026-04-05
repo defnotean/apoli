@@ -23,7 +23,7 @@ public class PreventGameEventPowerType extends PowerType {
         new SerializableData()
             .add("entity_action", EntityAction.DATA_TYPE.optional(), Optional.empty())
             .add("event", SerializableDataTypes.GAME_EVENT, null)
-            .addFunctionedDefault("events", SerializableDataTypes.GAME_EVENT_ENTRIES, data -> MiscUtil.singletonListOrEmpty(data.get("event")))
+            .addFunctionedDefault("events", SerializableDataTypes.GAME_EVENTS, data -> MiscUtil.singletonListOrEmpty(data.get("event")))
             .add("event_tag", SerializableDataTypes.GAME_EVENT_TAG.optional(), Optional.empty()),
         (data, condition) -> new PreventGameEventPowerType(
             data.get("entity_action"),

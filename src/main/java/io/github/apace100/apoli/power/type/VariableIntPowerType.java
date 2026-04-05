@@ -55,7 +55,7 @@ public abstract class VariableIntPowerType extends PowerType {
 
     @Override
     public Tag toTag() {
-        return IntTag.of(currentValue);
+        return IntTag.valueOf(currentValue);
     }
 
     @Override

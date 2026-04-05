@@ -36,7 +36,7 @@ public class ItemOnItemPowerType extends PowerType implements Prioritized<ItemOn
             .add("click_phases", ApoliDataTypes.STACK_CLICK_PHASE_SET, EnumSet.allOf(StackClickPhase.class))
             .add("result_stack", SerializableDataTypes.ITEM_STACK.optional(), Optional.empty())
             .add("result_item_action", ItemAction.DATA_TYPE.optional(), Optional.empty())
-            .add("result_from_on_stack", SerializableDataTypes.NON_NEGATIVE_INT, 0)
+            .add("result_from_on_stack", SerializableDataTypes.INT, 0)
             .add("priority", SerializableDataTypes.INT, 0),
         (data, condition) -> new ItemOnItemPowerType(
             data.get("entity_action"),

@@ -23,7 +23,7 @@ public class SyncStatusEffectsUtil {
 
         CompoundTag statusEffectNbt = new CompoundTag();
         if (instance != null && updateType != UpdateType.CLEAR) {
-            statusEffectNbt = (CompoundTag) instance.save();
+            statusEffectNbt = (CompoundTag) MobEffectInstance.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, instance).result().orElse(new CompoundTag());
         }
 
         SyncStatusEffectS2CPacket syncStatusEffectPacket = new SyncStatusEffectS2CPacket(entity.getId(), statusEffectNbt, updateType);
@@ -52,7 +52,7 @@ public class SyncStatusEffectsUtil {
 
         });
 
-        public static final StreamCodec<FriendlyByteBuf, UpdateType> PACKET_CODEC = ByteBufCodecs.indexed(index -> values()[index], UpdateType::ordinal).cast();
+        public static final StreamCodec<FriendlyByteBuf, UpdateType> PACKET_CODEC = ByteBufCodecs.VAR_INT.map(index -> values()[index], UpdateType::ordinal).cast();
 
         final BiConsumer<LivingEntity, MobEffectInstance> consumer;
         UpdateType(BiConsumer<LivingEntity, MobEffectInstance> consumer) {

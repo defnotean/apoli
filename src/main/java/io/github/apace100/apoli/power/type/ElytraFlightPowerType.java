@@ -102,7 +102,7 @@ public class ElytraFlightPowerType extends PowerType {
             entity.setDeltaMovement(velocity);
 
             // Damage real elytra durability (vanilla: 1 per 10 ticks) only for players wearing elytra
-            if (entity instanceof Player player && !entity.level().isClientSide) {
+            if (entity instanceof Player player && !entity.level().isClientSide()) {
                 var chestStack = player.getItemBySlot(EquipmentSlot.CHEST);
                 if (chestStack.is(Items.ELYTRA) && player.tickCount % 10 == 0) {
                     chestStack.hurtEquipment(EquipmentSlot.CHEST, 1, player,

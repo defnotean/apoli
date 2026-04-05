@@ -25,7 +25,7 @@ public class RestrictArmorPowerType extends PowerType {
         data -> {
 
             EnumMap<EquipmentSlot, Optional<ItemCondition>> conditions = Arrays.stream(EquipmentSlot.values())
-                .filter(EquipmentSlot::isArmorSlot)
+                .filter(EquipmentSlot::isArmor)
                 .collect(Collectors.toMap(Function.identity(), slot -> data.get(slot.getName()), (o1, o2) -> o2, () -> new EnumMap<>(EquipmentSlot.class)));
 
             return new RestrictArmorPowerType(conditions);
@@ -96,7 +96,7 @@ public class RestrictArmorPowerType extends PowerType {
 
         SerializableData serializableData = new SerializableData();
         Arrays.stream(EquipmentSlot.values())
-            .filter(EquipmentSlot::isArmorSlot)
+            .filter(EquipmentSlot::isArmor)
             .forEach(slot -> serializableData.add(slot.getName(), ItemCondition.DATA_TYPE.optional(), Optional.empty()));
 
         return serializableData;

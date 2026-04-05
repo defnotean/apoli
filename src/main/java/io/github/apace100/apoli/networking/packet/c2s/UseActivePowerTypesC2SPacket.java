@@ -13,8 +13,8 @@ import java.util.List;
 public record UseActivePowerTypesC2SPacket(List<Identifier> powerIds) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<UseActivePowerTypesC2SPacket> PACKET_ID = new CustomPacketPayload.Type<>(Apoli.identifier("c2s/use_active_power_types"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, UseActivePowerTypesC2SPacket> PACKET_CODEC = StreamCodec.tuple(
-        ByteBufCodecs.collection(ArrayList::new, Identifier.PACKET_CODEC), UseActivePowerTypesC2SPacket::powerIds,
+    public static final StreamCodec<RegistryFriendlyByteBuf, UseActivePowerTypesC2SPacket> PACKET_CODEC = StreamCodec.composite(
+        ByteBufCodecs.collection(ArrayList::new, Identifier.STREAM_CODEC), UseActivePowerTypesC2SPacket::powerIds,
         UseActivePowerTypesC2SPacket::new
     );
 

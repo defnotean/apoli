@@ -8,14 +8,14 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 public record VersionHandshakePacket(int[] semver) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<VersionHandshakePacket> PACKET_ID = new CustomPacketPayload.Type<>(Apoli.identifier("handshake/version"));
-    public static final StreamCodec<FriendlyByteBuf, VersionHandshakePacket> PACKET_CODEC = StreamCodec.of(VersionHandshakePacket::write, VersionHandshakePacket::read);
+    public static final StreamCodec<FriendlyByteBuf, VersionHandshakePacket> PACKET_CODEC = StreamCodec.ofMember(VersionHandshakePacket::write, VersionHandshakePacket::read);
 
     public static VersionHandshakePacket read(FriendlyByteBuf buf) {
-        return new VersionHandshakePacket(buf.readIntArray());
+        return new VersionHandshakePacket(buf.readVarIntArray());
     }
 
     public void write(FriendlyByteBuf buf) {
-        buf.writeIntArray(semver);
+        buf.writeVarIntArray(semver);
     }
 
     @Override

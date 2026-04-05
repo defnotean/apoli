@@ -62,7 +62,7 @@ public class AttributeModifyTransferPowerType extends PowerType {
     public void addModifiers(List<Modifier> modifiers) {
 
         AttributeMap attributeContainer = getHolder().getAttributes();
-        AttributeInstance attributeInstance = attributeContainer.getCustomInstance(attribute);
+        AttributeInstance attributeInstance = attributeContainer.getInstance(attribute);
 
         if (attributeInstance == null) {
             return;
@@ -70,7 +70,7 @@ public class AttributeModifyTransferPowerType extends PowerType {
 
         attributeInstance.getModifiers()
             .stream()
-            .map(mod -> new AttributeModifier(mod.id(), mod.value() * valueMultiplier, mod.operation()))
+            .map(mod -> new AttributeModifier(mod.id(), mod.amount() * valueMultiplier, mod.operation()))
             .map(ModifierUtil::fromAttributeModifier)
             .forEach(modifiers::add);
 

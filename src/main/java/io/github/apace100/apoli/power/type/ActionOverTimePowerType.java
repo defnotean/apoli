@@ -119,7 +119,7 @@ public class ActionOverTimePowerType extends PowerType {
 
     @Override
     public Tag toTag() {
-        return ByteTag.of(wasActive);
+        return ByteTag.valueOf(wasActive);
     }
 
     @Override

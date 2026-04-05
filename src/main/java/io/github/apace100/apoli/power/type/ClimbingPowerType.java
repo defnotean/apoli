@@ -14,7 +14,7 @@ public class ClimbingPowerType extends PowerType {
 
     public static final TypedDataObjectFactory<ClimbingPowerType> DATA_FACTORY = PowerType.createConditionedDataFactory(
         new SerializableData()
-            .addSupplied("holding_condition", EntityCondition.DATA_TYPE, () -> new SneakingEntityConditionType().createCondition())
+            .addFunctionedDefault("holding_condition", EntityCondition.DATA_TYPE, instance -> new SneakingEntityConditionType().createCondition())
             .add("allow_holding", SerializableDataTypes.BOOLEAN, true),
         (data, condition) -> new ClimbingPowerType(
             data.get("holding_condition"),

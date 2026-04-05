@@ -65,7 +65,7 @@ public final class MiscUtil {
         Explosion explosion = new Explosion(world, entity, damageSource, behavior, x, y, z, power, createFire, destructionType, ParticleTypes.EXPLOSION, ParticleTypes.EXPLOSION_EMITTER, SoundEvents.ENTITY_GENERIC_EXPLODE);
 
         explosion.collectBlocksAndDamageEntities();
-        explosion.affectWorld(world.isClientSide);
+        explosion.affectWorld(world.isClientSide());
 
         //  Sync the explosion effect to the client if the explosion is created on the server
         if (!(world instanceof ServerLevel serverWorld)) {

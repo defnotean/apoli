@@ -41,14 +41,14 @@ public interface AttributeModifying {
 		processModifiers(entity, (modifier, attributeInstance) -> {
 
 			if (!attributeInstance.hasModifier(modifier.id())) {
-				attributeInstance.addTemporaryModifier(modifier);
+				attributeInstance.addTransientModifier(modifier);
 			}
 
 		});
 	}
 
 	default void addPersistentModifiers(LivingEntity entity) {
-		processModifiers(entity, (modifier, attributeInstance) -> attributeInstance.overwritePersistentModifier(modifier));
+		processModifiers(entity, (modifier, attributeInstance) -> attributeInstance.addOrReplacePermanentModifier(modifier));
 	}
 
 	default void removeModifiers(LivingEntity entity) {

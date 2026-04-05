@@ -11,10 +11,10 @@ import net.minecraft.resources.Identifier;
 public record SyncPowerDataS2CPacket(int entityId, Identifier powerTypeId, CompoundTag powerData) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<SyncPowerDataS2CPacket> PACKET_ID = new CustomPacketPayload.Type<>(Apoli.identifier("s2c/sync_power_data"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, SyncPowerDataS2CPacket> PACKET_CODEC = StreamCodec.tuple(
+    public static final StreamCodec<RegistryFriendlyByteBuf, SyncPowerDataS2CPacket> PACKET_CODEC = StreamCodec.composite(
         ByteBufCodecs.VAR_INT, SyncPowerDataS2CPacket::entityId,
-        Identifier.PACKET_CODEC, SyncPowerDataS2CPacket::powerTypeId,
-        ByteBufCodecs.NBT_COMPOUND, SyncPowerDataS2CPacket::powerData,
+        Identifier.STREAM_CODEC, SyncPowerDataS2CPacket::powerTypeId,
+        ByteBufCodecs.COMPOUND_TAG, SyncPowerDataS2CPacket::powerData,
         SyncPowerDataS2CPacket::new
     );
 

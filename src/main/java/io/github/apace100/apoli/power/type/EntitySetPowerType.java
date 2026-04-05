@@ -136,7 +136,7 @@ public class EntitySetPowerType extends PowerType {
 
     public boolean validateEntities() {
 
-        MinecraftServer server = getHolder().getServer();
+        MinecraftServer server = getHolder().level().getServer();
         if (server == null) {
             return false;
         }
@@ -170,7 +170,7 @@ public class EntitySetPowerType extends PowerType {
 
     public boolean add(Entity entity, Optional<Integer> time) {
 
-        if (entity == null || entity.isRemoved() || entity.level().isClientSide) {
+        if (entity == null || entity.isRemoved() || entity.level().isClientSide()) {
             return false;
         }
 
@@ -201,7 +201,7 @@ public class EntitySetPowerType extends PowerType {
 
     public boolean remove(@Nullable Entity entity, boolean executeRemoveAction) {
 
-        if (entity == null || entity.level().isClientSide) {
+        if (entity == null || entity.level().isClientSide()) {
             return false;
         }
 
@@ -264,7 +264,7 @@ public class EntitySetPowerType extends PowerType {
         }
 
         Entity entity = null;
-        MinecraftServer server = getHolder().getServer();
+        MinecraftServer server = getHolder().level().getServer();
 
         if (entities.containsKey(uuid)) {
             entity = entities.get(uuid);
@@ -287,19 +287,19 @@ public class EntitySetPowerType extends PowerType {
         ListTag tempUuidsNbt = new ListTag();
 
         for (UUID entityUuid : entityUuids) {
-            IntArrayTag entityUuidNbt = NbtUtils.createUUID(entityUuid);
+            IntArrayTag entityUuidNbt = new IntArrayTag(net.minecraft.core.UUIDUtil.uuidToIntArray(entityUuid));
             entityUuidsNbt.add(entityUuidNbt);
         }
 
         for (UUID tempUuid : tempUuids) {
-            IntArrayTag tempUuidNbt = NbtUtils.createUUID(tempUuid);
+            IntArrayTag tempUuidNbt = new IntArrayTag(net.minecraft.core.UUIDUtil.uuidToIntArray(tempUuid));
             tempUuidsNbt.add(tempUuidNbt);
         }
 
         ListTag tempExpirationsNbt = new ListTag();
         for (Map.Entry<UUID, Long> entry : tempEntities.entrySet()) {
             CompoundTag entryNbt = new CompoundTag();
-            entryNbt.putIntArray("UUID", NbtUtils.createUUID(entry.getKey()).getAsIntArray());
+            entryNbt.putIntArray("UUID", new IntArrayTag(net.minecraft.core.UUIDUtil.uuidToIntArray(entry.getKey())).getAsIntArray());
             entryNbt.putLong("Expiration", entry.getValue());
             tempExpirationsNbt.add(entryNbt);
         }
@@ -325,28 +325,28 @@ public class EntitySetPowerType extends PowerType {
         entityUuids.clear();
         entities.clear();
 
-        ListTag tempUuidsNbt = rootNbt.getList("TempEntities", Tag.TAG_INT_ARRAY);
+        ListTag tempUuidsNbt = rootNbt.getListOrEmpty("TempEntities");
         for (Tag tempUuidNbt : tempUuidsNbt) {
-            UUID tempUuid = NbtUtils.loadUUID(tempUuidNbt);
+            UUID tempUuid = net.minecraft.core.UUIDUtil.uuidFromIntArray(((IntArrayTag)tempUuidNbt).getAsIntArray());
             tempUuids.add(tempUuid);
         }
 
-        ListTag entityUuidsNbt = rootNbt.getList("Entities", Tag.TAG_INT_ARRAY);
+        ListTag entityUuidsNbt = rootNbt.getListOrEmpty("Entities");
         for (Tag entityUuidNbt : entityUuidsNbt) {
-            UUID entityUuid = NbtUtils.loadUUID(entityUuidNbt);
+            UUID entityUuid = net.minecraft.core.UUIDUtil.uuidFromIntArray(((IntArrayTag)entityUuidNbt).getAsIntArray());
             entityUuids.add(entityUuid);
         }
 
-        ListTag tempExpirationsNbt = rootNbt.getList("TempExpirations", Tag.TAG_COMPOUND);
+        ListTag tempExpirationsNbt = rootNbt.getListOrEmpty("TempExpirations");
         for (Tag expirationTag : tempExpirationsNbt) {
             if (expirationTag instanceof CompoundTag entryNbt) {
-                UUID uuid = NbtUtils.loadUUID(new IntArrayTag(entryNbt.getIntArray("UUID")));
-                long expiration = entryNbt.getLong("Expiration");
+                UUID uuid = net.minecraft.core.UUIDUtil.uuidFromIntArray(((IntArrayTag)new IntArrayTag(entryNbt.getIntArray("UUID").orElse(new int[0]).getAsIntArray())));
+                long expiration = entryNbt.getLongOr("Expiration", 0L);
                 tempEntities.put(uuid, expiration);
             }
         }
 
-        removedTemps = rootNbt.getBoolean("RemovedTemps");
+        removedTemps = rootNbt.getBooleanOr("RemovedTemps", false);
 
     }
 

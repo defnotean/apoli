@@ -9,20 +9,20 @@ public class ModPackets {
 
     public static void register() {
 
-        PayloadTypeRegistry.configurationS2C().register(VersionHandshakePacket.PACKET_ID, VersionHandshakePacket.PACKET_CODEC);
-        PayloadTypeRegistry.configurationC2S().register(VersionHandshakePacket.PACKET_ID, VersionHandshakePacket.PACKET_CODEC);
+        PayloadTypeRegistry.clientboundConfiguration().register(VersionHandshakePacket.PACKET_ID, VersionHandshakePacket.PACKET_CODEC);
+        PayloadTypeRegistry.serverboundConfiguration().register(VersionHandshakePacket.PACKET_ID, VersionHandshakePacket.PACKET_CODEC);
 
-        PayloadTypeRegistry.playS2C().register(SyncAttackerS2CPacket.PACKET_ID, SyncAttackerS2CPacket.PACKET_CODEC);
-        PayloadTypeRegistry.playS2C().register(DismountPlayerS2CPacket.PACKET_ID, DismountPlayerS2CPacket.PACKET_CODEC);
-        PayloadTypeRegistry.playS2C().register(SyncStatusEffectS2CPacket.PACKET_ID, SyncStatusEffectS2CPacket.PACKET_CODEC);
-        PayloadTypeRegistry.playS2C().register(ShowToastS2CPacket.PACKET_ID, ShowToastS2CPacket.PACKET_CODEC);
-        PayloadTypeRegistry.playS2C().register(MountPlayerS2CPacket.PACKET_ID, MountPlayerS2CPacket.PACKET_CODEC);
-        PayloadTypeRegistry.playS2C().register(SyncPowerDataS2CPacket.PACKET_ID, SyncPowerDataS2CPacket.PACKET_CODEC);
-        PayloadTypeRegistry.playS2C().register(SyncBulkPowerDataS2CPacket.PACKET_ID, SyncBulkPowerDataS2CPacket.PACKET_CODEC);
-        PayloadTypeRegistry.playS2C().register(SyncPowersS2CPacket.PACKET_ID, SyncPowersS2CPacket.PACKET_CODEC);
-        PayloadTypeRegistry.playS2C().register(SyncEntityTypeTagCacheS2CPacket.PACKET_ID, SyncEntityTypeTagCacheS2CPacket.PACKET_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(SyncAttackerS2CPacket.PACKET_ID, SyncAttackerS2CPacket.PACKET_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(DismountPlayerS2CPacket.PACKET_ID, DismountPlayerS2CPacket.PACKET_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(SyncStatusEffectS2CPacket.PACKET_ID, SyncStatusEffectS2CPacket.PACKET_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(ShowToastS2CPacket.PACKET_ID, ShowToastS2CPacket.PACKET_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(MountPlayerS2CPacket.PACKET_ID, MountPlayerS2CPacket.PACKET_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(SyncPowerDataS2CPacket.PACKET_ID, SyncPowerDataS2CPacket.PACKET_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(SyncBulkPowerDataS2CPacket.PACKET_ID, SyncBulkPowerDataS2CPacket.PACKET_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(SyncPowersS2CPacket.PACKET_ID, SyncPowersS2CPacket.PACKET_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(SyncEntityTypeTagCacheS2CPacket.PACKET_ID, SyncEntityTypeTagCacheS2CPacket.PACKET_CODEC);
 
-        PayloadTypeRegistry.playC2S().register(UseActivePowerTypesC2SPacket.PACKET_ID, UseActivePowerTypesC2SPacket.PACKET_CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(UseActivePowerTypesC2SPacket.PACKET_ID, UseActivePowerTypesC2SPacket.PACKET_CODEC);
 
     }
 

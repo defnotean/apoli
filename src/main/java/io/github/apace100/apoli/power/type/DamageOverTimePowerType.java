@@ -119,7 +119,7 @@ public class DamageOverTimePowerType extends PowerType {
 
         if (inDamageTicks++ - getDamageBegin() >= 0 && (inDamageTicks - getDamageBegin()) % damageInterval == 0) {
 
-            DamageSource damageSource = holder.damageSources().create(damageType);
+            DamageSource damageSource = new DamageSource(holder.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.DAMAGE_TYPE).getOrThrow(damageType));
             float amount = holder.level().getDifficulty() == Difficulty.EASY
                 ? damageAmountEasy
                 : damageAmount;
@@ -155,10 +155,11 @@ public class DamageOverTimePowerType extends PowerType {
         }
 
         LivingEntity holder = getHolder();
-        Registry<Enchantment> enchantmentRegistry = holder.registryAccess().get(Registries.ENCHANTMENT);
+        net.minecraft.core.Registry<Enchantment> enchantmentRegistry = holder.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
 
-        Enchantment protectingEnchantment = enchantmentRegistry.getOrThrow(protectionEnchantmentKey.get());
-        Holder<Enchantment> protectingEnchantmentEntry = enchantmentRegistry.wrapAsHolder(protectingEnchantment);
+        Holder.Reference<Enchantment> protectingEnchantmentEntry = enchantmentRegistry.get(protectionEnchantmentKey.get()).orElse(null);
+        if (protectingEnchantmentEntry == null) return 0;
+        Enchantment protectingEnchantment = protectingEnchantmentEntry.value();
 
         Map<EquipmentSlot, ItemStack> potentialItems = protectingEnchantment.getSlotItems(holder);
 
@@ -167,7 +168,7 @@ public class DamageOverTimePowerType extends PowerType {
 
         for (ItemStack potentialItem : potentialItems.values()) {
 
-            int level = EnchantmentHelper.getLevel(protectingEnchantmentEntry, potentialItem);
+            int level = EnchantmentHelper.getEnchantmentLevel(protectingEnchantmentEntry, holder);
             accumLevel += level;
 
             if (level > 0) {
@@ -196,8 +197,8 @@ public class DamageOverTimePowerType extends PowerType {
     public void fromTag(Tag tag) {
 
         if (tag instanceof CompoundTag nbt) {
-            inDamageTicks = nbt.getInt("InDamage");
-            outOfDamageTicks = nbt.getInt("OutDamage");
+            inDamageTicks = nbt.getIntOr("InDamage", 0);
+            outOfDamageTicks = nbt.getIntOr("OutDamage", 0);
         }
 
     }

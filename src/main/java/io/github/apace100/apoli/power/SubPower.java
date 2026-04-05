@@ -14,7 +14,7 @@ public class SubPower extends Power {
         public SubPower decode(RegistryFriendlyByteBuf buf) {
 
             Identifier superPowerId = buf.readIdentifier();
-            String subName = buf.readString();
+            String subName = buf.readUtf();
 
             return new SubPower(superPowerId, subName, power);
 
@@ -23,7 +23,7 @@ public class SubPower extends Power {
         @Override
         public void encode(RegistryFriendlyByteBuf buf, SubPower value) {
             buf.writeIdentifier(value.getSuperPowerId());
-            buf.writeString(value.getSubName());
+            buf.writeUtf(value.getSubName());
         }
 
     };

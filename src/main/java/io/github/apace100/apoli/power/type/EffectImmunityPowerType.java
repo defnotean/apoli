@@ -18,8 +18,8 @@ public class EffectImmunityPowerType extends PowerType {
 
     public static final TypedDataObjectFactory<EffectImmunityPowerType> DATA_FACTORY = PowerType.createConditionedDataFactory(
         new SerializableData()
-            .add("effect", SerializableDataTypes.STATUS_EFFECT_ENTRY, null)
-            .addFunctionedDefault("effects", SerializableDataTypes.STATUS_EFFECT_ENTRIES, data -> MiscUtil.singletonListOrEmpty(data.get("effect")))
+            .add("effect", SerializableDataTypes.STATUS_EFFECT, null)
+            .addFunctionedDefault("effects", SerializableDataTypes.STATUS_EFFECTS, data -> MiscUtil.singletonListOrEmpty(data.get("effect")))
             .add("inverted", SerializableDataTypes.BOOLEAN, false),
         (data, condition) -> new EffectImmunityPowerType(
             data.get("effects"),
@@ -46,7 +46,7 @@ public class EffectImmunityPowerType extends PowerType {
     }
 
     public boolean doesApply(MobEffectInstance instance) {
-        return doesApply(instance.getEffectType());
+        return doesApply(instance.getEffect());
     }
 
     public boolean doesApply(Holder<MobEffect> effect) {

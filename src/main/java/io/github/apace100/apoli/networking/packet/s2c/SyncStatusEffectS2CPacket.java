@@ -11,9 +11,9 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 public record SyncStatusEffectS2CPacket(int targetId, CompoundTag statusEffectData, SyncStatusEffectsUtil.UpdateType updateType) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<SyncStatusEffectS2CPacket> PACKET_ID = new CustomPacketPayload.Type<>(Apoli.identifier("s2c/sync_status_effect"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, SyncStatusEffectS2CPacket> PACKET_CODEC = StreamCodec.tuple(
+    public static final StreamCodec<RegistryFriendlyByteBuf, SyncStatusEffectS2CPacket> PACKET_CODEC = StreamCodec.composite(
         ByteBufCodecs.VAR_INT, SyncStatusEffectS2CPacket::targetId,
-        ByteBufCodecs.UNLIMITED_NBT_COMPOUND, SyncStatusEffectS2CPacket::statusEffectData,
+        ByteBufCodecs.TRUSTED_COMPOUND_TAG, SyncStatusEffectS2CPacket::statusEffectData,
         SyncStatusEffectsUtil.UpdateType.PACKET_CODEC, SyncStatusEffectS2CPacket::updateType,
         SyncStatusEffectS2CPacket::new
     );

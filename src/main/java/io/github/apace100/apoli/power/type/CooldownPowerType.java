@@ -57,7 +57,7 @@ public class CooldownPowerType extends PowerType implements HudRendered {
 
     @Override
     public Tag toTag() {
-        return LongTag.of(lastUseTime);
+        return LongTag.valueOf(lastUseTime);
     }
 
     @Override

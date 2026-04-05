@@ -12,8 +12,8 @@ public record VersionHandshakeTask(int[] semver) implements ConfigurationTask {
     public static final ConfigurationTask.Type KEY = new ConfigurationTask.Type("apoli:handshake/version");
 
     @Override
-    public void sendPacket(Consumer<Packet<?>> sender) {
-        sender.accept(ServerConfigurationNetworking.createS2CPacket(new VersionHandshakePacket(semver)));
+    public void start(Consumer<Packet<?>> sender) {
+        sender.accept(ServerConfigurationNetworking.createClientboundPacket(new VersionHandshakePacket(semver)));
     }
 
     @Override

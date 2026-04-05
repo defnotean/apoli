@@ -20,8 +20,8 @@ public class ModifyStatusEffectAmplifierPowerType extends ValueModifyingPowerTyp
 
     public static final TypedDataObjectFactory<ModifyStatusEffectAmplifierPowerType> DATA_FACTORY = createConditionedModifyingRequiredDataFactory(
         new SerializableData()
-            .add("status_effect", SerializableDataTypes.STATUS_EFFECT_ENTRY, null)
-            .addFunctionedDefault("status_effects", SerializableDataTypes.STATUS_EFFECT_ENTRIES, data -> MiscUtil.singletonListOrEmpty(data.get("status_effect"))),
+            .add("status_effect", SerializableDataTypes.STATUS_EFFECT, null)
+            .addFunctionedDefault("status_effects", SerializableDataTypes.STATUS_EFFECTS, data -> MiscUtil.singletonListOrEmpty(data.get("status_effect"))),
         (data, modifiers, condition) -> new ModifyStatusEffectAmplifierPowerType(
             data.get("status_effects"),
             modifiers,

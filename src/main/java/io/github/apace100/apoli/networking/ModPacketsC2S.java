@@ -48,7 +48,7 @@ public class ModPacketsC2S {
 
     private static void handleHandshakeReply(VersionHandshakePacket payload, ServerConfigurationNetworking.Context context) {
 
-        ServerConfigurationPacketListenerImpl handler = context.connection();
+        ServerConfigurationPacketListenerImpl handler = context.packetListener();
 
         int[] semver = payload.semver();
         boolean mismatch = semver.length != Apoli.SEMVER.length;

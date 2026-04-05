@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 public record DismountPlayerS2CPacket(int id) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<DismountPlayerS2CPacket> PACKET_ID = new CustomPacketPayload.Type<>(Apoli.identifier("s2c/dismount_player"));
-    public static final StreamCodec<FriendlyByteBuf, DismountPlayerS2CPacket> PACKET_CODEC = ByteBufCodecs.VAR_INT.xmap(DismountPlayerS2CPacket::new, DismountPlayerS2CPacket::id).cast();
+    public static final StreamCodec<FriendlyByteBuf, DismountPlayerS2CPacket> PACKET_CODEC = ByteBufCodecs.VAR_INT.map(DismountPlayerS2CPacket::new, DismountPlayerS2CPacket::id).cast();
 
     @Override
     public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {

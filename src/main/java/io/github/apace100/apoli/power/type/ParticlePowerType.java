@@ -26,7 +26,7 @@ public class ParticlePowerType extends PowerType {
             .addFunctionedDefault("offset", SerializableDataTypes.VECTOR, data -> new Vec3(data.get("offset_x"), data.get("offset_y"), data.get("offset_z")))
             .add("spread", SerializableDataTypes.VECTOR, new Vec3(0.5, 0.5, 0.5))
             .add("frequency", SerializableDataTypes.POSITIVE_INT)
-            .add("count", SerializableDataTypes.NON_NEGATIVE_INT, 1)
+            .add("count", SerializableDataTypes.INT, 1)
             .add("speed", SerializableDataTypes.FLOAT, 0.0F)
             .add("visible_in_first_person", SerializableDataTypes.BOOLEAN, false)
             .add("visible_while_invisible", SerializableDataTypes.BOOLEAN, false)

@@ -36,7 +36,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.Identifier;
 import net.minecraft.IdentifierException;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -68,10 +68,12 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
     private static final Object2ObjectOpenHashMap<Identifier, Power> POWERS_BY_ID = new Object2ObjectOpenHashMap<>();
     private static final ObjectOpenHashSet<Identifier> DISABLED_POWERS = new ObjectOpenHashSet<>();
 
+    private static final String DIRECTORY_NAME = "powers";
+
     private final HolderLookup.Provider wrapperLookup;
 
     PowerManager(HolderLookup.Provider wrapperLookup) {
-        super(GSON, "powers", PackType.SERVER_DATA);
+        super(GSON, DIRECTORY_NAME, PackType.SERVER_DATA);
         this.wrapperLookup = wrapperLookup;
     }
 
@@ -93,7 +95,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
     }
 
     @Override
-    protected void apply(MultiJsonDataContainer prepared, ResourceManager manager, Profiler profiler) {
+    protected void apply(MultiJsonDataContainer prepared, ResourceManager manager, ProfilerFiller profiler) {
 
         Apoli.LOGGER.info("Reading powers from data packs...");
 
@@ -106,8 +108,8 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
             try {
 
-                SerializableData.CURRENT_NAMESPACE = id.getNamespace();
-                SerializableData.CURRENT_PATH = id.getPath();
+                SerializableData.CURRENT_NAMESPACE.set(id.getNamespace());
+                SerializableData.CURRENT_PATH.set(id.getPath());
 
                 if (jsonElement instanceof JsonObject jsonObject) {
                     this.readMultipleOrNormalPower(packName, id, jsonObject);
@@ -125,15 +127,14 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
         });
 
-        SerializableData.CURRENT_NAMESPACE = null;
-        SerializableData.CURRENT_PATH = null;
+        SerializableData.CURRENT_NAMESPACE.set(null);
+        SerializableData.CURRENT_PATH.set(null);
 
         Apoli.LOGGER.info("Finished reading powers from data packs. Registry contains {} powers.", size());
         endBuilding();
 
     }
 
-    @Override
     public void onReject(String packName, Identifier resourceId) {
 
         if (!contains(resourceId)) {
@@ -246,7 +247,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
         powerJson.addProperty("id", powerId.toString());
 
         PrePowerLoadCallback.EVENT.invoker().onPrePowerLoad(powerId, powerJson);
-        Power basePower = Power.DATA_TYPE.read(wrapperLookup.getOps(JsonOps.INSTANCE), powerJson).getOrThrow(JsonParseException::new);
+        Power basePower = Power.DATA_TYPE.codec().parse(wrapperLookup.createSerializationContext(JsonOps.INSTANCE), powerJson).getOrThrow(JsonParseException::new);
 
         if (basePower.isMultiple()) {
 
@@ -261,13 +262,13 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
                 try {
 
-                    if (!Identifier.isPathValid(key)) {
+                    if (!Identifier.isValidPath(key)) {
                         throw new IdentifierException("Non [a-z0-9/._-] character in sub-power name \"" + key + "\"!");
                     }
 
                     else if (jsonElement instanceof JsonObject subPowerJson) {
 
-                        Identifier subPowerId = powerId.withSuffixedPath("_" + key);
+                        Identifier subPowerId = powerId.withSuffix("_" + key);
 
                         if (this.readSubPower(packName, powerId, subPowerId, key, subPowerJson)) {
                             subPowerIds.add(subPowerId);
@@ -305,7 +306,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
     private boolean readSubPower(String packName, Identifier superPowerId, Identifier subPowerId, String name, JsonObject subPowerJson) {
 
-        if (!ResourceConditionsImpl.applyResourceConditions(subPowerJson, directoryName, subPowerId, wrapperLookup)) {
+        if (!ResourceConditionsImpl.applyResourceConditions(subPowerJson, DIRECTORY_NAME, subPowerId, createRegistryInfoLookup(wrapperLookup))) {
             this.onReject(packName, subPowerId);
             return false;
         }
@@ -313,7 +314,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
         else {
 
             subPowerJson.addProperty("id", subPowerId.toString());
-            Power basePower = Power.DATA_TYPE.read(wrapperLookup.getOps(JsonOps.INSTANCE), subPowerJson).getOrThrow(JsonParseException::new);
+            Power basePower = Power.DATA_TYPE.codec().parse(wrapperLookup.createSerializationContext(JsonOps.INSTANCE), subPowerJson).getOrThrow(JsonParseException::new);
 
             SubPower subPower = switch (this.readPower(packName, new SubPower(superPowerId, name, basePower), subPowerJson)) {
                 case SubPower selfSubPower ->
@@ -342,7 +343,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
         Identifier powerId = power.getId();
 
         int previousPriority = LOADING_PRIORITIES.getOrDefault(powerId, 0);
-        int priority = GsonHelper.getInt(powerJson, "loading_priority", 0);
+        int priority = GsonHelper.getAsInt(powerJson, "loading_priority", 0);
 
         if (!contains(powerId)) {
             return this.finishReadingPower(PowerManager::register, powerId, power, powerJson, priority);
@@ -550,9 +551,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
     public static void send(ServerPlayer player) {
 
-        if (player.server.isRemote()) {
-            ServerPlayNetworking.send(player, new SyncPowersS2CPacket(POWERS_BY_ID));
-        }
+        ServerPlayNetworking.send(player, new SyncPowersS2CPacket(POWERS_BY_ID));
 
     }
 
@@ -626,7 +625,7 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
         for (PowerConfiguration<?> powerConfiguration : ApoliRegistries.POWER_TYPE) {
 
-            if (powerConfiguration.dataType().serializableData().containsField(field)) {
+            if (hasField(powerConfiguration.dataFactory().getSerializableData(), field)) {
                 Apoli.LOGGER.error("Cannot add additional data callback for field \"{}\", as it's already used by the \"{}\" power type!", field, powerConfiguration.id());
                 return;
             }
@@ -637,12 +636,32 @@ public class PowerManager extends IdentifiableMultiJsonDataLoader implements Ide
 
     }
 
+    private static boolean hasField(SerializableData data, String field) {
+        for (String name : data.getFieldNames()) {
+            if (name.equals(field)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static RegistryOps.RegistryInfoLookup createRegistryInfoLookup(HolderLookup.Provider provider) {
+        return new RegistryOps.RegistryInfoLookup() {
+            @Override
+            public <T> Optional<RegistryOps.RegistryInfo<T>> lookup(net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<? extends T>> registryKey) {
+                return provider.lookup((net.minecraft.resources.ResourceKey) registryKey)
+                    .map(lookup -> RegistryOps.RegistryInfo.fromRegistryLookup((HolderLookup.RegistryLookup) lookup));
+            }
+        };
+    }
+
     public static boolean shouldIgnoreField(String field) {
         return field.isEmpty()
             || field.startsWith("$")
             || FIELDS_TO_IGNORE.contains(field)
             || ADDITIONAL_DATA.containsKey(field)
-            || Power.SERIALIZABLE_DATA.containsField(field);
+            || hasField(Power.SERIALIZABLE_DATA, field);
     }
 
 }

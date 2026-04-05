@@ -14,9 +14,9 @@ import java.util.Map;
 public record SyncBulkPowerDataS2CPacket(int entityId, Map<Identifier, Tag> powerAndData) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<SyncBulkPowerDataS2CPacket> PACKET_ID = new CustomPacketPayload.Type<>(Apoli.identifier("s2c/sync_bulk_power_data"));
-    public static final StreamCodec<FriendlyByteBuf, SyncBulkPowerDataS2CPacket> PACKET_CODEC = StreamCodec.tuple(
+    public static final StreamCodec<FriendlyByteBuf, SyncBulkPowerDataS2CPacket> PACKET_CODEC = StreamCodec.composite(
         ByteBufCodecs.VAR_INT, SyncBulkPowerDataS2CPacket::entityId,
-        ByteBufCodecs.map(HashMap::new, Identifier.PACKET_CODEC, ByteBufCodecs.NBT_ELEMENT), SyncBulkPowerDataS2CPacket::powerAndData,
+        ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, ByteBufCodecs.TAG), SyncBulkPowerDataS2CPacket::powerAndData,
         SyncBulkPowerDataS2CPacket::new
     );
 

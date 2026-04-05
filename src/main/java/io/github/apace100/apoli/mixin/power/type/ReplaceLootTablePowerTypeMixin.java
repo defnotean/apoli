@@ -22,6 +22,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.*;
 import net.minecraft.util.context.ContextKeySet;
 import net.minecraft.world.level.storage.loot.entries.NestedLootTable;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -48,10 +49,10 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 	public static abstract class Replacer {
 
 		@Inject(method = "<init>", at = @At("TAIL"))
-		private void setupLootTables(RegistryAccess.Frozen registryManager, CallbackInfo ci) {
-			registryManager.get(Registries.LOOT_TABLE).streamEntries().forEach(reference -> {
+		private void setupLootTables(HolderLookup.Provider registryManager, CallbackInfo ci) {
+			registryManager.lookupOrThrow(Registries.LOOT_TABLE).listElements().forEach(reference -> {
 
-				ResourceKey<LootTable> key = reference.registryKey();
+				ResourceKey<LootTable> key = reference.key();
 
 				if (reference.value() instanceof KeyableLootTable keyable) {
 					keyable.apoli$setup(key, (ReloadableServerRegistries.Holder) (Object) this);
@@ -82,7 +83,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 		@WrapOperation(method = "generateLoot", at = @At(value = "INVOKE", target = "Lcom/mojang/datafixers/util/Either;map(Ljava/util/function/Function;Ljava/util/function/Function;)Ljava/lang/Object;"))
 		private <T, L extends ResourceKey<LootTable>, R extends LootTable> T replaceGetter(Either<L, R> either, Function<? super L, ? extends T> leftFunction, Function<? super R, ? extends T> rightFunction, Operation<T> original, Consumer<ItemStack> stackConsumer, LootContext lootContext) {
 
-			ReloadableServerRegistries.Holder lookup = lootContext.getLevel().getServer().getReloadableServerRegistries();
+			ReloadableServerRegistries.Holder lookup = lootContext.getLevel().getServer().reloadableRegistries();
 			Function<? super L, ? extends T> newGetter = l -> (T) lookup.getLootTable(l);
 
 			return original.call(either, newGetter, rightFunction);
@@ -111,7 +112,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 			this.apoli$lookup = lookup;
 		}
 
-		@Inject(method = "generateUnprocessedLoot(Lnet/minecraft/world/level/storage/loot/LootContext;Ljava/util/function/Consumer;)V", at = @At("HEAD"), cancellable = true)
+		@Inject(method = "getRandomItemsRaw(Lnet/minecraft/world/level/storage/loot/LootContext;Ljava/util/function/Consumer;)V", at = @At("HEAD"), cancellable = true)
 		private void replaceTable(LootContext context, Consumer<ItemStack> lootConsumer, CallbackInfo ci) {
 
 			if (!(context instanceof ReplacingLootContext replacingContext)) {
@@ -147,7 +148,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 			else if (contextType == LootContextParamSets.PIGLIN_BARTER) {
 
 				if (thisEntity instanceof Piglin piglin) {
-					holder = piglin.getBrain().getOptionalRegisteredMemory(MemoryModuleType.NEAREST_VISIBLE_PLAYER).orElse(null);
+					holder = piglin.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_PLAYER).orElse(null);
 				}
 
 			}
@@ -177,12 +178,12 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 			LootTable table = replacementTable.get();
 			replacingContext.apoli$setReplaced(key);
 
-			table.generateUnprocessedLoot(context, lootConsumer);
+			table.getRandomItemsRaw(context, lootConsumer);
 			ci.cancel();
 
 		}
 
-		@WrapMethod(method = "generateUnprocessedLoot(Lnet/minecraft/world/level/storage/loot/LootContext;Ljava/util/function/Consumer;)V")
+		@WrapMethod(method = "getRandomItemsRaw(Lnet/minecraft/world/level/storage/loot/LootContext;Ljava/util/function/Consumer;)V")
 		private void wrapGenerateForReplacing(LootContext context, Consumer<ItemStack> lootConsumer, Operation<Void> original) {
 
 			try {
@@ -195,12 +196,12 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 
 		}
 
-		@Inject(method = "generateUnprocessedLoot(Lnet/minecraft/world/level/storage/loot/LootContext;Ljava/util/function/Consumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/loot/LootContext;pushVisitedElement(Lnet/minecraft/world/level/storage/loot/LootContext$VisitedEntry;)Z"))
+		@Inject(method = "getRandomItemsRaw(Lnet/minecraft/world/level/storage/loot/LootContext;Ljava/util/function/Consumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/loot/LootContext;pushVisitedElement(Lnet/minecraft/world/level/storage/loot/LootContext$VisitedEntry;)Z"))
 		private void popReplaced(LootContext context, Consumer<ItemStack> lootConsumer, CallbackInfo ci) {
 			ReplaceLootTablePowerType.pop();
 		}
 
-		@Inject(method = "generateUnprocessedLoot(Lnet/minecraft/world/level/storage/loot/LootContext;Ljava/util/function/Consumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/loot/LootContext;popVisitedElement(Lnet/minecraft/world/level/storage/loot/LootContext$VisitedEntry;)V"))
+		@Inject(method = "getRandomItemsRaw(Lnet/minecraft/world/level/storage/loot/LootContext;Ljava/util/function/Consumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/loot/LootContext;popVisitedElement(Lnet/minecraft/world/level/storage/loot/LootContext$VisitedEntry;)V"))
 		private void restoreReplaced(LootContext context, Consumer<ItemStack> lootConsumer, CallbackInfo ci) {
 			ReplaceLootTablePowerType.restore();
 		}

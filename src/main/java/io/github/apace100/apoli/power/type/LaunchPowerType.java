@@ -68,12 +68,12 @@ public class LaunchPowerType extends ActiveCooldownPowerType {
 		super.onUse();
 
 		holder.push(0, speed, 0);
-		holder.hasImpulse = true;
+		holder.hurtMarked = true;
 
 		sound.ifPresent(soundEvent -> serverWorld.playSound(null, holder.getX(), holder.getY(), holder.getZ(), soundEvent, SoundSource.NEUTRAL, 0.5F, 0.4F / holder.getRandom().nextFloat()));
 
 		for (int i = 0; i < 4; i++) {
-			serverWorld.spawnParticles(ParticleTypes.CLOUD, holder.getX(), holder.getRandomBodyY(), holder.getZ(), 8, holder.getRandom().nextGaussian(), 0.0D, holder.getRandom().nextGaussian(), 0.5);
+			serverWorld.spawnParticles(ParticleTypes.CLOUD, holder.getX(), holder.getRandomY(), holder.getZ(), 8, holder.getRandom().nextGaussian(), 0.0D, holder.getRandom().nextGaussian(), 0.5);
 		}
 
 	}

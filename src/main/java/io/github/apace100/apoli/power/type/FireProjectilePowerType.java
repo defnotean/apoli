@@ -43,8 +43,8 @@ public class FireProjectilePowerType extends ActiveCooldownPowerType {
             .add("hud_render", HudRender.DATA_TYPE, HudRender.DONT_RENDER)
             .add("cooldown", SerializableDataTypes.INT, 1)
             .add("count", SerializableDataTypes.INT, 1)
-            .add("interval", SerializableDataTypes.NON_NEGATIVE_INT, 0)
-            .add("start_delay", SerializableDataTypes.NON_NEGATIVE_INT, 0)
+            .add("interval", SerializableDataTypes.INT, 0)
+            .add("start_delay", SerializableDataTypes.INT, 0)
             .add("speed", SerializableDataTypes.FLOAT, 1.5F)
             .add("divergence", SerializableDataTypes.FLOAT, 1.0F),
         (data, condition) -> new FireProjectilePowerType(
@@ -148,10 +148,10 @@ public class FireProjectilePowerType extends ActiveCooldownPowerType {
         }
 
         else if (tag instanceof CompoundTag nbtCompound) {
-            this.lastUseTime = nbtCompound.getLong("LastUseTime");
-            this.shotProjectiles = nbtCompound.getInt("ShotProjectiles");
-            this.finishedStartDelay = nbtCompound.getBoolean("FinishedStartDelay");
-            this.isFiringProjectiles = nbtCompound.getBoolean("IsFiringProjectiles");
+            this.lastUseTime = nbtCompound.getLongOr("LastUseTime", 0L);
+            this.shotProjectiles = nbtCompound.getIntOr("ShotProjectiles", 0);
+            this.finishedStartDelay = nbtCompound.getBooleanOr("FinishedStartDelay", false);
+            this.isFiringProjectiles = nbtCompound.getBooleanOr("IsFiringProjectiles", false);
         }
 
     }
@@ -215,7 +215,7 @@ public class FireProjectilePowerType extends ActiveCooldownPowerType {
 
 					soundEvent.ifPresent(event -> holder.level().playSound(null, holder.getX(), holder.getY(), holder.getZ(), event, SoundSource.NEUTRAL, 0.5F, 0.4F / (holder.getRandom().nextFloat() * 0.4F + 0.8F)));
 
-                    if (!holder.level().isClientSide) {
+                    if (!holder.level().isClientSide()) {
                         fireProjectile();
                     }
 

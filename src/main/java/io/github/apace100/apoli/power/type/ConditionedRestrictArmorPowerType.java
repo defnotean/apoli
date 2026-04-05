@@ -24,7 +24,7 @@ public class ConditionedRestrictArmorPowerType extends RestrictArmorPowerType {
         (data, condition) -> {
 
             EnumMap<EquipmentSlot, Optional<ItemCondition>> armorConditions = Arrays.stream(EquipmentSlot.values())
-                .filter(EquipmentSlot::isArmorSlot)
+                .filter(EquipmentSlot::isArmor)
                 .collect(Collectors.toMap(Function.identity(), slot -> data.get(slot.getName()), (o1, o2) -> o2, () -> new EnumMap<>(EquipmentSlot.class)));
 
             return new ConditionedRestrictArmorPowerType(
