@@ -42,7 +42,7 @@ public class GameModeEntityConditionType extends EntityConditionType {
         }
 
         else if (player instanceof ServerPlayer serverPlayer) {
-            ServerPlayerInteractionManagerAccessor interactionManager = (ServerPlayerInteractionManagerAccessor) serverPlayer.interactionManager;
+            ServerPlayerInteractionManagerAccessor interactionManager = (ServerPlayerInteractionManagerAccessor) serverPlayer.gameMode;
             return interactionManager.getGameMode() == gameMode;
         }
 

@@ -15,10 +15,14 @@ import io.github.apace100.calio.util.ArgumentWrapper;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -49,7 +53,7 @@ public class SelectorActionEntityActionType extends EntityActionType {
 
     public SelectorActionEntityActionType(ArgumentWrapper<EntitySelector> selector, BiEntityAction biEntityAction, Optional<BiEntityCondition> biEntityCondition) {
         this.selector = selector;
-        this.unwrappedSelector = selector.parsedValue();
+        this.unwrappedSelector = selector.get();
         this.biEntityAction = biEntityAction;
         this.biEntityCondition = biEntityCondition;
     }
@@ -58,31 +62,37 @@ public class SelectorActionEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         Entity entity = context.entity();
-        MinecraftServer server = entity.getServer();
+        MinecraftServer server = entity.level().getServer();
 
         if (server == null) {
             return;
         }
 
-        CommandSourceStack commandSource = entity.createCommandSourceStack()
-            .withSource(CommandSource.NULL)
-            .withLevel(Apoli.config.executeCommand.permissionLevel);
+        CommandSource source = Apoli.config.executeCommand.showOutput
+            ? (entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null ? (CommandSource) serverPlayer : server)
+            : CommandSource.NULL;
 
-        if (Apoli.config.executeCommand.showOutput) {
-            commandSource = commandSource.withSource(entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
-                ? serverPlayer
-                : server);
-        }
+        CommandSourceStack commandSource = new CommandSourceStack(
+            source,
+            entity.position(),
+            Vec2.ZERO,
+            (ServerLevel) entity.level(),
+            LevelBasedPermissionSet.forLevel(PermissionLevel.byId(Apoli.config.executeCommand.permissionLevel)),
+            entity.getName().getString(),
+            entity.getDisplayName(),
+            server,
+            entity
+        );
 
         try {
-            unwrappedSelector.getEntities(commandSource)
+            unwrappedSelector.findEntities(commandSource)
                 .stream()
                 .filter(selected -> biEntityCondition.map(condition -> condition.test(entity, selected)).orElse(true))
                 .forEach(selected -> biEntityAction.execute(entity, selected));
         }
 
         catch (CommandSyntaxException cse) {
-            commandSource.sendError(Component.literal(cse.getRawMessage()));
+            commandSource.sendFailure(Component.literal(cse.getMessage()));
         }
 
     }

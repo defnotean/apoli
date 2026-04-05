@@ -31,18 +31,18 @@ public class HasCommandTagEntityConditionType extends EntityConditionType {
     private final List<String> commandTags;
 
     public HasCommandTagEntityConditionType(List<String> commandTags) {
-        this.tags = commandTags;
+        this.commandTags = commandTags;
     }
 
     @Override
     public boolean test(EntityConditionContext context) {
 
         Entity entity = context.entity();
-        Set<String> commandTags = entity.getTags();
+        Set<String> entityCommandTags = entity.getTags();
 
-        return this.tags.isEmpty()
-            ? !commandTags.isEmpty()
-            : !Collections.disjoint(commandTags, this.tags);
+        return this.commandTags.isEmpty()
+            ? !entityCommandTags.isEmpty()
+            : !Collections.disjoint(entityCommandTags, this.commandTags);
 
     }
 

@@ -56,7 +56,7 @@ public class GrantAdvancementEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         Entity entity = context.entity();
-        MinecraftServer server = entity.getServer();
+        MinecraftServer server = entity.level().getServer();
 
         if (server == null || !(entity instanceof ServerPlayer serverPlayerEntity)) {
             return;
@@ -64,7 +64,7 @@ public class GrantAdvancementEntityActionType extends EntityActionType {
 
         ServerAdvancementManager advancementLoader = server.getAdvancements();
         if (selection == AdvancementCommands.Mode.EVERYTHING) {
-            AdvancementUtil.processAdvancements(advancementLoader.getAdvancements(), AdvancementCommands.Action.GRANT, serverPlayerEntity);
+            AdvancementUtil.processAdvancements(advancementLoader.getAllAdvancements(), AdvancementCommands.Action.GRANT, serverPlayerEntity);
         }
 
         else if (advancementId != null) {
@@ -75,7 +75,7 @@ public class GrantAdvancementEntityActionType extends EntityActionType {
             }
 
             else if (criteria.isEmpty()) {
-                AdvancementUtil.processAdvancements(AdvancementUtil.selectEntries(server.getAdvancements().getManager(), advancementEntry, selection), AdvancementCommands.Action.GRANT, serverPlayerEntity);
+                AdvancementUtil.processAdvancements(AdvancementUtil.selectEntries(server.getAdvancements().tree(), advancementEntry, selection), AdvancementCommands.Action.GRANT, serverPlayerEntity);
             }
 
             else {

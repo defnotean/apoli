@@ -20,7 +20,7 @@ public class PowerCountItemConditionType extends ItemConditionType {
 
     public static final TypedDataObjectFactory<PowerCountItemConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("slot", SerializableDataTypes.EQUIPMENT_SLOT_GROUP.optional(), Optional.empty())
+            .add("slot", ApoliDataTypes.EQUIPMENT_SLOT_GROUP.optional(), Optional.empty())
             .add("comparison", ApoliDataTypes.COMPARISON)
             .add("compare_to", SerializableDataTypes.INT),
         data -> new PowerCountItemConditionType(

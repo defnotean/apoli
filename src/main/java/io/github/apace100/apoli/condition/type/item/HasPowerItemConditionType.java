@@ -20,7 +20,7 @@ public class HasPowerItemConditionType extends ItemConditionType {
 
     public static final TypedDataObjectFactory<HasPowerItemConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("slot", SerializableDataTypes.EQUIPMENT_SLOT_GROUP.optional(), Optional.empty())
+            .add("slot", ApoliDataTypes.EQUIPMENT_SLOT_GROUP.optional(), Optional.empty())
             .add("power", ApoliDataTypes.POWER_REFERENCE),
         data -> new HasPowerItemConditionType(
             data.get("slot"),

@@ -43,7 +43,7 @@ public interface Active {
 
             KeyBindingReference keyBindingReference = activePowerType.getKey();
             TriState keyPressed = keyBindingReference.asKeyBinding()
-                .map(KeyMapping::isPressed)
+                .map(KeyMapping::isDown)
                 .map(TriState::of)
                 .orElse(TriState.DEFAULT);
 

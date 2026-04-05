@@ -33,7 +33,7 @@ public class SwingHandEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         if (context.entity() instanceof LivingEntity livingEntity) {
-            livingEntity.swingHand(hand, true);
+            livingEntity.swing(hand, true);
         }
 
     }

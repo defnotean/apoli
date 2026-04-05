@@ -25,7 +25,7 @@ public class UsingEffectiveToolEntityConditionType extends EntityConditionType {
         BlockState miningBlockState;
         if (playerEntity instanceof ServerPlayer serverPlayer) {
 
-            ServerPlayerInteractionManagerAccessor interactionManager = (ServerPlayerInteractionManagerAccessor) serverPlayer.interactionManager;
+            ServerPlayerInteractionManagerAccessor interactionManager = (ServerPlayerInteractionManagerAccessor) serverPlayer.gameMode;
             if (!interactionManager.getMining()) {
                 return false;
             }

@@ -23,6 +23,10 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.TagValueInput;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -78,7 +82,7 @@ public class InventoryPowerType extends PowerType implements Active, Container {
         this.key = key;
         this.shouldDropOnDeath = shouldDropOnDeath;
         this.recoverable = recoverable;
-        this.container = NonNullList.ofSize(containerType.size(), ItemStack.EMPTY);
+        this.container = NonNullList.withSize(containerType.size(), ItemStack.EMPTY);
         this.containerHandlerFactory = containerType.create(this);
         this.setTicking(true);
     }
@@ -120,10 +124,10 @@ public class InventoryPowerType extends PowerType implements Active, Container {
     @Override
     public CompoundTag toTag() {
 
-        CompoundTag tag = new CompoundTag();
-        ContainerHelper.save(tag, container, getHolder().registryAccess());
+        TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, getHolder().registryAccess());
+        ContainerHelper.saveAllItems(output, container);
 
-        return tag;
+        return output.buildResult();
 
     }
 
@@ -134,13 +138,13 @@ public class InventoryPowerType extends PowerType implements Active, Container {
             return;
         }
 
-        this.clear();
-        ContainerHelper.load(rootNbt, container, getHolder().registryAccess());
+        this.clearContent();
+        ContainerHelper.loadAllItems(TagValueInput.create(ProblemReporter.DISCARDING, getHolder().registryAccess(), rootNbt), container);
 
     }
 
     @Override
-    public int size() {
+    public int getContainerSize() {
         return container.size();
     }
 
@@ -150,16 +154,16 @@ public class InventoryPowerType extends PowerType implements Active, Container {
     }
 
     @Override
-    public ItemStack getStack(int slot) {
+    public ItemStack getItem(int slot) {
         return container.get(slot);
     }
 
     @Override
-    public ItemStack removeStack(int slot, int amount) {
+    public ItemStack removeItem(int slot, int amount) {
 
-        ItemStack stack = ContainerHelper.splitStack(container, slot, amount);
+        ItemStack stack = ContainerHelper.removeItem(container, slot, amount);
         if (!stack.isEmpty()) {
-            this.markDirty();
+            this.setChanged();
         }
 
         return stack;
@@ -167,41 +171,41 @@ public class InventoryPowerType extends PowerType implements Active, Container {
     }
 
     @Override
-    public ItemStack removeStack(int slot) {
+    public ItemStack removeItemNoUpdate(int slot) {
 
-        ItemStack prevStack = this.getStack(slot);
-        this.setStack(slot, ItemStack.EMPTY);
+        ItemStack prevStack = this.getItem(slot);
+        this.setItem(slot, ItemStack.EMPTY);
 
         return prevStack;
 
     }
 
     @Override
-    public void setStack(int slot, ItemStack stack) {
+    public void setItem(int slot, ItemStack stack) {
 
         container.set(slot, stack);
         if (!stack.isEmpty()) {
-            stack.setCount(Math.min(stack.getCount(), this.getMaxCountPerStack()));
+            stack.setCount(Math.min(stack.getCount(), this.getMaxStackSize()));
         }
 
-        this.markDirty();
+        this.setChanged();
 
     }
 
     @Override
-    public void markDirty() {
+    public void setChanged() {
         this.dirty = true;
     }
 
     @Override
-    public boolean canPlayerUse(Player player) {
+    public boolean stillValid(Player player) {
         return player == getHolder();
     }
 
     @Override
-    public void clear() {
+    public void clearContent() {
         this.container.clear();
-        this.markDirty();
+        this.setChanged();
     }
 
     @Override
@@ -238,14 +242,14 @@ public class InventoryPowerType extends PowerType implements Active, Container {
 
         for (int i = 0; i < container.size(); ++i) {
 
-            ItemStack currentStack = this.getStack(i).copy();
+            ItemStack currentStack = this.getItem(i).copy();
             if (!this.shouldDropOnDeath(currentStack)) {
                 continue;
             }
 
-            this.removeStack(i);
-            if (!EnchantmentHelper.hasAnyEnchantmentsWith(currentStack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
-                playerEntity.spawnAtLocation(currentStack, true, false);
+            this.removeItemNoUpdate(i);
+            if (!EnchantmentHelper.has(currentStack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
+                playerEntity.drop(currentStack, true);
             }
 
         }
@@ -259,7 +263,7 @@ public class InventoryPowerType extends PowerType implements Active, Container {
         }
 
         for (int i = 0; i < container.size(); ++i) {
-            playerEntity.getInventory().addItem(this.getStack(i));
+            playerEntity.getInventory().add(this.getItem(i));
         }
 
     }

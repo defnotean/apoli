@@ -6,6 +6,7 @@ import io.github.apace100.apoli.action.type.EntityActionType;
 import io.github.apace100.apoli.action.type.EntityActionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
+import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.entity.AreaEffectCloud;
@@ -19,7 +20,7 @@ public class SpawnEffectCloudEntityActionType extends EntityActionType {
 
     public static final TypedDataObjectFactory<SpawnEffectCloudEntityActionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("effect_component", SerializableDataTypes.POTION_CONTENTS_COMPONENT, PotionContents.DEFAULT)
+            .add("effect_component", SerializableDataType.of(PotionContents.CODEC), PotionContents.EMPTY)
             .add("wait_time", SerializableDataTypes.INT, 10)
             .add("radius", SerializableDataTypes.FLOAT, 3.0F)
             .add("radius_on_use", SerializableDataTypes.FLOAT, -0.5F)

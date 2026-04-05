@@ -62,7 +62,7 @@ public class PassengerActionEntityActionType extends EntityActionType {
         }
 
         Iterable<Entity> passengers = recursive
-            ? entity.getPassengersAndSelf()
+            ? entity.getPassengersAndSelf().toList()
             : entity.getPassengers();
 
         for (Entity passenger : passengers) {

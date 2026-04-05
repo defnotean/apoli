@@ -6,6 +6,7 @@ import io.github.apace100.apoli.condition.type.ItemConditionType;
 import io.github.apace100.apoli.condition.type.ItemConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
+import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -18,7 +19,7 @@ public class EquippableItemConditionType extends ItemConditionType {
 
     public static final TypedDataObjectFactory<EquippableItemConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("equipment_slot", SerializableDataTypes.EQUIPMENT_SLOT_GROUP.optional(), Optional.empty()),
+            .add("equipment_slot", ApoliDataTypes.EQUIPMENT_SLOT_GROUP.optional(), Optional.empty()),
         data -> new EquippableItemConditionType(
             data.get("equipment_slot")
         ),

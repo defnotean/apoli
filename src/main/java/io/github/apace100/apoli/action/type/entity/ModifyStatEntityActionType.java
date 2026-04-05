@@ -42,10 +42,10 @@ public class ModifyStatEntityActionType extends EntityActionType {
         if (context.entity() instanceof ServerPlayer serverPlayer) {
 
             ServerStatsCounter statHandler = serverPlayer.getStats();
-            int originalValue = statHandler.getStat(stat);
+            int originalValue = statHandler.getValue(stat);
 
             serverPlayer.resetStat(stat);
-            serverPlayer.increaseStat(stat, (int) modifier.apply(serverPlayer, originalValue));
+            serverPlayer.awardStat(stat, (int) modifier.apply(serverPlayer, originalValue));
 
         }
 

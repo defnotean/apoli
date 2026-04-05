@@ -30,7 +30,7 @@ public class ResourceCommand {
 
         //  The main node of the command
         var resourceNode = literal("resource")
-            .requires(source -> source.hasPermissionLevel(2))
+            .requires(source -> source.permissions() instanceof net.minecraft.server.permissions.LevelBasedPermissionSet lbps && lbps.level().isEqualOrHigherThan(net.minecraft.server.permissions.PermissionLevel.GAMEMASTERS))
             .build();
 
         //  Add the sub-nodes as children of the main node
@@ -59,16 +59,16 @@ public class ResourceCommand {
             Entity target = PowerHolderArgumentType.getHolder(context, "target");
             Power power = PowerArgumentType.getResource(context, "resource");
 
-            CommandSourceStack commandSource = context.getDirectEntity();
+            CommandSourceStack commandSource = context.getSource();
             PowerType powerType = PowerUtil.getOptionalPowerType(power, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), power.getId().toString()));
 
             if (powerType != null) {
-                commandSource.sendFeedback(() -> Component.translatable("commands.execute.conditional.pass"), false);
+                commandSource.sendSuccess(() -> Component.translatable("commands.execute.conditional.pass"), false);
                 return 1;
             }
 
             else {
-                commandSource.sendError(Component.translatable("commands.execute.conditional.fail"));
+                commandSource.sendFailure(Component.translatable("commands.execute.conditional.fail"));
                 return 0;
             }
 
@@ -92,20 +92,20 @@ public class ResourceCommand {
             Entity target = PowerHolderArgumentType.getHolder(context, "target");
             Power power = PowerArgumentType.getResource(context, "resource");
 
-            CommandSourceStack commandSource = context.getDirectEntity();
+            CommandSourceStack commandSource = context.getSource();
             PowerType powerType = PowerUtil.getOptionalPowerType(power, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), power.getId().toString()));
 
             if (powerType != null) {
 
                 int value = PowerUtil.getResourceValue(powerType);
-                commandSource.sendFeedback(() -> Component.translatable("commands.scoreboard.players.get.success", target.getName(), value, power.getId().toString()), false);
+                commandSource.sendSuccess(() -> Component.translatable("commands.scoreboard.players.get.success", target.getName(), value, power.getId().toString()), false);
 
                 return value;
 
             }
 
             else {
-                commandSource.sendError(Component.translatable("commands.scoreboard.players.get.null", power.getId().toString(), target.getName()));
+                commandSource.sendFailure(Component.translatable("commands.scoreboard.players.get.null", power.getId().toString(), target.getName()));
                 return 0;
             }
 
@@ -132,7 +132,7 @@ public class ResourceCommand {
             int value = IntegerArgumentType.getInteger(context, "value");
             int newValue;
 
-            CommandSourceStack commandSource = context.getDirectEntity();
+            CommandSourceStack commandSource = context.getSource();
             PowerType powerType = PowerUtil.getOptionalPowerType(power, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), power.getId().toString()));
 
             if (PowerUtil.setResourceValue(powerType, value)) {
@@ -140,7 +140,7 @@ public class ResourceCommand {
             }
 
             newValue = PowerUtil.getResourceValue(powerType);
-            commandSource.sendFeedback(() -> Component.translatable("commands.scoreboard.players.set.success.single", power.getId().toString(), target.getName(), newValue), true);
+            commandSource.sendSuccess(() -> Component.translatable("commands.scoreboard.players.set.success.single", power.getId().toString(), target.getName(), newValue), true);
 
             return newValue;
 
@@ -167,7 +167,7 @@ public class ResourceCommand {
             int value = IntegerArgumentType.getInteger(context, "value");
             int newValue;
             
-            CommandSourceStack commandSource = context.getDirectEntity();
+            CommandSourceStack commandSource = context.getSource();
             PowerType powerType = PowerUtil.getOptionalPowerType(resource, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), resource.getId().toString()));
             
             if (PowerUtil.changeResourceValue(powerType, value)) {
@@ -175,7 +175,7 @@ public class ResourceCommand {
             }
             
             newValue = PowerUtil.getResourceValue(powerType);
-            commandSource.sendFeedback(() -> Component.translatable("commands.scoreboard.players.add.success.single", value, resource.getId().toString(), target.getName(), newValue), true);
+            commandSource.sendSuccess(() -> Component.translatable("commands.scoreboard.players.add.success.single", value, resource.getId().toString(), target.getName(), newValue), true);
             
             return newValue;
 
@@ -206,7 +206,7 @@ public class ResourceCommand {
             ScoreHolder source = ScoreHolderArgument.getScoreHolder(context, "source");
             Objective objective = ObjectiveArgument.getObjective(context, "objective");
 
-            CommandSourceStack commandSource = context.getDirectEntity();
+            CommandSourceStack commandSource = context.getSource();
             PowerType powerType = PowerUtil.getOptionalPowerType(resource, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), resource.getId().toString()));
 
             ScoreAccess scoreAccess = commandSource.getServer().getScoreboard().getOrCreateScore(source, objective);
@@ -218,7 +218,7 @@ public class ResourceCommand {
                 PowerHolderComponent.syncPower(target, resource);
             }
 
-            commandSource.sendFeedback(() -> Component.translatable("commands.scoreboard.players.operation.success.single", resource.getId().toString(), target.getName(), newValue), true);
+            commandSource.sendSuccess(() -> Component.translatable("commands.scoreboard.players.operation.success.single", resource.getId().toString(), target.getName(), newValue), true);
             return newValue;
 
         }

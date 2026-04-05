@@ -183,10 +183,10 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
         int range = 64;
 
         AtomicReference<Vec3> newSpawnPointVec = new AtomicReference<>();
-        BlockPos dimensionSpawnPos = serverPlayer.serverLevel().getSharedSpawnPos();
+        BlockPos dimensionSpawnPos = serverPlayer.serverLevel().getLevelData().getRespawnData().pos();
 
-        BlockPos.Mutable newSpawnPointPos = new BlockPos.Mutable();
-        BlockPos.Mutable mutableDimensionSpawnPos = spawnStrategy.apply(dimensionSpawnPos, center, dimensionDistanceMultiplier).mutable();
+        BlockPos.MutableBlockPos newSpawnPointPos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos mutableDimensionSpawnPos = spawnStrategy.apply(dimensionSpawnPos, center, dimensionDistanceMultiplier).mutable();
 
         this.getBiomePos(targetDimension, mutableDimensionSpawnPos).ifPresent(mutableDimensionSpawnPos::set);
         this.getSpawnPos(targetDimension, mutableDimensionSpawnPos, range).ifPresent(newSpawnPointVec::set);
@@ -348,7 +348,7 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
 
         //  The valid spawn position and (mutable) starting position
         Vec3 spawnPos;
-        BlockPos.Mutable mutableStartPos = startPos.mutable();
+        BlockPos.MutableBlockPos mutableStartPos = startPos.mutable();
 
         //  The current position
         int x = startPos.x();
@@ -429,7 +429,7 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
         CENTER((blockPos, center, multiplier) -> new BlockPos(0, center, 0)),
         DEFAULT((blockPos, center, multiplier) -> {
 
-            BlockPos.Mutable mut = new BlockPos.Mutable();
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
             multiplier = Math.max(multiplier, 1F);
 
             return mut.set(blockPos.x() * multiplier, blockPos.y(), blockPos.z() * multiplier);

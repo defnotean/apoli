@@ -45,7 +45,7 @@ public class CustomToast implements PositionAwareToast {
     public CustomToast(Component title, Component description, Identifier texture, ItemStack iconStack, int duration) {
 
         Font textRenderer = Minecraft.getInstance().font;
-        int maxWidth = this.getWidth() - 33;
+        int maxWidth = this.getBbWidth() - 33;
 
         this.title = textRenderer.wrapLines(title, maxWidth);
         this.description = textRenderer.wrapLines(description, maxWidth);
@@ -75,7 +75,7 @@ public class CustomToast implements PositionAwareToast {
         int alphaShift = Mth.floor(Mth.clamp((float) Math.abs(alphaShiftEnd - startTime) / 300, 0.0, 1.0) * 255.0f) << 24 | 67108864;
 
         int toastTextX = 30;
-        int toastTextYCenter = this.getHeight() / 2;
+        int toastTextYCenter = this.getBbHeight() / 2;
 
         int titleY = toastTextYCenter - title.size() * 9 / 2;
         int descriptionY = toastTextYCenter - description.size() * 9 / 2;
@@ -84,7 +84,7 @@ public class CustomToast implements PositionAwareToast {
         int descriptionYOffset = Math.max(7, descriptionY);
 
         //  Draw the texture and icon of the toast
-        context.drawGuiTexture(texture, 0, 0, this.getWidth(), this.getHeight());
+        context.drawGuiTexture(texture, 0, 0, this.getBbWidth(), this.getBbHeight());
         context.drawItemWithoutEntity(iconStack, 8, toastTextYCenter - 8);
 
         //  If the title and the description only has 1 line, display as is
@@ -97,7 +97,7 @@ public class CustomToast implements PositionAwareToast {
         //  display and fit the title texts onto the toast and shift its alpha channel (for the fade effect)
         else if (startTime < alphaShiftEnd) {
 
-            context.enableScissor(x + 4, y + 4, x + this.getWidth() - 4, y + this.getHeight() - 4);
+            context.enableScissor(x + 4, y + 4, x + this.getBbWidth() - 4, y + this.getBbHeight() - 4);
 
             for (var titleLine : title) {
                 context.drawText(textRenderer, titleLine, toastTextX, titleYOffset, TITLE_BASE_COLOR | alphaShift, false);
@@ -112,7 +112,7 @@ public class CustomToast implements PositionAwareToast {
         //  Otherwise, display and fit the description texts onto the toast
         else {
 
-            context.enableScissor(x + 4, y + 4, x + this.getWidth() - 4, y + this.getHeight() - 4);
+            context.enableScissor(x + 4, y + 4, x + this.getBbWidth() - 4, y + this.getBbHeight() - 4);
 
             for (var descriptionLine : description) {
                 context.drawText(textRenderer, descriptionLine, toastTextX, descriptionYOffset, DESCRIPTION_BASE_COLOR | alphaShift, false);

@@ -30,6 +30,7 @@ import io.github.ladysnake.pal.PlayerAbility;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.SlotArgument;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.inventory.SlotRange;
 import net.minecraft.world.item.ItemStack;
@@ -64,6 +65,8 @@ public class ApoliDataTypes {
 	public static final SerializableDataType<PowerReference> RESOURCE_REFERENCE = SerializableDataTypes.IDENTIFIER.xmap(PowerReference::resource, PowerReference::id);
 
 	public static final SerializableDataType<Space> SPACE = SerializableDataType.enumValue(Space.class);
+
+    public static final SerializableDataType<EquipmentSlotGroup> EQUIPMENT_SLOT_GROUP = SerializableDataType.enumValue(EquipmentSlotGroup.class);
 
     public static final SerializableDataType<ResourceOperation> RESOURCE_OPERATION = SerializableDataType.enumValue(ResourceOperation.class);
 

@@ -46,13 +46,10 @@ public class ModifyItemCooldownItemActionType extends ItemActionType {
         }
 
         ItemCooldowns cooldownManager = player.getCooldowns();
-        ItemCooldowns.Entry cooldownEntry = cooldownManager.entries.get(stack.getItem());
 
-        int oldDuration = cooldownEntry != null
-            ? cooldownEntry.endTick - cooldownEntry.startTick
-            : 0;
+        int oldDuration = cooldownManager.isOnCooldown(stack) ? 1 : 0;
 
-        cooldownManager.set(stack.getItem(), (int) ModifierUtil.applyModifiers(player, modifiers, oldDuration));
+        cooldownManager.addCooldown(stack, (int) ModifierUtil.applyModifiers(player, modifiers, oldDuration));
 
     }
 

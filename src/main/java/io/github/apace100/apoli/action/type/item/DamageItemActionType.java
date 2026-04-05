@@ -53,7 +53,7 @@ public class DamageItemActionType extends ItemActionType {
         }
 
         else {
-            stack.hurt(amount, world, null, item -> {});
+            stack.hurtAndBreak(amount, world, null, item -> {});
         }
 
     }

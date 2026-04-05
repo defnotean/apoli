@@ -14,6 +14,9 @@ import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.NotNull;
 
 public class ExecuteCommandEntityActionType extends EntityActionType {
@@ -44,19 +47,22 @@ public class ExecuteCommandEntityActionType extends EntityActionType {
         }
 
         MinecraftServer server = serverWorld.getServer();
-        CommandSourceStack commandSource = entity.createCommandSourceStack()
-            .withLevel(Apoli.config.executeCommand.permissionLevel)
-            .withSource(CommandSource.NULL);
 
-        if (Apoli.config.executeCommand.showOutput) {
+        CommandSource source = Apoli.config.executeCommand.showOutput
+            ? (entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null ? (CommandSource) serverPlayer : server)
+            : CommandSource.NULL;
 
-            CommandSource output = entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
-                ? serverPlayer
-                : server;
-
-            commandSource = commandSource.withSource(output);
-
-        }
+        CommandSourceStack commandSource = new CommandSourceStack(
+            source,
+            entity.position(),
+            Vec2.ZERO,
+            serverWorld,
+            LevelBasedPermissionSet.forLevel(PermissionLevel.byId(Apoli.config.executeCommand.permissionLevel)),
+            entity.getName().getString(),
+            entity.getDisplayName(),
+            server,
+            entity
+        );
 
         server.getCommands().performPrefixedCommand(commandSource, command);
 

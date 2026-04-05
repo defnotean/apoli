@@ -95,7 +95,7 @@ public class ParticlePowerType extends PowerType {
         LivingEntity holder = getHolder();
         return (!holder.isInvisibleTo(viewer) || this.isVisibleWhileInvisible())
             && (holder != viewer || (!inFirstPerson || this.isVisibleInFirstPerson()))
-            && (viewer.blockPosition().isWithinDistance(holder.position(), this.shouldForce() ? 512 : 32))
+            && (viewer.getBlockPos().isWithinDistance(holder.position(), this.shouldForce() ? 512 : 32))
             && (holder.tickCount % this.getFrequency() == 0)
             && biEntityCondition.map(condition -> condition.test(viewer, holder)).orElse(true);
     }

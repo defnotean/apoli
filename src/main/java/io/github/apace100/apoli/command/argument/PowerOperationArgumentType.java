@@ -32,7 +32,7 @@ public class PowerOperationArgumentType implements ArgumentType<PowerOperationAr
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return SharedSuggestionProvider.suggestMatching(new String[]{"=", "+=", "-=", "*=", "/=", "%=", "<", ">", "><"}, builder);
+        return SharedSuggestionProvider.suggest(new String[]{"=", "+=", "-=", "*=", "/=", "%=", "<", ">", "><"}, builder);
     }
 
     @Override
@@ -50,17 +50,17 @@ public class PowerOperationArgumentType implements ArgumentType<PowerOperationAr
         String stringOperator = stringReader.getString().substring(i, stringReader.getCursor());
         return switch (stringOperator) {
             case "=" -> (powerType, scoreAccess) ->
-                PowerUtil.setResourceValue(powerType, scoreAccess.getScore());
+                PowerUtil.setResourceValue(powerType, scoreAccess.get());
             case "+=" -> (powerType, scoreAccess) ->
-                PowerUtil.changeResourceValue(powerType, scoreAccess.getScore());
+                PowerUtil.changeResourceValue(powerType, scoreAccess.get());
             case "-=" -> (powerType, scoreAccess) ->
-                PowerUtil.changeResourceValue(powerType, -scoreAccess.getScore());
+                PowerUtil.changeResourceValue(powerType, -scoreAccess.get());
             case "*=" -> (powerType, scoreAccess) ->
-                PowerUtil.setResourceValue(powerType, PowerUtil.getResourceValue(powerType) * scoreAccess.getScore());
+                PowerUtil.setResourceValue(powerType, PowerUtil.getResourceValue(powerType) * scoreAccess.get());
             case "/=" -> (powerType, scoreAccess) -> {
 
                 int resourceValue = PowerUtil.getResourceValue(powerType);
-                int scoreValue = scoreAccess.getScore();
+                int scoreValue = scoreAccess.get();
 
                 if (scoreValue == 0) {
                     throw DIVISION_ZERO_EXCEPTION.create();
@@ -74,7 +74,7 @@ public class PowerOperationArgumentType implements ArgumentType<PowerOperationAr
             case "%=" -> (powerType, scoreAccess) -> {
 
                 int resourceValue = PowerUtil.getResourceValue(powerType);
-                int scoreValue = scoreAccess.getScore();
+                int scoreValue = scoreAccess.get();
 
                 if (scoreValue == 0) {
                     throw DIVISION_ZERO_EXCEPTION.create();
@@ -86,15 +86,15 @@ public class PowerOperationArgumentType implements ArgumentType<PowerOperationAr
 
             };
             case "<" -> (powerType, scoreAccess) ->
-                PowerUtil.setResourceValue(powerType, Math.min(PowerUtil.getResourceValue(powerType), scoreAccess.getScore()));
+                PowerUtil.setResourceValue(powerType, Math.min(PowerUtil.getResourceValue(powerType), scoreAccess.get()));
             case ">" -> (powerType, scoreAccess) ->
-                PowerUtil.setResourceValue(powerType, Math.max(PowerUtil.getResourceValue(powerType), scoreAccess.getScore()));
+                PowerUtil.setResourceValue(powerType, Math.max(PowerUtil.getResourceValue(powerType), scoreAccess.get()));
             case "><" -> (powerType, scoreAccess) -> {
 
                 int resourceValue = PowerUtil.getResourceValue(powerType);
-                int scoreValue = scoreAccess.getScore();
+                int scoreValue = scoreAccess.get();
 
-                scoreAccess.setScore(resourceValue);
+                scoreAccess.set(resourceValue);
                 return PowerUtil.setResourceValue(powerType, scoreValue);
 
             };

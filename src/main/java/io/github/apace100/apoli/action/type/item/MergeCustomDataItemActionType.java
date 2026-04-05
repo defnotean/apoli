@@ -32,7 +32,7 @@ public class MergeCustomDataItemActionType extends ItemActionType {
 
     @Override
     public void accept(ItemActionContext context) {
-        CustomData.set(DataComponents.CUSTOM_DATA, context.stackReference().get(), oldNbt -> oldNbt.merge(nbt));
+        CustomData.update(DataComponents.CUSTOM_DATA, context.stackReference().get(), oldNbt -> oldNbt.merge(nbt));
     }
 
     @Override

@@ -79,11 +79,11 @@ public class SpawnParticlesEntityActionType extends EntityActionType {
             return;
         }
 
-        Vec3 delta = spread.multiply(entity.getWidth(), entity.getHeight(), entity.getWidth());
+        Vec3 delta = spread.multiply(entity.getBbWidth(), entity.getBbHeight(), entity.getBbWidth());
         serverWorld.players()
             .stream()
             .filter(player -> biEntityCondition.map(condition -> condition.test(entity, player)).orElse(true))
-            .forEach(player -> serverWorld.spawnParticles(player, particle, force, pos.x(), pos.y(), pos.z(), count, delta.x(), delta.y(), delta.z(), speed));
+            .forEach(player -> serverWorld.sendParticles(player, particle, force, false, pos.x(), pos.y(), pos.z(), count, delta.x(), delta.y(), delta.z(), (double) speed));
 
     }
 

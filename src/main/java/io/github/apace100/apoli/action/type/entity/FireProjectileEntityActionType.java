@@ -17,8 +17,11 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.TagValueInput;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -83,7 +86,7 @@ public class FireProjectileEntityActionType extends EntityActionType {
             return;
         }
 
-        Random random = serverWorld.getRandom();
+        RandomSource random = serverWorld.getRandom();
 
         Vec3 velocity = entity.getDeltaMovement();
         Vec3 verticalOffset = entity.position().add(0, entity.getEyeHeight(entity.getPose()), 0);
@@ -108,7 +111,7 @@ public class FireProjectileEntityActionType extends EntityActionType {
                 }
 
                 projectileToSpawn.setOwner(entity);
-                projectileToSpawn.setDeltaMovement(entity, pitch, yaw, 0F, speed, divergence);
+                projectileToSpawn.shootFromRotation(entity, pitch, yaw, 0F, speed, divergence);
 
             }
 
@@ -124,7 +127,7 @@ public class FireProjectileEntityActionType extends EntityActionType {
                 Vec3 velocityToApply = new Vec3(l, m, n)
                     .normalize()
                     .add(random.nextGaussian() * k * divergence, random.nextGaussian() * k * divergence, random.nextGaussian() * k * divergence)
-                    .multiply(speed);
+                    .scale(speed);
 
                 entityToSpawn.setDeltaMovement(velocityToApply);
                 entityToSpawn.push(velocity.x, entity.onGround() ? 0.0D : velocity.y, velocity.z);
@@ -133,10 +136,12 @@ public class FireProjectileEntityActionType extends EntityActionType {
 
             if (!tag.isEmpty()) {
 
-                CompoundTag mergedNbt = entityToSpawn.save(new CompoundTag());
+                TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, serverWorld.registryAccess());
+                entityToSpawn.save(output);
+                CompoundTag mergedNbt = output.buildResult();
                 mergedNbt.merge(tag);
 
-                entityToSpawn.load(mergedNbt);
+                entityToSpawn.load(TagValueInput.create(ProblemReporter.DISCARDING, serverWorld.registryAccess(), mergedNbt));
 
             }
 

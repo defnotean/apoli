@@ -86,7 +86,7 @@ public class ExplodeEntityActionType extends EntityActionType {
         MiscUtil.createExplosion(
             entity.level(),
             damageSelf ? null : entity,
-            Explosion.createDamageSource(entity.level(), entity),
+            Explosion.getDefaultDamageSource(entity.level(), entity),
             entity.position().x(),
             entity.position().y(),
             entity.position().z(),

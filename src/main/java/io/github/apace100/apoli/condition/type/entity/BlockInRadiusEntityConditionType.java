@@ -71,7 +71,7 @@ public class BlockInRadiusEntityConditionType extends EntityConditionType {
         Entity entity = context.entity();
         int matches = 0;
 
-        for (BlockPos pos : shape.getBlockPositions(entity.blockPosition(), radius)) {
+        for (BlockPos pos : shape.getBlockPositions(entity.getBlockPos(), radius)) {
 
             if (blockCondition.test(entity.level(), pos)) {
                 ++matches;

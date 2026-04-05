@@ -7,6 +7,7 @@ import io.github.apace100.apoli.action.type.EntityActionType;
 import io.github.apace100.apoli.action.type.EntityActionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
+import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -18,7 +19,7 @@ public class EquippedItemActionEntityActionType extends EntityActionType {
 
     public static final TypedDataObjectFactory<EquippedItemActionEntityActionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("equipment_slot", SerializableDataTypes.EQUIPMENT_SLOT_GROUP)
+            .add("equipment_slot", ApoliDataTypes.EQUIPMENT_SLOT_GROUP)
             .add("item_action", ItemAction.DATA_TYPE),
         data -> new EquippedItemActionEntityActionType(
             data.get("equipment_slot"),
@@ -47,7 +48,7 @@ public class EquippedItemActionEntityActionType extends EntityActionType {
         for (EquipmentSlot slot : EquipmentSlot.values()) {
 
             if (equipmentSlot.test(slot)) {
-                itemAction.execute(livingEntity.level(), SlotAccess.of(livingEntity, slot));
+                itemAction.execute(livingEntity.level(), SlotAccess.forEquipmentSlot(livingEntity, slot));
             }
 
         }

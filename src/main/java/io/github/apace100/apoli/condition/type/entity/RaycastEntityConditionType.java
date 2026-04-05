@@ -123,7 +123,7 @@ public class RaycastEntityConditionType extends EntityConditionType {
         if (this.entity) {
 
             double distance = getEntityReach(entity);
-            destination = origin.add(direction.multiply(distance));
+            destination = origin.add(direction.scale(distance));
 
             hitResult = entityRaycast(entity, origin, destination);
 
@@ -132,7 +132,7 @@ public class RaycastEntityConditionType extends EntityConditionType {
         if (this.block) {
 
             double distance = getBlockReach(entity);
-            destination = origin.add(direction.multiply(distance));
+            destination = origin.add(direction.scale(distance));
 
             BlockHitResult blockResult = blockRaycast(entity, origin, destination);
             if (blockResult.getType() != HitResult.Type.MISS && overrideHitResult(entity, hitResult, blockResult)) {
@@ -144,7 +144,7 @@ public class RaycastEntityConditionType extends EntityConditionType {
         return switch (hitResult) {
             case BlockHitResult blockResult when blockCondition.isPresent() ->
                 blockResult.getType() != HitResult.Type.MISS
-                    && blockCondition.get().test(entity.level(), blockResult.blockPosition());
+                    && blockCondition.get().test(entity.level(), blockResult.getBlockPos());
             case EntityHitResult entityResult when hitBiEntityCondition.isPresent() ->
                 entityResult.getType() != HitResult.Type.MISS
                     && hitBiEntityCondition.get().test(entity, entityResult.getEntity());
@@ -170,7 +170,7 @@ public class RaycastEntityConditionType extends EntityConditionType {
                 .map(condition -> condition.test(caster, intersected))
                 .orElse(true));
 
-        return ProjectileUtil.clip(
+        return ProjectileUtil.getEntityHitResult(
             caster,
             origin,
             destination,
@@ -198,19 +198,19 @@ public class RaycastEntityConditionType extends EntityConditionType {
     private static boolean overrideHitResult(Entity caster, @Nullable HitResult prev, HitResult next) {
         return prev == null
             || prev.getType() == HitResult.Type.MISS
-            || prev.distanceToSqr(caster) > next.distanceToSqr(caster);
+            || prev.distanceTo(caster) > next.distanceTo(caster);
     }
 
     private double getEntityReach(Entity entity) {
         return entityDistance
             .or(() -> distance)
-            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, Attributes.PLAYER_ENTITY_INTERACTION_RANGE, 1.0));
+            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, Attributes.ENTITY_INTERACTION_RANGE, 1.0));
     }
 
     private double getBlockReach(Entity entity) {
         return blockDistance
             .or(() -> distance)
-            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, Attributes.PLAYER_BLOCK_INTERACTION_RANGE, 1.0));
+            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, Attributes.BLOCK_INTERACTION_RANGE, 1.0));
     }
 
 }

@@ -20,13 +20,18 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.ClipContext;
@@ -172,7 +177,7 @@ public class RaycastEntityActionType extends EntityActionType {
             .map(dir -> transformDirection(entity, dir))
             .orElseGet(() -> entity.getViewVector(1.0F));
 
-        Vec3 destination = origin.add(direction.multiply(distance));
+        Vec3 destination = origin.add(direction.scale(distance));
         HitResult hitResult = null;
 
         if (this.entity) {
@@ -193,23 +198,23 @@ public class RaycastEntityActionType extends EntityActionType {
 
         if (hit && commandAtHit.isPresent()) {
 
-            Vec3 hitPos = hitResult.position();
+            Vec3 hitPos = hitResult.getLocation();
             Offset offset = this.getOffset(entity, hitResult, direction);
 
-            hitPos = hitPos.subtract(offset.direction().multiply(offset.amount()));
+            hitPos = hitPos.subtract(offset.direction().scale(offset.amount()));
             this.executeCommandAtHit(entity, hitPos);
 
         }
 
         if (commandAlongRay.isPresent() && (!commandAlongRayOnlyOnHit || hit)) {
-            this.executeCommandAtSteps(entity, origin, hit ? hitResult.position() : destination);
+            this.executeCommandAtSteps(entity, origin, hit ? hitResult.getLocation() : destination);
         }
 
         if (hit) {
 
             switch (hitResult) {
                 case BlockHitResult blockResult ->
-                    blockAction.ifPresent(action -> action.execute(entity.level(), blockResult.blockPosition(), Optional.of(blockResult.getSide())));
+                    blockAction.ifPresent(action -> action.execute(entity.level(), blockResult.getBlockPos(), Optional.of(blockResult.getDirection())));
                 case EntityHitResult entityResult ->
                     biEntityAction.ifPresent(action -> action.execute(entity, entityResult.getEntity()));
                 default -> {
@@ -246,7 +251,7 @@ public class RaycastEntityActionType extends EntityActionType {
                 .map(condition -> condition.test(caster, intersected))
                 .orElse(true));
 
-        return ProjectileUtil.clip(
+        return ProjectileUtil.getEntityHitResult(
             caster,
             origin,
             destination,
@@ -284,20 +289,20 @@ public class RaycastEntityActionType extends EntityActionType {
 
             if (hitResult instanceof BlockHitResult blockResult) {
 
-                Direction hitSide = blockResult.getSide();
+                Direction hitSide = blockResult.getDirection();
 
                 switch (hitSide) {
                     case DOWN ->
-                        offset = entity.getHeight();
+                        offset = entity.getBbHeight();
                     case UP ->
                         offset = 0;
                     default -> {
 
-                        double offsetX = hitSide.getX();
-                        double offsetY = hitSide.getY();
-                        double offsetZ = hitSide.getZ();
+                        double offsetX = hitSide.getStepX();
+                        double offsetY = hitSide.getStepY();
+                        double offsetZ = hitSide.getStepZ();
 
-                        offset = entity.getWidth() / 2;
+                        offset = entity.getBbWidth() / 2;
                         offsetDirection = new Vec3(offsetX, offsetY, offsetZ).reverse();
 
                     }
@@ -315,7 +320,7 @@ public class RaycastEntityActionType extends EntityActionType {
     private static boolean overrideHitResult(Entity caster, @Nullable HitResult prev, HitResult next) {
         return prev == null
             || prev.getType() == HitResult.Type.MISS
-            || prev.distanceToSqr(caster) > next.distanceToSqr(caster);
+            || prev.distanceTo(caster) > next.distanceTo(caster);
     }
 
     private double getReach(Entity entity) {
@@ -337,18 +342,18 @@ public class RaycastEntityActionType extends EntityActionType {
     private double getEntityReach(Entity entity) {
         return entityDistance
             .or(() -> distance)
-            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, Attributes.PLAYER_ENTITY_INTERACTION_RANGE, 1.0));
+            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, Attributes.ENTITY_INTERACTION_RANGE, 1.0));
     }
 
     private double getBlockReach(Entity entity) {
         return blockDistance
             .or(() -> distance)
-            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, Attributes.PLAYER_BLOCK_INTERACTION_RANGE, 1.0));
+            .orElseGet(() -> MiscUtil.getAttributeValueOrElse(entity, Attributes.BLOCK_INTERACTION_RANGE, 1.0));
     }
 
     private void executeCommandAtSteps(Entity entity, Vec3 origin, Vec3 destination) {
 
-        MinecraftServer server = entity.getServer();
+        MinecraftServer server = entity.level().getServer();
         String commandAlongRay = this.commandAlongRay.orElse("");
 
         if (server == null || commandAlongRay.isEmpty()) {
@@ -358,19 +363,25 @@ public class RaycastEntityActionType extends EntityActionType {
         Vec3 direction = destination.subtract(origin).normalize();
         double distance = origin.distanceTo(destination);
 
-        CommandSourceStack commandSource = entity.createCommandSourceStack()
-            .withSource(CommandSource.NULL)
-            .withLevel(Apoli.config.executeCommand.permissionLevel);
+        CommandSource source = Apoli.config.executeCommand.showOutput
+            ? (entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null ? (CommandSource) serverPlayer : server)
+            : CommandSource.NULL;
 
-        if (Apoli.config.executeCommand.showOutput) {
-            commandSource = commandSource.withSource(entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
-                ? serverPlayer
-                : server);
-        }
+        CommandSourceStack commandSource = new CommandSourceStack(
+            source,
+            entity.position(),
+            Vec2.ZERO,
+            (ServerLevel) entity.level(),
+            LevelBasedPermissionSet.forLevel(PermissionLevel.byId(Apoli.config.executeCommand.permissionLevel)),
+            entity.getName().getString(),
+            entity.getDisplayName(),
+            server,
+            entity
+        );
 
         for (double steps = 0; steps < distance; steps += commandStep) {
 
-            Vec3 offsetPos = direction.multiply(steps);
+            Vec3 offsetPos = direction.scale(steps);
             Vec3 newPos = origin.add(offsetPos);
 
             server.getCommands().performPrefixedCommand(commandSource.withPosition(newPos), commandAlongRay);
@@ -381,23 +392,28 @@ public class RaycastEntityActionType extends EntityActionType {
 
     private void executeCommandAtHit(Entity entity, Vec3 hitPos) {
 
-        MinecraftServer server = entity.getServer();
+        MinecraftServer server = entity.level().getServer();
         String commandAtHit = this.commandAtHit.orElse("");
 
         if (server == null || commandAtHit.isEmpty()) {
             return;
         }
 
-        CommandSourceStack commandSource = entity.createCommandSourceStack()
-            .withSource(CommandSource.NULL)
-            .withPosition(hitPos)
-            .withLevel(Apoli.config.executeCommand.permissionLevel);
+        CommandSource source = Apoli.config.executeCommand.showOutput
+            ? (entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null ? (CommandSource) serverPlayer : server)
+            : CommandSource.NULL;
 
-        if (Apoli.config.executeCommand.showOutput) {
-            commandSource = commandSource.withSource(entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
-                ? serverPlayer
-                : server);
-        }
+        CommandSourceStack commandSource = new CommandSourceStack(
+            source,
+            hitPos,
+            Vec2.ZERO,
+            (ServerLevel) entity.level(),
+            LevelBasedPermissionSet.forLevel(PermissionLevel.byId(Apoli.config.executeCommand.permissionLevel)),
+            entity.getName().getString(),
+            entity.getDisplayName(),
+            server,
+            entity
+        );
 
         server.getCommands().performPrefixedCommand(commandSource, commandAtHit);
 

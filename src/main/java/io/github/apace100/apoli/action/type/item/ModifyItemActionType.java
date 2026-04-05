@@ -8,6 +8,7 @@ import io.github.apace100.apoli.action.type.ItemActionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.loot.context.ApoliLootContextTypes;
 import io.github.apace100.calio.data.SerializableData;
+import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.ItemStack;
@@ -27,7 +28,7 @@ public class ModifyItemActionType extends ItemActionType {
 
     public static final TypedDataObjectFactory<ModifyItemActionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("modifier", SerializableDataTypes.ITEM_MODIFIER),
+            .add("modifier", SerializableDataType.registryKey(Registries.ITEM_MODIFIER)),
         data -> new ModifyItemActionType(
             data.get("modifier")
         ),
@@ -48,18 +49,19 @@ public class ModifyItemActionType extends ItemActionType {
         SlotAccess stackReference = context.stackReference();
 
         ItemStack oldStack = stackReference.get();
-        LootItemFunction itemModifier = world.getServer().getReloadableRegistries()
-            .registryAccess()
-            .get(Registries.ITEM_MODIFIER)
-            .getOrThrow(modifier);
+        LootItemFunction itemModifier = world.getServer().reloadableRegistries()
+            .lookup()
+            .lookupOrThrow(Registries.ITEM_MODIFIER)
+            .getOrThrow(modifier)
+            .value();
 
         LootParams lootContextParameterSet = new LootParams.Builder(world)
-            .add(LootContextParams.ORIGIN, world.getSharedSpawnPos().getCenter())
+            .add(LootContextParams.ORIGIN, world.getLevelData().getRespawnData().pos().getCenter())
             .add(LootContextParams.TOOL, oldStack)
             .addOptional(LootContextParams.THIS_ENTITY, ((EntityLinkedItemStack) oldStack).apoli$getEntity())
             .build(ApoliLootContextTypes.ANY);
 
-        ItemStack newStack = itemModifier.apply(oldStack, new LootContext.Builder(lootContextParameterSet).build(Optional.empty()));
+        ItemStack newStack = itemModifier.apply(oldStack, new LootContext.Builder(lootContextParameterSet).build(ApoliLootContextTypes.ANY));
         stackReference.set(newStack);
 
     }

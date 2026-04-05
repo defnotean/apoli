@@ -139,7 +139,7 @@ public class RandomTeleportEntityActionType extends EntityActionType {
 
     private boolean attemptToTeleport(Entity entity, ServerLevel serverWorld, double destX, double destY, double destZ) {
 
-        BlockPos.Mutable destBlockPos = BlockPos.containing(destX, destY, destZ).mutable();
+        BlockPos.MutableBlockPos destBlockPos = BlockPos.containing(destX, destY, destZ).mutable();
         boolean foundSurface = false;
 
         if (heightmapType.isPresent()) {
@@ -169,7 +169,7 @@ public class RandomTeleportEntityActionType extends EntityActionType {
         }
 
         destX = landingOffset.x() == 0 ? destX : Mth.floor(destX) + landingOffset.x();
-        destY = destBlockPos.y() + landingOffset.y();
+        destY = destBlockPos.getY() + landingOffset.y();
         destZ = landingOffset.z() == 0 ? destZ : Mth.floor(destZ) + landingOffset.z();
 
         destBlockPos.set(destX, destY, destZ);
@@ -178,10 +178,10 @@ public class RandomTeleportEntityActionType extends EntityActionType {
         double prevY = entity.getY();
         double prevZ = entity.getZ();
 
-        ChunkPos destChunkPos = new ChunkPos(destBlockPos);
-        if (!loadedChunksOnly && !serverWorld.hasChunkAt(destChunkPos.x, destChunkPos.z)) {
-            serverWorld.getChunkSource().addTicket(TicketType.POST_TELEPORT, destChunkPos, 0, entity.getId());
-            serverWorld.getChunk(destChunkPos.x, destChunkPos.z);
+        ChunkPos destChunkPos = ChunkPos.containing(destBlockPos);
+        if (!loadedChunksOnly && !serverWorld.hasChunkAt(destChunkPos.x(), destChunkPos.z())) {
+            serverWorld.getChunkSource().addTicket(new net.minecraft.server.level.Ticket(TicketType.UNKNOWN, 0), destChunkPos);
+            serverWorld.getChunk(destChunkPos.x(), destChunkPos.z());
         }
 
         entity.teleportTo(destX, destY, destZ);

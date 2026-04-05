@@ -192,12 +192,12 @@ public final class MiscUtil {
     }
 
     public static BlockState getInWallBlockState(Entity playerEntity) {
-        BlockPos.Mutable mutable = new BlockPos.Mutable();
+        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
         for(int i = 0; i < 8; ++i) {
-            double d = playerEntity.x() + (double)(((float)((i >> 0) % 2) - 0.5F) * playerEntity.getWidth() * 0.8F);
+            double d = playerEntity.x() + (double)(((float)((i >> 0) % 2) - 0.5F) * playerEntity.getBbWidth() * 0.8F);
             double e = playerEntity.getEyeY() + (double)(((float)((i >> 1) % 2) - 0.5F) * 0.1F);
-            double f = playerEntity.z() + (double)(((float)((i >> 2) % 2) - 0.5F) * playerEntity.getWidth() * 0.8F);
+            double f = playerEntity.z() + (double)(((float)((i >> 2) % 2) - 0.5F) * playerEntity.getBbWidth() * 0.8F);
             mutable.set(d, e, f);
             BlockState blockState = playerEntity.level().getBlockState(mutable);
             if (blockState.getRenderType() != RenderShape.INVISIBLE && blockState.shouldBlockVision(playerEntity.level(), mutable)) {

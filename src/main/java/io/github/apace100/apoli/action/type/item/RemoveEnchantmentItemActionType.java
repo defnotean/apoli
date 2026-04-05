@@ -83,21 +83,21 @@ public class RemoveEnchantmentItemActionType extends ItemActionType {
         }
 
         ItemEnchantments oldEnchantments = stack.getEnchantments();
-        ItemEnchantments.Builder newEnchantments = new ItemEnchantments.Builder(oldEnchantments);
+        ItemEnchantments.Mutable newEnchantments = new ItemEnchantments.Mutable(oldEnchantments);
 
-        Registry<Enchantment> enchantmentRegistry = dynamicRegistries.get(Registries.ENCHANTMENT);
+        Registry<Enchantment> enchantmentRegistry = dynamicRegistries.lookupOrThrow(Registries.ENCHANTMENT);
         for (ResourceKey<Enchantment> enchantmentKey : allEnchantmentKeys) {
 
             //  Since the registry keys are already validated, this should be fine.
-            Holder<Enchantment> enchantment = enchantmentRegistry.entryOf(enchantmentKey);
+            Holder<Enchantment> enchantment = enchantmentRegistry.getOrThrow(enchantmentKey);
 
-            if (oldEnchantments.getEnchantments().contains(enchantment)) {
+            if (oldEnchantments.keySet().contains(enchantment)) {
                 newEnchantments.set(enchantment, levels.map(lvl -> oldEnchantments.getLevel(enchantment) - lvl).orElse(0));
             }
 
         }
 
-        for (Holder<Enchantment> oldEnchantment : oldEnchantments.getEnchantments()) {
+        for (Holder<Enchantment> oldEnchantment : oldEnchantments.keySet()) {
 
             if (!allEnchantmentKeys.isEmpty()) {
                 break;
@@ -109,7 +109,7 @@ public class RemoveEnchantmentItemActionType extends ItemActionType {
 
         }
 
-        stack.set(DataComponents.ENCHANTMENTS, newEnchantments.build());
+        stack.set(DataComponents.ENCHANTMENTS, newEnchantments.toImmutable());
         if (resetRepairCost && !stack.isEnchanted()) {
             stack.set(DataComponents.REPAIR_COST, 0);
         }

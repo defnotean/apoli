@@ -8,6 +8,7 @@ import io.github.apace100.apoli.action.type.EntityActionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.InventoryUtil;
 import io.github.apace100.calio.data.SerializableData;
+import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.Entity;
@@ -25,7 +26,7 @@ public class GiveEntityActionType extends EntityActionType {
     public static final TypedDataObjectFactory<GiveEntityActionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
             .add("item_action", ItemAction.DATA_TYPE.optional(), Optional.empty())
-            .add("preferred_slot", SerializableDataTypes.EQUIPMENT_SLOT_GROUP.optional(), Optional.empty())
+            .add("preferred_slot", ApoliDataTypes.EQUIPMENT_SLOT_GROUP.optional(), Optional.empty())
             .add("stack", SerializableDataTypes.ITEM_STACK),
         data -> new GiveEntityActionType(
             data.get("item_action"),
@@ -96,7 +97,7 @@ public class GiveEntityActionType extends EntityActionType {
         }
 
         if (entity instanceof Player player) {
-            player.getInventory().addItem(stackToGive);
+            player.getInventory().add(stackToGive);
         }
 
         else {

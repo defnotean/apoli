@@ -40,7 +40,7 @@ public class WorldUtil {
 
     private static boolean isRainingAndExposed(Level world, BlockPos blockPos) {
         return world.isRaining()
-            && world.isSkyVisible(blockPos)
+            && world.canSeeSky(blockPos)
             && world.getHeightmapPos(Heightmap.Type.MOTION_BLOCKING, blockPos).y() < blockPos.y();
     }
 

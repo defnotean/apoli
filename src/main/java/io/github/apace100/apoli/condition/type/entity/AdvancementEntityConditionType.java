@@ -46,7 +46,7 @@ public class AdvancementEntityConditionType extends EntityConditionType {
             return false;
         }
 
-        MinecraftServer server = player.getServer();
+        MinecraftServer server = player.level().getServer();
         if (server != null) {
 
             AdvancementHolder advancementEntry = server.getAdvancements().get(advancement);

@@ -37,7 +37,7 @@ public class FeedEntityActionType extends EntityActionType {
     public void accept(EntityActionContext context) {
 
         if (context.entity() instanceof Player player) {
-            player.getFoodData().add(nutrition, saturation);
+            player.getFoodData().eat(nutrition, saturation);
         }
 
     }

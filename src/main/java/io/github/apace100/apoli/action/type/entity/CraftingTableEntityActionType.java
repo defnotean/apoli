@@ -23,7 +23,7 @@ public class CraftingTableEntityActionType extends EntityActionType {
 
             MenuConstructor handlerFactory = (syncId, playerInventory, _player) -> {
 
-                CraftingMenu craftingScreenHandler = new CraftingMenu(syncId, playerInventory, ContainerLevelAccess.create(player.level(), player.blockPosition()));
+                CraftingMenu craftingScreenHandler = new CraftingMenu(syncId, playerInventory, ContainerLevelAccess.create(player.level(), player.getBlockPos()));
                 ((ScreenHandlerUsabilityOverride) craftingScreenHandler).apoli$canUse(true);
 
                 return craftingScreenHandler;

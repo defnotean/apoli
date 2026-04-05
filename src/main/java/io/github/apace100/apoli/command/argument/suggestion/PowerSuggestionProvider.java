@@ -115,7 +115,7 @@ public record PowerSuggestionProvider(Function<CommandContext<CommandSourceStack
 
 			}
 
-			return SharedSuggestionProvider.suggestIdentifiers(powerIds.build(), builder);
+			return SharedSuggestionProvider.suggestResource(powerIds.build(), builder);
 
 		}
 

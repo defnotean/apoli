@@ -81,14 +81,14 @@ public class ActionOnBlockUsePowerType extends ActiveInteractionPowerType {
     public boolean shouldExecute(BlockUsagePhase usePhase, PriorityPhase priorityPhase, BlockHitResult hitResult, InteractionHand hand, ItemStack heldStack) {
         return priorityPhase.test(this.getPriority())
             && usePhases.contains(usePhase)
-            && directions.contains(hitResult.getSide())
+            && directions.contains(hitResult.getDirection())
             && super.shouldExecute(hand, heldStack)
-            && blockCondition.map(condition -> condition.test(getHolder().level(), hitResult.blockPosition())).orElse(true);
+            && blockCondition.map(condition -> condition.test(getHolder().level(), hitResult.getBlockPos())).orElse(true);
     }
 
     public InteractionResult executeAction(BlockHitResult hitResult, InteractionHand hand) {
 
-        blockAction.ifPresent(action -> action.execute(getHolder().level(), hitResult.blockPosition(), Optional.of(hitResult.getSide())));
+        blockAction.ifPresent(action -> action.execute(getHolder().level(), hitResult.getBlockPos(), Optional.of(hitResult.getDirection())));
         entityAction.ifPresent(action -> action.execute(getHolder()));
 
         if (getHolder() instanceof Player player) {

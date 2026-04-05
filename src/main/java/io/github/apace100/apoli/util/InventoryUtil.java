@@ -259,7 +259,7 @@ public class InventoryUtil {
 
             for (int i = 0; i < inventoryPowerTypes.size(); i++) {
 
-                ItemStack stack = inventoryPowerType.getStack(i);
+                ItemStack stack = inventoryPowerType.getItem(i);
 
                 if (!stack.isEmpty()) {
                     stackConsumer.accept(stack);
@@ -305,7 +305,7 @@ public class InventoryUtil {
     private static OptionalInt getSelectedHotBarSlot(Entity entity) {
 
         SlotRange slotRange = entity instanceof Player player
-            ? SlotRanges.nameToIds("hotbar." + player.getInventory().selected)
+            ? SlotRanges.nameToIds("hotbar." + player.getInventory().getSelectedSlot())
             : null;
 
         return slotRange != null
@@ -325,13 +325,13 @@ public class InventoryUtil {
      */
     public static boolean slotWithinBounds(Entity entity, Optional<InventoryPowerType> inventoryPowerType, int slot) {
         return inventoryPowerType
-            .map(powerType -> slot >= 0 && slot < powerType.size())
+            .map(powerType -> slot >= 0 && slot < powerType.getContainerSize())
             .orElseGet(() -> !entity.getSlot(slot).get().isEmpty());
     }
 
     public static SlotAccess getStackReference(@NotNull Entity entity, Optional<InventoryPowerType> inventoryPowerType, int slot) {
         return inventoryPowerType
-            .<SlotAccess>map(powerType -> SlotAccess.of(() -> powerType.getStack(slot), stack -> powerType.setStack(slot, stack)))
+            .<SlotAccess>map(powerType -> SlotAccess.of(() -> powerType.getItem(slot), stack -> powerType.setItem(slot, stack)))
             .orElseGet(() -> entity.getSlot(slot));
     }
 

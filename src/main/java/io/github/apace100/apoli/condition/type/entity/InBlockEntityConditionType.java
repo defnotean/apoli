@@ -31,7 +31,7 @@ public class InBlockEntityConditionType extends EntityConditionType {
     @Override
     public boolean test(EntityConditionContext context) {
         Entity entity = context.entity();
-        return blockCondition.test(entity.level(), entity.blockPosition());
+        return blockCondition.test(entity.level(), entity.getBlockPos());
     }
 
     @Override

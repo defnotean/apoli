@@ -6,8 +6,8 @@ import io.github.apace100.apoli.action.type.EntityActionType;
 import io.github.apace100.apoli.action.type.EntityActionTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.stats.Stats;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +19,7 @@ public class EnderChestEntityActionType extends EntityActionType {
 
         if (context.entity() instanceof Player player) {
 
-            MenuProvider handlerFactory = (syncId, playerInventory, _player) -> ChestMenu.threeRows(syncId, playerInventory, player.getEnderChestInventory());
+            MenuConstructor handlerFactory = (syncId, playerInventory, _player) -> ChestMenu.threeRows(syncId, playerInventory, player.getEnderChestInventory());
             player.openMenu(new SimpleMenuProvider(handlerFactory, Component.translatable("container.enderchest")));
 
             player.awardStat(Stats.OPEN_ENDERCHEST);

@@ -10,7 +10,7 @@ public class ExposedToSkyBlockConditionType extends BlockConditionType {
 
 	@Override
 	public boolean test(BlockConditionContext context) {
-		return context.world().isSkyVisible(context.pos());
+		return context.world().canSeeSky(context.pos());
 	}
 
 	@Override

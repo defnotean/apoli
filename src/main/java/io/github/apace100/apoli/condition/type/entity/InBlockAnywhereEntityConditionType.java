@@ -59,15 +59,15 @@ public class InBlockAnywhereEntityConditionType extends EntityConditionType {
         Entity entity = context.entity();
 
         AABB boundingBox = entity.getBoundingBox();
-        BlockPos.Mutable mutablePos = new BlockPos.Mutable();
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
         BlockPos minPos = BlockPos.containing(boundingBox.minX + 0.001D, boundingBox.minY + 0.001D, boundingBox.minZ + 0.001D);
         BlockPos maxPos = BlockPos.containing(boundingBox.maxX - 0.001D, boundingBox.maxY - 0.001D, boundingBox.maxZ - 0.001D);
 
         int matches = 0;
-        for (int x = minPos.x(); x <= maxPos.x() && matches < threshold; x++) {
-            for (int y = minPos.y(); y <= maxPos.y() && matches < threshold; y++) {
-                for (int z = minPos.z(); z <= maxPos.z() && matches < threshold; z++) {
+        for (int x = minPos.getX(); x <= maxPos.getX() && matches < threshold; x++) {
+            for (int y = minPos.getY(); y <= maxPos.getY() && matches < threshold; y++) {
+                for (int z = minPos.getZ(); z <= maxPos.getZ() && matches < threshold; z++) {
 
                     mutablePos.set(x, y, z);
 

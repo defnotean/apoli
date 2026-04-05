@@ -47,7 +47,7 @@ public abstract class EntityParticleMixin extends Entity {
 
             Vec3 spread = particlePower
                 .getSpread()
-                .multiply(this.getWidth(), this.getEyeHeight(this.getPose()), this.getWidth());
+                .multiply(this.getBbWidth(), this.getEyeHeight(this.getPose()), this.getBbWidth());
             Vec3 particlePos = this
                 .position()
                 .add(particlePower.getX(), particlePower.getY(), particlePower.getZ());

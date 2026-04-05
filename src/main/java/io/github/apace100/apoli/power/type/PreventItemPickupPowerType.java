@@ -103,7 +103,7 @@ public class PreventItemPickupPowerType extends PowerType implements Prioritized
         }
 
         ItemStack stack = itemEntity.getStack();
-        Entity throwerEntity = MiscUtil.getEntityByUuid(((ItemEntityAccessor) itemEntity).getThrowerUuid(), entity.getServer());
+        Entity throwerEntity = MiscUtil.getEntityByUuid(((ItemEntityAccessor) itemEntity).getThrowerUuid(), entity.level().getServer());
 
         CallInstance<PreventItemPickupPowerType> pippci = new CallInstance<>();
         pippci.add(entity, PreventItemPickupPowerType.class, p -> p.doesPrevent(stack, throwerEntity));

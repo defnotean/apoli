@@ -72,7 +72,7 @@ public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType
             .filter(e -> powerTarget() != PowerTarget.RESOURCE || PowerUtil.validateResource(e.getValue().getType()).isSuccess())
             .map(Map.Entry::getKey);
 
-        return SharedSuggestionProvider.suggestIdentifiers(powerIds, builder);
+        return SharedSuggestionProvider.suggestResource(powerIds, builder);
 
     }
 

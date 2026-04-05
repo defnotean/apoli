@@ -58,11 +58,11 @@ public class RevokeAdvancementEntityActionType extends EntityActionType {
             return;
         }
 
-        MinecraftServer server = serverPlayer.server;
+        MinecraftServer server = serverPlayer.level().getServer();
         ServerAdvancementManager advancementLoader = server.getAdvancements();
 
         if (selection == AdvancementCommands.Mode.EVERYTHING) {
-            AdvancementUtil.processAdvancements(advancementLoader.getAdvancements(), AdvancementCommands.Action.REVOKE, serverPlayer);
+            AdvancementUtil.processAdvancements(advancementLoader.getAllAdvancements(), AdvancementCommands.Action.REVOKE, serverPlayer);
         }
 
         else if (advancementId.isPresent()) {
@@ -76,7 +76,7 @@ public class RevokeAdvancementEntityActionType extends EntityActionType {
             }
 
             else if (criteria.isEmpty()) {
-                AdvancementUtil.processAdvancements(AdvancementUtil.selectEntries(advancementLoader.getManager(), advancementEntry, selection), AdvancementCommands.Action.REVOKE, serverPlayer);
+                AdvancementUtil.processAdvancements(AdvancementUtil.selectEntries(advancementLoader.tree(), advancementEntry, selection), AdvancementCommands.Action.REVOKE, serverPlayer);
             }
 
             else {

@@ -54,7 +54,7 @@ public interface DistanceFromCoordinatesMetaConditionType {
         Level world = context.map(BlockConditionContext::world, EntityConditionContext::world);
         BlockPos pos = context.map(BlockConditionContext::pos, EntityConditionContext::blockPos);
 
-        double coordinateScale = world.getDimension().coordinateScale();
+        double coordinateScale = world.dimensionType().coordinateScale();
 
         double x = 0;
         double y = 0;
@@ -64,7 +64,7 @@ public interface DistanceFromCoordinatesMetaConditionType {
 
             case PLAYER_SPAWN -> {
 
-                //  Requires an entity context — if there's no entity or no server player, fall back to world spawn
+                //  Requires an entity context -- if there's no entity or no server player, fall back to world spawn
                 Entity entity = context
                     .right()
                     .map(EntityConditionContext::entity)
@@ -73,25 +73,26 @@ public interface DistanceFromCoordinatesMetaConditionType {
                 if (entity instanceof ServerPlayer serverPlayer) {
                     //  Use the player's set respawn position (i.e., their bed or anchor location)
                     //  If none is set, fall through to world spawn behaviour
-                    BlockPos spawnPos = serverPlayer.getRespawnPosition();
-                    if (spawnPos != null) {
+                    ServerPlayer.RespawnConfig respawnConfig = serverPlayer.getRespawnConfig();
+                    if (respawnConfig != null) {
+                        BlockPos spawnPos = respawnConfig.respawnData().pos();
                         //  Check for wrong-dimension guard
-                        var respawnDimension = serverPlayer.getRespawnDimension();
+                        var respawnDimension = respawnConfig.respawnData().dimension();
                         if (resultOnWrongDimension().isPresent() && !world.dimension().equals(respawnDimension)) {
                             return resultOnWrongDimension().get();
                         }
-                        x = spawnPos.x();
-                        y = spawnPos.y();
-                        z = spawnPos.z();
+                        x = spawnPos.getX();
+                        y = spawnPos.getY();
+                        z = spawnPos.getZ();
                         break;
                     }
                 }
 
-                //  No player-specific spawn set — fall back to world spawn
-                BlockPos worldSpawn = world.getSharedSpawnPos();
-                x = worldSpawn.x();
-                y = worldSpawn.y();
-                z = worldSpawn.z();
+                //  No player-specific spawn set -- fall back to world spawn
+                BlockPos worldSpawn = world.getLevelData().getRespawnData().pos();
+                x = worldSpawn.getX();
+                y = worldSpawn.getY();
+                z = worldSpawn.getZ();
 
             }
 
@@ -103,28 +104,28 @@ public interface DistanceFromCoordinatesMetaConditionType {
                     .orElse(null);
 
                 if (entity instanceof ServerPlayer serverPlayer) {
-                    //  Use the "natural" (unforced / no anchor) spawn position — i.e., bed spawn only
+                    //  Use the "natural" (unforced / no anchor) spawn position -- i.e., bed spawn only
                     //  A forced respawn (anchor or /spawnpoint) is excluded if checkModifiedSpawn() is true
-                    BlockPos spawnPos = serverPlayer.getRespawnPosition();
-                    boolean spawnForced = serverPlayer.isRespawnForced();
+                    ServerPlayer.RespawnConfig respawnConfig = serverPlayer.getRespawnConfig();
 
-                    if (spawnPos != null && (!checkModifiedSpawn() || !spawnForced)) {
-                        var respawnDimension = serverPlayer.getRespawnDimension();
+                    if (respawnConfig != null && (!checkModifiedSpawn() || !respawnConfig.forced())) {
+                        BlockPos spawnPos = respawnConfig.respawnData().pos();
+                        var respawnDimension = respawnConfig.respawnData().dimension();
                         if (resultOnWrongDimension().isPresent() && !world.dimension().equals(respawnDimension)) {
                             return resultOnWrongDimension().get();
                         }
-                        x = spawnPos.x();
-                        y = spawnPos.y();
-                        z = spawnPos.z();
+                        x = spawnPos.getX();
+                        y = spawnPos.getY();
+                        z = spawnPos.getZ();
                         break;
                     }
                 }
 
-                //  No natural spawn set — fall back to world spawn
-                BlockPos worldSpawn = world.getSharedSpawnPos();
-                x = worldSpawn.x();
-                y = worldSpawn.y();
-                z = worldSpawn.z();
+                //  No natural spawn set -- fall back to world spawn
+                BlockPos worldSpawn = world.getLevelData().getRespawnData().pos();
+                x = worldSpawn.getX();
+                y = worldSpawn.getY();
+                z = worldSpawn.getZ();
 
             }
 
@@ -135,10 +136,10 @@ public interface DistanceFromCoordinatesMetaConditionType {
                     return resultOnWrongDimension().get();
                 }
 
-                BlockPos spawnPos = world.getSharedSpawnPos();
-                x = spawnPos.x();
-                y = spawnPos.y();
-                z = spawnPos.z();
+                BlockPos spawnPos = world.getLevelData().getRespawnData().pos();
+                x = spawnPos.getX();
+                y = spawnPos.getY();
+                z = spawnPos.getZ();
 
             }
 
@@ -157,9 +158,9 @@ public interface DistanceFromCoordinatesMetaConditionType {
             z /= coordinateScale;
         }
 
-        double xDistance = ignoreX() ? 0 : Math.abs(pos.x() - x);
-        double yDistance = ignoreY() ? 0 : Math.abs(pos.y() - y);
-        double zDistance = ignoreZ() ? 0 : Math.abs(pos.z() - z);
+        double xDistance = ignoreX() ? 0 : Math.abs(pos.getX() - x);
+        double yDistance = ignoreY() ? 0 : Math.abs(pos.getY() - y);
+        double zDistance = ignoreZ() ? 0 : Math.abs(pos.getZ() - z);
 
         if (scaleDistanceToDimension()) {
             xDistance *= coordinateScale;
