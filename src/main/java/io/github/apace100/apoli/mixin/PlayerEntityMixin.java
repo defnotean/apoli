@@ -57,8 +57,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
     @Shadow
     public abstract boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount);
 
-    @Shadow
-    public abstract ItemStack getItemBySlot(EquipmentSlot slot);
+    // getItemBySlot is inherited from LivingEntity, no @Shadow needed
 
     @Shadow
     @Final
