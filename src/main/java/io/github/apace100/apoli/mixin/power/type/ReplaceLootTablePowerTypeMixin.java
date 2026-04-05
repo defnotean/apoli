@@ -256,7 +256,8 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 	@Mixin(LootParams.Builder.class)
 	public static abstract class LootContextParametersCacheInit {
 
-		@ModifyReturnValue(method = "build", at = @At("RETURN"))
+		// MC 26.1: LootParams.Builder.build renamed to create
+		@ModifyReturnValue(method = "create", at = @At("RETURN"))
 		private LootParams cacheType(LootParams original, ContextKeySet type) {
 
 			((LootContextTypeHolder) original).apoli$setType(type);

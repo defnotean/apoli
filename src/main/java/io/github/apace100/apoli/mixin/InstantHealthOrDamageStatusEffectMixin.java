@@ -11,6 +11,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.core.registries.Registries;
 
+// MC 26.1: applyInstantenousEffect is declared on MobEffect (parent). InstantenousMobEffect inherits it.
+// @WrapMethod resolves inherited methods, so targeting InstantenousMobEffect is correct for the cast.
 @Mixin(targets = "net.minecraft.world.effect.InstantenousMobEffect")
 public abstract class InstantHealthOrDamageStatusEffectMixin {
 

@@ -59,15 +59,15 @@ public abstract class GameEventListenerPowerTypeMixin {
 	@Mixin(Entity.class)
 	public static abstract class EventHandlerUpdater {
 
-		// MC 26.1: Entity.getWorld() no longer exists; level() is the direct method on Entity
+		// MC 26.1: Entity.updateDynamicGameEventListener takes BiConsumer<DynamicGameEventListener<?>, ServerLevel>
 		@Inject(method = "updateDynamicGameEventListener", at = @At("HEAD"))
-		private void apoli$update(BiConsumer<VibrationSystem.Listener, ServerLevel> callback, CallbackInfo ci) {
+		private void apoli$update(BiConsumer<net.minecraft.world.level.gameevent.DynamicGameEventListener<?>, ServerLevel> callback, CallbackInfo ci) {
 
 			if (((Entity) (Object) this).level() instanceof ServerLevel serverWorld) {
 				PowerHolderComponent.getPowerTypes((Entity) (Object) this, GameEventListenerPowerType.class, true)
 					.stream()
 					.map(GameEventListenerPowerType::getGameEventHandler)
-					.forEach(listener -> callback.accept(listener.getListener(), serverWorld));
+					.forEach(listener -> callback.accept(listener, serverWorld));
 			}
 
 		}

@@ -13,8 +13,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Leashable.class)
 public interface LeashableMixin {
 
-    @WrapWithCondition(method = "dropLeash(Lnet/minecraft/world/entity/Entity;ZZ)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;spawnAtLocation(Lnet/minecraft/world/level/ItemLike;)Lnet/minecraft/world/entity/item/ItemEntity;"))
-    private static boolean apoli$preventDroppingLeashOnCustom(Entity entity, ItemLike item) {
+    // MC 26.1: Entity.spawnAtLocation now takes (ServerLevel, ItemLike) instead of just (ItemLike)
+    @WrapWithCondition(method = "dropLeash(Lnet/minecraft/world/entity/Entity;ZZ)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/ItemLike;)Lnet/minecraft/world/entity/item/ItemEntity;"))
+    private static boolean apoli$preventDroppingLeashOnCustom(Entity entity, net.minecraft.server.level.ServerLevel serverLevel, ItemLike item) {
         return !(entity instanceof CustomLeashable customLeashable)
             || !customLeashable.apoli$isCustomLeashed();
     }
