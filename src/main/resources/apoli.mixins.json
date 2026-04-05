@@ -34,7 +34,6 @@
 		"GrindstoneScreenHandlerMixin",
 		"GrindstoneScreenHandlerOutputSlotMixin",
 		"GrindstoneScreenHandlerTopInputSlotMixin",
-		"InstantHealthOrDamageStatusEffectMixin",
 		"InteractionEntityMixin",
 		"ItemEntityAccessor",
 		"ItemEntityMixin",

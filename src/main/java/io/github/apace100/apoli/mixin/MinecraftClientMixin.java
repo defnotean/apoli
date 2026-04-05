@@ -43,7 +43,7 @@ public abstract class MinecraftClientMixin implements OverlaySpriteHolder {
     @Shadow
     public abstract TextureManager getTextureManager();
 
-    @ModifyReturnValue(method = "hasOutline", at = @At("RETURN"))
+    @ModifyReturnValue(method = "shouldEntityAppearGlowing", at = @At("RETURN"))
     private boolean apoli$makeEntitiesGlow(boolean original, Entity entity) {
         return original
             || (player != entity && PowerHolderComponent.hasPowerType(player, EntityGlowPowerType.class, p -> p.doesApply(entity)))
