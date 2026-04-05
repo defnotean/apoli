@@ -55,7 +55,7 @@ public class ModifiedCraftingRecipe implements CraftingRecipe {
 
     @Override
     public boolean matches(CraftingInput input, Level world) {
-        return delegate().test(input, world);
+        return delegate().matches(input, world);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class ModifiedCraftingRecipe implements CraftingRecipe {
     public static Optional<BlockPos> getBlockFromInventory(TransientCraftingContainer craftingInventory) {
 
         if (((CraftingInventoryAccessor) craftingInventory).getHandler() instanceof CraftingMenu craftingScreenHandler) {
-            return ((CraftingScreenHandlerAccessor) craftingScreenHandler).getContext().get((world, pos) -> pos);
+            return ((CraftingScreenHandlerAccessor) craftingScreenHandler).getContext().evaluate((world, pos) -> pos);
         }
 
         else {
@@ -173,7 +173,7 @@ public class ModifiedCraftingRecipe implements CraftingRecipe {
         ApoliDataTypes.DISALLOWING_INTERNAL_CRAFTING_RECIPE.codec().fieldOf("recipe").forGetter(ModifiedCraftingRecipe::delegate)
     ).apply(instance, ModifiedCraftingRecipe::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ModifiedCraftingRecipe> PACKET_CODEC = StreamCodec.of(
+    public static final StreamCodec<RegistryFriendlyByteBuf, ModifiedCraftingRecipe> PACKET_CODEC = StreamCodec.ofMember(
         ModifiedCraftingRecipe::send,
         ModifiedCraftingRecipe::receive
     );

@@ -17,7 +17,7 @@ public abstract class TextCodecsMixin {
 	@ModifyArg(method = "createCodec", at = @At(value = "NEW", target = "(Ljava/util/Collection;Ljava/util/function/Function;)Lnet/minecraft/network/chat/ComponentSerialization$FuzzyCodec;"), index = 0)
 	private static Collection apoli$addCustomCodec(Collection original) {
 		ArrayList codecs = new ArrayList(original);
-		codecs.add(ForcedTranslatableTextContent.CODEC);
+		codecs.add(ForcedTranslatableTextContent.FORCED_TRANSLATABLE_CODEC);
 		return codecs;
 	}
 

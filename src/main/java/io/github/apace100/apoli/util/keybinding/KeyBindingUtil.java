@@ -27,7 +27,7 @@ public class KeyBindingUtil {
     public static MutableComponent getLocalizedName(String translationKey) {
         return getKeyBinding(translationKey)
             .filter(Predicate.not(KeyMapping::isUnbound))
-            .map(KeyMapping::getBoundKeyLocalizedText)
+            .map(KeyMapping::getTranslatedKeyMessage)
             .map(Component::copy)
             .orElseGet(() -> Component.translatable(translationKey));
     }

@@ -12,9 +12,9 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.client.renderer.RenderPipelines;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -31,6 +31,8 @@ public class PowerHudRenderer implements GameHudRender {
     private static final int BAR_INDEX_OFFSET = BAR_HEIGHT + 2;
     private static final int ICON_INDEX_OFFSET = ICON_SIZE + 1;
 
+    private static final int TEXTURE_SIZE = 256;
+
     private final AtomicInteger x = new AtomicInteger();
     private final AtomicInteger y = new AtomicInteger();
 
@@ -45,7 +47,7 @@ public class PowerHudRenderer implements GameHudRender {
         }
 
         int yOffset = 49;
-        if (player.isSubmergedIn(FluidTags.WATER) || player.getAirSupply() < player.getMaxAirSupply()) {
+        if (player.isInWater() || player.getAirSupply() < player.getMaxAirSupply()) {
             yOffset += 10;
         }
 
@@ -54,8 +56,8 @@ public class PowerHudRenderer implements GameHudRender {
             yOffset += bars * 10;
         }
 
-        x.set(((context.getScaledWindowWidth() / 2) + 20) + config.resourcesAndCooldowns.hudOffsetX);
-        y.set((context.getScaledWindowHeight() - yOffset) + config.resourcesAndCooldowns.hudOffsetY);
+        x.set(((context.guiWidth() / 2) + 20) + config.resourcesAndCooldowns.hudOffsetX);
+        y.set((context.guiHeight() - yOffset) + config.resourcesAndCooldowns.hudOffsetY);
 
         PowerHolderComponent.KEY.get(player).getPowerTypes()
             .stream()
@@ -72,17 +74,17 @@ public class PowerHudRenderer implements GameHudRender {
 
                 //  Draw the background texture of the resource bar
                 Identifier spriteLocation = hudRender.getSpriteLocation();
-                context.drawTexture(spriteLocation, x.get(), y.get(), 0, 0, BAR_WIDTH, 5);
+                context.blit(RenderPipelines.GUI_TEXTURED, spriteLocation, x.get(), y.get(), 0, 0, BAR_WIDTH, 5, TEXTURE_SIZE, TEXTURE_SIZE);
 
                 int barV = BAR_HEIGHT + hudRender.getBarIndex() * BAR_INDEX_OFFSET;
                 int iconU = (BAR_WIDTH + 2) + hudRender.getIconIndex() * ICON_INDEX_OFFSET;
 
                 //  Draw the fill portion of the resource bar
                 int barFillWidth = (int) ((hudRender.isInverted() ? 1.0F - hudRendered.getFill() : hudRendered.getFill()) * BAR_WIDTH);
-                context.drawTexture(spriteLocation, x.get(), y.get() - 2, 0, barV, barFillWidth, BAR_HEIGHT);
+                context.blit(RenderPipelines.GUI_TEXTURED, spriteLocation, x.get(), y.get() - 2, 0, barV, barFillWidth, BAR_HEIGHT, TEXTURE_SIZE, TEXTURE_SIZE);
 
                 //  Draw the icon of the resource bar
-                context.drawTexture(spriteLocation, x.get() - ICON_SIZE - 2, y.get() - 2, iconU, barV, ICON_SIZE, ICON_SIZE);
+                context.blit(RenderPipelines.GUI_TEXTURED, spriteLocation, x.get() - ICON_SIZE - 2, y.get() - 2, iconU, barV, ICON_SIZE, ICON_SIZE, TEXTURE_SIZE, TEXTURE_SIZE);
                 y.getAndAdd(-8);
 
             });

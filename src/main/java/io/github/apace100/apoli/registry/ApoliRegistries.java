@@ -36,7 +36,7 @@ public class ApoliRegistries {
     public static final Registry<ContainerType> CONTAINER_TYPE = create(ApoliRegistryKeys.CONTAINER_TYPE);
 
     private static <T> Registry<T> create(ResourceKey<Registry<T>> registryKey) {
-        return FabricRegistryBuilder.createSimple(registryKey).buildAndRegister();
+        return FabricRegistryBuilder.create(registryKey).buildAndRegister();
     }
 
 }

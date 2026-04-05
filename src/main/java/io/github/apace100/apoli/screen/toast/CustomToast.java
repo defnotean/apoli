@@ -14,6 +14,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.client.renderer.RenderPipelines;
 
 import java.util.List;
 
@@ -36,7 +37,10 @@ public class CustomToast implements PositionAwareToast {
     private final int alphaShiftEnd;
     private final int heightShift;
 
-    private int height;
+    private int toastHeight;
+
+    private Visibility wantedVisibility = Visibility.SHOW;
+    private long lastStartTime;
 
     public CustomToast(CustomToastData toastData) {
         this(toastData.title(), toastData.description(), toastData.texture(), toastData.iconStack(), (int) ((toastData.duration() / 20.0) * 1000.0));
@@ -45,17 +49,17 @@ public class CustomToast implements PositionAwareToast {
     public CustomToast(Component title, Component description, Identifier texture, ItemStack iconStack, int duration) {
 
         Font textRenderer = Minecraft.getInstance().font;
-        int maxWidth = this.getBbWidth() - 33;
+        int maxWidth = this.width() - 33;
 
-        this.title = textRenderer.wrapLines(title, maxWidth);
-        this.description = textRenderer.wrapLines(description, maxWidth);
+        this.title = textRenderer.split(title, maxWidth);
+        this.description = textRenderer.split(description, maxWidth);
         this.iconStack = iconStack;
         this.duration = duration;
 
         this.titleHeight = 24 + (Math.max(this.title.size(), 1) * 8);
         this.descriptionHeight = 24 + (Math.max(this.description.size(), 1) * 8);
 
-        this.height = titleHeight;
+        this.toastHeight = titleHeight;
         this.texture = TextureUtil.tryLoadingTexture(texture)
             .result()
             .orElseGet(() -> TextureUtil
@@ -69,13 +73,26 @@ public class CustomToast implements PositionAwareToast {
     }
 
     @Override
-    public Visibility draw(int x, int y, GuiGraphicsExtractor context, ToastManager manager, long startTime) {
+    public Visibility getWantedVisibility() {
+        return wantedVisibility;
+    }
 
-        Font textRenderer = manager.getClient().font;
+    @Override
+    public void update(ToastManager manager, long startTime) {
+        this.lastStartTime = startTime;
+        this.toastHeight = (int) Mth.lerp(Mth.clamp((float) startTime / (float) heightShift, 0F, 1F), titleHeight, descriptionHeight);
+        this.wantedVisibility = startTime >= duration * manager.getNotificationDisplayTimeMultiplier()
+            ? Visibility.HIDE
+            : Visibility.SHOW;
+    }
+
+    @Override
+    public void extractRenderStatePositionAware(int x, int y, GuiGraphicsExtractor context, Font textRenderer, long startTime) {
+
         int alphaShift = Mth.floor(Mth.clamp((float) Math.abs(alphaShiftEnd - startTime) / 300, 0.0, 1.0) * 255.0f) << 24 | 67108864;
 
         int toastTextX = 30;
-        int toastTextYCenter = this.getBbHeight() / 2;
+        int toastTextYCenter = this.height() / 2;
 
         int titleY = toastTextYCenter - title.size() * 9 / 2;
         int descriptionY = toastTextYCenter - description.size() * 9 / 2;
@@ -84,23 +101,23 @@ public class CustomToast implements PositionAwareToast {
         int descriptionYOffset = Math.max(7, descriptionY);
 
         //  Draw the texture and icon of the toast
-        context.drawGuiTexture(texture, 0, 0, this.getBbWidth(), this.getBbHeight());
-        context.drawItemWithoutEntity(iconStack, 8, toastTextYCenter - 8);
+        context.blitSprite(RenderPipelines.GUI_TEXTURED, texture, 0, 0, this.width(), this.height());
+        context.fakeItem(iconStack, 8, toastTextYCenter - 8);
 
         //  If the title and the description only has 1 line, display as is
         if (title.size() == 1 && description.size() == 1) {
-            context.drawText(textRenderer, title.getFirst(), toastTextX, 7, TITLE_BASE_COLOR | 0xFF000000, false);
-            context.drawText(textRenderer, description.getFirst(), toastTextX, 18, -1, false);
+            context.text(textRenderer, title.getFirst(), toastTextX, 7, TITLE_BASE_COLOR | 0xFF000000, false);
+            context.text(textRenderer, description.getFirst(), toastTextX, 18, -1, false);
         }
 
         //  If the toast has only been displayed for a certain amount of time,
         //  display and fit the title texts onto the toast and shift its alpha channel (for the fade effect)
         else if (startTime < alphaShiftEnd) {
 
-            context.enableScissor(x + 4, y + 4, x + this.getBbWidth() - 4, y + this.getBbHeight() - 4);
+            context.enableScissor(x + 4, y + 4, x + this.width() - 4, y + this.height() - 4);
 
             for (var titleLine : title) {
-                context.drawText(textRenderer, titleLine, toastTextX, titleYOffset, TITLE_BASE_COLOR | alphaShift, false);
+                context.text(textRenderer, titleLine, toastTextX, titleYOffset, TITLE_BASE_COLOR | alphaShift, false);
                 titleYOffset += 9;
             }
 
@@ -112,10 +129,10 @@ public class CustomToast implements PositionAwareToast {
         //  Otherwise, display and fit the description texts onto the toast
         else {
 
-            context.enableScissor(x + 4, y + 4, x + this.getBbWidth() - 4, y + this.getBbHeight() - 4);
+            context.enableScissor(x + 4, y + 4, x + this.width() - 4, y + this.height() - 4);
 
             for (var descriptionLine : description) {
-                context.drawText(textRenderer, descriptionLine, toastTextX, descriptionYOffset, DESCRIPTION_BASE_COLOR | alphaShift, false);
+                context.text(textRenderer, descriptionLine, toastTextX, descriptionYOffset, DESCRIPTION_BASE_COLOR | alphaShift, false);
                 descriptionYOffset += 9;
             }
 
@@ -123,16 +140,17 @@ public class CustomToast implements PositionAwareToast {
 
         }
 
-        this.height = Mth.lerp(Mth.clamp((float) startTime / (float) heightShift, 0F, 1F), titleHeight, descriptionHeight);
-        return startTime >= duration * manager.getNotificationDisplayTimeMultiplier()
-            ? Visibility.HIDE
-            : Visibility.SHOW;
-
     }
 
     @Override
-    public int getHeight() {
-        return height;
+    public void extractRenderState(GuiGraphicsExtractor context, Font font, long startTime) {
+        // Fallback when not called through the mixin; render at 0,0
+        extractRenderStatePositionAware(0, 0, context, font, startTime);
+    }
+
+    @Override
+    public int height() {
+        return toastHeight;
     }
 
 }

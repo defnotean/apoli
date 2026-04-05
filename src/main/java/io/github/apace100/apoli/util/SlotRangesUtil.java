@@ -120,10 +120,10 @@ public class SlotRangesUtil {
 
 	};
 
-	public static final StreamCodec<ByteBuf, SlotRange> PACKET_CODEC = ByteBufCodecs.STRING.xmap(SlotRanges::fromName, StringRepresentable::asString);
+	public static final StreamCodec<ByteBuf, SlotRange> PACKET_CODEC = ByteBufCodecs.STRING_UTF8.map(SlotRanges::nameToIds, StringRepresentable::getSerializedName);
 
 	public static DataResult<SlotRange> validateSingleSlot(SlotRange slotRange) {
-		return slotRange.getSlotCount() == 1
+		return slotRange.size() == 1
 			? DataResult.success(slotRange)
 			: DataResult.error(() -> "Slot range \"" + slotRange + "\" has multiple slot IDs, which is not allowed!");
 	}

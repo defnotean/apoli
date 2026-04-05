@@ -5,8 +5,8 @@ import net.minecraft.world.InteractionResult;
 public class ActionResultUtil {
 
     public static boolean shouldOverride(InteractionResult oldResult, InteractionResult newResult) {
-        return (newResult.isAccepted() && !oldResult.isAccepted())
-            || (newResult.shouldSwingHand() && !oldResult.shouldSwingHand());
+        return (newResult.consumesAction() && !oldResult.consumesAction())
+            || (newResult instanceof InteractionResult.Success && !(oldResult instanceof InteractionResult.Success));
     }
 
 }

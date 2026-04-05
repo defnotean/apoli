@@ -13,7 +13,7 @@ public class ApoliCodecUtil {
         return ByteBufCodecs.either(
             primary,
             secondary
-        ).xmap(
+        ).map(
             fsEither -> fsEither.map(p -> p, converter),
             Either::left
         );

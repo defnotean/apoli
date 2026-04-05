@@ -3,6 +3,7 @@ package io.github.apace100.apoli.util;
 import io.github.apace100.apoli.text.ForcedTranslatableTextContent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 
 import java.util.Optional;
@@ -42,18 +43,17 @@ public class TextUtil {
 		if (altText.isPresent()) {
 
 			Component text = altText.get();
-			String literal = text.getLiteralString();
 
-			if (text.getContent() instanceof TranslatableContents) {
+			if (text.getContents() instanceof TranslatableContents) {
 				return text;
 			}
 
-			else if (literal != null) {
-				return Component.translatableWithFallback(translationKey, literal);
+			else if (text.getContents() instanceof PlainTextContents.LiteralContents literalContents) {
+				return Component.translatableWithFallback(translationKey, literalContents.text());
 			}
 
 			else {
-				return MutableComponent.of(new ForcedTranslatableTextContent(translationKey, text));
+				return MutableComponent.create(new ForcedTranslatableTextContent(translationKey, text));
 			}
 
 		}

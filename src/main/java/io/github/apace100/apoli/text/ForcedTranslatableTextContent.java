@@ -8,13 +8,14 @@ import io.github.apace100.apoli.mixin.TranslatableTextContentAccessor;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.locale.Language;
+import net.minecraft.network.chat.contents.TranslatableContents;
 
 import java.util.List;
 import java.util.Optional;
 
-public class ForcedTranslatableTextContent extends net.minecraft.network.chat.contents.TranslatableContents {
+public class ForcedTranslatableTextContent extends TranslatableContents {
 
-	public static final MapCodec<ForcedTranslatableTextContent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final MapCodec<ForcedTranslatableTextContent> FORCED_TRANSLATABLE_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("translate").forGetter(ForcedTranslatableTextContent::getKey),
 		ComponentSerialization.CODEC.fieldOf("alt_text").forGetter(ForcedTranslatableTextContent::getTextFallback),
 		TranslatableTextContentAccessor.getArgumentCodec().listOf().optionalFieldOf("with").forGetter(content -> TranslatableTextContentAccessor.callToOptionalList(content.getArgs()))
@@ -34,9 +35,11 @@ public class ForcedTranslatableTextContent extends net.minecraft.network.chat.co
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public MapCodec<? extends ComponentContents> codec() {
-		return (MapCodec) CODEC;
+	public MapCodec<TranslatableContents> codec() {
+		// Safe cast: ForcedTranslatableTextContent extends TranslatableContents, and the codec handles the mapping
+		@SuppressWarnings("unchecked")
+		MapCodec<TranslatableContents> mapped = (MapCodec<TranslatableContents>) (MapCodec<?>) FORCED_TRANSLATABLE_CODEC;
+		return mapped;
 	}
 
 	@Override
@@ -48,7 +51,7 @@ public class ForcedTranslatableTextContent extends net.minecraft.network.chat.co
 		}
 
 		String key = this.getKey();
-		String translated = language.get(key);
+		String translated = language.getOrDefault(key);
 
 		this.decomposedWith = language;
 
@@ -63,7 +66,7 @@ public class ForcedTranslatableTextContent extends net.minecraft.network.chat.co
 
 			}
 
-			catch (TranslationException te) {
+			catch (IllegalArgumentException te) {
 				this.decomposedParts = ImmutableList.of(FormattedText.of(translated));
 			}
 

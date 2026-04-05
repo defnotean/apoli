@@ -27,7 +27,7 @@ public record IndexedStack(ItemStack stack, Optional<SlotRange> slot) {
 	public static final SerializableDataType<IndexedStack> DATA_TYPE = DATA_FACTORY.getDataType();
 
 	public Optional<IntList> slotIds() {
-		return slot.map(SlotRange::getSlotIds);
+		return slot.map(SlotRange::slots);
 	}
 
 }

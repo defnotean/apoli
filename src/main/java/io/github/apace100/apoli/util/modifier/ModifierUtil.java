@@ -31,7 +31,7 @@ public class ModifierUtil {
                 ModifierOperation.MULTIPLY_TOTAL_MULTIPLICATIVE;
         };
 
-        return Modifier.of(operation, attributeModifier.value());
+        return Modifier.of(operation, attributeModifier.amount());
 
     }
 

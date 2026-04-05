@@ -26,7 +26,6 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.inventory.SlotRange;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Holder;
@@ -62,26 +61,18 @@ public final class MiscUtil {
 
     public static void createExplosion(Level world, @Nullable Entity entity, @Nullable DamageSource damageSource, double x, double y, double z, float power, boolean createFire, Explosion.BlockInteraction destructionType, ExplosionDamageCalculator behavior) {
 
-        Explosion explosion = new Explosion(world, entity, damageSource, behavior, x, y, z, power, createFire, destructionType, ParticleTypes.EXPLOSION, ParticleTypes.EXPLOSION_EMITTER, SoundEvents.ENTITY_GENERIC_EXPLODE);
+        Level.ExplosionInteraction interaction = mapBlockInteraction(destructionType);
+        world.explode(entity, damageSource, behavior, x, y, z, power, createFire, interaction);
 
-        explosion.collectBlocksAndDamageEntities();
-        explosion.affectWorld(world.isClientSide());
+    }
 
-        //  Sync the explosion effect to the client if the explosion is created on the server
-        if (!(world instanceof ServerLevel serverWorld)) {
-            return;
-        }
-
-        if (!explosion.shouldDestroy()) {
-            explosion.clearAffectedBlocks();
-        }
-
-        for (ServerPlayer serverPlayerEntity : serverWorld.players()) {
-            if (serverPlayerEntity.distanceToSqr(x, y, z) < 4096.0) {
-                serverPlayerEntity.connection.send(new ClientboundExplodePacket(x, y, z, power, explosion.getAffectedBlocks(), explosion.getAffectedPlayers().get(serverPlayerEntity), explosion.getBlockInteraction(), explosion.getParticle(), explosion.getEmitterParticle(), explosion.getSoundEvent()));
-            }
-        }
-
+    private static Level.ExplosionInteraction mapBlockInteraction(Explosion.BlockInteraction blockInteraction) {
+        return switch (blockInteraction) {
+            case KEEP -> Level.ExplosionInteraction.NONE;
+            case DESTROY -> Level.ExplosionInteraction.BLOCK;
+            case DESTROY_WITH_DECAY -> Level.ExplosionInteraction.TNT;
+            case TRIGGER_BLOCK -> Level.ExplosionInteraction.TRIGGER;
+        };
     }
 
     @Nullable
@@ -89,11 +80,11 @@ public final class MiscUtil {
         return indestructibleCondition == null ? null : new ExplosionDamageCalculator() {
 
             @Override
-            public Optional<Float> getBlastResistance(Explosion explosion, BlockGetter blockView, BlockPos pos, BlockState blockState, FluidState fluidState) {
+            public Optional<Float> getBlockExplosionResistance(Explosion explosion, BlockGetter blockView, BlockPos pos, BlockState blockState, FluidState fluidState) {
 
                 BlockInWorld cachedBlockPosition = new BlockInWorld(world, pos, true);
 
-                Optional<Float> defaultValue = super.getBlastResistance(explosion, world, pos, blockState, fluidState);
+                Optional<Float> defaultValue = super.getBlockExplosionResistance(explosion, blockView, pos, blockState, fluidState);
                 Optional<Float> newValue = indestructibleCondition.test(cachedBlockPosition) ? Optional.of(indestructibleResistance) : Optional.empty();
 
                 return defaultValue.isPresent() ? (newValue.isPresent() ? (defaultValue.get() > newValue.get() ? (defaultValue) : newValue) : defaultValue) : defaultValue;
@@ -101,7 +92,7 @@ public final class MiscUtil {
             }
 
             @Override
-            public boolean canDestroyBlock(Explosion explosion, BlockGetter blockView, BlockPos pos, BlockState state, float power) {
+            public boolean shouldBlockExplode(Explosion explosion, BlockGetter blockView, BlockPos pos, BlockState state, float power) {
                 return !indestructibleCondition.test(new BlockInWorld(world, pos, true));
             }
 
@@ -113,9 +104,9 @@ public final class MiscUtil {
         return indestructibleCondition == null ? null : new ExplosionDamageCalculator() {
 
             @Override
-            public Optional<Float> getBlastResistance(Explosion explosion, BlockGetter world, BlockPos pos, BlockState blockState, FluidState fluidState) {
+            public Optional<Float> getBlockExplosionResistance(Explosion explosion, BlockGetter world, BlockPos pos, BlockState blockState, FluidState fluidState) {
 
-                Optional<Float> defaultValue = super.getBlastResistance(explosion, world, pos, blockState, fluidState);
+                Optional<Float> defaultValue = super.getBlockExplosionResistance(explosion, world, pos, blockState, fluidState);
                 Optional<Float> newValue = indestructibleCondition.test(new BlockConditionContext((Level) world, pos))
                     ? Optional.of(resistance)
                     : Optional.empty();
@@ -127,7 +118,7 @@ public final class MiscUtil {
             }
 
             @Override
-            public boolean canDestroyBlock(Explosion explosion, BlockGetter world, BlockPos pos, BlockState state, float power) {
+            public boolean shouldBlockExplode(Explosion explosion, BlockGetter world, BlockPos pos, BlockState state, float power) {
                 return !indestructibleCondition.test(new BlockConditionContext((Level) world, pos));
             }
 
@@ -149,12 +140,13 @@ public final class MiscUtil {
             entityToSpawnNbt.merge(entityNbt);
         }
 
-        entityToSpawnNbt.putString("id", BuiltInRegistries.ENTITY_TYPE.getId(entityType).toString());
-        Entity entityToSpawn = EntityType.loadEntityWithPassengers(
+        entityToSpawnNbt.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(entityType).toString());
+        Entity entityToSpawn = EntityType.loadEntityRecursive(
             entityToSpawnNbt,
             serverWorld,
+            EntitySpawnReason.COMMAND,
             entity -> {
-                entity.moveTo(pos.x, pos.y, pos.z, yaw.orElse(entity.getYRot()), pitch.orElse(entity.getXRot()));
+                entity.snapTo(pos.x, pos.y, pos.z, yaw.orElse(entity.getYRot()), pitch.orElse(entity.getXRot()));
                 return entity;
             }
         );
@@ -164,7 +156,7 @@ public final class MiscUtil {
         }
 
         if ((entityNbt == null || entityNbt.isEmpty()) && entityToSpawn instanceof Mob mobToSpawn) {
-            mobToSpawn.initialize(serverWorld, serverWorld.getLocalDifficulty(BlockPos.containing(pos)), EntitySpawnReason.COMMAND, null);
+            mobToSpawn.finalizeSpawn(serverWorld, serverWorld.getCurrentDifficultyAt(BlockPos.containing(pos)), EntitySpawnReason.COMMAND, null);
         }
 
         return Optional.of(entityToSpawn);
@@ -195,12 +187,12 @@ public final class MiscUtil {
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
         for(int i = 0; i < 8; ++i) {
-            double d = playerEntity.x() + (double)(((float)((i >> 0) % 2) - 0.5F) * playerEntity.getBbWidth() * 0.8F);
+            double d = playerEntity.getX() + (double)(((float)((i >> 0) % 2) - 0.5F) * playerEntity.getBbWidth() * 0.8F);
             double e = playerEntity.getEyeY() + (double)(((float)((i >> 1) % 2) - 0.5F) * 0.1F);
-            double f = playerEntity.z() + (double)(((float)((i >> 2) % 2) - 0.5F) * playerEntity.getBbWidth() * 0.8F);
+            double f = playerEntity.getZ() + (double)(((float)((i >> 2) % 2) - 0.5F) * playerEntity.getBbWidth() * 0.8F);
             mutable.set(d, e, f);
             BlockState blockState = playerEntity.level().getBlockState(mutable);
-            if (blockState.getRenderType() != RenderShape.INVISIBLE && blockState.shouldBlockVision(playerEntity.level(), mutable)) {
+            if (blockState.getRenderShape() != RenderShape.INVISIBLE && blockState.isViewBlocking(playerEntity.level(), mutable)) {
                 return blockState;
             }
         }
@@ -232,7 +224,7 @@ public final class MiscUtil {
 
         Set<String> fieldsToEvaluate = fieldNames.length > 0
             ? new ObjectOpenHashSet<>(fieldNames)
-            : data.serializableData().getFieldNames();
+            : Set.of();
 
         for (String field : fieldsToEvaluate) {
 
@@ -286,7 +278,7 @@ public final class MiscUtil {
 
         Set<String> fieldsToEvaluate = fieldNames.length > 0
             ? new ObjectOpenHashSet<>(fieldNames)
-            : data.serializableData().getFieldNames();
+            : Set.of();
 
         for (String field : fieldsToEvaluate) {
 
@@ -342,9 +334,9 @@ public final class MiscUtil {
 
     public static OptionalInt getSpaceInInventory(Inventory playerInventory, ItemStack stack) {
 
-        int slot = playerInventory.getOccupiedSlotWithRoomForStack(stack);
+        int slot = playerInventory.getSlotWithRemainingSpace(stack);
         if (slot == -1) {
-            slot = playerInventory.getEmptySlot();
+            slot = playerInventory.getFreeSlot();
         }
 
         return slot == -1

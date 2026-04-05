@@ -36,7 +36,7 @@ public class ApoliRegistryKeys {
     public static final ResourceKey<Registry<ContainerType>> CONTAINER_TYPE = create("container_type");
 
     private static <T> ResourceKey<Registry<T>> create(String path) {
-        return ResourceKey.ofRegistry(Apoli.identifier(path));
+        return ResourceKey.createRegistryKey(Apoli.identifier(path));
     }
 
 }

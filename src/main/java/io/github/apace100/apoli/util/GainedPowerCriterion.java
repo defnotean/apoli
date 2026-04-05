@@ -18,18 +18,18 @@ public class GainedPowerCriterion extends SimpleCriterionTrigger<GainedPowerCrit
     public static final Identifier ID = Apoli.identifier("gained_power");
 
     @Override
-    public Codec<Conditions> getConditionsCodec() {
+    public Codec<Conditions> codec() {
         return Conditions.CODEC;
     }
 
     public void trigger(ServerPlayer player, Power power) {
-        this.trigger(player, conditions -> conditions.test(power));
+        this.trigger(player, conditions -> conditions.matches(power));
     }
 
     public record Conditions(Optional<ContextAwarePredicate> player, Identifier powerId) implements SimpleCriterionTrigger.SimpleInstance {
 
         public static final Codec<Conditions> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            EntityPredicate.LOOT_CONTEXT_PREDICATE_CODEC.optionalFieldOf("player").forGetter(Conditions::player),
+            EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(Conditions::player),
             Identifier.CODEC.fieldOf("power").forGetter(Conditions::powerId)
         ).apply(instance, Conditions::new));
 

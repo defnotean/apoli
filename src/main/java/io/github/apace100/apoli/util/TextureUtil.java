@@ -8,16 +8,14 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.*;
 import net.minecraft.resources.Identifier;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import java.io.IOException;
 import java.util.function.Function;
 
 @SuppressWarnings("unused")
 @Environment(EnvType.CLIENT)
 public class TextureUtil {
 
-    public static final Identifier GUI_ATLAS_TEXTURE = Identifier.ofVanilla("textures/atlas/gui.png");
+    public static final Identifier GUI_ATLAS_TEXTURE = Identifier.withDefaultNamespace("textures/atlas/gui.png");
 
     /**
      *  <p>Tries loading the texture that corresponds with the specified {@link Identifier}.</p>
@@ -44,43 +42,29 @@ public class TextureUtil {
         TextureManagerAccessor textureManagerAccessor = (TextureManagerAccessor) Minecraft.getInstance().getTextureManager();
 
         AbstractTexture texture = textureManagerAccessor.getTextures().get(id);
-        StringBuilder errorMessage = new StringBuilder();
 
-        boolean erred = false;
-        
         if (texture != null) {
-            return texture == MissingTextureAtlasSprite.getMissingTextureAtlasSpriteTexture()
-                ? DataResult.error(() -> missingErr.apply(id))
-                : DataResult.success(id);
+            return DataResult.success(id);
         }
 
+        // In MC 26.1, texture loading is managed internally by the TextureManager.
+        // We simply register the texture ID and check if the manager already knows about it.
+        // If not, try to get it through the texture manager which will handle loading.
         try {
-            texture = new ResourceTexture(id);
-            texture.load(textureManagerAccessor.getResourceContainer());
-        } catch (IOException io) {
-
-            texture = MissingTextureAtlasSprite.getMissingTextureAtlasSpriteTexture();
-
-            if (id != TextureManager.MISSING_IDENTIFIER) {
-
-                errorMessage
-                    .append(loadFailureErr.apply(id))
-                    .append(ExceptionUtils.getStackTrace(io));
-
-                erred = true;
-
+            Minecraft.getInstance().getTextureManager().getTexture(id);
+            AbstractTexture loadedTexture = textureManagerAccessor.getTextures().get(id);
+            if (loadedTexture != null) {
+                return DataResult.success(id);
             }
-
+        } catch (Throwable ignored) {
+            // Fall through
         }
 
-        AbstractTexture prevTexture = textureManagerAccessor.getTextures().put(id, texture);
-        if (prevTexture != null && prevTexture != MissingTextureAtlasSprite.getMissingTextureAtlasSpriteTexture()) {
-            textureManagerAccessor.callCloseTexture(id, prevTexture);
+        if (id.equals(TextureManager.INTENTIONAL_MISSING_TEXTURE)) {
+            return DataResult.error(() -> missingErr.apply(id));
         }
 
-        return erred
-            ? DataResult.error(errorMessage::toString)
-            : DataResult.success(id);
+        return DataResult.error(() -> loadFailureErr.apply(id));
 
     }
 

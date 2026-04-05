@@ -51,9 +51,12 @@ public class PowerCraftingRecipe implements CraftingRecipe {
             .map(RecipePowerType.class::isInstance)
             .orElse(false);
 
-        return matchingPowerType && world.getRecipeManager().get(powerId())
+        if (!matchingPowerType || !(world instanceof net.minecraft.server.level.ServerLevel serverLevel)) {
+            return false;
+        }
+        return serverLevel.recipeAccess().byKey(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE, powerId()))
             .filter(entry -> Objects.equals(this, entry.value()))
-            .map(entry -> delegate().test(input, world))
+            .map(entry -> delegate().matches(input, world))
             .orElse(false);
 
     }
@@ -113,7 +116,7 @@ public class PowerCraftingRecipe implements CraftingRecipe {
         ApoliDataTypes.DISALLOWING_INTERNAL_CRAFTING_RECIPE.codec().fieldOf("recipe").forGetter(PowerCraftingRecipe::delegate)
     ).apply(instance, PowerCraftingRecipe::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, PowerCraftingRecipe> PACKET_CODEC = StreamCodec.of(
+    public static final StreamCodec<RegistryFriendlyByteBuf, PowerCraftingRecipe> PACKET_CODEC = StreamCodec.ofMember(
         PowerCraftingRecipe::send,
         PowerCraftingRecipe::receive
     );
