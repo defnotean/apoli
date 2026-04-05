@@ -59,7 +59,7 @@ public class BlockStateBlockConditionType extends BlockConditionType {
         var propValue = blockState.getProperties()
             .stream()
             .filter(prop -> prop.getName().equals(property))
-            .map(blockState::get)
+            .map(blockState::getValue)
             .findFirst()
             .orElse(null);
 

@@ -39,7 +39,8 @@ public class ApoliClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 
-		showPowersOnUsabilityHint = KeyMappingHelper.registerKeyBinding(new KeyMapping("key.apoli.usability_hint.show_powers", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, "category." + Apoli.MODID));
+		KeyMapping.Category apoliCategory = KeyMapping.Category.register(Apoli.identifier("category"));
+		showPowersOnUsabilityHint = KeyMappingHelper.registerKeyBinding(new KeyMapping("key.apoli.usability_hint.show_powers", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, apoliCategory));
 		ModPacketsS2C.register();
 
 		ApoliClassDataClient.registerAll();
@@ -72,7 +73,7 @@ public class ApoliClient implements ClientModInitializer {
 	 */
 	@Deprecated(forRemoval = true)
 	public static void registerPowerKeybinding(String keyId, KeyMapping keyBinding) {
-		KeyBindingUtil.ALIASES.addAlias(keyId, keyBinding.getDescriptionId());
+		KeyBindingUtil.ALIASES.addAlias(keyId, keyBinding.getName());
 	}
 
 	/**

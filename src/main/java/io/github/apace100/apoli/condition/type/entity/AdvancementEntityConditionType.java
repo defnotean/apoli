@@ -57,8 +57,8 @@ public class AdvancementEntityConditionType extends EntityConditionType {
             }
 
             else {
-                return ((ServerPlayer) player).getAdvancementTracker()
-                    .getProgress(advancementEntry)
+                return ((ServerPlayer) player).getAdvancements()
+                    .getOrStartProgress(advancementEntry)
                     .isDone();
             }
 
@@ -66,7 +66,7 @@ public class AdvancementEntityConditionType extends EntityConditionType {
 
         else if (player instanceof LocalPlayer clientPlayer && clientPlayer.connection != null) {
 
-            ClientAdvancements advancementManager = clientPlayer.connection.getAdvancementHandler();
+            ClientAdvancements advancementManager = clientPlayer.connection.getAdvancements();
             AdvancementHolder advancement = advancementManager.get(this.advancement);
 
             if (advancement == null) {

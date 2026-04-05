@@ -10,7 +10,7 @@ public class LightBlockingBlockConditionType extends BlockConditionType {
 
 	@Override
 	public boolean test(BlockConditionContext context) {
-		return context.blockState().isOpaque();
+		return context.blockState().canOcclude();
 	}
 
 	@Override

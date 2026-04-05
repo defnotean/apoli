@@ -36,7 +36,7 @@ public class TimeOfDayEntityConditionType extends EntityConditionType {
 
     @Override
     public boolean test(EntityConditionContext context) {
-        return comparison.compare(context.world().getTimeOfDay() % 24000L, compareTo);
+        return comparison.compare(context.world().getDefaultClockTime() % 24000L, compareTo);
     }
 
     @Override

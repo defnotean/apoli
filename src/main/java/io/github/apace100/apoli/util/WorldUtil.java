@@ -28,7 +28,7 @@ public class WorldUtil {
         return Arrays.stream(blockPositions)
             .anyMatch(blockPos -> {
                 Biome biome = world.getBiome(blockPos).value();
-                return biome.getPrecipitation(blockPos) == Biome.Precipitation.SNOW
+                return biome.getPrecipitationAt(blockPos, blockPos.getY()) == Biome.Precipitation.SNOW
                     && isRainingAndExposed(world, blockPos);
             });
     }

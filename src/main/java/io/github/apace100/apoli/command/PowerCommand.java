@@ -226,7 +226,7 @@ public class PowerCommand {
 				}
 
 				else {
-					commandSource.sendFailure(Component.stringifiedTranslatable("commands.apoli.revoke_all.fail.multiple", source));
+					commandSource.sendFailure(Component.translatableEscape("commands.apoli.revoke_all.fail.multiple", source));
 				}
 
 			}
@@ -276,11 +276,11 @@ public class PowerCommand {
 
 				List<Component> sourcesTooltip = powerComponent.getSources(power)
 					.stream()
-					.map(Component::of)
+					.map(id -> Component.literal(id.toString()))
 					.toList();
 
-				Component joinedSourcesTooltip = Component.translatable("commands.apoli.list.sources", ComponentUtils.join(sourcesTooltip, Component.literal(", ")));
-				HoverEvent sourceHoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, joinedSourcesTooltip);
+				Component joinedSourcesTooltip = Component.translatable("commands.apoli.list.sources", ComponentUtils.formatList(sourcesTooltip, Component.literal(", ")));
+				HoverEvent sourceHoverEvent = new HoverEvent.ShowText(joinedSourcesTooltip);
 
 				powersTooltip.add(Component
 					.literal(power.getId().toString())
@@ -293,7 +293,7 @@ public class PowerCommand {
 			}
 
 			else {
-				commandSource.sendSuccess(() -> Component.translatable("commands.apoli.list.pass", target.getName(), powersTooltip.size(), ComponentUtils.join(powersTooltip, Component.literal(", "))), false);
+				commandSource.sendSuccess(() -> Component.translatable("commands.apoli.list.pass", target.getName(), powersTooltip.size(), ComponentUtils.formatList(powersTooltip, Component.literal(", "))), false);
 			}
 
 			return powersTooltip.size();

@@ -10,7 +10,7 @@ public class HighHumidityBiomeConditionType extends BiomeConditionType {
 
 	@Override
 	public boolean test(BiomeConditionContext context) {
-		return context.biomeEntry().value().weather.downfall() > 0.85F;
+		return context.biomeEntry().value().hasPrecipitation();
 	}
 
 	@Override

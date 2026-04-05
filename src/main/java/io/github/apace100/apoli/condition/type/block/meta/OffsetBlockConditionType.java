@@ -44,7 +44,7 @@ public class OffsetBlockConditionType extends BlockConditionType {
     public boolean test(BlockConditionContext context) {
 
         Level world = context.world();
-        BlockPos offsetBlockPos = context.pos().add(offset);
+        BlockPos offsetBlockPos = context.pos().offset(offset);
 
         return world.hasChunkAt(offsetBlockPos)
             && blockCondition.test(world, offsetBlockPos);

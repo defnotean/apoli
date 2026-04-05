@@ -50,7 +50,7 @@ public class BlockCollisionEntityConditionType extends EntityConditionType {
 
         Entity entity = context.entity();
 
-        AABB boundingBox = entity.getBoundingBox().offset(offset);
+        AABB boundingBox = entity.getBoundingBox().move(offset);
         Level world = entity.level();
 
         BlockCollisions<BlockPos> spliterator = new BlockCollisions<>(world, entity, boundingBox, false, (pos, shape) -> pos);

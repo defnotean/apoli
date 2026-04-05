@@ -31,7 +31,7 @@ public class InTagEntityConditionType extends EntityConditionType {
 
     @Override
     public boolean test(EntityConditionContext context) {
-        return context.entity().getType().is(tag);
+        return context.entity().typeHolder().is(tag);
     }
 
     @Override

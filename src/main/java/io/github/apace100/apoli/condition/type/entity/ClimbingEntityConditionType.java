@@ -12,7 +12,7 @@ public class ClimbingEntityConditionType extends EntityConditionType {
 	@Override
 	public boolean test(EntityConditionContext context) {
 		return context.entity() instanceof LivingEntity livingEntity
-			&& livingEntity.isClimbing();
+			&& livingEntity.onClimbable();
 	}
 
 	@Override

@@ -160,7 +160,7 @@ public class DamageOverTimePowerType extends PowerType {
         Enchantment protectingEnchantment = enchantmentRegistry.getOrThrow(protectionEnchantmentKey.get());
         Holder<Enchantment> protectingEnchantmentEntry = enchantmentRegistry.wrapAsHolder(protectingEnchantment);
 
-        Map<EquipmentSlot, ItemStack> potentialItems = protectingEnchantment.getEquipment(holder);
+        Map<EquipmentSlot, ItemStack> potentialItems = protectingEnchantment.getSlotItems(holder);
 
         int accumLevel = 0;
         int items = 0;

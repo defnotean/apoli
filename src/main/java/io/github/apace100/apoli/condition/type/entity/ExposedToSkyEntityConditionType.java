@@ -19,7 +19,7 @@ public class ExposedToSkyEntityConditionType extends EntityConditionType {
         Level world = entity.level();
 
         return world.canSeeSky(BlockPos.containing(MiscUtil.getPoseDependentEyePos(entity)))
-            || world.canSeeSky(entity.getBlockPos());
+            || world.canSeeSky(entity.blockPosition());
 
     }
 

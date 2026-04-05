@@ -41,7 +41,7 @@ public class HardnessBlockConditionType extends BlockConditionType {
         Level world = context.world();
         BlockPos pos = context.pos();
 
-        return comparison.compare(context.blockState().getHardness(world, pos), compareTo);
+        return comparison.compare(context.blockState().getDestroySpeed(world, pos), compareTo);
 
     }
 

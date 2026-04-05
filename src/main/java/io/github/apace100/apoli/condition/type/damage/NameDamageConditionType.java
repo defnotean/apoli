@@ -29,7 +29,7 @@ public class NameDamageConditionType extends DamageConditionType {
 
     @Override
     public boolean test(DamageConditionContext context) {
-        return context.source().getName().equals(name);
+        return context.source().getMsgId().equals(name);
     }
 
     @Override

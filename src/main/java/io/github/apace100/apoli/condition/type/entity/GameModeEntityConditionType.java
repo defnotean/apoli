@@ -47,7 +47,7 @@ public class GameModeEntityConditionType extends EntityConditionType {
         }
 
         else if (player instanceof LocalPlayer clientPlayer) {
-            ClientPlayerInteractionManagerAccessor interactionManager = (ClientPlayerInteractionManagerAccessor) (((ClientPlayerEntityAccessor) clientPlayer).getClient()).interactionManager;
+            ClientPlayerInteractionManagerAccessor interactionManager = (ClientPlayerInteractionManagerAccessor) (((ClientPlayerEntityAccessor) clientPlayer).getClient()).gameMode;
             return interactionManager != null && interactionManager.getGameMode() == gameMode;
         }
 

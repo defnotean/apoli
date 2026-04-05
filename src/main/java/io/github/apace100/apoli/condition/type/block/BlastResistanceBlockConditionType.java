@@ -36,7 +36,7 @@ public class BlastResistanceBlockConditionType extends BlockConditionType {
 
     @Override
     public boolean test(BlockConditionContext context) {
-        return comparison.compare(context.blockState().getBlock().getBlastResistance(), compareTo);
+        return comparison.compare(context.blockState().getBlock().getExplosionResistance(), compareTo);
     }
 
     @Override

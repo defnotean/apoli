@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType<Identifier> {
 
     public static final DynamicCommandExceptionType POWER_NOT_RESOURCE = new DynamicCommandExceptionType(
-        o -> Component.stringifiedTranslatable("commands.apoli.power_not_resource", o)
+        o -> Component.translatableEscape("commands.apoli.power_not_resource", o)
     );
 
     public static final Dynamic2CommandExceptionType POWER_NOT_GRANTED = new Dynamic2CommandExceptionType(
@@ -36,7 +36,7 @@ public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType
     );
 
     public static final DynamicCommandExceptionType POWER_NOT_FOUND = new DynamicCommandExceptionType(
-        o -> Component.stringifiedTranslatable("commands.apoli.power_not_found", o)
+        o -> Component.translatableEscape("commands.apoli.power_not_found", o)
     );
 
     public static PowerArgumentType power() {
@@ -61,7 +61,7 @@ public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType
 
     @Override
     public Identifier parse(StringReader reader) throws CommandSyntaxException {
-        return Identifier.fromCommandInputNonEmpty(reader);
+        return Identifier.read(reader);
     }
 
     @Override
@@ -84,22 +84,22 @@ public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType
     public record Serializer() implements ArgumentTypeInfo<PowerArgumentType, Serializer.Properties> {
 
         @Override
-        public void writePacket(Properties properties, FriendlyByteBuf buf) {
-            buf.writeEnumConstant(properties.powerTarget());
+        public void serializeToNetwork(Properties properties, FriendlyByteBuf buf) {
+            buf.writeVarInt(properties.powerTarget().ordinal());
         }
 
         @Override
-        public Properties fromPacket(FriendlyByteBuf buf) {
-            return new Properties(this, buf.readEnumConstant(PowerTarget.class));
+        public Properties deserializeFromNetwork(FriendlyByteBuf buf) {
+            return new Properties(this, PowerTarget.values()[buf.readVarInt()]);
         }
 
         @Override
-        public void writeJson(Properties properties, JsonObject jsonObject) {
+        public void serializeToJson(Properties properties, JsonObject jsonObject) {
             jsonObject.addProperty("power_target", properties.powerTarget().name());
         }
 
         @Override
-        public Properties getTemplate(PowerArgumentType argumentType) {
+        public Properties unpack(PowerArgumentType argumentType) {
             return new Properties(this, argumentType.powerTarget());
         }
 

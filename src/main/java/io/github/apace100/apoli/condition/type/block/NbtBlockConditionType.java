@@ -35,7 +35,7 @@ public class NbtBlockConditionType extends BlockConditionType {
     @Override
     public boolean test(BlockConditionContext context) {
         return context.blockEntity()
-            .map(be -> be.createNbtWithIdentifyingData(context.world().registryAccess()))
+            .map(be -> be.saveWithFullMetadata(context.world().registryAccess()))
             .map(beNbt -> NbtUtils.compareNbt(nbt, beNbt, true))
             .orElse(false);
     }

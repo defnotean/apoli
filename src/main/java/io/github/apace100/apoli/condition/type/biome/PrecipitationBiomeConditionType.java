@@ -30,7 +30,7 @@ public class PrecipitationBiomeConditionType extends BiomeConditionType {
 
     @Override
     public boolean test(BiomeConditionContext context) {
-        return context.biomeEntry().value().getPrecipitation(context.pos()) == precipitation;
+        return context.biomeEntry().value().getPrecipitationAt(context.pos(), context.pos().getY()) == precipitation;
     }
 
     @Override

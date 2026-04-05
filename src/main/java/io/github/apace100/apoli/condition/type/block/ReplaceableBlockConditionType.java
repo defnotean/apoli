@@ -10,7 +10,7 @@ public class ReplaceableBlockConditionType extends BlockConditionType {
 
 	@Override
 	public boolean test(BlockConditionContext context) {
-		return context.blockState().isReplaceable();
+		return context.blockState().canBeReplaced();
 	}
 
 	@Override

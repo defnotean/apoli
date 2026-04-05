@@ -85,7 +85,7 @@ public class RelativeRotationBiEntityConditionType extends BiEntityConditionType
     }
 
     private static double getAngleBetween(Vec3 a, Vec3 b) {
-        double dot = a.dotProduct(b);
+        double dot = a.dot(b);
         return dot / (a.length() * b.length());
     }
 

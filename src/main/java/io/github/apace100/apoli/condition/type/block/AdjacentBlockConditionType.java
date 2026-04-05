@@ -54,7 +54,7 @@ public class AdjacentBlockConditionType extends BlockConditionType {
 
         for (Direction direction : Direction.values()) {
 
-            BlockPos offsetPos = pos.offset(direction);
+            BlockPos offsetPos = pos.relative(direction);
 
             if (world.hasChunkAt(offsetPos) && adjacentCondition.test(world, offsetPos)) {
                 matches++;

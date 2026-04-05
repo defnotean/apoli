@@ -1,6 +1,7 @@
 package io.github.apace100.apoli.power.type;
 
 import io.github.apace100.apoli.condition.EntityCondition;
+import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.registry.ApoliClassData;
@@ -23,7 +24,7 @@ public class AttributeModifyTransferPowerType extends PowerType {
     public static final TypedDataObjectFactory<AttributeModifyTransferPowerType> DATA_FACTORY = PowerType.createConditionedDataFactory(
         new SerializableData()
             .add("class", ApoliClassData.POWER_TYPE.getDataType())
-            .add("attribute", SerializableDataTypes.ATTRIBUTE_ENTRY)
+            .add("attribute", ApoliDataTypes.ATTRIBUTE_ENTRY)
             .add("multiplier", SerializableDataTypes.DOUBLE, 1.0D),
         (data, condition) -> new AttributeModifyTransferPowerType(
             data.get("class"),

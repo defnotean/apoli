@@ -19,7 +19,7 @@ public class AttachableBlockConditionType extends BlockConditionType {
 
         for (Direction direction : Direction.values()) {
 
-            BlockPos offsetPos = pos.offset(direction);
+            BlockPos offsetPos = pos.relative(direction);
 
             if (world.hasChunkAt(offsetPos) && world.getBlockState(offsetPos).isFaceSturdy(world, pos, direction.getOpposite())) {
                 return true;

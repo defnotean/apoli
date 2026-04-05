@@ -36,7 +36,7 @@ public class UsingEffectiveToolEntityConditionType extends EntityConditionType {
 
         else if (playerEntity instanceof LocalPlayer clientPlayer) {
 
-            ClientPlayerInteractionManagerAccessor interactionManager = (ClientPlayerInteractionManagerAccessor) ((ClientPlayerEntityAccessor) clientPlayer).getClient().interactionManager;
+            ClientPlayerInteractionManagerAccessor interactionManager = (ClientPlayerInteractionManagerAccessor) ((ClientPlayerEntityAccessor) clientPlayer).getClient().gameMode;
             if (interactionManager == null || !interactionManager.getBreakingBlock()) {
                 return false;
             }

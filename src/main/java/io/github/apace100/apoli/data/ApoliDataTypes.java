@@ -30,7 +30,10 @@ import io.github.ladysnake.pal.PlayerAbility;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.SlotArgument;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.inventory.SlotRange;
 import net.minecraft.world.item.ItemStack;
@@ -60,6 +63,11 @@ import java.util.stream.Stream;
 @SuppressWarnings("unused")
 public class ApoliDataTypes {
 
+    public static final SerializableDataType<Holder<Attribute>> ATTRIBUTE_ENTRY = SerializableDataType.of(
+        BuiltInRegistries.ATTRIBUTE.holderByNameCodec(),
+        net.minecraft.network.codec.ByteBufCodecs.holderRegistry(net.minecraft.core.registries.Registries.ATTRIBUTE)
+    );
+
     public static final SerializableDataType<PowerReference> POWER_REFERENCE = SerializableDataTypes.IDENTIFIER.xmap(PowerReference::of, PowerReference::id);
 
 	public static final SerializableDataType<PowerReference> RESOURCE_REFERENCE = SerializableDataTypes.IDENTIFIER.xmap(PowerReference::resource, PowerReference::id);
@@ -78,7 +86,7 @@ public class ApoliDataTypes {
 
     public static final SerializableDataType<AttributedEntityAttributeModifier> ATTRIBUTED_ATTRIBUTE_MODIFIER = SerializableDataType.compound(
         DataObjectFactories.ATTRIBUTE_MODIFIER.getSerializableData().copy()
-            .add("attribute", SerializableDataTypes.ATTRIBUTE_ENTRY),
+            .add("attribute", ApoliDataTypes.ATTRIBUTE_ENTRY),
         data -> new AttributedEntityAttributeModifier(
             data.get("attribute"),
             DataObjectFactories.ATTRIBUTE_MODIFIER.fromData(data)

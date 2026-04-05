@@ -36,7 +36,7 @@ public class TemperatureBiomeConditionType extends BiomeConditionType {
 
     @Override
     public boolean test(BiomeConditionContext context) {
-        return comparison.compare(context.biomeEntry().value().getTemperature(), compareTo);
+        return comparison.compare(context.biomeEntry().value().getBaseTemperature(), compareTo);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package io.github.apace100.apoli.power.type;
 
 import io.github.apace100.apoli.condition.EntityCondition;
+import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.modifier.Modifier;
@@ -17,7 +18,7 @@ public class ModifyAttributePowerType extends ValueModifyingPowerType {
 
     public static final TypedDataObjectFactory<ModifyAttributePowerType> DATA_FACTORY = createConditionedModifyingRequiredDataFactory(
         new SerializableData()
-            .add("attribute", SerializableDataTypes.ATTRIBUTE_ENTRY),
+            .add("attribute", ApoliDataTypes.ATTRIBUTE_ENTRY),
         (data, modifiers, condition) -> new ModifyAttributePowerType(
             data.get("attribute"),
             modifiers,

@@ -12,11 +12,15 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.commands.CommandResultCallback;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -63,9 +67,25 @@ public class CommandEntityConditionType extends EntityConditionType {
         MinecraftServer server = serverWorld.getServer();
         AtomicInteger result = new AtomicInteger();
 
-        CommandSourceStack commandSource = entity.createCommandSourceStack()
-            .withReturnValueConsumer((successful, returnValue) -> result.set(returnValue))
-            .withLevel(Apoli.config.executeCommand.permissionLevel)
+        CommandSourceStack commandSource;
+        if (entity instanceof ServerPlayer serverPlayer) {
+            commandSource = serverPlayer.createCommandSourceStack();
+        } else {
+            commandSource = new CommandSourceStack(
+                CommandSource.NULL,
+                entity.position(),
+                Vec2.ZERO,
+                serverWorld,
+                LevelBasedPermissionSet.forLevel(PermissionLevel.byId(Apoli.config.executeCommand.permissionLevel)),
+                entity.getName().getString(),
+                entity.getDisplayName(),
+                server,
+                entity
+            );
+        }
+        commandSource = commandSource
+            .withCallback((CommandResultCallback) (successful, returnValue) -> result.set(returnValue))
+            .withPermission(LevelBasedPermissionSet.forLevel(PermissionLevel.byId(Apoli.config.executeCommand.permissionLevel)))
             .withSource(CommandSource.NULL);
 
         if (Apoli.config.executeCommand.showOutput) {

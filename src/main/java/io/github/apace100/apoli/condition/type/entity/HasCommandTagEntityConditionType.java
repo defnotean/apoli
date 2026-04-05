@@ -38,7 +38,7 @@ public class HasCommandTagEntityConditionType extends EntityConditionType {
     public boolean test(EntityConditionContext context) {
 
         Entity entity = context.entity();
-        Set<String> entityCommandTags = entity.getTags();
+        Set<String> entityCommandTags = entity.entityTags();
 
         return this.commandTags.isEmpty()
             ? !entityCommandTags.isEmpty()

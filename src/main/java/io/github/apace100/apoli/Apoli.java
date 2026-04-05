@@ -124,7 +124,7 @@ public class Apoli implements ModInitializer, EntityComponentInitializer {
 
 		ServerEntityEvents.EQUIPMENT_CHANGE.register(ItemPowersComponent::onChangeEquipment);
 
-		CalioResourceConditions.ALIASES.addNamespaceAlias(MODID, Calio.MOD_NAMESPACE);
+		CalioResourceConditions.ALIASES.addNamespaceAlias(MODID, "calio");
 		CriteriaTriggers.register(GainedPowerCriterion.ID.toString(), GainedPowerCriterion.INSTANCE);
 
 		LOGGER.info("Apoli " + VERSION + " has initialized. Ready to power up your game!");
@@ -132,11 +132,11 @@ public class Apoli implements ModInitializer, EntityComponentInitializer {
 	}
 
 	public static Identifier identifier(String path) {
-		return Identifier.parse(MODID, path);
+		return Identifier.fromNamespaceAndPath(MODID, path);
 	}
 
 	public static boolean onServerSide() {
-		return server != null && server.isOnThread();
+		return server != null && server.isSameThread();
 	}
 
 	@Override

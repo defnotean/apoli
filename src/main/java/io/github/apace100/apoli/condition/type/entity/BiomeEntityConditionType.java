@@ -53,12 +53,12 @@ public class BiomeEntityConditionType extends EntityConditionType {
 
         Entity entity = context.entity();
 
-        Holder<Biome> biomeEntry = entity.level().getBiome(entity.getBlockPos());
-        ResourceKey<Biome> biomeKey = biomeEntry.getKey().orElseThrow();
+        Holder<Biome> biomeEntry = entity.level().getBiome(entity.blockPosition());
+        ResourceKey<Biome> biomeKey = biomeEntry.unwrapKey().orElseThrow();
 
         return biome.map(biomeKey::equals).orElse(true)
             && biomes.map(keys -> keys.contains(biomeKey)).orElse(true)
-            && biomeCondition.map(condition -> condition.test(entity.getBlockPos(), biomeEntry)).orElse(true);
+            && biomeCondition.map(condition -> condition.test(entity.blockPosition(), biomeEntry)).orElse(true);
 
     }
 

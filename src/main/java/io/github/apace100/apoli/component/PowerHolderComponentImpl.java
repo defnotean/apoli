@@ -17,8 +17,14 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -225,25 +231,23 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public void readFromNbt(@NotNull CompoundTag compoundTag, HolderLookup.Provider lookup) {
+    public void readData(@NotNull ValueInput input) {
 
         powers.clear();
         powerSources.clear();
 
-        ListTag powersTag = compoundTag.getList("powers", Tag.TAG_COMPOUND);
+        HolderLookup.Provider lookup = input.lookup();
+        var ops = RegistryOps.create(NbtOps.INSTANCE, lookup);
 
-        //  Migrate compound NBTs from the old 'Powers' NBT path to the new 'powers' NBT path
-        if (compoundTag.contains("Powers")) {
-            powersTag.addAll(compoundTag.getList("Powers", Tag.TAG_COMPOUND));
-        }
+        var powersInput = input.childrenListOrEmpty("powers");
+        for (int i = 0; i < powersInput.size(); i++) {
 
-        for (int i = 0; i < powersTag.size(); i++) {
-
-            CompoundTag powerTag = powersTag.getCompound(i);
+            ValueInput powerInput = powersInput.get(i);
 
             try {
 
-                Power.DataEntry powerDataEntry = Power.DataEntry.CODEC.read(lookup.getOps(NbtOps.INSTANCE), powerTag).getOrThrow();
+                // Read power data entry via codec from the child input
+                Power.DataEntry powerDataEntry = powerInput.read(Power.DataEntry.CODEC).orElseThrow();
                 PowerReference powerReference = powerDataEntry.powerReference();
 
                 try {
@@ -261,8 +265,6 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
                     }
 
                     catch (ClassCastException cce) {
-                        //  Occurs when the power was overridden by a data pack since last resource reload,
-                        //  where the overridden power may encode/decode different NBT types
                         Apoli.LOGGER.warn("Data type of power \"{}\" has changed, skipping data for that power on entity {} (UUID: {})", powerReference.id(), owner.getName().getString(), owner.getStringUUID());
                     }
 
@@ -278,7 +280,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
             }
 
             catch (Throwable t) {
-                Apoli.LOGGER.warn("Error trying to decode NBT element ({}) at index {} into a power from NBT of entity {} (UUID: {}) (skipping): {}", powerTag, i, owner.getName().getString(), owner.getStringUUID(), t.getMessage());
+                Apoli.LOGGER.warn("Error trying to decode power at index {} from NBT of entity {} (UUID: {}) (skipping): {}", i, owner.getName().getString(), owner.getStringUUID(), t.getMessage());
             }
 
         }
@@ -286,7 +288,10 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
     }
 
     @Override
-    public void writeToNbt(@NotNull CompoundTag compoundTag, HolderLookup.Provider lookup) {
+    public void writeData(@NotNull ValueOutput output) {
+
+        HolderLookup.Provider lookup = owner.level().registryAccess();
+        var ops = RegistryOps.create(NbtOps.INSTANCE, lookup);
 
         ListTag powersTag = new ListTag();
         powers.forEach((power, powerType) -> {
@@ -294,14 +299,15 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
             PowerConfiguration<?> typeConfig = power.getType().getConfig();
             PowerReference powerReference = PowerReference.of(power.getId());
 
-            Power.DataEntry.CODEC.codec().encodeStart(lookup.getOps(NbtOps.INSTANCE), new Power.DataEntry(typeConfig, powerReference, powerType.toTag(), powerSources.get(power)))
+            Power.DataEntry.CODEC.codec().encodeStart(ops, new Power.DataEntry(typeConfig, powerReference, powerType.toTag(), powerSources.get(power)))
                 .mapError(err -> "Error encoding power \"" + power.getId() + "\" to NBT of entity " + owner.getName().getString() + " (UUID: " + owner.getStringUUID() + ") (skipping): " + err)
                 .resultOrPartial(Apoli.LOGGER::warn)
                 .ifPresent(powersTag::add);
 
         });
 
-        compoundTag.put("powers", powersTag);
+        // Store the list using a codec-based approach
+        output.store("powers", ListTag.CODEC, powersTag);
 
     }
 

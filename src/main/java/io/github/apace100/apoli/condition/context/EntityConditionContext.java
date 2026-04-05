@@ -12,7 +12,7 @@ public record EntityConditionContext(Entity entity) implements ConditionContext 
 	}
 
 	public BlockPos blockPos() {
-		return entity().getBlockPos();
+		return entity().blockPosition();
 	}
 
 }

@@ -50,7 +50,7 @@ public class PassengerRecursiveEntityConditionType extends EntityConditionType {
         Entity entity = context.entity();
         long matches = entity.getPassengers()
             .stream()
-            .flatMap(Entity::streamPassengersAndSelf)
+            .flatMap(Entity::getSelfAndPassengers)
             .filter(passenger -> biEntityCondition.map(condition -> condition.test(passenger, entity)).orElse(true))
             .count();
 

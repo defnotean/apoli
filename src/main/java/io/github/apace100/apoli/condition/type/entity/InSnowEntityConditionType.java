@@ -15,7 +15,7 @@ public class InSnowEntityConditionType extends EntityConditionType {
 	@Override
 	public boolean test(EntityConditionContext context) {
 		Entity entity = context.entity();
-		return WorldUtil.inSnow(entity.level(), BlockPos.containing(MiscUtil.getPoseDependentEyePos(entity)), entity.getBlockPos());
+		return WorldUtil.inSnow(entity.level(), BlockPos.containing(MiscUtil.getPoseDependentEyePos(entity)), entity.blockPosition());
 	}
 
 	@Override

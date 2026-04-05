@@ -21,7 +21,7 @@ public class AttributeEntityConditionType extends EntityConditionType {
 
     public static final TypedDataObjectFactory<AttributeEntityConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("attribute", SerializableDataTypes.ATTRIBUTE_ENTRY)
+            .add("attribute", ApoliDataTypes.ATTRIBUTE_ENTRY)
             .add("comparison", ApoliDataTypes.COMPARISON)
             .add("compare_to", SerializableDataTypes.DOUBLE),
         data -> new AttributeEntityConditionType(

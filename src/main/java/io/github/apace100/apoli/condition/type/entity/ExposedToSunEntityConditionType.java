@@ -17,7 +17,7 @@ public class ExposedToSunEntityConditionType extends EntityConditionType {
     @Override
     public boolean test(EntityConditionContext context) {
         Entity entity = context.entity();
-        return entity.level().isDay()
+        return entity.level().isBrightOutside()
             && !IN_RAIN.test(context)
             && BRIGHTNESS.test(context)
             && EXPOSED_TO_SKY.test(context);

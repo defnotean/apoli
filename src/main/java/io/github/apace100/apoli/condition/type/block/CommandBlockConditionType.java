@@ -12,9 +12,12 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.commands.CommandResultCallback;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec2;
@@ -70,14 +73,14 @@ public class CommandBlockConditionType extends BlockConditionType {
             pos.getCenter(),
             Vec2.ZERO,
             serverWorld,
-            Apoli.config.executeCommand.permissionLevel,
+            LevelBasedPermissionSet.forLevel(PermissionLevel.byId(Apoli.config.executeCommand.permissionLevel)),
             blockTranslationKey,
             Component.translatable(blockTranslationKey),
             server,
             null
         );
 
-        commandSource = commandSource.withReturnValueConsumer((successful, returnValue) -> result.set(returnValue));
+        commandSource = commandSource.withCallback((CommandResultCallback) (successful, returnValue) -> result.set(returnValue));
         server.getCommands().performPrefixedCommand(commandSource, command);
 
         return comparison.compare(result.get(), compareTo);

@@ -8,7 +8,7 @@ import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.ladysnake.pal.PlayerAbility;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class AbilityEntityConditionType extends EntityConditionType {
@@ -31,8 +31,8 @@ public class AbilityEntityConditionType extends EntityConditionType {
 
     @Override
     public boolean test(EntityConditionContext context) {
-        return context.entity() instanceof ServerPlayer serverPlayer
-            && ability.isEnabledFor(serverPlayer);
+        return context.entity() instanceof Player player
+            && ability.isEnabledFor(player);
     }
 
     @Override

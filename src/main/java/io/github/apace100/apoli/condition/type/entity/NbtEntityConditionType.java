@@ -9,6 +9,8 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -34,7 +36,9 @@ public class NbtEntityConditionType extends EntityConditionType {
 
     @Override
     public boolean test(EntityConditionContext context) {
-        return NbtUtils.compareNbt(nbt, context.entity().save(new CompoundTag()), true);
+        TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, context.entity().level().registryAccess());
+        context.entity().saveWithoutId(output);
+        return NbtUtils.compareNbt(nbt, output.buildResult(), true);
     }
 
     @Override

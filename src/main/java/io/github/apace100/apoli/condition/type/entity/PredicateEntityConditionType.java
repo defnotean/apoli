@@ -6,6 +6,7 @@ import io.github.apace100.apoli.condition.type.EntityConditionType;
 import io.github.apace100.apoli.condition.type.EntityConditionTypes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
+import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -25,7 +26,7 @@ public class PredicateEntityConditionType extends EntityConditionType {
 
     public static final TypedDataObjectFactory<PredicateEntityConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("predicate", SerializableDataTypes.PREDICATE),
+            .add("predicate", SerializableDataType.registryKey(Registries.PREDICATE)),
         data -> new PredicateEntityConditionType(
             data.get("predicate")
         ),
@@ -47,16 +48,16 @@ public class PredicateEntityConditionType extends EntityConditionType {
             return false;
         }
 
-        LootItemCondition lootCondition = serverWorld.getServer().getReloadableRegistries()
+        LootItemCondition lootCondition = serverWorld.getServer().reloadableRegistries()
             .registryAccess()
             .get(Registries.PREDICATE)
             .getOrThrow(predicate);
         LootParams lootContextParameterSet = new LootParams.Builder(serverWorld)
-            .add(LootContextParams.ORIGIN, entity.position())
-            .addOptional(LootContextParams.THIS_ENTITY, entity)
-            .build(LootContextParamSets.COMMAND);
+            .withParameter(LootContextParams.ORIGIN, entity.position())
+            .withOptionalParameter(LootContextParams.THIS_ENTITY, entity)
+            .create(LootContextParamSets.COMMAND);
 
-        return lootCondition.test(new LootContext.Builder(lootContextParameterSet).build(Optional.empty()));
+        return lootCondition.test(new LootContext.Builder(lootContextParameterSet).create(Optional.empty()));
 
     }
 

@@ -36,7 +36,7 @@ public class SlipperinessBlockConditionType extends BlockConditionType {
 
     @Override
     public boolean test(BlockConditionContext context) {
-        return comparison.compare(context.blockState().getBlock().getSlipperiness(), compareTo);
+        return comparison.compare(context.blockState().getBlock().getFriction(), compareTo);
     }
 
     @Override

@@ -41,8 +41,8 @@ public class BlockItemMixin {
         ItemStack stack = context.getStack();
         InteractionHand hand = context.getHand();
 
-        BlockPos toPos = context.getBlockPos();
-        BlockPos onPos = ((ItemUsageContextAccessor) context).callGetHitResult().getBlockPos();
+        BlockPos toPos = context.blockPosition();
+        BlockPos onPos = ((ItemUsageContextAccessor) context).callGetHitResult().blockPosition();
 
         Prioritized.CallInstance<ActiveInteractionPowerType> aipci = new Prioritized.CallInstance<>();
         int preventBlockPlacePowers = 0;
@@ -78,7 +78,7 @@ public class BlockItemMixin {
         }
 
         Direction direction = context.getDirection();
-        BlockPos onPos = ((ItemUsageContextAccessor) context).callGetHitResult().getBlockPos();
+        BlockPos onPos = ((ItemUsageContextAccessor) context).callGetHitResult().blockPosition();
         InteractionHand hand = context.getHand();
 
         Prioritized.CallInstance<ActiveInteractionPowerType> aipci = new Prioritized.CallInstance<>();

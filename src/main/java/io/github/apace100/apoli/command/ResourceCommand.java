@@ -192,7 +192,7 @@ public class ResourceCommand {
                         .suggests(PowerSuggestionProvider.resourcesFromEntity("target"))
                         .then(argument("operation", PowerOperationArgumentType.operation())
                             .then(argument("source", ScoreHolderArgument.scoreHolder())
-                                .then(argument("objective", ObjectiveArgument.scoreboardObjective())
+                                .then(argument("objective", ObjectiveArgument.objective())
                                     .executes(OperationNode::execute)))))).build();
         }
 
@@ -203,13 +203,13 @@ public class ResourceCommand {
 
             PowerOperationArgumentType.Operation operation = PowerOperationArgumentType.getOperation(context, "operation");
 
-            ScoreHolder source = ScoreHolderArgument.getScoreHolder(context, "source");
+            ScoreHolder source = ScoreHolderArgument.getName(context, "source");
             Objective objective = ObjectiveArgument.getObjective(context, "objective");
 
             CommandSourceStack commandSource = context.getSource();
             PowerType powerType = PowerUtil.getOptionalPowerType(resource, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), resource.getId().toString()));
 
-            ScoreAccess scoreAccess = commandSource.getServer().getScoreboard().getOrCreateScore(source, objective);
+            ScoreAccess scoreAccess = commandSource.getServer().getScoreboard().getOrCreatePlayerScore(source, objective);
 
             boolean operated = operation.apply(powerType, scoreAccess);
             int newValue = PowerUtil.getResourceValue(powerType);

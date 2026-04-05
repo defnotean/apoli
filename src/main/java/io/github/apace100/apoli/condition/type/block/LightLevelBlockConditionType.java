@@ -54,7 +54,7 @@ public class LightLevelBlockConditionType extends BlockConditionType {
 
         int lightLevel = lightType
             .map(lt -> world.getBrightness(lt, pos))
-            .orElseGet(() -> world.getLightLevel(pos));
+            .orElseGet(() -> world.getMaxLocalRawBrightness(pos));
 
         return comparison.compare(lightLevel, compareTo);
 

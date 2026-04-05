@@ -17,7 +17,7 @@ public class InTagDamageConditionType extends DamageConditionType {
 
     public static final TypedDataObjectFactory<InTagDamageConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("tag", SerializableDataType.tagKey(Registries.DAMAGE_TYPE)),
+            .add("tag", SerializableDataType.tag(Registries.DAMAGE_TYPE)),
         data -> new InTagDamageConditionType(
             data.get("tag")
         ),

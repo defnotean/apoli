@@ -75,7 +75,7 @@ public class ModPacketsC2S {
             separator = ".";
         }
 
-        handler.disconnect(Component.stringifiedTranslatable("apoli.gui.version_mismatch", Apoli.VERSION, semverString));
+        handler.disconnect(Component.translatableEscape("apoli.gui.version_mismatch", Apoli.VERSION, semverString));
 
     }
 

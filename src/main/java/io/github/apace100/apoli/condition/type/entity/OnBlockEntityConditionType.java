@@ -34,7 +34,7 @@ public class OnBlockEntityConditionType extends EntityConditionType {
     public boolean test(EntityConditionContext context) {
         Entity entity = context.entity();
         return entity.onGround()
-            && blockCondition.map(condition -> condition.test(entity.level(), entity.getSteppingPos())).orElse(true);
+            && blockCondition.map(condition -> condition.test(entity.level(), entity.getOnPos())).orElse(true);
     }
 
     @Override

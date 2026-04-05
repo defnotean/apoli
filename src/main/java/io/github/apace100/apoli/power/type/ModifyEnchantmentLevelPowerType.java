@@ -172,7 +172,7 @@ public class ModifyEnchantmentLevelPowerType extends ValueModifyingPowerType {
 
                 Holder<Enchantment> innerEnchantment = entity.registryAccess()
                     .get(Registries.ENCHANTMENT)
-                    .entryOf(innerPower.enchantmentKey);
+                    .getOrThrow(innerPower.enchantmentKey);
 
                 //  If this enchantment has already been processed, continue
                 if (processedEnchantments.contains(innerEnchantment)) {

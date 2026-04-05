@@ -350,7 +350,7 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
             return false;
         }
 
-        this.climbingPos = Optional.of(this.getBlockPos());
+        this.climbingPos = Optional.of(this.blockPosition());
         return true;
 
     }
