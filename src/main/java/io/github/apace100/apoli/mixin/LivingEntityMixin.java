@@ -94,7 +94,7 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
         SyncStatusEffectsUtil.sendStatusEffectUpdatePacket((LivingEntity) (Object) this, SyncStatusEffectsUtil.UpdateType.CLEAR, null);
     }
 
-    @ModifyVariable(method = "addEffect(Lnet/minecraft/world/entity/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z", at = @At("HEAD"), argsOnly = true)
+    @ModifyVariable(method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z", at = @At("HEAD"), argsOnly = true)
     private MobEffectInstance apoli$modifyStatusEffect(MobEffectInstance original) {
 
         Holder<MobEffect> effectType = original.getEffect();

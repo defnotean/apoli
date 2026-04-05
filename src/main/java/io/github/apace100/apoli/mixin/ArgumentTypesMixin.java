@@ -22,7 +22,7 @@ public abstract class ArgumentTypesMixin {
     private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> ArgumentTypeInfo<A, T> register(Registry<ArgumentTypeInfo<?, ?>> registry, String string, Class<? extends A> clazz, ArgumentTypeInfo<A, T> argumentSerializer) {
         throw new AssertionError("Mixins for basic functionality are fun.");
     }
-    @Inject(method = "register(Lnet/minecraft/core/Registry;)Lnet/minecraft/command/argument/serialize/ArgumentTypeInfo;", at = @At("RETURN"))
+    @Inject(method = "bootstrap(Lnet/minecraft/core/Registry;)Lnet/minecraft/commands/synchronization/ArgumentTypeInfo;", at = @At("RETURN"))
     private static void registerApoliArgumentTypes(Registry<ArgumentTypeInfo<?, ?>> registry, CallbackInfoReturnable<ArgumentTypeInfo<?, ?>> cir) {
         register(registry, Apoli.MODID + ":power", PowerArgumentType.class, new PowerArgumentType.Serializer());
         register(registry, Apoli.MODID + ":power_operation", PowerOperationArgumentType.class, SingletonArgumentInfo.contextFree(PowerOperationArgumentType::operation));
