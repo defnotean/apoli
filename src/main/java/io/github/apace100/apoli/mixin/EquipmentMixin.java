@@ -14,10 +14,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(Equippable.class)
-public interface EquipmentMixin {
+public abstract class EquipmentMixin {
 
     @ModifyExpressionValue(method = "handleEquipmentSwap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;canUseSlot(Lnet/minecraft/world/entity/EquipmentSlot;)Z"))
-    private boolean apoli$preventArmorEquipping(boolean original, Item item, Level world, Player user, @Local ItemStack stack, @Local EquipmentSlot slot) {
+    private static boolean apoli$preventArmorEquipping(boolean original, Item item, Level world, Player user, @Local ItemStack stack, @Local EquipmentSlot slot) {
         return original
             && !PowerHolderComponent.hasPowerType(user, RestrictArmorPowerType.class, p -> p.doesRestrict(stack, slot));
     }
