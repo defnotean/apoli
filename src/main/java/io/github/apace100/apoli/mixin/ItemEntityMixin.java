@@ -12,29 +12,26 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
-import java.util.UUID;
-
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin extends Entity {
 
     @Shadow
-    @Nullable
-    private UUID throwerUuid;
+    private EntityReference<Entity> thrower;
 
     @Shadow
-    public abstract ItemStack getStack();
+    public abstract ItemStack getItem();
 
     @Shadow
-    public abstract void setStack(ItemStack stack);
+    public abstract void setItem(ItemStack stack);
 
     private ItemEntityMixin(EntityType<?> type, Level world) {
         super(type, world);
@@ -50,14 +47,14 @@ public abstract class ItemEntityMixin extends Entity {
         else if (MiscUtil.hasSpaceInInventory(playerInventory, stack)) {
 
             SlotAccess stackReference = InventoryUtil.createStackReference(stack);
-            Entity thrower = MiscUtil.getEntityByUuid(this.throwerUuid, this.level().getServer());
+            Entity throwerEntity = EntityReference.getEntity(this.thrower, this.level());
 
-            Prioritized.CallInstance<ActionOnItemPickupPowerType> callInstance = ActionOnItemPickupPowerType.executeItemAction(thrower, stackReference, player);
-            this.setStack(stackReference.get());
+            Prioritized.CallInstance<ActionOnItemPickupPowerType> callInstance = ActionOnItemPickupPowerType.executeItemAction(throwerEntity, stackReference, player);
+            this.setItem(stackReference.get());
 
-            boolean result = original.call(playerInventory, this.getStack());
+            boolean result = original.call(playerInventory, this.getItem());
             if (result) {
-                ActionOnItemPickupPowerType.executeBiEntityAction(callInstance, thrower);
+                ActionOnItemPickupPowerType.executeBiEntityAction(callInstance, throwerEntity);
             }
 
             return result;

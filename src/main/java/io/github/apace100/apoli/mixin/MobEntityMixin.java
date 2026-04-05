@@ -7,7 +7,6 @@ import io.github.apace100.apoli.power.type.ActionOnItemPickupPowerType;
 import io.github.apace100.apoli.power.type.PreventItemPickupPowerType;
 import io.github.apace100.apoli.power.type.Prioritized;
 import io.github.apace100.apoli.util.InventoryUtil;
-import io.github.apace100.apoli.util.MiscUtil;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Targeting;
@@ -33,7 +32,7 @@ public abstract class MobEntityMixin extends LivingEntity implements Targeting {
     private void apoli$actionOnItemPickup(Mob mobEntity, ItemEntity itemEntity, Operation<Void> original) {
 
         SlotAccess stackReference = InventoryUtil.createStackReference(itemEntity.getItem());
-        Entity thrower = MiscUtil.getEntityByUuid(((ItemEntityAccessor) itemEntity).getThrowerUuid(), this.level().getServer());
+        Entity thrower = EntityReference.getEntity(((ItemEntityAccessor) itemEntity).getThrower(), this.level());
 
         Prioritized.CallInstance<ActionOnItemPickupPowerType> callInstance = ActionOnItemPickupPowerType.executeItemAction(thrower, stackReference, this);
         itemEntity.setItem(stackReference.get());

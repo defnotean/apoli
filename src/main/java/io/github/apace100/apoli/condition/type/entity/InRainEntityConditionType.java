@@ -11,7 +11,7 @@ public class InRainEntityConditionType extends EntityConditionType {
 
     @Override
     public boolean test(EntityConditionContext context) {
-        return ((EntityAccessor) context.entity()).callIsBeingRainedOn();
+        return ((EntityAccessor) context.entity()).callIsInRain();
     }
 
     @Override

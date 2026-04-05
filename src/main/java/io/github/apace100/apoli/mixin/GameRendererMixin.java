@@ -12,25 +12,21 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.resources.Identifier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.level.BlockGetter;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
@@ -41,42 +37,38 @@ public abstract class GameRendererMixin {
 
     @Shadow
     @Final
-    private Camera camera;
+    private Camera mainCamera;
 
     @Shadow
     @Final
-    Minecraft client;
+    private Minecraft minecraft;
 
     @Shadow
-    protected abstract void loadPostProcessor(Identifier identifier);
+    private Identifier postEffectId;
 
     @Shadow
-    PostChain postProcessor;
-    @Shadow
-    private boolean postProcessorEnabled;
+    private boolean effectActive;
 
     @Shadow
-    @Final
-    private ResourceManager resourceManager;
+    public abstract void clearPostEffect();
 
     @Shadow
-    public abstract void disablePostProcessor();
+    protected abstract void setPostEffect(Identifier identifier);
 
     @Unique
     private Identifier apoli$currentlyLoadedShader;
 
-    @Inject(at = @At("TAIL"), method = "onCameraEntitySet")
+    @Inject(at = @At("TAIL"), method = "checkEntityPostEffect")
     private void apoli$loadShaderFromPowerOnCameraEntity(Entity entity, CallbackInfo ci) {
 
-        PowerHolderComponent.getPowerTypes(client.getCameraEntity(), ShaderPowerType.class)
+        PowerHolderComponent.getPowerTypes(minecraft.getCameraEntity(), ShaderPowerType.class)
             .stream()
-            .filter(p -> resourceManager.getResource(p.getShaderLocation()).isPresent())
             .max(Comparator.comparing(ShaderPowerType::getPriority))
             .ifPresent(p -> {
 
                 Identifier shaderLocation = p.getShaderLocation();
 
-                loadPostProcessor(shaderLocation);
+                setPostEffect(shaderLocation);
                 apoli$currentlyLoadedShader = shaderLocation;
 
             });
@@ -87,53 +79,34 @@ public abstract class GameRendererMixin {
     private void apoli$loadShaderFromPower(DeltaTracker tickCounter, boolean tick, CallbackInfo ci) {
 
         //  Load a shader from a shader power with a high priority
-        PowerHolderComponent.getPowerTypes(client.getCameraEntity(), ShaderPowerType.class)
+        PowerHolderComponent.getPowerTypes(minecraft.getCameraEntity(), ShaderPowerType.class)
             .stream()
-            .filter(p -> resourceManager.getResource(p.getShaderLocation()).isPresent())
             .max(Comparator.comparing(ShaderPowerType::getPriority))
             .ifPresent(p -> {
                 Identifier shaderLocation = p.getShaderLocation();
                 if (shaderLocation != apoli$currentlyLoadedShader) {
-                    loadPostProcessor(shaderLocation);
+                    setPostEffect(shaderLocation);
                     apoli$currentlyLoadedShader = shaderLocation;
                 }
             });
 
         //  Remove the currently loaded shader if the entity doesn't have any shader powers
-        if (!PowerHolderComponent.hasPowerType(client.getCameraEntity(), ShaderPowerType.class) && apoli$currentlyLoadedShader != null) {
+        if (!PowerHolderComponent.hasPowerType(minecraft.getCameraEntity(), ShaderPowerType.class) && apoli$currentlyLoadedShader != null) {
 
-            if (postProcessor != null) {
-                disablePostProcessor();
-            }
-
-            postProcessorEnabled = false;
+            clearPostEffect();
+            effectActive = false;
             apoli$currentlyLoadedShader = null;
 
         }
 
     }
 
-    @Inject(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hudHidden:Z"))
-    private void apoli$renderOverlayPowersBelowHud(DeltaTracker tickCounter, boolean tick, CallbackInfo ci) {
-        PowerHolderComponent.getPowerTypes(client.getCameraEntity(), OverlayPowerType.class)
-            .stream()
-            .filter(p -> p.shouldRender(client.options, OverlayPowerType.DrawPhase.BELOW_HUD))
-            .sorted(Comparator.comparing(OverlayPowerType::getPriority))
-            .forEach(OverlayPowerType::render);
-    }
-
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", ordinal = 0))
-    private void apoli$renderOverlayPowersAboveHud(DeltaTracker tickCounter, boolean tick, CallbackInfo ci) {
-        PowerHolderComponent.getPowerTypes(client.getCameraEntity(), OverlayPowerType.class)
-            .stream()
-            .filter(p -> p.shouldRender(client.options, OverlayPowerType.DrawPhase.ABOVE_HUD))
-            .sorted(Comparator.comparing(OverlayPowerType::getPriority))
-            .forEach(OverlayPowerType::render);
-    }
+    // TODO: MC 26.1 removed Options.hudHidden field access from render(). Overlay rendering moved to GuiRenderer.
+    // OverlayPowerType rendering (below/above HUD) needs to be reimplemented via the new GuiRenderer system.
 
     @Inject(at = @At("HEAD"), method = "togglePostEffect", cancellable = true)
     private void disableShaderToggle(CallbackInfo ci) {
-        PowerHolderComponent.withPowerType(client.getCameraEntity(), ShaderPowerType.class, p -> true, shaderPower -> {
+        PowerHolderComponent.withPowerType(minecraft.getCameraEntity(), ShaderPowerType.class, p -> true, shaderPower -> {
             Identifier shaderLoc = shaderPower.getShaderLocation();
             if(!shaderPower.isToggleable() && apoli$currentlyLoadedShader == shaderLoc) {
                 ci.cancel();
@@ -142,7 +115,7 @@ public abstract class GameRendererMixin {
     }
 
     // NightVisionPower
-    @WrapMethod(method = "calculateNightVisionScale")
+    @WrapMethod(method = "getNightVisionScale")
     private static float apoli$modifyNightVisionStrength(LivingEntity entity, float tickDelta, Operation<Float> original) {
         return PowerHolderComponent.getPowerTypes(entity, NightVisionPowerType.class)
             .stream()
@@ -151,15 +124,8 @@ public abstract class GameRendererMixin {
             .orElseGet(() -> original.call(entity, tickDelta));
     }
 
-    @ModifyExpressionValue(method = "getFov", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getSubmersionType()Lnet/minecraft/world/level/material/FogType;"))
-    private FogType apoli$modifySubmersionTypeFov(FogType original, Camera camera) {
-        return PowerHolderComponent.getPowerTypes(camera.entity(), ModifyCameraSubmersionTypePowerType.class, true)
-            .stream()
-            .filter(p -> p.doesModify(original) && p.isActive())
-            .findFirst()
-            .map(ModifyCameraSubmersionTypePowerType::getNewType)
-            .orElse(original);
-    }
+    // TODO: MC 26.1 removed getFov() from GameRenderer. FOV modification for ModifyCameraSubmersionTypePowerType
+    // needs to be reimplemented via the new extract/update pipeline.
 
     @Unique
     private final HashMap<BlockPos, BlockState> savedStates = new HashMap<>();
@@ -167,7 +133,7 @@ public abstract class GameRendererMixin {
     // PHASING: remove_blocks
     @Inject(at = @At(value = "HEAD"), method = "render")
     private void beforeRender(DeltaTracker tickCounter, boolean tick, CallbackInfo ci) {
-        List<PhasingPowerType> phasings = PowerHolderComponent.getPowerTypes(camera.entity(), PhasingPowerType.class);
+        List<PhasingPowerType> phasings = PowerHolderComponent.getPowerTypes(mainCamera.entity(), PhasingPowerType.class);
         if (phasings.stream().anyMatch(pp -> pp.getRenderType() == PhasingPowerType.RenderType.REMOVE_BLOCKS)) {
             float view = phasings.stream().filter(pp -> pp.getRenderType() == PhasingPowerType.RenderType.REMOVE_BLOCKS).map(PhasingPowerType::getViewDistance).min(Float::compareTo).get();
             Set<BlockPos> eyePositions = getEyePos(0.25F, 0.05F, 0.25F);
@@ -179,33 +145,32 @@ public abstract class GameRendererMixin {
             }
             for (BlockPos eyePosition : noLongerEyePositions) {
                 BlockState state = savedStates.get(eyePosition);
-                client.level.setBlockAndUpdate(eyePosition, state);
+                minecraft.level.setBlockAndUpdate(eyePosition, state);
                 savedStates.remove(eyePosition);
             }
             for (BlockPos p : eyePositions) {
-                BlockState stateAtP = client.level.getBlockState(p);
-                if (!savedStates.containsKey(p) && !client.level.isEmptyBlock(p) && !(stateAtP.getBlock() instanceof LiquidBlock)) {
+                BlockState stateAtP = minecraft.level.getBlockState(p);
+                if (!savedStates.containsKey(p) && !minecraft.level.isEmptyBlock(p) && !(stateAtP.getBlock() instanceof LiquidBlock)) {
                     savedStates.put(p, stateAtP);
-                    client.level.setBlockAndUpdate(p, Blocks.AIR.defaultBlockState());
+                    minecraft.level.setBlockAndUpdate(p, Blocks.AIR.defaultBlockState());
                 }
             }
         } else if (savedStates.size() > 0) {
             Set<BlockPos> noLongerEyePositions = new HashSet<>(savedStates.keySet());
             for (BlockPos eyePosition : noLongerEyePositions) {
                 BlockState state = savedStates.get(eyePosition);
-                client.level.setBlockAndUpdate(eyePosition, state);
+                minecraft.level.setBlockAndUpdate(eyePosition, state);
                 savedStates.remove(eyePosition);
             }
         }
     }
 
     // PHASING: In MC 26.1 Camera.update() takes only a DeltaTracker - third person prevention handled elsewhere
-    // The Camera.update(DeltaTracker) method no longer accepts direct parameters for third person mode.
     // TODO: Re-implement phasing third-person prevention using the new Camera API (setCameraType or similar).
 
     @Unique
     private Set<BlockPos> getEyePos(float rangeX, float rangeY, float rangeZ) {
-        Vec3 pos = camera.entity().getEyePosition();
+        Vec3 pos = mainCamera.entity().getEyePosition();
         AABB cameraBox = new AABB(pos, pos);
         cameraBox = cameraBox.inflate(rangeX, rangeY, rangeZ);
         HashSet<BlockPos> set = new HashSet<>();
@@ -213,11 +178,7 @@ public abstract class GameRendererMixin {
         return set;
     }
 
-    @ModifyExpressionValue(method = "pick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;canHit()Z"))
-    private static boolean apoli$preventEntitySelection(boolean original, Entity target) {
-        Entity cameraEntity = Minecraft.getInstance().getCameraEntity();
-        return original
-            && !PowerHolderComponent.hasPowerType(cameraEntity, PreventEntitySelectionPowerType.class, p -> p.doesPrevent(target));
-    }
+    // TODO: MC 26.1 removed pick() from GameRenderer. Entity selection prevention for
+    // PreventEntitySelectionPowerType needs to be reimplemented elsewhere.
 
 }

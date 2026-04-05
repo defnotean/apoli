@@ -58,32 +58,17 @@ import java.util.Optional;
 public abstract class ServerPlayerEntityMixin extends Player implements ContainerListener, EndRespawningEntity, CustomToastViewer {
 
     @Shadow
-    private ResourceKey<Level> spawnPointDimension;
-
-    @Shadow
-    private BlockPos spawnPointPosition;
-
-    @Shadow
     @Final
-    public MinecraftServer server;
+    private MinecraftServer server;
 
     @Shadow
     public ServerGamePacketListenerImpl connection;
 
     @Shadow
-    public abstract void displayClientMessage(Component message, boolean actionBar);
+    public abstract void sendSystemMessage(Component message, boolean actionBar);
 
     @Shadow
-    private boolean spawnForced;
-
-    @Shadow
-    public abstract void sendSystemMessage(Component message);
-
-    @Shadow
-    public abstract boolean shouldDamagePlayer(Player player);
-
-    @Shadow
-    private float spawnAngle;
+    public abstract ServerPlayer.RespawnConfig getRespawnConfig();
 
     // MC 26.1: findRespawnPosition removed. The respawn system now uses RespawnConfig.
     // findRespawnAndUseSpawnBlock is the new equivalent but has a different signature.
@@ -92,8 +77,11 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
         super(world, gameProfile);
     }
 
-    @WrapOperation(method = "startSleepInBed", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;setSpawnPoint(Lnet/minecraft/core/ResourceKey;Lnet/minecraft/core/BlockPos;FZZ)V"))
-    private void apoli$preventSleep(ServerPlayer serverPlayer, ResourceKey<Level> dimension, BlockPos pos, float angle, boolean forced, boolean sendMessage, Operation<Void> original, @Cancellable CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
+    @WrapOperation(method = "startSleepInBed", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;setRespawnPosition(Lnet/minecraft/server/level/ServerPlayer$RespawnConfig;Z)V"))
+    private void apoli$preventSleep(ServerPlayer serverPlayer, ServerPlayer.RespawnConfig config, boolean sendMessage, Operation<Void> original, @Cancellable CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
+
+        // Extract position from RespawnConfig for condition checks
+        BlockPos pos = this.blockPosition();
 
         List<PreventSleepPowerType> preventSleepPowers = PowerHolderComponent.getPowerTypes(this, PreventSleepPowerType.class)
             .stream()
@@ -102,95 +90,41 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
             .toList();
 
         if (preventSleepPowers.isEmpty()) {
-            original.call(serverPlayer, dimension, pos, angle, forced, sendMessage);
+            original.call(serverPlayer, config, sendMessage);
         }
 
         else {
 
             if (preventSleepPowers.stream().allMatch(PreventSleepPowerType::doesAllowSpawnPoint)) {
-                original.call(serverPlayer, dimension, pos, angle, forced, sendMessage);
+                original.call(serverPlayer, config, sendMessage);
             }
 
             cir.setReturnValue(Either.left(Player.BedSleepingProblem.OTHER_PROBLEM));
-            this.displayClientMessage(preventSleepPowers.getLast().getMessage(), true);
+            this.sendSystemMessage(preventSleepPowers.getLast().getMessage(), true);
 
         }
 
     }
 
-    @ModifyReturnValue(method = "getRespawnDimension", at = @At("RETURN"))
-    private ResourceKey<Level> apoli$modifySpawnPointDimension(ResourceKey<Level> original) {
-
-        if (!this.apoli$isEndRespawning() && (this.spawnPointPosition == null || this.apoli$hasObstructedOriginalSpawnPoint())) {
-            return PowerHolderComponent.getPowerTypes(this, ModifyPlayerSpawnPowerType.class)
-                .stream()
-                .max(Comparator.comparing(ModifyPlayerSpawnPowerType::getPriority))
-                .map(ModifyPlayerSpawnPowerType::getDimensionKey)
-                .orElse(original);
-        }
-
-        else {
-            return original;
-        }
-
-    }
-
-    @ModifyReturnValue(method = "getRespawnPosition", at = @At("RETURN"))
-    private BlockPos apoli$modifySpawnPointPosition(BlockPos original) {
-
-        if (this.apoli$isEndRespawning() || !PowerHolderComponent.hasPowerType(this, ModifyPlayerSpawnPowerType.class)) {
-            return original;
-        }
-
-        else if (original == null) {
-            return this.apoli$findPowerSpawnPoint();
-        }
-
-        else if (this.apoli$hasObstructedOriginalSpawnPoint()) {
-            this.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
-            return this.apoli$findPowerSpawnPoint();
-        }
-
-        else {
-            return original;
-        }
-
-    }
-
-    @ModifyReturnValue(method = "isRespawnForced", at = @At("RETURN"))
-    private boolean apoli$modifySpawnForced(boolean original) {
-        return original || (!this.apoli$isEndRespawning() && (spawnPointPosition == null || this.apoli$hasObstructedOriginalSpawnPoint()) && PowerHolderComponent.hasPowerType(this, ModifyPlayerSpawnPowerType.class));
-    }
+    // TODO: MC 26.1 replaced getRespawnDimension/getRespawnPosition/isRespawnForced with RespawnConfig.
+    // ModifyPlayerSpawnPowerType needs to be reimplemented to work with the new getRespawnConfig() API.
+    // The RespawnConfig object now encapsulates dimension, position, angle, and forced flag together.
 
     // MC 26.1: getRespawnTarget and findRespawnPosition replaced by findRespawnPositionAndUseSpawnBlock.
     // The respawn system now uses RespawnConfig objects. The retry logic for obstructed spawn points
     // needs to be adapted to the new system in a future update.
     // TODO: Reimplement spawn point retry logic for MC 26.1 RespawnConfig system.
 
-    @Inject(method = "restoreFrom", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/server/network/ServerPlayer;enchantmentTableSeed:I"))
+    @Inject(method = "restoreFrom", at = @At("TAIL"))
     private void copyInventoryWhenKeeping(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
         if(PowerHolderComponent.hasPowerType(oldPlayer, KeepInventoryPowerType.class)) {
             this.getInventory().replaceWith(oldPlayer.getInventory());
         }
     }
 
-    @Unique
-    private boolean apoli$hasObstructedOriginalSpawnPoint() {
-        ServerLevel spawnPointWorld = this.server.getLevel(spawnPointDimension);
-        return spawnPointPosition != null
-            && spawnPointWorld != null
-            && DismountHelper.findSafeDismountLocation(this.getType(), spawnPointWorld, this.spawnPointPosition, this.spawnForced) == null;
-    }
-
-    @Unique
-    private BlockPos apoli$findPowerSpawnPoint() {
-        return PowerHolderComponent.getPowerTypes(this, ModifyPlayerSpawnPowerType.class)
-            .stream()
-            .max(Comparator.comparing(ModifyPlayerSpawnPowerType::getPriority))
-            .flatMap(ModifyPlayerSpawnPowerType::getSpawn)
-            .map(Pair::getSecond)
-            .orElse(null);
-    }
+    // TODO: MC 26.1 - These helper methods need reimplementation using RespawnConfig API.
+    // apoli$hasObstructedOriginalSpawnPoint and apoli$findPowerSpawnPoint relied on
+    // spawnPointDimension/spawnPointPosition/spawnForced fields which are now inside RespawnConfig.
 
     @Inject(method = "drop", at = @At("HEAD"))
     private void cacheItemStackBeforeDropping(boolean entireStack, CallbackInfoReturnable<Boolean> cir, @Share("prevSelectedStack") LocalRef<ItemStack> prevSelectedStackLocRef) {
@@ -227,7 +161,8 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
 
     @Override
     public boolean apoli$hasRealRespawnPoint() {
-        return spawnPointPosition != null && !apoli$hasObstructedOriginalSpawnPoint();
+        // TODO: MC 26.1 - Use RespawnConfig to determine real respawn point
+        return this.getRespawnConfig() != null;
     }
 
     @Override

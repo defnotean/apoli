@@ -8,6 +8,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface EntityAccessor {
 
 	@Invoker
-	boolean callIsBeingRainedOn();
+	boolean callIsInRain();
 
 }

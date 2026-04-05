@@ -101,12 +101,12 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
 
     }
 
-    @Inject(method = "fall", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;onLandedUpon(Lnet/minecraft/world/Level;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;F)V"))
+    @Inject(method = "checkFallDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;onLandedUpon(Lnet/minecraft/world/Level;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;F)V"))
     private void invokeActionOnLand(CallbackInfo ci) {
         PowerHolderComponent.withPowerTypes((Entity) (Object) this, ActionOnLandPowerType.class, p -> true, ActionOnLandPowerType::executeAction);
     }
 
-    @ModifyReturnValue(method = "isInvulnerableTo", at = @At("RETURN"))
+    @ModifyReturnValue(method = "isInvulnerableToBase", at = @At("RETURN"))
     private boolean apoli$makeEntitiesInvulnerable(boolean original, DamageSource source) {
         return original
             || PowerHolderComponent.hasPowerType((Entity) (Object) this, InvulnerabilityPowerType.class, p -> p.doesApply(source));
@@ -168,7 +168,7 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
 
     }
 
-    @Inject(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getLandingPos()Lnet/minecraft/core/BlockPos;"))
+    @Inject(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getOnPos()Lnet/minecraft/core/BlockPos;"))
     private void forceGrounded(MoverType movementType, Vec3 movement, CallbackInfo ci) {
         if(PowerHolderComponent.hasPowerType((Entity)(Object)this, GroundedPowerType.class)) {
             this.onGround = true;
@@ -236,12 +236,12 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
 
     }
 
-    @ModifyExpressionValue(method = "push", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;isConnectedThroughVehicle(Lnet/minecraft/world/entity/Entity;)Z"))
+    @ModifyExpressionValue(method = "push", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;isPassengerOfSameVehicle(Lnet/minecraft/world/entity/Entity;)Z"))
     private boolean apoli$preventEntityPushing(boolean original, Entity fromEntity) {
         return original || PreventEntityCollisionPowerType.doesApply(fromEntity, (Entity) (Object) this);
     }
 
-    @ModifyReturnValue(method = "collidesWith", at = @At("RETURN"))
+    @ModifyReturnValue(method = "canCollideWith", at = @At("RETURN"))
     private boolean apoli$preventEntityCollision(boolean original, Entity other) {
         return !PreventEntityCollisionPowerType.doesApply((Entity) (Object) this, other) && original;
     }
@@ -377,15 +377,15 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
 
     }
 
-    @ModifyReturnValue(method = "getTags", at = @At("RETURN"))
+    @ModifyReturnValue(method = "entityTags", at = @At("RETURN"))
     private Set<String> apoli$queryTrackedCommandTags(Set<String> original) {
         return apoli$hasCommandTagsTracker
             ? this.getEntityData().get(COMMAND_TAGS)
             : original;
     }
 
-    @Inject(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;readAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V"))
-    private void apoli$trackCommandTagsFromNbt(CompoundTag nbt, CallbackInfo ci) {
+    @Inject(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;readAdditionalSaveData(Lnet/minecraft/world/level/storage/ValueInput;)V"))
+    private void apoli$trackCommandTagsFromNbt(net.minecraft.world.level.storage.ValueInput input, CallbackInfo ci) {
 
         if (apoli$hasCommandTagsTracker) {
             this.getEntityData().set(COMMAND_TAGS, Set.copyOf(this.tags));

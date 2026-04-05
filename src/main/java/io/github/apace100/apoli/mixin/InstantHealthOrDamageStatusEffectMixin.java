@@ -14,11 +14,11 @@ import net.minecraft.core.registries.Registries;
 @Mixin(targets = "net.minecraft.world.effect.InstantenousMobEffect")
 public abstract class InstantHealthOrDamageStatusEffectMixin {
 
-    @WrapMethod(method = "applyInstantEffect")
-    private void apoli$instantEffectImmunity(Entity source, Entity attacker, LivingEntity target, int amplifier, double proximity, Operation<Void> original) {
+    @WrapMethod(method = "applyInstantenousEffect")
+    private void apoli$instantEffectImmunity(net.minecraft.server.level.ServerLevel serverLevel, Entity source, Entity attacker, LivingEntity target, int amplifier, double proximity, Operation<Void> original) {
 
         if (!PowerHolderComponent.hasPowerType(target, EffectImmunityPowerType.class, p -> p.doesApply(BuiltInRegistries.MOB_EFFECT.wrapAsHolder((InstantenousMobEffect) (Object) this)))) {
-            original.call(source, attacker, target, amplifier, proximity);
+            original.call(serverLevel, source, attacker, target, amplifier, proximity);
         }
 
     }

@@ -55,10 +55,10 @@ import java.util.List;
 public abstract class PlayerEntityMixin extends LivingEntity implements Nameable, CommandSource, JumpingEntity, ModifiedPoseHolder {
 
     @Shadow
-    public abstract boolean damage(DamageSource source, float amount);
+    public abstract boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount);
 
     @Shadow
-    public abstract ItemStack getEquippedStack(EquipmentSlot slot);
+    public abstract ItemStack getItemBySlot(EquipmentSlot slot);
 
     @Shadow
     @Final
@@ -73,89 +73,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
         cir.setReturnValue(PowerHolderComponent.modify(this, ModifyAirSpeedPowerType.class, cir.getReturnValue()));
     }
 
-    @ModifyVariable(method = "eat", at = @At("HEAD"), argsOnly = true)
-    private ItemStack apoli$modifyEatenStack(ItemStack original) {
+    // TODO: MC 26.1 removed Player.eat(). The food system has been reworked.
+    // ModifyFoodPowerType and EdibleItemPowerType integration needs reimplementation for MC 26.1.
 
-        SlotAccess newStackRef = InventoryUtil.createStackReference(original);
-        ModifiableFoodEntity modifiableFoodEntity = (ModifiableFoodEntity) this;
-
-        List<ModifyFoodPowerType> modifyFoodPowers = PowerHolderComponent.getPowerTypes(this, ModifyFoodPowerType.class)
-            .stream()
-            .filter(mfp -> mfp.doesApply(original))
-            .toList();
-
-        for (ModifyFoodPowerType modifyFoodPower : modifyFoodPowers) {
-            modifyFoodPower.setConsumedItemStackReference(newStackRef);
-        }
-
-        EdibleItemPowerType.get(original.copy(), this).ifPresent(modifiableFoodEntity::apoli$setEdibleItemPower);
-
-        modifiableFoodEntity.apoli$setCurrentModifyFoodPowers(modifyFoodPowers);
-        modifiableFoodEntity.apoli$setOriginalFoodStack(original);
-
-        return newStackRef.get();
-
-    }
-
-    @Unique
-    private boolean apoli$updateStatsManually = false;
-
-    @ModifyVariable(method = "eat", at = @At("HEAD"), argsOnly = true)
-    private FoodProperties apoli$modifyFoodComponent(FoodProperties original, Level world, ItemStack stack, @Share("modifyFoodPowers") LocalRef<List<ModifyFoodPowerType>> sharedModifyFoodPowers) {
-
-        List<ModifyFoodPowerType> modifyFoodPowers = ((ModifiableFoodEntity) this).apoli$getCurrentModifyFoodPowers()
-            .stream()
-            .filter(p -> p.doesApply(stack))
-            .toList();
-
-        sharedModifyFoodPowers.set(modifyFoodPowers);
-        this.apoli$updateStatsManually = false;
-
-        List<Modifier> nutritionModifiers = modifyFoodPowers
-            .stream()
-            .flatMap(p -> p.getFoodModifiers().stream())
-            .toList();
-        List<Modifier> saturationModifiers = modifyFoodPowers
-            .stream()
-            .flatMap(p -> p.getSaturationModifiers().stream())
-            .toList();
-
-        int oldNutrition = original.nutrition();
-        float oldSaturation = original.saturation();
-
-        int newNutrition = (int) ModifierUtil.applyModifiers(this, nutritionModifiers, oldNutrition);
-        float newSaturation = (float) ModifierUtil.applyModifiers(this, saturationModifiers, oldSaturation);
-
-        if (newNutrition != oldNutrition || newSaturation != oldSaturation) {
-            this.apoli$updateStatsManually = true;
-        }
-
-        return new FoodProperties(
-            newNutrition,
-            newSaturation,
-            original.canAlwaysEat()
-        );
-
-    }
-
-    @Inject(method = "eat", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/FoodData;eat(Lnet/minecraft/world/item/component/FoodProperties;)V", shift = At.Shift.AFTER))
-    private void apoli$executeActionsAfterEating(Level world, ItemStack stack, FoodProperties foodComponent, CallbackInfoReturnable<ItemStack> cir, @Share("modifyFoodPowers") LocalRef<List<ModifyFoodPowerType>> sharedModifyFoodPowers) {
-
-        List<ModifyFoodPowerType> modifyFoodPowers = sharedModifyFoodPowers.get();
-        if (!((Player) (Object) this instanceof ServerPlayer serverPlayer) || modifyFoodPowers == null) {
-            return;
-        }
-
-        modifyFoodPowers.forEach(ModifyFoodPowerType::eat);
-        if (apoli$updateStatsManually) {
-            FoodData hungerManager = serverPlayer.getFoodData();
-            serverPlayer.connection.send(new ClientboundSetHealthPacket(this.getHealth(), hungerManager.getFoodLevel(), hungerManager.getSaturationLevel()));
-        }
-
-    }
-
-    @Inject(method = "damage", at = @At(value = "RETURN", ordinal = 3), cancellable = true)
-    private void allowDamageIfModifyingPowersExist(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "hurtServer", at = @At(value = "RETURN", ordinal = 3), cancellable = true)
+    private void allowDamageIfModifyingPowersExist(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 
         boolean hasModifyingPower = false;
 
@@ -165,7 +87,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
         }
 
         hasModifyingPower |= PowerHolderComponent.hasPowerType(this, ModifyDamageTakenPowerType.class, mdtp -> mdtp.doesApply(source, amount));
-        if (hasModifyingPower) { super.hurt(source, amount); cir.setReturnValue(true); }
+        if (hasModifyingPower) { super.hurtServer(serverLevel, source, amount); cir.setReturnValue(true); }
 
     }
 
@@ -191,7 +113,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
         }
     }
 
-    @Inject(method = "stopSleeping(ZZ)V", at = @At("HEAD"))
+    @Inject(method = "stopSleepInBed(ZZ)V", at = @At("HEAD"))
     private void invokeWakeUpAction(boolean bl, boolean updateSleepingPlayers, CallbackInfo ci) {
         if(!bl && !updateSleepingPlayers && getSleepingPos().isPresent()) {
             BlockPos sleepingPos = getSleepingPos().get();
@@ -230,8 +152,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
             && !PowerHolderComponent.hasPowerType(this, RestrictArmorPowerType.class, p -> p.doesRestrict(stack, this.getEquipmentSlotForItem(stack)));
     }
 
-    @WrapOperation(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
-    private InteractionResult apoli$beforeEntityUse(Entity entity, Player player, InteractionHand hand, Operation<InteractionResult> original, @Share("zeroPriority$onEntity") LocalRef<InteractionResult> sharedZeroPriority$onEntity) {
+    @WrapOperation(method = "interactOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/InteractionResult;"))
+    private InteractionResult apoli$beforeEntityUse(Entity entity, Player player, InteractionHand hand, Vec3 hitVec, Operation<InteractionResult> original, @Share("zeroPriority$onEntity") LocalRef<InteractionResult> sharedZeroPriority$onEntity) {
 
         ItemStack stackInHand = player.getItemInHand(hand);
         for (PreventEntityUsePowerType peup : PowerHolderComponent.getPowerTypes(this, PreventEntityUsePowerType.class)) {
@@ -298,11 +220,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
 
         }
 
-        return original.call(entity, player, hand);
+        return original.call(entity, player, hand, hitVec);
 
     }
 
-    @ModifyReturnValue(method = "interact", at = @At("RETURN"), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getItemInHand(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;", ordinal = 0)))
+    @ModifyReturnValue(method = "interactOn", at = @At("RETURN"), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getItemInHand(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;", ordinal = 0)))
     private InteractionResult apoli$afterEntityUse(InteractionResult original, Entity entity, InteractionHand hand, @Share("zeroPriority$onEntity") LocalRef<InteractionResult> sharedZeroPriority$onEntity) {
 
         InteractionResult cachedPriorityZeroResult = sharedZeroPriority$onEntity.get();
@@ -365,12 +287,12 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
 
     }
 
-    @ModifyExpressionValue(method = "jump", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSprinting()Z"))
+    @ModifyExpressionValue(method = "jumpFromGround", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSprinting()Z"))
     private boolean apoli$shouldApplySprintJumpExhaustion(boolean original) {
         return original && this.apoli$applySprintJumpEffects();
     }
 
-    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;updatePose()V"))
+    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;updatePlayerPose()V"))
     private boolean apoli$preventUpdatingPose(Player player) {
         return this.apoli$getModifiedEntityPose().isEmpty();
     }

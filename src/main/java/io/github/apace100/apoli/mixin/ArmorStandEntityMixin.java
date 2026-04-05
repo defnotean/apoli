@@ -21,8 +21,8 @@ public abstract class ArmorStandEntityMixin extends LivingEntity {
         super(entityType, world);
     }
 
-    @Inject(method = "damage", at = @At("RETURN"), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSource;isSourceCreativePlayer()Z")))
-    private void apoli$invokeHitActions(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "hurtServer", at = @At("RETURN"), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSource;isCreativePlayer()Z")))
+    private void apoli$invokeHitActions(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 
         if (!cir.getReturnValue()) {
             return;

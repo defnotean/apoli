@@ -38,7 +38,7 @@ public abstract class MinecraftClientMixin implements OverlaySpriteHolder {
     private ReloadableResourceManager resourceManager;
 
     @Shadow
-    public abstract boolean isFinishedLoading();
+    public abstract boolean isGameLoadFinished();
 
     @Shadow
     public abstract TextureManager getTextureManager();

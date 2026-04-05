@@ -1,33 +1,15 @@
 package io.github.apace100.apoli.mixin;
 
-import io.github.apace100.apoli.component.PowerHolderComponent;
-import io.github.apace100.apoli.power.type.NightVisionPowerType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Lightmap;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
+// TODO: MC 26.1 completely rewrote the Lightmap class. It no longer has a 'client' field or 'update' method.
+// NightVisionPowerType lightmap modification needs to be reimplemented using the new
+// LightmapRenderStateExtractor or the static render(LightmapRenderState) pipeline.
 @Mixin(Lightmap.class)
 @Environment(EnvType.CLIENT)
 public abstract class LightmapTextureManagerMixin implements AutoCloseable {
-
-    @Shadow
-    @Final
-    private Minecraft client;
-
-    @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 6)
-    private float apoli$modifyNightVisionStrength(float original) {
-        return PowerHolderComponent.getPowerTypes(this.client.player, NightVisionPowerType.class)
-            .stream()
-            .map(NightVisionPowerType::getStrength)
-            .max(Float::compareTo)
-            .map(newValue -> Math.max(newValue, original))
-            .orElse(original);
-    }
 
 }

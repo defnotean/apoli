@@ -10,7 +10,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.mixin.ItemEntityAccessor;
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.InventoryUtil;
-import io.github.apace100.apoli.util.MiscUtil;
+import net.minecraft.world.entity.EntityReference;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.Entity;
@@ -103,7 +103,7 @@ public class PreventItemPickupPowerType extends PowerType implements Prioritized
         }
 
         ItemStack stack = itemEntity.getItem();
-        Entity throwerEntity = MiscUtil.getEntityByUuid(((ItemEntityAccessor) itemEntity).getThrowerUuid(), entity.level().getServer());
+        Entity throwerEntity = EntityReference.getEntity(((ItemEntityAccessor) itemEntity).getThrower(), entity.level());
 
         CallInstance<PreventItemPickupPowerType> pippci = new CallInstance<>();
         pippci.add(entity, PreventItemPickupPowerType.class, p -> p.doesPrevent(stack, throwerEntity));

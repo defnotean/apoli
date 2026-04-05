@@ -16,7 +16,7 @@ import java.util.Optional;
 public abstract class DamageSourceMixin implements NameMutableDamageSource {
 
     @Shadow
-    public abstract String getName();
+    public abstract String getMsgId();
 
     @Unique
     private String apoli$mutableName;
@@ -31,12 +31,12 @@ public abstract class DamageSourceMixin implements NameMutableDamageSource {
         apoli$mutableName = name;
     }
 
-    @ModifyVariable(method = "getDeathMessage", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/world/damagesource/DamageSource;attacker:Lnet/minecraft/world/entity/Entity;", ordinal = 0))
+    @ModifyVariable(method = "getLocalizedDeathMessage", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/world/damagesource/DamageSource;causingEntity:Lnet/minecraft/world/entity/Entity;", ordinal = 0))
     private String apoli$modifyDeathMessageString(String value) {
-        return "death.attack." + this.getName();
+        return "death.attack." + this.getMsgId();
     }
 
-    @ModifyReturnValue(method = "getName", at = @At("RETURN"))
+    @ModifyReturnValue(method = "getMsgId", at = @At("RETURN"))
     private String apoli$overrideName(String original) {
         return this.apoli$getName().orElse(original);
     }
