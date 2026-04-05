@@ -62,7 +62,7 @@ public class PreventGameEventPowerType extends PowerType {
     }
 
     public boolean doesPrevent(Holder<GameEvent> event) {
-        return eventTag.map(event::isIn).orElse(false)
+        return eventTag.map(event::is).orElse(false)
             || (events.isEmpty() || events.contains(event));
     }
 

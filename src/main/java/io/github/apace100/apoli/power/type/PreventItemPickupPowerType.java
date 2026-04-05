@@ -86,13 +86,13 @@ public class PreventItemPickupPowerType extends PowerType implements Prioritized
 
     public void executeActions(ItemEntity itemEntity, Entity thrower) {
 
-        SlotAccess stackReference = InventoryUtil.createStackReference(itemEntity.getStack());
+        SlotAccess stackReference = InventoryUtil.createStackReference(itemEntity.getItem());
         itemAction.ifPresent(action -> action.execute(getHolder().level(), stackReference));
 
         biEntityActionThrower.ifPresent(action -> action.execute(thrower, getHolder()));
         biEntityActionItem.ifPresent(action -> action.execute(getHolder(), itemEntity));
 
-        itemEntity.setStack(stackReference.get());
+        itemEntity.setItem(stackReference.get());
 
     }
 
@@ -102,7 +102,7 @@ public class PreventItemPickupPowerType extends PowerType implements Prioritized
             return false;
         }
 
-        ItemStack stack = itemEntity.getStack();
+        ItemStack stack = itemEntity.getItem();
         Entity throwerEntity = MiscUtil.getEntityByUuid(((ItemEntityAccessor) itemEntity).getThrowerUuid(), entity.level().getServer());
 
         CallInstance<PreventItemPickupPowerType> pippci = new CallInstance<>();

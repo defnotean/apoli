@@ -63,7 +63,7 @@ public class ToggleNightVisionPowerType extends NightVisionPowerType implements 
 
     @Override
     public Tag toTag() {
-        return ByteTag.of(toggled);
+        return ByteTag.valueOf(toggled);
     }
 
     @Override

@@ -73,7 +73,7 @@ public class LaunchPowerType extends ActiveCooldownPowerType {
 		sound.ifPresent(soundEvent -> serverWorld.playSound(null, holder.getX(), holder.getY(), holder.getZ(), soundEvent, SoundSource.NEUTRAL, 0.5F, 0.4F / holder.getRandom().nextFloat()));
 
 		for (int i = 0; i < 4; i++) {
-			serverWorld.spawnParticles(ParticleTypes.CLOUD, holder.getX(), holder.getRandomY(), holder.getZ(), 8, holder.getRandom().nextGaussian(), 0.0D, holder.getRandom().nextGaussian(), 0.5);
+			serverWorld.sendParticles(ParticleTypes.CLOUD, holder.getX(), holder.getRandomY(), holder.getZ(), 8, holder.getRandom().nextGaussian(), 0.0D, holder.getRandom().nextGaussian(), 0.5);
 		}
 
 	}

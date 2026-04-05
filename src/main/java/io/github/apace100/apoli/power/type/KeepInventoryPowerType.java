@@ -28,8 +28,8 @@ public class KeepInventoryPowerType extends PowerType {
 
     private static final ObjectOpenHashSet<Integer> DEFAULT_SLOTS = ObjectOpenHashSet.of(SlotRanges.nameToIds("inventory.*"), SlotRanges.nameToIds("hotbar.*"), SlotRanges.nameToIds("armor.*"))
         .stream()
-        .map(SlotRange::getSlotIds)
-        .map(IntCollection::intStream)
+        .map(SlotRange::slots)
+        .map(it.unimi.dsi.fastutil.ints.IntList::intStream)
         .flatMap(IntStream::boxed)
         .collect(Collectors.toCollection(ObjectOpenHashSet::new));
 
@@ -64,8 +64,8 @@ public class KeepInventoryPowerType extends PowerType {
 
         this.slotRanges.stream()
             .flatMap(Collection::stream)
-            .map(SlotRange::getSlotIds)
-            .map(IntCollection::intStream)
+            .map(SlotRange::slots)
+            .map(it.unimi.dsi.fastutil.ints.IntList::intStream)
             .flatMap(IntStream::boxed)
             .forEach(this.slots::add);
 
@@ -87,7 +87,7 @@ public class KeepInventoryPowerType extends PowerType {
 
         for (int slot : slots) {
 
-            SlotAccess stackReference = holder.getStackReference(slot);
+            SlotAccess stackReference = holder.getSlot(slot);
             ItemStack stack = stackReference.get();
 
             if (!stack.isEmpty() && itemCondition.map(condition -> condition.test(getHolder().level(), stack)).orElse(true)) {
@@ -115,7 +115,7 @@ public class KeepInventoryPowerType extends PowerType {
                 ItemStack cachedStack = cachedStackEntry.getValue();
 
                 if (!cachedStack.isEmpty()) {
-                    getHolder().getStackReference(slot).set(cachedStack);
+                    getHolder().getSlot(slot).set(cachedStack);
                 }
 
             }

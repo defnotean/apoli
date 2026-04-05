@@ -92,12 +92,12 @@ public class ReplaceLootTablePowerType extends PowerType implements Prioritized<
 
     public boolean hasReplacement(ResourceKey<LootTable> lootTableKey) {
 
-        Identifier id = lootTableKey.getValue();
+        Identifier id = lootTableKey.identifier();
         String idString = id.toString();
 
         for (var replacement : replacements.keySet()) {
 
-            if (replacement.matcher(idString).test()) {
+            if (replacement.matcher(idString).matches()) {
                 return true;
             }
 
@@ -110,7 +110,7 @@ public class ReplaceLootTablePowerType extends PowerType implements Prioritized<
     public boolean doesApply(LootContext context) {
 
         Entity contextEntity = context.getOptionalParameter(LootContextParams.THIS_ENTITY);
-        ItemStack toolStack = context.hasParameter(LootContextParams.TOOL) ? context.getOptionalParameter(LootContextParams.TOOL) : ItemStack.EMPTY;
+        ItemStack toolStack = context.hasParameter(LootContextParams.TOOL) ? (ItemStack) context.getOptionalParameter(LootContextParams.TOOL) : ItemStack.EMPTY;
 
         return doesApply(contextEntity, toolStack, SavedBlockPosition.fromLootContext(context));
 
@@ -124,14 +124,14 @@ public class ReplaceLootTablePowerType extends PowerType implements Prioritized<
 
     public Optional<ResourceKey<LootTable>> getReplacement(ResourceKey<LootTable> key) {
 
-        String id = key.getValue().toString();
+        String id = key.identifier().toString();
         for (var entry : replacements.entrySet()) {
 
             Pattern regex = entry.getKey();
             String replacement = entry.getValue();
 
             Matcher matcher = regex.matcher(id);
-            if (matcher.test()) {
+            if (matcher.matches()) {
 
                 try {
 

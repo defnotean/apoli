@@ -115,7 +115,7 @@ public class StackingStatusEffectPowerType extends StatusEffectPowerType {
         for (MobEffectInstance effectInstance : effects) {
 
             int duration = Math.max(0, durationPerStack * currentStack);
-            effectInstance = new MobEffectInstance(effectInstance.getEffect(), duration, effectInstance.getAmplifier(), effectInstance.isAmbient(), effectInstance.shouldShowParticles(), effectInstance.shouldShowIcon());
+            effectInstance = new MobEffectInstance(effectInstance.getEffect(), duration, effectInstance.getAmplifier(), effectInstance.isAmbient(), effectInstance.isVisible(), effectInstance.showIcon());
 
             getHolder().addEffect(effectInstance);
 

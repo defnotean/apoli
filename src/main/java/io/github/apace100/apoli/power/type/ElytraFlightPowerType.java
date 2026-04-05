@@ -105,8 +105,7 @@ public class ElytraFlightPowerType extends PowerType {
             if (entity instanceof Player player && !entity.level().isClientSide()) {
                 var chestStack = player.getItemBySlot(EquipmentSlot.CHEST);
                 if (chestStack.is(Items.ELYTRA) && player.tickCount % 10 == 0) {
-                    chestStack.hurtEquipment(EquipmentSlot.CHEST, 1, player,
-                        e -> entity.broadcastBreakEvent(EquipmentSlot.CHEST));
+                    chestStack.hurtAndBreak(1, player, EquipmentSlot.CHEST);
                 }
             }
         }

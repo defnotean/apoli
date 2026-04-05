@@ -23,6 +23,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
 import net.minecraft.world.level.gameevent.GameEventListener;
+import net.minecraft.world.level.gameevent.DynamicGameEventListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -90,7 +91,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
     private final boolean showParticle;
     private final int range;
 
-    private VibrationSystem.Listener gameEventHandler;
+    private DynamicGameEventListener<VibrationSystem.Listener> gameEventHandler;
 
     public GameEventListenerPowerType(Optional<BiEntityAction> biEntityAction, Optional<BiEntityCondition> biEntityCondition, Optional<BlockAction> blockAction, Optional<BlockCondition> blockCondition, List<Holder<GameEvent>> gameEvents, Optional<TagKey<GameEvent>> gameEventTag, GameEventListener.DeliveryMode triggerOrder, HudRender hudRender, int cooldownDuration, boolean showParticle, int range, Optional<EntityCondition> condition) {
         super(cooldownDuration, hudRender, condition);
@@ -125,7 +126,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
     public void onAdded() {
 
         if (getHolder().level() instanceof ServerLevel serverWorld) {
-            getGameEventHandler().onEntitySetPos(serverWorld);
+            getGameEventHandler().add(serverWorld);
         }
 
     }
@@ -134,7 +135,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
     public void onRemoved() {
 
         if (getHolder().level() instanceof ServerLevel serverWorld) {
-            getGameEventHandler().onEntityRemoval(serverWorld);
+            getGameEventHandler().remove(serverWorld);
         }
 
     }
@@ -159,10 +160,10 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
         return vibrationCallback;
     }
 
-    public VibrationSystem.Listener getGameEventHandler() {
+    public DynamicGameEventListener<VibrationSystem.Listener> getGameEventHandler() {
 
         if (gameEventHandler == null) {
-            gameEventHandler = new VibrationSystem.Listener(this);
+            gameEventHandler = new DynamicGameEventListener<>(new VibrationSystem.Listener(this));
         }
 
         return gameEventHandler;
@@ -176,7 +177,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
     public class Callback implements VibrationSystem.User {
 
         @Override
-        public int getRange() {
+        public int getListenerRadius() {
             return range;
         }
 
@@ -187,14 +188,14 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
         }
 
         @Override
-        public boolean accepts(ServerLevel world, BlockPos pos, Holder<GameEvent> event, GameEvent.Context emitter) {
+        public boolean canReceiveVibration(ServerLevel world, BlockPos pos, Holder<GameEvent> event, GameEvent.Context emitter) {
             return GameEventListenerPowerType.this.canUse()
                 && blockCondition.map(condition -> condition.test(world, pos)).orElse(true)
                 && biEntityCondition.map(condition -> condition.test(emitter.sourceEntity(), getHolder())).orElse(true);
         }
 
         @Override
-        public void accept(ServerLevel world, BlockPos pos, Holder<GameEvent> event, @Nullable Entity sourceEntity, @Nullable Entity entity, float distance) {
+        public void onReceiveVibration(ServerLevel world, BlockPos pos, Holder<GameEvent> event, @Nullable Entity sourceEntity, @Nullable Entity entity, float distance) {
 
             GameEventListenerPowerType.this.use();
 
@@ -204,12 +205,12 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
         }
 
         @Override
-        public TagKey<GameEvent> getTag() {
-            return gameEventTag.orElse(VibrationSystem.User.super.getTag());
+        public TagKey<GameEvent> getListenableEvents() {
+            return gameEventTag.orElse(VibrationSystem.User.super.getListenableEvents());
         }
 
         public boolean containsEvent(Holder<GameEvent> gameEvent) {
-            return gameEventTag.map(gameEvent::isIn).orElse(true)
+            return gameEventTag.map(gameEvent::is).orElse(true)
                 && (gameEvents.isEmpty() || gameEvents.contains(gameEvent));
         }
 

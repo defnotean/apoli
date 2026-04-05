@@ -99,7 +99,7 @@ public class TogglePowerType extends PowerType implements Active {
 
     @Override
     public Tag toTag() {
-        return ByteTag.of(toggled);
+        return ByteTag.valueOf(toggled);
     }
 
     @Override

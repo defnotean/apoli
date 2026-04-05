@@ -72,7 +72,7 @@ public abstract class GameEventListenerPowerTypeMixin {
 				PowerHolderComponent.getPowerTypes((Entity) (Object) this, GameEventListenerPowerType.class, true)
 					.stream()
 					.map(GameEventListenerPowerType::getGameEventHandler)
-					.forEach(listener -> callback.accept(listener, serverWorld));
+					.forEach(listener -> callback.accept(listener.getListener(), serverWorld));
 			}
 
 		}

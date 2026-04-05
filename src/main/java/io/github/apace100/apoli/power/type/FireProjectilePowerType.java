@@ -240,7 +240,7 @@ public class FireProjectilePowerType extends ActiveCooldownPowerType {
             return;
         }
 
-        Random random = serverWorld.getRandom();
+        RandomSource random = serverWorld.getRandom();
 
         Vec3 velocity = holder.getDeltaMovement();
         Vec3 verticalOffset = holder.position().add(0, holder.getEyeHeight(holder.getPose()), 0);
@@ -263,7 +263,7 @@ public class FireProjectilePowerType extends ActiveCooldownPowerType {
             }
 
             projectileToSpawn.setOwner(holder);
-            projectileToSpawn.setDeltaMovement(holder, pitch, yaw, 0F, speed, divergence);
+            projectileToSpawn.shootFromRotation(holder, pitch, yaw, 0F, speed, divergence);
 
         }
 
@@ -279,7 +279,7 @@ public class FireProjectilePowerType extends ActiveCooldownPowerType {
             Vec3 velocityToApply = new Vec3(l, m, n)
                 .normalize()
                 .add(random.nextGaussian() * k * divergence, random.nextGaussian() * k * divergence, random.nextGaussian() * k * divergence)
-                .multiply(speed);
+                .scale(speed);
 
             entityToSpawn.setDeltaMovement(velocityToApply);
             entityToSpawn.push(velocity.x, holder.onGround() ? 0.0D : velocity.y, velocity.z);
@@ -288,10 +288,14 @@ public class FireProjectilePowerType extends ActiveCooldownPowerType {
 
         if (!tag.isEmpty()) {
 
-            CompoundTag mergedTag = entityToSpawn.save(new CompoundTag());
+            net.minecraft.util.ProblemReporter.Collector reporter = new net.minecraft.util.ProblemReporter.Collector();
+            net.minecraft.world.level.storage.TagValueOutput output = net.minecraft.world.level.storage.TagValueOutput.createWithContext(reporter, serverWorld.registryAccess());
+            entityToSpawn.saveWithoutId(output);
+            CompoundTag mergedTag = output.buildResult();
             mergedTag.merge(tag);
 
-            entityToSpawn.load(mergedTag);
+            net.minecraft.world.level.storage.ValueInput input = net.minecraft.world.level.storage.TagValueInput.create(reporter, serverWorld.registryAccess(), mergedTag);
+            entityToSpawn.load(input);
 
         }
 

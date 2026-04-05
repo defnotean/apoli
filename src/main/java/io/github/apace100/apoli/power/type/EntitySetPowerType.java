@@ -340,7 +340,7 @@ public class EntitySetPowerType extends PowerType {
         ListTag tempExpirationsNbt = rootNbt.getListOrEmpty("TempExpirations");
         for (Tag expirationTag : tempExpirationsNbt) {
             if (expirationTag instanceof CompoundTag entryNbt) {
-                UUID uuid = net.minecraft.core.UUIDUtil.uuidFromIntArray(((IntArrayTag)new IntArrayTag(entryNbt.getIntArray("UUID").orElse(new int[0]).getAsIntArray())));
+                UUID uuid = net.minecraft.core.UUIDUtil.uuidFromIntArray(entryNbt.getIntArray("UUID").orElse(new int[0]));
                 long expiration = entryNbt.getLongOr("Expiration", 0L);
                 tempEntities.put(uuid, expiration);
             }

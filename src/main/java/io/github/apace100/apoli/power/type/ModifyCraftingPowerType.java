@@ -143,7 +143,7 @@ public class ModifyCraftingPowerType extends PowerType implements Prioritized<Mo
             modifyCraftingPowers.forEach(mcpt -> mcpt.applyAfterCraftingItemAction(stackReference));
 
             if (stackReference.get().isEmpty()) {
-                slot.onTakeItem(player, copy);
+                slot.onTake(player, copy);
             }
 
         }

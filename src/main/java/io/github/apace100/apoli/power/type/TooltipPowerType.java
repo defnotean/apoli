@@ -163,7 +163,7 @@ public class TooltipPowerType extends PowerType {
     public Tag toTag() {
 
         HolderLookup.Provider registryLookup = getHolder().registryAccess();
-        RegistryOps<Tag> nbtOps = registryLookup.getOps(NbtOps.INSTANCE);
+        RegistryOps<Tag> nbtOps = registryLookup.createSerializationContext(NbtOps.INSTANCE);
 
         CompoundTag rootNbt = new CompoundTag();
         ListTag tooltipTextsNbt = new ListTag();
@@ -183,7 +183,7 @@ public class TooltipPowerType extends PowerType {
     public void fromTag(Tag tag) {
 
         HolderLookup.Provider registryLookup = getHolder().registryAccess();
-        RegistryOps<Tag> nbtOps = registryLookup.getOps(NbtOps.INSTANCE);
+        RegistryOps<Tag> nbtOps = registryLookup.createSerializationContext(NbtOps.INSTANCE);
 
         this.tooltipTexts.clear();
 
@@ -237,9 +237,9 @@ public class TooltipPowerType extends PowerType {
         }
 
         ListIterator<Component> textIterator = texts.listIterator();
-        CommandSourceStack source = holder.createCommandSourceStack()
+        CommandSourceStack source = holder.createCommandSourceStackForNameResolution(serverWorld)
             .withSource(serverWorld.getServer())
-            .withLevel(Apoli.config.executeCommand.permissionLevel);
+            .withPermission(net.minecraft.server.permissions.PermissionSet.ALL_PERMISSIONS);
 
         while (textIterator.hasNext()) {
 
@@ -247,7 +247,7 @@ public class TooltipPowerType extends PowerType {
             int index = textIterator.nextIndex();
 
             try {
-                parsedTexts.add(ComponentUtils.parse(source, text, holder, 0));
+                parsedTexts.add(ComponentUtils.resolve(net.minecraft.network.chat.ResolutionContext.create(source), text, 0));
             }
 
             catch (CommandSyntaxException cse) {

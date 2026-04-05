@@ -77,7 +77,7 @@ public class ModifyEnchantmentLevelPowerType extends ValueModifyingPowerType {
 
         for (int slot : InventoryUtil.getAllSlots()) {
 
-            SlotAccess stackReference = holder.getStackReference(slot);
+            SlotAccess stackReference = holder.getSlot(slot);
 
             if (stackReference != null && isWorkableEmptyStack(holder, stackReference)) {
                 stackReference.set(ItemStack.EMPTY);
@@ -99,7 +99,7 @@ public class ModifyEnchantmentLevelPowerType extends ValueModifyingPowerType {
 
         for (int slot : InventoryUtil.getAllSlots()) {
 
-            SlotAccess stackReference = holder.getStackReference(slot);
+            SlotAccess stackReference = holder.getSlot(slot);
             ItemStack stack = stackReference.get();
 
             if (stackReference == null) {
@@ -164,14 +164,14 @@ public class ModifyEnchantmentLevelPowerType extends ValueModifyingPowerType {
                 break;
             }
 
-            ItemEnchantments.Builder enchantmentsBuilder = new ItemEnchantments.Builder(stack.getEnchantments());
+            ItemEnchantments.Mutable enchantmentsBuilder = new ItemEnchantments.Mutable(stack.getEnchantments());
             Set<Holder<Enchantment>> processedEnchantments = new HashSet<>();
 
             //  Iterate on all powers, because we found a match, and must set the item enchantments accordingly
             for (ModifyEnchantmentLevelPowerType innerPower : PowerHolderComponent.getPowerTypes(entity, ModifyEnchantmentLevelPowerType.class)) {
 
                 Holder<Enchantment> innerEnchantment = entity.registryAccess()
-                    .get(Registries.ENCHANTMENT)
+                    .lookupOrThrow(Registries.ENCHANTMENT)
                     .getOrThrow(innerPower.enchantmentKey);
 
                 //  If this enchantment has already been processed, continue
@@ -180,7 +180,7 @@ public class ModifyEnchantmentLevelPowerType extends ValueModifyingPowerType {
                 }
 
                 //  Set the enchantment level from all modify enchantment powers that have the enchantment
-                int innerEnchantmentLevel = stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.DEFAULT).getLevel(innerEnchantment);
+                int innerEnchantmentLevel = stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).getLevel(innerEnchantment);
                 enchantmentsBuilder.set(innerEnchantment, (int) PowerHolderComponent.modify(entity, ModifyEnchantmentLevelPowerType.class, innerEnchantmentLevel, p -> innerPower.doesApply(innerPower.enchantmentKey, stack)));
 
                 //  Mark the enchantment as processed
@@ -191,7 +191,7 @@ public class ModifyEnchantmentLevelPowerType extends ValueModifyingPowerType {
             power.recalculateCache(entity, stack);
             ITEM_ENCHANTMENTS
                 .computeIfAbsent(entity.getUUID(), uuid -> new WeakHashMap<>())
-                .put(stack, enchantmentsBuilder.build());
+                .put(stack, enchantmentsBuilder.toImmutable());
 
             break;
 

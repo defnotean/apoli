@@ -18,12 +18,12 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.server.level.Ticket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.util.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.core.SectionPos;
@@ -37,6 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import net.minecraft.core.registries.Registries;
 
@@ -46,9 +47,9 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
         new SerializableData()
             .add("dimension", SerializableDataTypes.DIMENSION)
             .add("structure", SerializableDataType.registryKey(Registries.STRUCTURE).optional(), Optional.empty())
-            .add("structure_tag", SerializableDataType.tagKey(Registries.STRUCTURE).optional(), Optional.empty())
+            .add("structure_tag", SerializableDataType.tag(Registries.STRUCTURE).optional(), Optional.empty())
             .add("biome", SerializableDataType.registryKey(Registries.BIOME).optional(), Optional.empty())
-            .add("biome_tag", SerializableDataType.tagKey(Registries.BIOME).optional(), Optional.empty())
+            .add("biome_tag", SerializableDataType.tag(Registries.BIOME).optional(), Optional.empty())
             .add("spawn_strategy", SerializableDataType.enumValue(SpawnStrategy.class), SpawnStrategy.DEFAULT)
             .add("respawn_sound", SerializableDataTypes.SOUND_EVENT.optional(), Optional.empty())
             .add("dimension_distance_multiplier", SerializableDataTypes.FLOAT, 1.0F)
@@ -122,8 +123,8 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
             return;
         }
 
-        if (!serverPlayer.isDisconnected() && serverPlayer.getRespawnPosition() != null && !serverPlayer.isRespawnForced()) {
-            serverPlayer.setRespawnPosition(Level.OVERWORLD, null, 0F, false, false);
+        if (!serverPlayer.hasDisconnected() && serverPlayer.getRespawnConfig() != null && !serverPlayer.getRespawnConfig().forced()) {
+            serverPlayer.setRespawnPosition(null, false);
         }
 
     }
@@ -148,20 +149,20 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
             return;
         }
 
-        ServerLevel spawnPointDimension = spawnPoint.getLeft();
-        BlockPos spawnPointPosition = spawnPoint.getRight();
+        ServerLevel spawnPointDimension = spawnPoint.getFirst();
+        BlockPos spawnPointPosition = spawnPoint.getSecond();
 
         float pitch = serverPlayer.getXRot();
         float yaw = serverPlayer.getYRot();
 
-        Vec3 placement = DismountHelper.findRespawnPos(serverPlayer.getType(), spawnPointDimension, spawnPointPosition, true);
+        Vec3 placement = DismountHelper.findSafeDismountLocation(serverPlayer.getType(), spawnPointDimension, spawnPointPosition, true);
         if (placement == null) {
             Apoli.LOGGER.warn("Power \"{}\" could not find a suitable spawn point for player {}! Teleporting to the found location directly...", this.getPower().getId(), serverPlayer.getName().getString());
-            serverPlayer.teleport(spawnPointDimension, spawnPointPosition.x(), spawnPointPosition.y(), spawnPointPosition.z(), pitch, yaw);
+            serverPlayer.teleportTo(spawnPointDimension, spawnPointPosition.getX() + 0.5, spawnPointPosition.getY(), spawnPointPosition.getZ() + 0.5, Set.of(), yaw, pitch, false);
         }
 
         else {
-            serverPlayer.teleport(spawnPointDimension, placement.x(), placement.y(), placement.z(), pitch, yaw);
+            serverPlayer.teleportTo(spawnPointDimension, placement.x, placement.y, placement.z, Set.of(), yaw, pitch, false);
         }
 
     }
@@ -172,7 +173,7 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
             return Optional.empty();
         }
 
-        MinecraftServer server = serverPlayer.server;
+        MinecraftServer server = serverPlayer.level().getServer();
         ServerLevel targetDimension = server.getLevel(dimensionKey);
 
         if (targetDimension == null) {
@@ -183,7 +184,7 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
         int range = 64;
 
         AtomicReference<Vec3> newSpawnPointVec = new AtomicReference<>();
-        BlockPos dimensionSpawnPos = serverPlayer.serverLevel().getLevelData().getRespawnData().pos();
+        BlockPos dimensionSpawnPos = serverPlayer.level().getLevelData().getRespawnData().pos();
 
         BlockPos.MutableBlockPos newSpawnPointPos = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos mutableDimensionSpawnPos = spawnStrategy.apply(dimensionSpawnPos, center, dimensionDistanceMultiplier).mutable();
@@ -196,10 +197,10 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
         }
 
         Vec3 msp = newSpawnPointVec.get();
-        newSpawnPointPos.set(msp.x, msp.y, msp.z);
+        newSpawnPointPos.set((int) msp.x, (int) msp.y, (int) msp.z);
 
-        targetDimension.getChunkSource().addTicket(TicketType.START, new ChunkPos(newSpawnPointPos), 11, Unit.INSTANCE);
-        return Optional.of(new Pair<>(targetDimension, newSpawnPointPos));
+        targetDimension.getChunkSource().addTicketWithRadius(TicketType.PLAYER_SPAWN, ChunkPos.containing(newSpawnPointPos), 11);
+        return Optional.of(new Pair<>(targetDimension, newSpawnPointPos.immutable()));
 
     }
 
@@ -225,8 +226,8 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
             verticalBlockCheckInterval = 64;
         }
 
-        var targetBiomePos = targetDimension.locateBiome(
-            biome -> biomeKey.map(biome::matchesKey).orElse(false) || biomeTag.map(biome::isIn).orElse(false),
+        var targetBiomePos = targetDimension.findClosestBiome3d(
+            biome -> biomeKey.map(biome::is).orElse(false) || biomeTag.map(biome::is).orElse(false),
             originPos,
             radius,
             horizontalBlockCheckInterval,
@@ -243,14 +244,16 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
             StringBuilder name = new StringBuilder();
 
             biomeKey
-                .map(ResourceKey::location)
+                .map(ResourceKey::identifier)
                 .ifPresent(id -> name.append("biome \"").append(id).append("\""));
             biomeTag
                 .map(TagKey::location)
                 .ifPresent(id -> name.append(!name.isEmpty() ? " or " : "").append("any biomes from tag \"").append(id).append("\""));
 
-            Apoli.LOGGER.warn("Power \"{}\" could not set player {}'s spawn point at {} as none can be found nearby in dimension \"{}\".", this.getPower().getId(), holder.getName().getString(), name, dimensionKey.location());
-            holder.sendSystemMessage(Component.literal("Power \"%s\" couldn't set spawn point at %s as none can be found nearby in dimension \"%s\"!".formatted(this.getPower().getId(), name, dimensionKey.location())).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY));
+            Apoli.LOGGER.warn("Power \"{}\" could not set player {}'s spawn point at {} as none can be found nearby in dimension \"{}\".", this.getPower().getId(), holder.getName().getString(), name, dimensionKey.identifier());
+            if (holder instanceof ServerPlayer sp) {
+                sp.sendSystemMessage(Component.literal("Power \"%s\" couldn't set spawn point at %s as none can be found nearby in dimension \"%s\"!".formatted(this.getPower().getId(), name, dimensionKey.identifier())).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY));
+            }
 
             return Optional.empty();
 
@@ -264,18 +267,20 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
             return Optional.empty();
         }
 
-        Registry<Structure> structureRegistry = dimension.registryAccess().get(Registries.STRUCTURE);
+        Registry<Structure> structureRegistry = dimension.registryAccess().lookupOrThrow(Registries.STRUCTURE);
         List<Holder<Structure>> structureEntries = new ArrayList<>();
 
         structureKey
-            .map(structureRegistry::entryOf)
+            .flatMap(structureRegistry::get)
             .ifPresent(structureEntries::add);
 
         structureTag
-            .flatMap(structureRegistry::getEntryList)
-            .map(registryEntries -> (HolderSet.ListBacked<Structure>) registryEntries)
-            .map(HolderSet.ListBacked::getEntries)
-            .ifPresent(structureEntries::addAll);
+            .flatMap(structureRegistry::get)
+            .ifPresent(named -> named.stream().forEach(structureEntries::add));
+
+        if (structureEntries.isEmpty()) {
+            return Optional.empty();
+        }
 
         BlockPos center = new BlockPos(0, 70, 0);
         int radius = Apoli.config.modifyPlayerSpawnPower.radius;
@@ -284,7 +289,7 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
             radius = 6400;
         }
 
-        var result = Optional.ofNullable(dimension.getChunkSource().getChunkGenerator().locateStructure(dimension, HolderSet.of(structureEntries), center, radius, false))
+        var result = Optional.ofNullable(dimension.getChunkSource().getGenerator().findNearestMapStructure(dimension, HolderSet.direct(structureEntries), center, radius, false))
             .map(pair -> pair.mapSecond(Holder::value))
             .map(pair -> new Pair<>(pair.getFirst(), pair.getSecond()));
 
@@ -294,14 +299,16 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
             StringBuilder name = new StringBuilder();
 
             structureKey
-                .map(ResourceKey::location)
+                .map(ResourceKey::identifier)
                 .ifPresent(id -> name.append("structure \"").append(id).append("\""));
             structureTag
                 .map(TagKey::location)
                 .ifPresent(id -> name.append(!name.isEmpty() ? " or " : "").append("any structures from tag \"").append(id).append("\""));
 
-            Apoli.LOGGER.warn("Power \"{}\" could not set player {}'s spawn point at {} as none can be found nearby in dimension \"{}\".", this.getPower().getId(), holder.getName().getString(), name, dimensionKey.location());
-            holder.sendSystemMessage(Component.literal("Power \"%s\" couldn't set spawn point at %s as none can be found nearby in dimension \"%s\"!".formatted(this.getPower().getId(), name, dimensionKey.location())).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY));
+            Apoli.LOGGER.warn("Power \"{}\" could not set player {}'s spawn point at {} as none can be found nearby in dimension \"{}\".", this.getPower().getId(), holder.getName().getString(), name, dimensionKey.identifier());
+            if (holder instanceof ServerPlayer sp) {
+                sp.sendSystemMessage(Component.literal("Power \"%s\" couldn't set spawn point at %s as none can be found nearby in dimension \"%s\"!".formatted(this.getPower().getId(), name, dimensionKey.identifier())).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY));
+            }
 
             return Optional.empty();
 
@@ -322,13 +329,13 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
             return Optional.empty();
         }
 
-        BlockPos structurePos = targetStructure.get().getLeft();
-        Structure structure = targetStructure.get().getRight();
+        BlockPos structurePos = targetStructure.get().getFirst();
+        Structure structure = targetStructure.get().getSecond();
 
-        ChunkPos chunkPos = new ChunkPos(structurePos.x() >> 4, structurePos.z() >> 4);
-        SectionPos chunkSectionPos = SectionPos.from(chunkPos, 0);
+        ChunkPos chunkPos = ChunkPos.containing(structurePos);
+        SectionPos chunkSectionPos = SectionPos.of(chunkPos, 0);
 
-        return Optional.ofNullable(targetDimension.getStructureAccessor().getStructureStart(chunkSectionPos, structure, targetDimension.getChunk(structurePos)))
+        return Optional.ofNullable(targetDimension.structureManager().getStartForStructure(chunkSectionPos, structure, targetDimension.getChunk(structurePos)))
             .map(structureStart -> structureStart.getBoundingBox().getCenter())
             .flatMap(pos -> this.getValidSpawn(targetDimension, pos, range));
 
@@ -344,15 +351,15 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
         int segmentLength = 1;
 
         //  The center of the structure/dimension
-        int center = startPos.y();
+        int center = startPos.getY();
 
         //  The valid spawn position and (mutable) starting position
         Vec3 spawnPos;
         BlockPos.MutableBlockPos mutableStartPos = startPos.mutable();
 
         //  The current position
-        int x = startPos.x();
-        int z = startPos.z();
+        int x = startPos.getX();
+        int z = startPos.getZ();
 
         //  Determines how much of the current segment has been passed
         int segmentPassed = 0;
@@ -380,14 +387,14 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
 
                 //  Offset the Y axis (up and down) of the current position to check for valid spawn positions
                 mutableStartPos.setY(center + upOffset);
-                spawnPos = DismountHelper.findRespawnPos(getHolder().getType(), targetDimension, mutableStartPos, true);
+                spawnPos = DismountHelper.findSafeDismountLocation(getHolder().getType(), targetDimension, mutableStartPos, true);
 
                 if (spawnPos != null) {
                     return Optional.of(spawnPos);
                 }
 
                 mutableStartPos.setY(center + downOffset);
-                spawnPos = DismountHelper.findRespawnPos(getHolder().getType(), targetDimension, mutableStartPos, true);
+                spawnPos = DismountHelper.findSafeDismountLocation(getHolder().getType(), targetDimension, mutableStartPos, true);
 
                 if (spawnPos != null) {
                     return Optional.of(spawnPos);
@@ -432,7 +439,7 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
             BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
             multiplier = Math.max(multiplier, 1F);
 
-            return mut.set(blockPos.x() * multiplier, blockPos.y(), blockPos.z() * multiplier);
+            return mut.set((int)(blockPos.getX() * multiplier), blockPos.getY(), (int)(blockPos.getZ() * multiplier));
 
         });
 

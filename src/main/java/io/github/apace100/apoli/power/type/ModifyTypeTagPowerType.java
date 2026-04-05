@@ -39,7 +39,7 @@ import net.minecraft.core.registries.Registries;
 public class ModifyTypeTagPowerType extends PowerType {
 
     private static final Map<Identifier, Collection<Identifier>> ENTITY_TYPE_SUB_TAGS = new ConcurrentHashMap<>();
-    private static final String ENTITY_TYPE_TAG_PATH = Registries.getTagPath(Registries.ENTITY_TYPE);
+    private static final String ENTITY_TYPE_TAG_PATH = "tags/" + Registries.ENTITY_TYPE.identifier().getPath();
 
     public static final TypedDataObjectFactory<ModifyTypeTagPowerType> DATA_FACTORY = PowerType.createConditionedDataFactory(
         new SerializableData()
@@ -65,9 +65,9 @@ public class ModifyTypeTagPowerType extends PowerType {
     }
 
     public boolean doesApply(TagKey<EntityType<?>> typeTag) {
-        return Objects.equals(typeTag, tag) || ENTITY_TYPE_SUB_TAGS.getOrDefault(typeTag.id(), new ObjectArrayList<>())
+        return Objects.equals(typeTag, tag) || ENTITY_TYPE_SUB_TAGS.getOrDefault(typeTag.location(), new ObjectArrayList<>())
             .stream()
-            .map(id -> TagKey.of(Registries.ENTITY_TYPE, id))
+            .map(id -> TagKey.create(Registries.ENTITY_TYPE, id))
             .anyMatch(this::doesApply);
     }
 
@@ -76,7 +76,7 @@ public class ModifyTypeTagPowerType extends PowerType {
     }
 
     public static boolean doesApply(Entity entity, HolderSet<EntityType<?>> entryList) {
-        return entryList.getTagKey()
+        return entryList.unwrapKey()
             .map(tagKey -> doesApply(entity, tagKey))
             .orElse(false);
     }

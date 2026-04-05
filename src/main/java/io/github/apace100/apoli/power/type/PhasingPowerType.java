@@ -23,7 +23,7 @@ public class PhasingPowerType extends PowerType {
 
     public static final TypedDataObjectFactory<PhasingPowerType> DATA_FACTORY = createConditionedDataFactory(
         new SerializableData()
-            .addSupplied("phase_down_condition", EntityCondition.DATA_TYPE, () -> new SneakingEntityConditionType().createCondition())
+            .addFunctionedDefault("phase_down_condition", EntityCondition.DATA_TYPE, data -> new SneakingEntityConditionType().createCondition())
             .add("block_condition", BlockCondition.DATA_TYPE.optional(), Optional.empty())
             .add("render_type", SerializableDataType.enumValue(RenderType.class), RenderType.BLINDNESS)
             .add("view_distance", SerializableDataTypes.POSITIVE_FLOAT, 10.0F)
@@ -74,7 +74,7 @@ public class PhasingPowerType extends PowerType {
 
     public boolean shouldPhase(VoxelShape shape, BlockPos pos) {
         LivingEntity holder = getHolder();
-        return (holder.getY() < (double) pos.y() + shape.getMax(Direction.Axis.Y) - (holder.onGround() ? 8.05 / 16.0 : 0.0015) || this.shouldPhaseDown())
+        return (holder.getY() < (double) pos.getY() + shape.max(Direction.Axis.Y) - (holder.onGround() ? 8.05 / 16.0 : 0.0015) || this.shouldPhaseDown())
             && this.doesApply(pos);
     }
 

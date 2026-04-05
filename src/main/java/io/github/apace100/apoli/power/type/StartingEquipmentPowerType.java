@@ -75,13 +75,13 @@ public class StartingEquipmentPowerType extends PowerType {
             boolean given = slotIds
                 .intStream()
                 .boxed()
-                .map(holder::getStackReference)
+                .map(holder::getSlot)
                 .anyMatch(stackReference -> stackReference.set(stack));
 
             if (!given) {
 
                 if (holder instanceof Player player) {
-                    player.getInventory().addItem(stack);
+                    player.getInventory().add(stack);
                 }
 
                 else {
