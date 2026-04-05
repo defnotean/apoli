@@ -13,7 +13,7 @@ import java.util.Map;
 
 public record SyncBulkPowerDataS2CPacket(int entityId, Map<Identifier, Tag> powerAndData) implements CustomPacketPayload {
 
-    public static final CustomPacketPayload.Id<SyncBulkPowerDataS2CPacket> PACKET_ID = new CustomPacketPayload.Id<>(Apoli.identifier("s2c/sync_bulk_power_data"));
+    public static final CustomPacketPayload.Type<SyncBulkPowerDataS2CPacket> PACKET_ID = new CustomPacketPayload.Type<>(Apoli.identifier("s2c/sync_bulk_power_data"));
     public static final StreamCodec<FriendlyByteBuf, SyncBulkPowerDataS2CPacket> PACKET_CODEC = StreamCodec.tuple(
         ByteBufCodecs.VAR_INT, SyncBulkPowerDataS2CPacket::entityId,
         ByteBufCodecs.map(HashMap::new, Identifier.PACKET_CODEC, ByteBufCodecs.NBT_ELEMENT), SyncBulkPowerDataS2CPacket::powerAndData,
@@ -21,7 +21,7 @@ public record SyncBulkPowerDataS2CPacket(int entityId, Map<Identifier, Tag> powe
     );
 
     @Override
-    public CustomPacketPayload.Id<? extends CustomPacketPayload> getId() {
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
         return PACKET_ID;
     }
 

@@ -8,7 +8,7 @@ import io.github.apace100.apoli.util.HudRender;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,7 +35,7 @@ public class PowerHudRenderer implements GameHudRender {
     private final AtomicInteger y = new AtomicInteger();
 
     @Override
-    public void render(GuiGraphics context, DeltaTracker delta) {
+    public void render(GuiGraphicsExtractor context, DeltaTracker delta) {
 
         Minecraft client = Minecraft.getInstance();
         LocalPlayer player = client.player;

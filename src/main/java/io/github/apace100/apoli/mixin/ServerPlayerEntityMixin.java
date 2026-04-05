@@ -85,10 +85,8 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
     @Shadow
     private float spawnAngle;
 
-    @Shadow
-    private static Optional<ServerPlayer.RespawnPos> findRespawnPosition(ServerLevel world, BlockPos pos, float spawnAngle, boolean spawnForced, boolean alive) {
-        throw new AssertionError();
-    }
+    // MC 26.1: findRespawnPosition removed. The respawn system now uses RespawnConfig.
+    // findRespawnAndUseSpawnBlock is the new equivalent but has a different signature.
 
     private ServerPlayerEntityMixin(Level world, BlockPos pos, float yaw, GameProfile gameProfile) {
         super(world, pos, yaw, gameProfile);
@@ -164,22 +162,10 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
         return original || (!this.apoli$isEndRespawning() && (spawnPointPosition == null || this.apoli$hasObstructedOriginalSpawnPoint()) && PowerHolderComponent.hasPowerType(this, ModifyPlayerSpawnPowerType.class));
     }
 
-	@WrapOperation(method = "getRespawnTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;findRespawnPosition(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;FZZ)Ljava/util/Optional;"))
-	private Optional<ServerPlayer.RespawnPos> apoli$retryObstructedSpawnPointIfFailed(ServerLevel world, BlockPos pos, float spawnAngle, boolean spawnForced, boolean alive, Operation<Optional<ServerPlayer.RespawnPos>> original) {
-
-	    Optional<ServerPlayer.RespawnPos> originalRespawnPos = original.call(world, pos, spawnAngle, spawnForced, alive);
-
-        if (originalRespawnPos.isEmpty() && PowerHolderComponent.hasPowerType(this, ModifyPlayerSpawnPowerType.class)) {
-            return Optional
-                .ofNullable(DismountHelper.findRespawnPos(this.getType(), world, pos, spawnForced))
-                .map(newPos -> ServerPlayer.RespawnPos.fromCurrentPos(newPos, pos));
-        }
-
-        else {
-            return originalRespawnPos;
-        }
-
-	}
+    // MC 26.1: getRespawnTarget and findRespawnPosition replaced by findRespawnPositionAndUseSpawnBlock.
+    // The respawn system now uses RespawnConfig objects. The retry logic for obstructed spawn points
+    // needs to be adapted to the new system in a future update.
+    // TODO: Reimplement spawn point retry logic for MC 26.1 RespawnConfig system.
 
     @Inject(method = "restoreFrom", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/server/network/ServerPlayer;enchantmentTableSeed:I"))
     private void copyInventoryWhenKeeping(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
@@ -193,7 +179,7 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
         ServerLevel spawnPointWorld = this.server.getLevel(spawnPointDimension);
         return spawnPointPosition != null
             && spawnPointWorld != null
-            && findRespawnPosition(spawnPointWorld, this.spawnPointPosition, this.spawnAngle, this.spawnForced, true).isEmpty();
+            && DismountHelper.findRespawnPos(this.getType(), spawnPointWorld, this.spawnPointPosition, this.spawnForced) == null;
     }
 
     @Unique

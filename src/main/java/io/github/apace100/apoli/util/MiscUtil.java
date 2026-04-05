@@ -10,13 +10,13 @@ import io.github.apace100.calio.data.SerializableData;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minecraft.world.level.block.BlockRenderType;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.SpawnReason;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Mob;
@@ -39,7 +39,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.ExplosionBehavior;
+import net.minecraft.world.level.ExplosionDamageCalculator;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -52,15 +52,15 @@ import net.minecraft.core.registries.Registries;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class MiscUtil {
 
-    public static void createExplosion(Level world, Vec3 pos, float power, boolean createFire, Explosion.BlockInteraction destructionType, ExplosionBehavior behavior) {
+    public static void createExplosion(Level world, Vec3 pos, float power, boolean createFire, Explosion.BlockInteraction destructionType, ExplosionDamageCalculator behavior) {
         createExplosion(world, null, pos, power, createFire, destructionType, behavior);
     }
 
-    public static void createExplosion(Level world, Entity entity, Vec3 pos, float power, boolean createFire, Explosion.BlockInteraction destructionType, ExplosionBehavior behavior) {
+    public static void createExplosion(Level world, Entity entity, Vec3 pos, float power, boolean createFire, Explosion.BlockInteraction destructionType, ExplosionDamageCalculator behavior) {
         createExplosion(world, entity, null, pos.getX(), pos.getY(), pos.getZ(), power, createFire, destructionType, behavior);
     }
 
-    public static void createExplosion(Level world, @Nullable Entity entity, @Nullable DamageSource damageSource, double x, double y, double z, float power, boolean createFire, Explosion.BlockInteraction destructionType, ExplosionBehavior behavior) {
+    public static void createExplosion(Level world, @Nullable Entity entity, @Nullable DamageSource damageSource, double x, double y, double z, float power, boolean createFire, Explosion.BlockInteraction destructionType, ExplosionDamageCalculator behavior) {
 
         Explosion explosion = new Explosion(world, entity, damageSource, behavior, x, y, z, power, createFire, destructionType, ParticleTypes.EXPLOSION, ParticleTypes.EXPLOSION_EMITTER, SoundEvents.ENTITY_GENERIC_EXPLODE);
 
@@ -85,8 +85,8 @@ public final class MiscUtil {
     }
 
     @Nullable
-    public static ExplosionBehavior getExplosionBehavior(Level world, float indestructibleResistance, @Nullable Predicate<BlockInWorld> indestructibleCondition) {
-        return indestructibleCondition == null ? null : new ExplosionBehavior() {
+    public static ExplosionDamageCalculator getExplosionDamageCalculator(Level world, float indestructibleResistance, @Nullable Predicate<BlockInWorld> indestructibleCondition) {
+        return indestructibleCondition == null ? null : new ExplosionDamageCalculator() {
 
             @Override
             public Optional<Float> getBlastResistance(Explosion explosion, BlockGetter blockView, BlockPos pos, BlockState blockState, FluidState fluidState) {
@@ -109,8 +109,8 @@ public final class MiscUtil {
     }
 
     @Nullable
-    public static ExplosionBehavior createExplosionBehavior(@Nullable Predicate<BlockConditionContext> indestructibleCondition, float resistance) {
-        return indestructibleCondition == null ? null : new ExplosionBehavior() {
+    public static ExplosionDamageCalculator createExplosionDamageCalculator(@Nullable Predicate<BlockConditionContext> indestructibleCondition, float resistance) {
+        return indestructibleCondition == null ? null : new ExplosionDamageCalculator() {
 
             @Override
             public Optional<Float> getBlastResistance(Explosion explosion, BlockGetter world, BlockPos pos, BlockState blockState, FluidState fluidState) {
@@ -164,7 +164,7 @@ public final class MiscUtil {
         }
 
         if ((entityNbt == null || entityNbt.isEmpty()) && entityToSpawn instanceof Mob mobToSpawn) {
-            mobToSpawn.initialize(serverWorld, serverWorld.getLocalDifficulty(BlockPos.ofFloored(pos)), SpawnReason.COMMAND, null);
+            mobToSpawn.initialize(serverWorld, serverWorld.getLocalDifficulty(BlockPos.ofFloored(pos)), EntitySpawnReason.COMMAND, null);
         }
 
         return Optional.of(entityToSpawn);
@@ -200,7 +200,7 @@ public final class MiscUtil {
             double f = playerEntity.getZ() + (double)(((float)((i >> 2) % 2) - 0.5F) * playerEntity.getWidth() * 0.8F);
             mutable.set(d, e, f);
             BlockState blockState = playerEntity.level().getBlockState(mutable);
-            if (blockState.getRenderType() != BlockRenderType.INVISIBLE && blockState.shouldBlockVision(playerEntity.level(), mutable)) {
+            if (blockState.getRenderType() != RenderShape.INVISIBLE && blockState.shouldBlockVision(playerEntity.level(), mutable)) {
                 return blockState;
             }
         }

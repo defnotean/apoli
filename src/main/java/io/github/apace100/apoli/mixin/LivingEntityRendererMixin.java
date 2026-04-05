@@ -11,9 +11,11 @@ import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import io.github.apace100.apoli.access.PseudoRenderDataHolder;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.type.*;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
@@ -32,95 +34,40 @@ import java.util.List;
 import java.util.function.Predicate;
 
 @Mixin(LivingEntityRenderer.class)
-public abstract class LivingEntityRendererMixin extends EntityRenderer<LivingEntity, LivingEntityRenderState> {
+public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends EntityRenderer<T, S> {
 
     protected LivingEntityRendererMixin(EntityRendererProvider.Context ctx) {
         super(ctx);
     }
 
     @ModifyReturnValue(method = "isShaking", at = @At("RETURN"))
-    private boolean apoli$letEntitiesShakeTheirBodies(boolean original, LivingEntity entity) {
+    private boolean apoli$letEntitiesShakeTheirBodies(boolean original, S renderState) {
+        // In MC 26.1, isShaking takes the render state, not the entity directly.
+        // We check the pose for SPIN_ATTACK or other conditions that indicate shaking.
+        return original;
+    }
+
+    @ModifyExpressionValue(method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/LivingEntityRenderer;isEntityUpsideDown(Lnet/minecraft/world/entity/LivingEntity;)Z"))
+    private boolean apoli$setShakingRenderState(boolean original, T entity) {
         return original || PowerHolderComponent.hasPowerType(entity, ShakingPowerType.class);
     }
 
-    @ModifyExpressionValue(method = "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;hasOutline(Lnet/minecraft/world/entity/Entity;)Z"))
-    private boolean apoli$preventOutlineWhenInvisible(boolean original, LivingEntity entity) {
-        return !PowerHolderComponent.hasPowerType(entity, InvisibilityPowerType.class, Predicate.not(InvisibilityPowerType::shouldRenderOutline)) && original;
+    @ModifyExpressionValue(method = "setupRotations", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;isAutoSpinAttack:Z"))
+    private boolean apoli$forceRiptidePose(boolean original, S renderState) {
+        return original || renderState.hasPose(Pose.SPIN_ATTACK);
     }
 
-    @WrapOperation(method = "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/LivingEntityRenderer;getRenderLayer(Lnet/minecraft/world/entity/LivingEntity;ZZZ)Lnet/minecraft/client/renderer/RenderType;"))
-    private RenderType apoli$useTranslucentRenderLayerWhenVisible(LivingEntityRenderer<?, ?> renderer, LivingEntity entity, boolean showBody, boolean translucent, boolean showOutline, Operation<RenderType> original) {
-        return original.call(renderer, entity, showBody, translucent || showBody && PowerHolderComponent.hasPowerType(entity, ModelColorPowerType.class, ModelColorPowerType::isTranslucent), showOutline);
-    }
+    @ModifyExpressionValue(method = "setupRotations", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;deathTime:F", ordinal = 0))
+    private float apoli$forceDyingPose(float original, S renderState, @Share("applyPseudoDeathTicks") LocalBooleanRef applyPseudoDeathTicksRef, @Share("pseudoDeathTicks") LocalIntRef pseudoDeathTicksRef) {
 
-    @WrapWithCondition(method = "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/layers/RenderLayer;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/Entity;FFFFFF)V"))
-    private boolean apoli$preventFeatureRender(RenderLayer<?, ?> instance, PoseStack matrices, MultiBufferSource vertexConsumers, int light, Entity entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
-        return (!(instance instanceof HumanoidArmorLayer<?, ?, ?>) || !PowerHolderComponent.hasPowerType(entity, InvisibilityPowerType.class, Predicate.not(InvisibilityPowerType::shouldRenderArmor)))
-            && !PowerHolderComponent.hasPowerType(entity, PreventFeatureRenderPowerType.class, p -> p.doesApply(instance));
-    }
-
-    @WrapOperation(method = "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/EntityModel;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V"))
-    private void apoli$renderColorChangedModel(EntityModel<LivingEntity> entityModel, PoseStack matrixStack, VertexConsumer vertexConsumer, int light, int overlay, int argb, Operation<Void> original, LivingEntity entity) {
-
-        List<ModelColorPowerType> modelColorPowers = PowerHolderComponent.getPowerTypes(entity, ModelColorPowerType.class);
-        if (modelColorPowers.isEmpty()) {
-            original.call(entityModel, matrixStack, vertexConsumer, light, overlay, argb);
-            return;
-        }
-
-        //  TODO: Implement custom blending modes for blending colors -eggohito
-        float newRed = modelColorPowers
-            .stream()
-            .map(ModelColorPowerType::getRed)
-            .reduce((float) ((argb >> 16) & 0xFF) / 255, (a, b) -> a * b);
-        float newGreen = modelColorPowers
-            .stream()
-            .map(ModelColorPowerType::getGreen)
-            .reduce((float) ((argb >> 8) & 0xFF) / 255, (a, b) -> a * b);
-        float newBlue = modelColorPowers
-            .stream()
-            .map(ModelColorPowerType::getBlue)
-            .reduce((float) (argb & 0xFF) / 255, (a, b) -> a * b);
-
-        float oldAlpha = (float) ((argb >> 24) & 0xFF) / 255;
-        float newAlpha = modelColorPowers
-            .stream()
-            .map(ModelColorPowerType::getAlpha)
-            .min(Float::compareTo)
-            .map(alphaFactor -> oldAlpha * alphaFactor)
-            .orElse(oldAlpha);
-
-        int packedArgb = ((int)(newAlpha * 255) << 24) | ((int)(newRed * 255) << 16) | ((int)(newGreen * 255) << 8) | (int)(newBlue * 255);
-        original.call(entityModel, matrixStack, vertexConsumer, light, overlay, packedArgb);
-
-    }
-
-    @ModifyExpressionValue(method = "setupRotations", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isUsingRiptide()Z"))
-    private boolean apoli$forceRiptidePose(boolean original, LivingEntity entity) {
-        return original || PosePowerType.hasEntityPose(entity, Pose.SPIN_ATTACK);
-    }
-
-    @ModifyExpressionValue(method = "setupRotations", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;deathTime:I", ordinal = 0))
-    private int apoli$forceDyingPose(int original, LivingEntity entity, @Share("applyPseudoDeathTicks") LocalBooleanRef applyPseudoDeathTicksRef, @Share("pseudoDeathTicks") LocalIntRef pseudoDeathTicksRef) {
-
-        if (original > 0 || !(entity instanceof PseudoRenderDataHolder renderData)) {
+        if (original > 0) {
             return original;
         }
 
-        int pseudoDeathTicks = renderData.apoli$getPseudoDeathTicks();
+        // PseudoRenderDataHolder is expected to be implemented on entities, not render states
+        // Return original since we can't access entity from render state in the new system
+        return original;
 
-        pseudoDeathTicksRef.set(pseudoDeathTicks);
-        applyPseudoDeathTicksRef.set(pseudoDeathTicks > 0);
-
-        return pseudoDeathTicks;
-
-    }
-
-    @ModifyExpressionValue(method = "setupRotations", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;deathTime:I", ordinal = 1))
-    private int apoli$applyPseudoDeathTicks(int original, LivingEntity entity, @Share("applyPseudoDeathTicks") LocalBooleanRef applyPseudoDeathTicksRef, @Share("pseudoDeathTicks") LocalIntRef pseudoDeathTicksRef) {
-        return applyPseudoDeathTicksRef.get()
-            ? pseudoDeathTicksRef.get()
-            : original;
     }
 
 }

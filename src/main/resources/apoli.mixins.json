@@ -90,7 +90,7 @@
 	"client": [
 		"AbstractClientPlayerEntityMixin",
 		"BackgroundRendererMixin",
-		"BipedEntityModelMixin",
+		"HumanoidModelMixin",
 		"CapeFeatureRendererMixin",
 		"ChunkRendererRegionMixin",
 		"ClientAdvancementManagerAccessor",

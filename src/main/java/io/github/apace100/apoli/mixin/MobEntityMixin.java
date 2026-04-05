@@ -10,24 +10,26 @@ import io.github.apace100.apoli.util.InventoryUtil;
 import io.github.apace100.apoli.util.MiscUtil;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.Targeting;
 import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(Mob.class)
-public abstract class MobEntityMixin extends LivingEntity implements Targeter {
+public abstract class MobEntityMixin extends LivingEntity implements Targeting {
 
     private MobEntityMixin(EntityType<? extends LivingEntity> entityType, Level world) {
         super(entityType, world);
     }
 
-    @WrapWithCondition(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/Mob;loot(Lnet/minecraft/world/entity/ItemEntity;)V"))
+    @WrapWithCondition(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;loot(Lnet/minecraft/world/entity/item/ItemEntity;)V"))
     private boolean apoli$preventItemPickup(Mob mobEntity, ItemEntity itemEntity) {
         return !PreventItemPickupPowerType.doesPrevent(itemEntity, this);
     }
 
-    @WrapOperation(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/Mob;loot(Lnet/minecraft/world/entity/ItemEntity;)V"))
+    @WrapOperation(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;loot(Lnet/minecraft/world/entity/item/ItemEntity;)V"))
     private void apoli$actionOnItemPickup(Mob mobEntity, ItemEntity itemEntity, Operation<Void> original) {
 
         SlotAccess stackReference = InventoryUtil.createStackReference(itemEntity.getStack());

@@ -7,7 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.FormattedCharSequence;
@@ -69,7 +69,7 @@ public class CustomToast implements PositionAwareToast {
     }
 
     @Override
-    public Visibility draw(int x, int y, GuiGraphics context, ToastManager manager, long startTime) {
+    public Visibility draw(int x, int y, GuiGraphicsExtractor context, ToastManager manager, long startTime) {
 
         Font textRenderer = manager.getClient().font;
         int alphaShift = Mth.floor(Mth.clamp((float) Math.abs(alphaShiftEnd - startTime) / 300, 0.0, 1.0) * 255.0f) << 24 | 67108864;

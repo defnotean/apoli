@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(Equipment.class)
+@Mixin(Equippable.class)
 public interface EquipmentMixin {
 
     @ModifyExpressionValue(method = "handleEquipmentSwap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;canUseSlot(Lnet/minecraft/world/entity/EquipmentSlot;)Z"))

@@ -19,14 +19,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.CraftingRecipeCategory;
 import net.minecraft.stats.RecipeBook;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.resources.Identifier;
 import net.minecraft.core.NonNullList;
@@ -37,12 +36,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Optional;
 
-public class ModifiedCraftingRecipe extends CraftingRecipe {
+public class ModifiedCraftingRecipe implements CraftingRecipe {
     private final Identifier id;
     private final CraftingRecipe delegate;
 
     public ModifiedCraftingRecipe(Identifier id, CraftingRecipe delegate) {
-        super(delegate.placementInfo());
         this.id = id;
         this.delegate = delegate;
     }
@@ -51,8 +49,8 @@ public class ModifiedCraftingRecipe extends CraftingRecipe {
     public CraftingRecipe delegate() { return delegate; }
 
     @Override
-    public CraftingRecipeCategory getCategory() {
-        return delegate().getCategory();
+    public CraftingBookCategory category() {
+        return delegate().category();
     }
 
     @Override
@@ -61,11 +59,11 @@ public class ModifiedCraftingRecipe extends CraftingRecipe {
     }
 
     @Override
-    public ItemStack craft(CraftingInput input, HolderLookup.Provider lookup) {
+    public ItemStack assemble(CraftingInput input) {
 
         if (input instanceof PowerCraftingInventory pci) {
 
-            Pair<ItemStack, Collection<ModifyCraftingPowerType>> result = this.getModifiedResult(lookup, pci.apoli$getPlayer());
+            Pair<ItemStack, Collection<ModifyCraftingPowerType>> result = this.getModifiedResult(pci.apoli$getPlayer());
             pci.apoli$setPowerTypes(result.getSecond());
 
             return result.getFirst().copy();
@@ -73,44 +71,24 @@ public class ModifiedCraftingRecipe extends CraftingRecipe {
         }
 
         else {
-            return this.getResultItem(lookup).copy();
+            return delegate().assemble(input).copy();
         }
 
     }
 
     @Override
-    public boolean fits(int width, int height) {
-        return delegate().fits(width, height);
-    }
-
-    @Override
-    public ItemStack getResultItem(HolderLookup.Provider registriesLookup) {
-        return delegate().getResultItem(registriesLookup);
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<ModifiedCraftingRecipe> getSerializer() {
         return ApoliRecipeSerializers.MODIFIED_CRAFTING;
     }
 
     @Override
-    public boolean isEmpty() {
-        return delegate().isEmpty();
+    public NonNullList<ItemStack> getRemainingItems(CraftingInput input) {
+        return delegate().getRemainingItems(input);
     }
 
     @Override
-    public NonNullList<ItemStack> getRemainder(CraftingInput input) {
-        return delegate().getRemainder(input);
-    }
-
-    @Override
-    public NonNullList<Ingredient> getIngredients() {
-        return delegate().getIngredients();
-    }
-
-    @Override
-    public boolean isIgnoredInRecipeBook() {
-        return delegate().isIgnoredInRecipeBook();
+    public PlacementInfo placementInfo() {
+        return delegate().placementInfo();
     }
 
     @Override
@@ -119,12 +97,12 @@ public class ModifiedCraftingRecipe extends CraftingRecipe {
     }
 
     @Override
-    public String getGroup() {
-        return delegate().getGroup();
+    public String group() {
+        return delegate().group();
     }
 
-    public Pair<ItemStack, Collection<ModifyCraftingPowerType>> getModifiedResult(HolderLookup.Provider registriesLookup, @Nullable Player player) {
-        return getModifiedResult(id(), delegate(), registriesLookup, player);
+    public Pair<ItemStack, Collection<ModifyCraftingPowerType>> getModifiedResult(@Nullable Player player) {
+        return getModifiedResult(id(), delegate(), player);
     }
 
     public static boolean canModify(Identifier id, CraftingRecipe craftingRecipe, RecipeBook recipeBook) {
@@ -139,12 +117,12 @@ public class ModifiedCraftingRecipe extends CraftingRecipe {
 
     public static boolean canModify(Identifier id, CraftingRecipe craftingRecipe, @Nullable Player player) {
         return player != null
-            && PowerHolderComponent.hasPowerType(player, ModifyCraftingPowerType.class, mcpt -> mcpt.doesApply(id, craftingRecipe.getResultItem(player.registryAccess())));
+            && PowerHolderComponent.hasPowerType(player, ModifyCraftingPowerType.class, mcpt -> mcpt.doesApply(id, craftingRecipe.assemble(null)));
     }
 
-    public static Pair<ItemStack, Collection<ModifyCraftingPowerType>> getModifiedResult(Identifier id, CraftingRecipe craftingRecipe, HolderLookup.Provider registriesLookup, @Nullable Player player) {
+    public static Pair<ItemStack, Collection<ModifyCraftingPowerType>> getModifiedResult(Identifier id, CraftingRecipe craftingRecipe, @Nullable Player player) {
 
-        ItemStack resultStack = craftingRecipe.getResultItem(registriesLookup).copy();
+        ItemStack resultStack = craftingRecipe.assemble(null).copy();
         SlotAccess newStackRef = InventoryUtil.createStackReference(resultStack);
 
         Prioritized.CallInstance<ModifyCraftingPowerType> mcptpci = new Prioritized.CallInstance<>();
@@ -172,13 +150,13 @@ public class ModifiedCraftingRecipe extends CraftingRecipe {
 
     private void send(RegistryFriendlyByteBuf buf) {
         buf.writeIdentifier(id());
-        Recipe.PACKET_CODEC.encode(buf, delegate());
+        Recipe.STREAM_CODEC.encode(buf, delegate());
     }
 
     private static ModifiedCraftingRecipe receive(RegistryFriendlyByteBuf buf) {
 
         Identifier id = buf.readIdentifier();
-        Recipe<?> recipe = Recipe.PACKET_CODEC.decode(buf);
+        Recipe<?> recipe = Recipe.STREAM_CODEC.decode(buf);
 
         if (recipe instanceof CraftingRecipe craftingRecipe) {
             return new ModifiedCraftingRecipe(id, craftingRecipe);
@@ -190,28 +168,18 @@ public class ModifiedCraftingRecipe extends CraftingRecipe {
 
     }
 
-    public static class Serializer implements RecipeSerializer<ModifiedCraftingRecipe> {
+    public static final MapCodec<ModifiedCraftingRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        Identifier.CODEC.fieldOf("id").forGetter(ModifiedCraftingRecipe::id),
+        ApoliDataTypes.DISALLOWING_INTERNAL_CRAFTING_RECIPE.codec().fieldOf("recipe").forGetter(ModifiedCraftingRecipe::delegate)
+    ).apply(instance, ModifiedCraftingRecipe::new));
 
-        public static final MapCodec<ModifiedCraftingRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Identifier.CODEC.fieldOf("id").forGetter(ModifiedCraftingRecipe::id),
-            ApoliDataTypes.DISALLOWING_INTERNAL_CRAFTING_RECIPE.codec().fieldOf("recipe").forGetter(ModifiedCraftingRecipe::delegate)
-        ).apply(instance, ModifiedCraftingRecipe::new));
+    public static final StreamCodec<RegistryFriendlyByteBuf, ModifiedCraftingRecipe> PACKET_CODEC = StreamCodec.of(
+        ModifiedCraftingRecipe::send,
+        ModifiedCraftingRecipe::receive
+    );
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, ModifiedCraftingRecipe> PACKET_CODEC = StreamCodec.of(
-            ModifiedCraftingRecipe::send,
-            ModifiedCraftingRecipe::receive
-        );
-
-        @Override
-        public MapCodec<ModifiedCraftingRecipe> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public StreamCodec<RegistryFriendlyByteBuf, ModifiedCraftingRecipe> packetCodec() {
-            return PACKET_CODEC;
-        }
-
+    public static RecipeSerializer<ModifiedCraftingRecipe> createSerializer() {
+        return new RecipeSerializer<>(CODEC, PACKET_CODEC);
     }
 
 }

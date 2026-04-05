@@ -10,7 +10,7 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
@@ -72,54 +72,29 @@ public class OverrideHudTexturePowerType extends PowerType implements Prioritize
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawHeartTexture(GuiGraphics context, Gui.HeartType heartType, int x, int y, int width, int height, boolean hardcore, boolean blinking, boolean half) {
+    public void drawHeartTexture(GuiGraphicsExtractor extractor, Gui.HeartType heartType, int x, int y, int width, int height, boolean hardcore, boolean blinking, boolean half) {
 
-        textureOrMapping.ifLeft(id -> {
-
-            int index = switch (heartType) {
-                case CONTAINER ->
-                    0;
-                case NORMAL ->
-                    2;
-                case POISONED ->
-                    4;
-                case WITHERED ->
-                    6;
-                case ABSORBING ->
-                    8;
-                case FROZEN ->
-                    9;
-            };
-
-            int v = hardcore ? 5 * 9 : 0;
-            int u = heartType == Gui.HeartType.CONTAINER ? (blinking ? 1 : 0) : (half ? 1 : 0) + (blinking ? 2 : 0);
-
-            u = 16 + (index * 2 + u) * 9;
-            context.drawTexture(id, x, y, u, v, width, height);
-
-        }).ifRight(mapping -> {
+        textureOrMapping.ifRight(mapping -> {
 
             Identifier texture = heartType.getTexture(hardcore, half, blinking);
             Identifier newTexture = mapping.getOrDefault(texture, texture);
 
-            context.drawGuiTexture(newTexture, x, y, width, height);
+            extractor.blitSprite(com.mojang.blaze3d.pipeline.RenderPipelines.GUI_TEXTURED, newTexture, x, y, width, height);
 
         });
 
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawTextureRegion(GuiGraphics context, Identifier texture, int width, int height, int minU, int minV, int legacyMinU, int legacyMinV, int x, int y, int maxU, int maxV) {
+    public void drawTextureRegion(GuiGraphicsExtractor extractor, Identifier texture, int width, int height, int minU, int minV, int legacyMinU, int legacyMinV, int x, int y, int maxU, int maxV) {
         textureOrMapping
-            .ifLeft(id -> context.drawTexture(id, x, y, legacyMinU, legacyMinV, maxU, maxV))
-            .ifRight(mapping -> context.drawGuiTexture(mapping.getOrDefault(texture, texture), width, height, minU, minV, x, y, maxU, maxV));
+            .ifRight(mapping -> extractor.blitSprite(com.mojang.blaze3d.pipeline.RenderPipelines.GUI_TEXTURED, mapping.getOrDefault(texture, texture), width, height, minU, minV, x, y, maxU, maxV));
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawTexture(GuiGraphics context, Identifier texture, int x, int y, int legacyU, int legacyV, int width, int height) {
+    public void drawTexture(GuiGraphicsExtractor extractor, Identifier texture, int x, int y, int legacyU, int legacyV, int width, int height) {
         textureOrMapping
-            .ifLeft(id -> context.drawTexture(id, x, y, legacyU, legacyV, width, height))
-            .ifRight(mapping -> context.drawGuiTexture(mapping.getOrDefault(texture, texture), x, y, width, height));
+            .ifRight(mapping -> extractor.blitSprite(com.mojang.blaze3d.pipeline.RenderPipelines.GUI_TEXTURED, mapping.getOrDefault(texture, texture), x, y, width, height));
     }
 
 }

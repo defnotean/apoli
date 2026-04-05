@@ -5,18 +5,17 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 
 public class ApoliRecipeSerializers {
 
-    public static final RecipeSerializer<PowerCraftingRecipe> POWER_CRAFTING = register("power_crafting", new PowerCraftingRecipe.Serializer());
-    public static final RecipeSerializer<ModifiedCraftingRecipe> MODIFIED_CRAFTING = register("modified_crafting", new ModifiedCraftingRecipe.Serializer());
+    public static final RecipeSerializer<PowerCraftingRecipe> POWER_CRAFTING = register("power_crafting", PowerCraftingRecipe.createSerializer());
+    public static final RecipeSerializer<ModifiedCraftingRecipe> MODIFIED_CRAFTING = register("modified_crafting", ModifiedCraftingRecipe.createSerializer());
 
     public static void register() {
 
     }
 
-    public static <R extends Recipe<?>, S extends RecipeSerializer<R>> S register(String path, S serializer) {
+    public static <R extends Recipe<?>> RecipeSerializer<R> register(String path, RecipeSerializer<R> serializer) {
         return Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Apoli.identifier(path), serializer);
     }
 

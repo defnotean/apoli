@@ -9,7 +9,7 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.world.level.block.EntityShapeContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.core.BlockPos;
@@ -95,7 +95,7 @@ public class PhasingPowerType extends PowerType {
     }
 
     public static boolean shouldPhase(CollisionContext context, VoxelShape shape, BlockPos pos) {
-        return context instanceof EntityShapeContext entityContext
+        return context instanceof EntityCollisionContext entityContext
             && PowerHolderComponent.hasPowerType(entityContext.getEntity(), PhasingPowerType.class, p -> p.shouldPhase(shape, pos));
     }
 

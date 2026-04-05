@@ -22,8 +22,7 @@ import net.minecraft.world.level.gameevent.EntityPositionSource;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
-import net.minecraft.world.level.gameevent.listener.EntityGameEventHandler;
-import net.minecraft.world.level.gameevent.listener.GameEventListener;
+import net.minecraft.world.level.gameevent.GameEventListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,7 +40,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
             .add("event", SerializableDataTypes.GAME_EVENT_ENTRY, null)
             .addFunctionedDefault("events", SerializableDataTypes.GAME_EVENT_ENTRIES, data -> MiscUtil.singletonListOrEmpty(data.get("event")))
             .add("event_tag", SerializableDataTypes.GAME_EVENT_TAG.optional(), Optional.empty())
-            .add("trigger_order", SerializableDataType.enumValue(GameEventListener.TriggerOrder.class), GameEventListener.TriggerOrder.UNSPECIFIED)
+            .add("trigger_order", SerializableDataType.enumValue(GameEventListener.DeliveryMode.class), GameEventListener.DeliveryMode.UNSPECIFIED)
             .add("hud_render", HudRender.DATA_TYPE, HudRender.DONT_RENDER)
             .add("cooldown", SerializableDataTypes.POSITIVE_INT, 1)
             .add("show_particle", SerializableDataTypes.BOOLEAN, true)
@@ -83,7 +82,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
     private final List<Holder<GameEvent>> gameEvents;
     private final Optional<TagKey<GameEvent>> gameEventTag;
 
-    private final GameEventListener.TriggerOrder triggerOrder;
+    private final GameEventListener.DeliveryMode triggerOrder;
 
     private final ListenerData vibrationListenerData;
     private final Callback vibrationCallback;
@@ -91,9 +90,9 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
     private final boolean showParticle;
     private final int range;
 
-    private EntityGameEventHandler<VibrationListener> gameEventHandler;
+    private VibrationSystem.Listener gameEventHandler;
 
-    public GameEventListenerPowerType(Optional<BiEntityAction> biEntityAction, Optional<BiEntityCondition> biEntityCondition, Optional<BlockAction> blockAction, Optional<BlockCondition> blockCondition, List<Holder<GameEvent>> gameEvents, Optional<TagKey<GameEvent>> gameEventTag, GameEventListener.TriggerOrder triggerOrder, HudRender hudRender, int cooldownDuration, boolean showParticle, int range, Optional<EntityCondition> condition) {
+    public GameEventListenerPowerType(Optional<BiEntityAction> biEntityAction, Optional<BiEntityCondition> biEntityCondition, Optional<BlockAction> blockAction, Optional<BlockCondition> blockCondition, List<Holder<GameEvent>> gameEvents, Optional<TagKey<GameEvent>> gameEventTag, GameEventListener.DeliveryMode triggerOrder, HudRender hudRender, int cooldownDuration, boolean showParticle, int range, Optional<EntityCondition> condition) {
         super(cooldownDuration, hudRender, condition);
 
         this.biEntityAction = biEntityAction;
@@ -142,7 +141,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
 
     @Override
     public void serverTick() {
-        Ticker.tick(getHolder().level(), getVibrationListenerData(), getVibrationCallback());
+        Ticker.tick(getHolder().level(), getVibrationData(), getVibrationUser());
     }
 
     @Override
@@ -151,19 +150,19 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
     }
 
     @Override
-    public ListenerData getVibrationListenerData() {
+    public ListenerData getVibrationData() {
         return vibrationListenerData;
     }
 
     @Override
-    public Callback getVibrationCallback() {
+    public Callback getVibrationUser() {
         return vibrationCallback;
     }
 
-    public EntityGameEventHandler<VibrationListener> getGameEventHandler() {
+    public VibrationSystem.Listener getGameEventHandler() {
 
         if (gameEventHandler == null) {
-            gameEventHandler = new EntityGameEventHandler<>(new Listener());
+            gameEventHandler = new VibrationSystem.Listener(this);
         }
 
         return gameEventHandler;
@@ -174,20 +173,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
         return showParticle;
     }
 
-    public class Listener extends VibrationListener {
-
-        public Listener() {
-            super(GameEventListenerPowerType.this);
-        }
-
-        @Override
-        public TriggerOrder getTriggerOrder() {
-            return triggerOrder;
-        }
-
-    }
-
-    public class Callback implements VibrationSystem.Callback {
+    public class Callback implements VibrationSystem.User {
 
         @Override
         public int getRange() {
@@ -201,7 +187,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
         }
 
         @Override
-        public boolean accepts(ServerLevel world, BlockPos pos, Holder<GameEvent> event, GameEvent.Emitter emitter) {
+        public boolean accepts(ServerLevel world, BlockPos pos, Holder<GameEvent> event, GameEvent.Context emitter) {
             return GameEventListenerPowerType.this.canUse()
                 && blockCondition.map(condition -> condition.test(world, pos)).orElse(true)
                 && biEntityCondition.map(condition -> condition.test(emitter.sourceEntity(), getHolder())).orElse(true);
@@ -219,7 +205,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
 
         @Override
         public TagKey<GameEvent> getTag() {
-            return gameEventTag.orElse(VibrationSystem.Callback.super.getTag());
+            return gameEventTag.orElse(VibrationSystem.User.super.getTag());
         }
 
         public boolean containsEvent(Holder<GameEvent> gameEvent) {
@@ -229,7 +215,7 @@ public class GameEventListenerPowerType extends CooldownPowerType implements Vib
 
     }
 
-    public class ListenerData extends VibrationSystem.ListenerData {
+    public class ListenerData extends VibrationSystem.Data {
 
         public boolean shouldShowParticle() {
             return GameEventListenerPowerType.this.shouldShowParticle();

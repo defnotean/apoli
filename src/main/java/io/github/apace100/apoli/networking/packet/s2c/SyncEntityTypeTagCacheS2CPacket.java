@@ -12,7 +12,7 @@ import java.util.Map;
 
 public record SyncEntityTypeTagCacheS2CPacket(Map<Identifier, Collection<Identifier>> subTags) implements CustomPacketPayload {
 
-	public static final CustomPacketPayload.Id<SyncEntityTypeTagCacheS2CPacket> PACKET_ID = new CustomPacketPayload.Id<>(Apoli.identifier("s2c/sync_entity_type_tag_cache"));
+	public static final CustomPacketPayload.Type<SyncEntityTypeTagCacheS2CPacket> PACKET_ID = new CustomPacketPayload.Type<>(Apoli.identifier("s2c/sync_entity_type_tag_cache"));
 	public static final StreamCodec<FriendlyByteBuf, SyncEntityTypeTagCacheS2CPacket> PACKET_CODEC = StreamCodec.of(SyncEntityTypeTagCacheS2CPacket::write, SyncEntityTypeTagCacheS2CPacket::read);
 
 	private static SyncEntityTypeTagCacheS2CPacket read(FriendlyByteBuf buf) {
@@ -24,7 +24,7 @@ public record SyncEntityTypeTagCacheS2CPacket(Map<Identifier, Collection<Identif
 	}
 
 	@Override
-	public CustomPacketPayload.Id<? extends CustomPacketPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 

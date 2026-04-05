@@ -26,7 +26,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.util.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.core.ChunkSectionPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -326,7 +326,7 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
         Structure structure = targetStructure.get().getRight();
 
         ChunkPos chunkPos = new ChunkPos(structurePos.getX() >> 4, structurePos.getZ() >> 4);
-        ChunkSectionPos chunkSectionPos = ChunkSectionPos.from(chunkPos, 0);
+        SectionPos chunkSectionPos = SectionPos.from(chunkPos, 0);
 
         return Optional.ofNullable(targetDimension.getStructureAccessor().getStructureStart(chunkSectionPos, structure, targetDimension.getChunk(structurePos)))
             .map(structureStart -> structureStart.getBoundingBox().getCenter())

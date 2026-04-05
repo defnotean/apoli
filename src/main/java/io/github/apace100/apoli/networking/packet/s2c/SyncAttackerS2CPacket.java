@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public record SyncAttackerS2CPacket(int targetId, Optional<Integer> attackerId) implements CustomPacketPayload {
 
-    public static final CustomPacketPayload.Id<SyncAttackerS2CPacket> PACKET_ID = new CustomPacketPayload.Id<>(Apoli.identifier("s2c/sync_attacker"));
+    public static final CustomPacketPayload.Type<SyncAttackerS2CPacket> PACKET_ID = new CustomPacketPayload.Type<>(Apoli.identifier("s2c/sync_attacker"));
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncAttackerS2CPacket> PACKET_CODEC = StreamCodec.tuple(
         ByteBufCodecs.VAR_INT, SyncAttackerS2CPacket::targetId,
         ByteBufCodecs.optional(ByteBufCodecs.VAR_INT), SyncAttackerS2CPacket::attackerId,
@@ -18,7 +18,7 @@ public record SyncAttackerS2CPacket(int targetId, Optional<Integer> attackerId) 
     );
 
     @Override
-    public CustomPacketPayload.Id<? extends CustomPacketPayload> getId() {
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
         return PACKET_ID;
     }
 

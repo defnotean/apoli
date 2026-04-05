@@ -99,12 +99,12 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
     }
 
     @WrapOperation(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;use(Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
-    private InteractionResult<ItemStack> apoli$onItemUse(Item item, Level world, Player user, InteractionHand hand, Operation<InteractionResult<ItemStack>> original) {
+    private InteractionResult apoli$onItemUse(Item item, Level world, Player user, InteractionHand hand, Operation<InteractionResult> original) {
 
         //  region  Prevent item use
         ItemStack thisAsStack = (ItemStack) (Object) this;
         if (PowerHolderComponent.hasPowerType(user, PreventItemUsePowerType.class, piup -> piup.doesPrevent(thisAsStack))) {
-            return InteractionResult.fail(thisAsStack);
+            return InteractionResult.FAIL;
         }
         //  endregion
 
@@ -125,7 +125,7 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
             .map(fc -> user.canConsume(fc.canAlwaysEat()))
             .orElse(false);
 
-        InteractionResult<ItemStack> action;
+        InteractionResult action;
         if (canConsumeCustomFood) {
             user.startUsingItem(hand);
             action = InteractionResult.CONSUME;
@@ -133,7 +133,7 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
             action = original.call(useStack.getItem(), world, user, hand);
         }
 
-        if (!action.getResult().isAccepted()) {
+        if (!action.consumesAction()) {
             return action;
         }
         //  endregion

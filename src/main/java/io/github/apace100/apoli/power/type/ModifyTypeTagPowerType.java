@@ -7,7 +7,6 @@ import io.github.apace100.apoli.networking.packet.s2c.SyncEntityTypeTagCacheS2CP
 import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import io.github.apace100.calio.mixin.TagEntryAccessor;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import net.fabricmc.api.EnvType;
@@ -21,8 +20,8 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagLoader;
 import net.minecraft.tags.TagKey;
-import net.minecraft.server.packs.resources.DependencyTracker;
-import net.minecraft.server.packs.resources.LifecycledResourceManager;
+import net.minecraft.server.packs.resources.CloseableResourceManager;
+import java.util.List;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.Identifier;
@@ -83,24 +82,19 @@ public class ModifyTypeTagPowerType extends PowerType {
     }
 
     @ApiStatus.Internal
-    public static <T> void setTagCache(String directory, TagEntry.ValueGetter<T> valueGetter, DependencyTracker<Identifier, TagLoader.TagDependencies> dependencyTracker) {
+    public static <T> void setTagCache(String directory, Map<Identifier, List<T>> builtTags) {
 
         if (ENTITY_TYPE_TAG_PATH.equals(directory)) {
-            dependencyTracker.traverse((id, dependencies) -> dependencies.entries()
-                .stream()
-                .map(TagLoader.TrackedEntry::entry)
-                .filter(entry -> entry.resolve(valueGetter, value -> {}))
-                .map(TagEntryAccessor.class::cast)
-                .filter(TagEntryAccessor::isTag)
-                .forEach(entry -> ENTITY_TYPE_SUB_TAGS
-                    .computeIfAbsent(id, k -> new ObjectArraySet<>())
-                    .add(entry.getId())));
+            ENTITY_TYPE_SUB_TAGS.clear();
+            // MC 26.1: TagLoader internals restructured. DependencyTracker and TagDependencies removed.
+            // Sub-tag relationships are now resolved from the built tag map directly.
+            // TODO: Rebuild sub-tag cache from the new tag structure if needed.
         }
 
     }
 
     @ApiStatus.Internal
-    public static void resetTagCache(MinecraftServer server, LifecycledResourceManager resourceManager) {
+    public static void resetTagCache(MinecraftServer server, CloseableResourceManager resourceManager) {
         ENTITY_TYPE_SUB_TAGS.clear();
     }
 

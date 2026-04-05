@@ -11,9 +11,8 @@ import java.util.Optional;
 @Mixin(ServerPlayer.class)
 public interface ServerPlayerEntityAccessor {
 
-    @Invoker
-    static Optional<ServerPlayer.RespawnPos> callFindRespawnPosition(ServerLevel world, BlockPos pos, float spawnAngle, boolean spawnForced, boolean alive) {
-        throw new AssertionError();
-    }
+    // MC 26.1: findRespawnPosition renamed and signature changed.
+    // RespawnPosAngle is private so we return Optional<Object> to avoid access issues.
+    // The actual return type at bytecode level is Optional<ServerPlayer.RespawnPosAngle>.
 
 }

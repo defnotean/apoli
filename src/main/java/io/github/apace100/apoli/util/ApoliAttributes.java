@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRe
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -60,7 +60,7 @@ public class ApoliAttributes {
         attribute.setSentiment(Attribute.Sentiment.POSITIVE);
         return Registry.registerForHolder(
             BuiltInRegistries.ATTRIBUTE,
-            ResourceLocation.fromNamespaceAndPath(id.getNamespace(), id.getPath()),
+            Identifier.fromNamespaceAndPath(id.getNamespace(), id.getPath()),
             attribute
         );
     }

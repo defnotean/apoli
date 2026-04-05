@@ -6,12 +6,13 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.apace100.apoli.mixin.TranslatableTextContentAccessor;
 import net.minecraft.network.chat.*;
-import net.minecraft.util.Language;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.locale.Language;
 
 import java.util.List;
 import java.util.Optional;
 
-public class ForcedTranslatableTextContent extends TranslatableContents {
+public class ForcedTranslatableTextContent extends net.minecraft.network.chat.contents.TranslatableContents {
 
 	public static final MapCodec<ForcedTranslatableTextContent> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("translate").forGetter(ForcedTranslatableTextContent::getKey),
@@ -19,7 +20,7 @@ public class ForcedTranslatableTextContent extends TranslatableContents {
 		TranslatableTextContentAccessor.getArgumentCodec().listOf().optionalFieldOf("with").forGetter(content -> TranslatableTextContentAccessor.callToOptionalList(content.getArgs()))
 	).apply(instance, ForcedTranslatableTextContent::new));
 
-	public static final Type<ForcedTranslatableTextContent> TYPE = new Type<>(CODEC, "apoli:forced_translatable");
+	// MC 26.1: ComponentContents.Type removed. Registration now uses MapCodec directly.
 
 	private final Component textFallback;
 
@@ -33,8 +34,9 @@ public class ForcedTranslatableTextContent extends TranslatableContents {
 	}
 
 	@Override
-	public Type<?> getType() {
-		return TYPE;
+	@SuppressWarnings("unchecked")
+	public MapCodec<? extends ComponentContents> codec() {
+		return (MapCodec) CODEC;
 	}
 
 	@Override

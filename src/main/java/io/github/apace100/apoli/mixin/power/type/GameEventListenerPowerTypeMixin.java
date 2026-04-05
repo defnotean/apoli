@@ -13,7 +13,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
-import net.minecraft.world.level.gameevent.listener.EntityGameEventHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,13 +23,13 @@ import java.util.function.BiConsumer;
 
 public abstract class GameEventListenerPowerTypeMixin {
 
-	@Mixin(VibrationSystem.Callback.class)
+	@Mixin(VibrationSystem.User.class)
 	public interface CustomCallbackHandler {
 
 		@WrapOperation(method = "canAccept", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Holder;is(Lnet/minecraft/tags/TagKey;)Z", ordinal = 0))
 		private boolean apoli$acceptsGameEvent(Holder<GameEvent> gameEvent, TagKey<GameEvent> gameEventTag, Operation<Boolean> original) {
 
-			if ((VibrationSystem.Callback) this instanceof GameEventListenerPowerType.Callback powerCallback) {
+			if ((VibrationSystem.User) this instanceof GameEventListenerPowerType.Callback powerCallback) {
 				return powerCallback.containsEvent(gameEvent);
 			}
 
@@ -46,7 +45,7 @@ public abstract class GameEventListenerPowerTypeMixin {
 	public interface ParticleAppearanceHandler {
 
 		@WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;spawnParticles(Lnet/minecraft/core/particles/ParticleOptions;DDDIDDDD)I"))
-		private static boolean apoli$onlyShowParticleWhenSpecified(ServerLevel world, ParticleOptions particle, double x, double y, double z, int count, double deltaX, double deltaY, double deltaZ, double speed, VibrationSystem.ListenerData listenerData) {
+		private static boolean apoli$onlyShowParticleWhenSpecified(ServerLevel world, ParticleOptions particle, double x, double y, double z, int count, double deltaX, double deltaY, double deltaZ, double speed, VibrationSystem.Data listenerData) {
 
 			if (listenerData instanceof GameEventListenerPowerType.ListenerData powerListenerData) {
 				return powerListenerData.shouldShowParticle();
@@ -67,7 +66,7 @@ public abstract class GameEventListenerPowerTypeMixin {
 		public abstract Level getWorld();
 
 		@Inject(method = "updateEventHandler", at = @At("HEAD"))
-		private void apoli$update(BiConsumer<EntityGameEventHandler<?>, ServerLevel> callback, CallbackInfo ci) {
+		private void apoli$update(BiConsumer<VibrationSystem.Listener, ServerLevel> callback, CallbackInfo ci) {
 
 			if (getWorld() instanceof ServerLevel serverWorld) {
 				PowerHolderComponent.getPowerTypes((Entity) (Object) this, GameEventListenerPowerType.class, true)

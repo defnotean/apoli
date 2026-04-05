@@ -6,7 +6,7 @@ import net.minecraft.world.level.GameType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(MultiPlayerGameType.class)
+@Mixin(GameType.class)
 public interface ClientPlayerInteractionManagerAccessor {
 
     @Accessor

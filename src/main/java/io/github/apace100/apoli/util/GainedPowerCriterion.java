@@ -4,9 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.power.Power;
-import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
-import net.minecraft.advancements.critereon.EntityPredicate;
-import net.minecraft.advancements.critereon.ContextAwarePredicate;
+import net.minecraft.advancements.criterion.SimpleCriterionTrigger;
+import net.minecraft.advancements.criterion.EntityPredicate;
+import net.minecraft.advancements.criterion.ContextAwarePredicate;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.Identifier;
 
@@ -26,7 +26,7 @@ public class GainedPowerCriterion extends SimpleCriterionTrigger<GainedPowerCrit
         this.trigger(player, conditions -> conditions.matches(power));
     }
 
-    public record Conditions(Optional<ContextAwarePredicate> player, Identifier powerId) implements SimpleCriterionTrigger.Conditions {
+    public record Conditions(Optional<ContextAwarePredicate> player, Identifier powerId) implements SimpleCriterionTrigger.SimpleInstance {
 
         public static final Codec<Conditions> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             EntityPredicate.LOOT_CONTEXT_PREDICATE_CODEC.optionalFieldOf("player").forGetter(Conditions::player),

@@ -4,7 +4,7 @@ import io.github.apace100.apoli.util.TextAlignment;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractStringWidget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
@@ -28,7 +28,7 @@ public class ScrollingTextWidget extends AbstractStringWidget {
     }
 
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 
         int left = this.getX() + 2;
         int right = this.getX() + this.getWidth() - 2;
@@ -44,7 +44,7 @@ public class ScrollingTextWidget extends AbstractStringWidget {
         return false;
     }
 
-    protected static void drawScrollingText(GuiGraphics context, Font textRenderer, Component text, TextAlignment textAlignment, int left, int top, int right, int bottom, int color, boolean hasShadow) {
+    protected static void drawScrollingText(GuiGraphicsExtractor context, Font textRenderer, Component text, TextAlignment textAlignment, int left, int top, int right, int bottom, int color, boolean hasShadow) {
 
         int textWidth = textRenderer.getWidth(text);
 

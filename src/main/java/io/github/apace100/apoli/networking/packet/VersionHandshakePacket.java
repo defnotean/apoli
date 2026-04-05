@@ -7,7 +7,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record VersionHandshakePacket(int[] semver) implements CustomPacketPayload {
 
-    public static final CustomPacketPayload.Id<VersionHandshakePacket> PACKET_ID = new CustomPacketPayload.Id<>(Apoli.identifier("handshake/version"));
+    public static final CustomPacketPayload.Type<VersionHandshakePacket> PACKET_ID = new CustomPacketPayload.Type<>(Apoli.identifier("handshake/version"));
     public static final StreamCodec<FriendlyByteBuf, VersionHandshakePacket> PACKET_CODEC = StreamCodec.of(VersionHandshakePacket::write, VersionHandshakePacket::read);
 
     public static VersionHandshakePacket read(FriendlyByteBuf buf) {
@@ -19,7 +19,7 @@ public record VersionHandshakePacket(int[] semver) implements CustomPacketPayloa
     }
 
     @Override
-    public CustomPacketPayload.Id<? extends CustomPacketPayload> getId() {
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
         return PACKET_ID;
     }
 
