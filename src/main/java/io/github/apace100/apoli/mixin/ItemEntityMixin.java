@@ -50,7 +50,7 @@ public abstract class ItemEntityMixin extends Entity {
         else if (MiscUtil.hasSpaceInInventory(playerInventory, stack)) {
 
             SlotAccess stackReference = InventoryUtil.createStackReference(stack);
-            Entity thrower = MiscUtil.getEntityByUuid(this.throwerUuid, this.getServer());
+            Entity thrower = MiscUtil.getEntityByUuid(this.throwerUuid, this.level().getServer());
 
             Prioritized.CallInstance<ActionOnItemPickupPowerType> callInstance = ActionOnItemPickupPowerType.executeItemAction(thrower, stackReference, player);
             this.setStack(stackReference.get());

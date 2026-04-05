@@ -95,7 +95,7 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
     @ModifyVariable(method = "addEffect(Lnet/minecraft/world/entity/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z", at = @At("HEAD"), argsOnly = true)
     private MobEffectInstance apoli$modifyStatusEffect(MobEffectInstance original) {
 
-        Holder<MobEffect> effectType = original.getEffectType();
+        Holder<MobEffect> effectType = original.getEffect();
 
         float amplifier = PowerHolderComponent.modify(this, ModifyStatusEffectAmplifierPowerType.class, original.getAmplifier(), p -> p.doesApply(effectType));
         float duration = PowerHolderComponent.modify(this, ModifyStatusEffectDurationPowerType.class, original.getDuration(), p -> p.doesApply(effectType));
@@ -105,8 +105,8 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
             Math.round(duration),
             Math.round(amplifier),
             original.isAmbient(),
-            original.shouldShowParticles(),
-            original.shouldShowIcon(),
+            original.isVisible(),
+            original.showIcon(),
             ((HiddenEffectStatus) original).apoli$getHiddenEffect()
         );
 
@@ -115,7 +115,7 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
     @Inject(method = "setAttacker", at = @At("TAIL"))
     private void apoli$syncAttacker(LivingEntity attacker, CallbackInfo ci) {
 
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             return;
         }
 
@@ -150,7 +150,7 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
 
     @ModifyExpressionValue(method = "onDamageTaken", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSources;generic()Lnet/minecraft/world/damagesource/DamageSource;"))
     private DamageSource apoli$overrideDamageSourceOnSync(DamageSource original, DamageSource source) {
-        return this.damageSources().create(ApoliDamageTypes.SYNC_DAMAGE_SOURCE);
+        return new net.minecraft.world.damagesource.DamageSource(this.level().registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.DAMAGE_TYPE).getOrThrow(ApoliDamageTypes.SYNC_DAMAGE_SOURCE));
     }
 
     @ModifyVariable(method = "damage", at = @At("HEAD"), argsOnly = true)
@@ -287,15 +287,15 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
     @Inject(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getFrozenTicks()I"))
     private void freezeEntityFromPower(CallbackInfo ci) {
         if(PowerHolderComponent.hasPowerType(this, FreezePowerType.class)) {
-            this.prevPowderSnowState = this.inPowderSnow;
-            this.inPowderSnow = true;
+            this.prevPowderSnowState = this.isInPowderSnow;
+            this.setIsInPowderSnow(true);
         }
     }
 
     @Inject(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;removePowderSnowSlow()V"))
     private void unfreezeEntityFromPower(CallbackInfo ci) {
         if(PowerHolderComponent.hasPowerType(this, FreezePowerType.class)) {
-            this.inPowderSnow = this.prevPowderSnowState;
+            this.setIsInPowderSnow(this.prevPowderSnowState);
         }
     }
 
@@ -396,7 +396,7 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
 
     @ModifyVariable(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;onGround()Z", opcode = Opcodes.GETFIELD, ordinal = 2))
     private float modifySlipperiness(float original) {
-        return PowerHolderComponent.modify(this, ModifySlipperinessPowerType.class, original, p -> p.doesApply(getWorld(), getVelocityAffectingPos()));
+        return PowerHolderComponent.modify(this, ModifySlipperinessPowerType.class, original, p -> p.doesApply(this.level(), this.getBlockPosBelowThatAffectsMyMovement()));
     }
 
     @ModifyExpressionValue(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isDead()Z", ordinal = 1))
@@ -478,7 +478,7 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
             }
 
             else if ((LivingEntity) (Object) this instanceof Player player && !player.isCreative()) {
-                player.getInventory().addItem(resultStack);
+                player.getInventory().add(resultStack);
             }
 
             else {
@@ -552,7 +552,7 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
     @ModifyExpressionValue(method = "jump", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSprinting()Z"))
     private boolean apoli$cancelOutJumpVelocityIfNotMovingWithSprintPower(boolean original) {
         // The movement check is here so this doesn't happen if the player is moving at a sprinting amount.
-        if (PowerHolderComponent.hasPowerType(this, SprintingPowerType.class) && this.apoli$getHorizontalMovementValue() < this.getAttributeValue(Attributes.GENERIC_MOVEMENT_SPEED)) {
+        if (PowerHolderComponent.hasPowerType(this, SprintingPowerType.class) && this.apoli$getHorizontalMovementValue() < this.getAttributeValue(Attributes.MOVEMENT_SPEED)) {
             return false;
         }
         return original;

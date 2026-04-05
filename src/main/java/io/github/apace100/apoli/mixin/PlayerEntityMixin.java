@@ -133,10 +133,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
         return new FoodProperties(
             newNutrition,
             newSaturation,
-            original.canAlwaysEat(),
-            original.eatSeconds(),
-            original.usingConvertsTo(),
-            original.effects()
+            original.canAlwaysEat()
         );
 
     }
@@ -168,7 +165,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
         }
 
         hasModifyingPower |= PowerHolderComponent.hasPowerType(this, ModifyDamageTakenPowerType.class, mdtp -> mdtp.doesApply(source, amount));
-        if (hasModifyingPower) cir.setReturnValue(super.hurt(source, amount));
+        if (hasModifyingPower) { super.hurt(source, amount); cir.setReturnValue(true); }
 
     }
 
@@ -182,8 +179,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
     @Inject(method = "updateSwimming", at = @At("TAIL"))
     private void updateSwimmingPower(CallbackInfo ci) {
         if(PowerHolderComponent.hasPowerType(this, SwimmingPowerType.class)) {
-            this.setSwimming(this.isSprinting() && !this.hasVehicle());
-            this.touchingWater = this.isSwimming();
+            this.setSwimming(this.isSprinting() && !this.isPassenger());
+            this.wasTouchingWater = this.isSwimming();
             if (this.isSwimming()) {
                 this.fallDistance = 0.0F;
                 Vec3 look = this.getLookAngle();
@@ -196,8 +193,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
 
     @Inject(method = "stopSleeping(ZZ)V", at = @At("HEAD"))
     private void invokeWakeUpAction(boolean bl, boolean updateSleepingPlayers, CallbackInfo ci) {
-        if(!bl && !updateSleepingPlayers && getSleepingPosition().isPresent()) {
-            BlockPos sleepingPos = getSleepingPosition().get();
+        if(!bl && !updateSleepingPlayers && getSleepingPos().isPresent()) {
+            BlockPos sleepingPos = getSleepingPos().get();
             PowerHolderComponent.getPowerTypes(this, ActionOnWakeUpPowerType.class).stream().filter(p -> p.doesApply(sleepingPos)).forEach(p -> p.executeActions(sleepingPos, Direction.DOWN));
         }
     }
@@ -230,7 +227,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
     @ModifyReturnValue(method = "canEquip", at = @At("RETURN"))
     private boolean apoli$preventArmorDispensing(boolean original, ItemStack stack) {
         return original
-            && !PowerHolderComponent.hasPowerType(this, RestrictArmorPowerType.class, p -> p.doesRestrict(stack, this.getPreferredEquipmentSlot(stack)));
+            && !PowerHolderComponent.hasPowerType(this, RestrictArmorPowerType.class, p -> p.doesRestrict(stack, this.getEquipmentSlotForItem(stack)));
     }
 
     @WrapOperation(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
@@ -293,8 +290,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
                 continue;
             }
 
-            if (previousResult.shouldSwingHand()) {
-                this.swingHand(hand);
+            if (previousResult instanceof InteractionResult.Success) {
+                this.swing(hand);
             }
 
             return previousResult;
@@ -358,8 +355,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
 
         }
 
-        if (newResult.shouldSwingHand()) {
-            this.swingHand(hand);
+        if (newResult instanceof InteractionResult.Success) {
+            this.swing(hand);
         }
 
         return ActionResultUtil.shouldOverride(original, newResult)

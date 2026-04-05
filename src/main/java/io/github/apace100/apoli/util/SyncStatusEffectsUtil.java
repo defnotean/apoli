@@ -17,7 +17,7 @@ public class SyncStatusEffectsUtil {
 
     public static void sendStatusEffectUpdatePacket(LivingEntity entity, UpdateType updateType, MobEffectInstance instance) {
 
-        if (entity.level().isClientSide) {
+        if (entity.level().isClientSide()) {
             return;
         }
 
@@ -39,7 +39,7 @@ public class SyncStatusEffectsUtil {
         APPLY((le, sei) -> {
 
             if (sei != null) {
-                le.getActiveEffectsMap().put(sei.getEffectType(), sei);
+                le.getActiveEffectsMap().put(sei.getEffect(), sei);
             }
 
         }),
@@ -47,7 +47,7 @@ public class SyncStatusEffectsUtil {
         REMOVE((le, sei) -> {
 
             if (sei != null) {
-                le.getActiveEffectsMap().remove(sei.getEffectType());
+                le.getActiveEffectsMap().remove(sei.getEffect());
             }
 
         });

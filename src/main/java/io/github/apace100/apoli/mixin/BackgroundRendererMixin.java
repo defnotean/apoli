@@ -32,7 +32,7 @@ public abstract class BackgroundRendererMixin {
 
     @ModifyExpressionValue(method = "setupFog", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/fog/FogRenderer;getFogType(Lnet/minecraft/client/Camera;)Lnet/minecraft/world/level/material/FogType;"))
     private FogType apoli$modifyCameraSubmersionType(FogType original, Camera camera) {
-        return PowerHolderComponent.getPowerTypes(camera.getFocusedEntity(), ModifyCameraSubmersionTypePowerType.class, true)
+        return PowerHolderComponent.getPowerTypes(camera.entity(), ModifyCameraSubmersionTypePowerType.class, true)
             .stream()
             .filter(p -> p.doesModify(original) && p.isActive())
             .findFirst()
@@ -42,7 +42,7 @@ public abstract class BackgroundRendererMixin {
 
     @Inject(method = "setupFog", at = @At("RETURN"))
     private void apoli$modifyFogForPhasing(Camera camera, int viewDistance, DeltaTracker deltaTracker, float skyDarkness, ClientLevel world, CallbackInfoReturnable<FogData> cir) {
-        if (camera.getFocusedEntity() instanceof LivingEntity living) {
+        if (camera.entity() instanceof LivingEntity living) {
             List<PhasingPowerType> phasings = PowerHolderComponent.getPowerTypes(living, PhasingPowerType.class);
             if (phasings.stream().anyMatch(pp -> pp.getRenderType() == PhasingPowerType.RenderType.BLINDNESS)) {
                 if (MiscUtil.getInWallBlockState(living) != null) {

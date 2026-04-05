@@ -17,7 +17,7 @@ public abstract class StatusEffectMixin {
     @WrapMethod(method = "applyInstantEffect")
     private void apoli$instantEffectImmunity(Entity source, Entity attacker, LivingEntity target, int amplifier, double proximity, Operation<Void> original) {
 
-        if (!PowerHolderComponent.hasPowerType(target, EffectImmunityPowerType.class, p -> p.doesApply(BuiltInRegistries.MOB_EFFECT.getEntry((MobEffect) (Object) this)))) {
+        if (!PowerHolderComponent.hasPowerType(target, EffectImmunityPowerType.class, p -> p.doesApply(BuiltInRegistries.MOB_EFFECT.wrapAsHolder((MobEffect) (Object) this)))) {
             original.call(source, attacker, target, amplifier, proximity);
         }
 

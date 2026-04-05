@@ -88,8 +88,8 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
     // MC 26.1: findRespawnPosition removed. The respawn system now uses RespawnConfig.
     // findRespawnAndUseSpawnBlock is the new equivalent but has a different signature.
 
-    private ServerPlayerEntityMixin(Level world, BlockPos pos, float yaw, GameProfile gameProfile) {
-        super(world, pos, yaw, gameProfile);
+    private ServerPlayerEntityMixin(Level world, GameProfile gameProfile) {
+        super(world, gameProfile);
     }
 
     @WrapOperation(method = "startSleepInBed", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;setSpawnPoint(Lnet/minecraft/core/ResourceKey;Lnet/minecraft/core/BlockPos;FZZ)V"))
@@ -147,7 +147,7 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
         }
 
         else if (this.apoli$hasObstructedOriginalSpawnPoint()) {
-            this.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK, 0.0F));
+            this.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
             return this.apoli$findPowerSpawnPoint();
         }
 
@@ -170,7 +170,7 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
     @Inject(method = "restoreFrom", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/server/network/ServerPlayer;enchantmentTableSeed:I"))
     private void copyInventoryWhenKeeping(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
         if(PowerHolderComponent.hasPowerType(oldPlayer, KeepInventoryPowerType.class)) {
-            this.getInventory().clone(oldPlayer.getInventory());
+            this.getInventory().replaceWith(oldPlayer.getInventory());
         }
     }
 
@@ -179,7 +179,7 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
         ServerLevel spawnPointWorld = this.server.getLevel(spawnPointDimension);
         return spawnPointPosition != null
             && spawnPointWorld != null
-            && DismountHelper.findRespawnPos(this.getType(), spawnPointWorld, this.spawnPointPosition, this.spawnForced) == null;
+            && DismountHelper.findSafeDismountLocation(this.getType(), spawnPointWorld, this.spawnPointPosition, this.spawnForced) == null;
     }
 
     @Unique
@@ -188,20 +188,20 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
             .stream()
             .max(Comparator.comparing(ModifyPlayerSpawnPowerType::getPriority))
             .flatMap(ModifyPlayerSpawnPowerType::getSpawn)
-            .map(Pair::getRight)
+            .map(Pair::getSecond)
             .orElse(null);
     }
 
     @Inject(method = "drop", at = @At("HEAD"))
     private void cacheItemStackBeforeDropping(boolean entireStack, CallbackInfoReturnable<Boolean> cir, @Share("prevSelectedStack") LocalRef<ItemStack> prevSelectedStackLocRef) {
-        prevSelectedStackLocRef.set(this.getInventory().getMainHandItem().copy());
+        prevSelectedStackLocRef.set(this.getInventory().getSelectedItem().copy());
     }
 
     @ModifyArg(method = "drop", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/ItemEntity;"))
     private ItemStack checkItemUsageStopping(ItemStack original, @Share("prevSelectedStack") LocalRef<ItemStack> prevSelectedStackLocRef) {
 
         ItemStack prevSelectedStack = prevSelectedStackLocRef.get();
-        if (!this.isUsingItem() || ItemStack.matches(prevSelectedStack, this.getInventory().getMainHandItem())) {
+        if (!this.isUsingItem() || ItemStack.matches(prevSelectedStack, this.getInventory().getSelectedItem())) {
             return original;
         }
 

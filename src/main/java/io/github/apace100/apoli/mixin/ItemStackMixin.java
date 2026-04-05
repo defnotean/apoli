@@ -112,7 +112,7 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
         SlotAccess useStackReference = InventoryUtil.getStackReferenceFromStack(user, thisAsStack);
         ItemStack useStack = useStackReference.get();
 
-        ActionOnItemUsePowerType.TriggerType triggerType = useStack.getMaxUseTime(user) == 0
+        ActionOnItemUsePowerType.TriggerType triggerType = useStack.getUseDuration(user) == 0
             ? ActionOnItemUsePowerType.TriggerType.INSTANT
             : ActionOnItemUsePowerType.TriggerType.START;
         ActionOnItemUsePowerType.executeActions(user, useStackReference, useStack, triggerType, PriorityPhase.BEFORE);
@@ -122,8 +122,8 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
         ItemStack oldUseStack = useStack.copy();
         boolean canConsumeCustomFood = EdibleItemPowerType.get(useStack, user)
             .map(EdibleItemPowerType::getFoodComponent)
-            .map(fc -> user.canConsume(fc.canAlwaysEat()))
-            .orElse(false);
+            .map(fc -> user.canEat(fc.canAlwaysEat()))
+            .orElse((Boolean) false);
 
         InteractionResult action;
         if (canConsumeCustomFood) {
@@ -139,8 +139,8 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
         //  endregion
 
         //  region  Action on item after use
-        useStackReference = SlotAccess.of(user, user.getPreferredEquipmentSlot(oldUseStack));
-        triggerType = useStack.getMaxUseTime(user) == 0
+        useStackReference = InventoryUtil.getStackReferenceFromStack(user, oldUseStack);
+        triggerType = useStack.getUseDuration(user) == 0
             ? ActionOnItemUsePowerType.TriggerType.INSTANT
             : ActionOnItemUsePowerType.TriggerType.START;
 
@@ -201,9 +201,10 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
         //  endregion
 
         //  region  Edible item consumption effects
-        finishUsingStackRef.set(EdibleItemPowerType.get(finishUsingStack, user)
-            .map(p -> user.eatFood(world, stack, p.getFoodComponent()))
-            .orElseGet(() -> original.call(finishUsingStack.getItem(), finishUsingStack, world, user)));
+        ItemStack edibleResult = EdibleItemPowerType.get(finishUsingStack, user)
+            .map(p -> original.call(finishUsingStack.getItem(), finishUsingStack, world, user))
+            .orElseGet(() -> original.call(finishUsingStack.getItem(), finishUsingStack, world, user));
+        finishUsingStackRef.set(edibleResult);
         //  endregion
 
         //  region  Action on item after finish using
@@ -253,8 +254,8 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
 
         StackClickPhase clickPhase = StackClickPhase.CURSOR;
 
-        SlotAccess cursorStackReference = ((ScreenHandlerAccessor) player.currentScreenHandler).callGetCursorStackReference();
-        SlotAccess slotStackReference = SlotAccess.of(slot.inventory, slot.getIndex());
+        SlotAccess cursorStackReference = ((ScreenHandlerAccessor) player.containerMenu).callGetCursorStackReference();
+        SlotAccess slotStackReference = slot.container.getSlot(slot.getContainerSlot());
 
         return ItemOnItemPowerType.executeActions(player, PriorityPhase.BEFORE, clickPhase, clickType, slot, slotStackReference, cursorStackReference)
             || original.call(cursorStackReference.get().getItem(), cursorStackReference.get(), slot, clickType, player)
@@ -266,7 +267,7 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
     private boolean apoli$itemOnItem_slotStack(Item slotItem, ItemStack slotStack, ItemStack cursorStack, Slot slot, ClickAction clickType, Player player, SlotAccess cursorStackReference, Operation<Boolean> original) {
 
         StackClickPhase clickPhase = StackClickPhase.SLOT;
-        SlotAccess slotStackReference = SlotAccess.of(slot.inventory, slot.getIndex());
+        SlotAccess slotStackReference = slot.container.getSlot(slot.getContainerSlot());
 
         return ItemOnItemPowerType.executeActions(player, PriorityPhase.BEFORE, clickPhase, clickType, slot, slotStackReference, cursorStackReference)
             || original.call(slotStackReference.get().getItem(), slotStackReference.get(), cursorStackReference.get(), slot, clickType, player, cursorStackReference)

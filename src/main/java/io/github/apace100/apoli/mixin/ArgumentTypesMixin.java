@@ -25,7 +25,7 @@ public abstract class ArgumentTypesMixin {
     @Inject(method = "register(Lnet/minecraft/core/Registry;)Lnet/minecraft/command/argument/serialize/ArgumentTypeInfo;", at = @At("RETURN"))
     private static void registerApoliArgumentTypes(Registry<ArgumentTypeInfo<?, ?>> registry, CallbackInfoReturnable<ArgumentTypeInfo<?, ?>> cir) {
         register(registry, Apoli.MODID + ":power", PowerArgumentType.class, new PowerArgumentType.Serializer());
-        register(registry, Apoli.MODID + ":power_operation", PowerOperationArgumentType.class, SingletonArgumentInfo.of(PowerOperationArgumentType::operation));
-        register(registry , Apoli.MODID + ":power_holder", PowerHolderArgumentType.class, new EntityArgument.Serializer());
+        register(registry, Apoli.MODID + ":power_operation", PowerOperationArgumentType.class, SingletonArgumentInfo.contextFree(PowerOperationArgumentType::operation));
+        register(registry , Apoli.MODID + ":power_holder", PowerHolderArgumentType.class, new EntityArgument.Info());
     }
 }

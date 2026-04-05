@@ -27,7 +27,7 @@ public abstract class WorldRendererMixin {
     @Inject(method = "renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V", at = @At(value = "INVOKE", target = "Ljava/lang/Runnable;run()V", shift = At.Shift.AFTER, ordinal = 0), cancellable = true)
     private void skipSkyRenderingForPhasingBlindness(Matrix4f matrix4f, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean thickFog, Runnable fogCallback, CallbackInfo ci) {
 
-        Entity cameraFocusedEntity = camera.getFocusedEntity();
+        Entity cameraFocusedEntity = camera.entity();
 
         if (PowerHolderComponent.hasPowerType(cameraFocusedEntity, PhasingPowerType.class, p -> p.getRenderType() == PhasingPowerType.RenderType.BLINDNESS) && MiscUtil.getInWallBlockState(cameraFocusedEntity) != null) {
             ci.cancel();

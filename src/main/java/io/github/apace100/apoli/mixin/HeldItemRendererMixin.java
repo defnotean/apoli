@@ -16,8 +16,8 @@ public abstract class HeldItemRendererMixin {
     private boolean apoli$overrideSpecialTransforms(boolean original, AbstractClientPlayer player, float tickDelta, float pitch, InteractionHand hand, float swingProgress, ItemStack stack) {
         return original && EdibleItemPowerType.get(stack)
             .map(EdibleItemPowerType::getFoodComponent)
-            .map(fc -> player.canConsume(fc.canAlwaysEat()))
-            .orElse(true);
+            .map(fc -> player.canEat(fc.canAlwaysEat()))
+            .orElse((Boolean) true);
     }
 
 }

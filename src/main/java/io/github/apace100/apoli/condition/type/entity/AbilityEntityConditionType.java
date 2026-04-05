@@ -31,8 +31,9 @@ public class AbilityEntityConditionType extends EntityConditionType {
 
     @Override
     public boolean test(EntityConditionContext context) {
-        return context.entity() instanceof Player player
-            && ability.isEnabledFor(player);
+        // TODO: PAL (PlayerAbilityLib) uses intermediary class names not available in 26.1. Re-enable when PAL updates.
+        // return context.entity() instanceof Player player && ability.isEnabledFor(player);
+        return false;
     }
 
     @Override

@@ -79,7 +79,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayer imple
 
     @Redirect(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Abilities;getFlySpeed()F"))
     private float modifyFlySpeed(Abilities playerAbilities){
-        return PowerHolderComponent.modify(this, ModifyAirSpeedPowerType.class, playerAbilities.getFlySpeed());
+        return PowerHolderComponent.modify(this, ModifyAirSpeedPowerType.class, playerAbilities.getFlyingSpeed());
     }
 
     @Override
@@ -87,7 +87,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayer imple
         Minecraft client = Minecraft.getInstance();
         client.execute(() -> {
             CustomToast toast = new CustomToast(toastData);
-            client.getToastManager().add(toast);
+            client.getToastManager().addToast(toast);
         });
     }
 

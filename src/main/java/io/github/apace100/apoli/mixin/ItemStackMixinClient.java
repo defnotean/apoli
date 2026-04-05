@@ -73,7 +73,7 @@ public abstract class ItemStackMixinClient implements DataComponentHolder {
     private void apoli$cacheTooltipStuff(Item.TooltipContext context, @Nullable Player player, TooltipFlag type, CallbackInfoReturnable<List<Component>> cir, @Local List<Component> tooltip) {
 
 		// Although this is a client-only mixin, this is still seen by the internal server.
-        if (player == null || !player.level().isClientSide) {
+        if (player == null || !player.level().isClientSide()) {
             return;
         }
 
@@ -133,10 +133,10 @@ public abstract class ItemStackMixinClient implements DataComponentHolder {
             KeyMapping keyBinding = ApoliClient.showPowersOnUsabilityHint;
 
             Integer keyCode = !keyBinding.isUnbound()
-                ? InputConstants.fromTranslationKey(keyBinding.getBoundKeyTranslationKey()).getCode()
+                ? InputConstants.getKey(keyBinding.saveString()).getValue()
                 : null;
             boolean isKeyPressed = keyCode != null
-                && InputConstants.isKeyPressed(client.getWindow().getHandle(), keyCode);
+                && InputConstants.isKeyDown(client.getWindow(), keyCode);
 
             if (isKeyPressed) {
                 this.apoli$appendExpandedTooltip(preventItemUsePowers, apoli$tooltip, translationKey, powerTextFormat, powerTextFormat);
@@ -150,7 +150,7 @@ public abstract class ItemStackMixinClient implements DataComponentHolder {
                 apoli$tooltip.add(baseText);
                 apoli$tooltip.add(Component.empty());
 
-                Component keyBindingText = KeyBindingUtil.getLocalizedName(keyBinding.getDescriptionId()).styled(style -> style
+                Component keyBindingText = KeyBindingUtil.getLocalizedName(keyBinding.getName()).withStyle(style -> style
                     .withColor(ChatFormatting.YELLOW)
                     .withItalic(keyBinding.isUnbound()));
 

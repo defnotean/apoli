@@ -30,6 +30,7 @@ import net.minecraft.world.scores.Team;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -56,7 +57,7 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
     @Shadow
     private boolean onGround;
 
-    @Shadow public abstract Vec3 getPos();
+    @Shadow public abstract Vec3 position();
 
     @Shadow public abstract double getX();
 
@@ -194,7 +195,7 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
 
         Team team = renderedEntity.getTeam();
 
-        boolean hasTeamColor = team != null && team.getColor().getColorValue() != null;
+        boolean hasTeamColor = team != null && team.getColor().getColor() != null;
         int colorAmount = 0;
 
         float red = 0.0f;
@@ -230,7 +231,7 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
         }
 
         return colorAmount > 0
-            ? Mth.packRgb(red / colorAmount, green / colorAmount, blue / colorAmount)
+            ? ARGB.color((int)(red / colorAmount * 255), (int)(green / colorAmount * 255), (int)(blue / colorAmount * 255))
             : original;
 
     }
@@ -299,9 +300,9 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
             return;
         }
 
-        double dx = apoli$prevPos.x - this.x();
-        double dy = apoli$prevPos.y - this.y();
-        double dz = apoli$prevPos.z - this.z();
+        double dx = apoli$prevPos.x - this.getX();
+        double dy = apoli$prevPos.y - this.getY();
+        double dz = apoli$prevPos.z - this.getZ();
 
         this.apoli$horizontalMovementValue = Math.sqrt(dx * dx + dz * dz);
         this.apoli$verticalMovementValue = Math.sqrt(dy * dy);
@@ -331,7 +332,7 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
 
     @WrapOperation(method = "causeFallDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/EntityType;is(Lnet/minecraft/tags/TagKey;)Z"))
     private boolean apoli$fixEntityTypeCalls(EntityType<?> instance, TagKey<EntityType<?>> tag, Operation<Boolean> original) {
-        return this.getType().is(tag);
+        return this.getType().builtInRegistryHolder().is(tag);
     }
 
     @Unique
@@ -344,7 +345,7 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
     private void apoli$registerCommandTagsDataTracker(EntityType<?> type, Level world, CallbackInfo ci, @Local SynchedEntityData.Builder builder) {
 
         try {
-            builder.add(COMMAND_TAGS, Set.of());
+            builder.define(COMMAND_TAGS, Set.of());
         }
 
         catch (Exception e) {
@@ -394,7 +395,7 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
 
     @Redirect(method = "save", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/Entity;tags:Ljava/util/Set;"))
     private Set<String> apoli$overrideCommandTagsFieldAccess(Entity entity) {
-        return entity.getTags();
+        return entity.entityTags();
     }
 
     @Unique

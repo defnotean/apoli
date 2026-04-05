@@ -153,7 +153,7 @@ public abstract class GameRendererMixin {
 
     @ModifyExpressionValue(method = "getFov", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getSubmersionType()Lnet/minecraft/world/level/material/FogType;"))
     private FogType apoli$modifySubmersionTypeFov(FogType original, Camera camera) {
-        return PowerHolderComponent.getPowerTypes(camera.getFocusedEntity(), ModifyCameraSubmersionTypePowerType.class, true)
+        return PowerHolderComponent.getPowerTypes(camera.entity(), ModifyCameraSubmersionTypePowerType.class, true)
             .stream()
             .filter(p -> p.doesModify(original) && p.isActive())
             .findFirst()
@@ -167,7 +167,7 @@ public abstract class GameRendererMixin {
     // PHASING: remove_blocks
     @Inject(at = @At(value = "HEAD"), method = "render")
     private void beforeRender(DeltaTracker tickCounter, boolean tick, CallbackInfo ci) {
-        List<PhasingPowerType> phasings = PowerHolderComponent.getPowerTypes(camera.getFocusedEntity(), PhasingPowerType.class);
+        List<PhasingPowerType> phasings = PowerHolderComponent.getPowerTypes(camera.entity(), PhasingPowerType.class);
         if (phasings.stream().anyMatch(pp -> pp.getRenderType() == PhasingPowerType.RenderType.REMOVE_BLOCKS)) {
             float view = phasings.stream().filter(pp -> pp.getRenderType() == PhasingPowerType.RenderType.REMOVE_BLOCKS).map(PhasingPowerType::getViewDistance).min(Float::compareTo).get();
             Set<BlockPos> eyePositions = getEyePos(0.25F, 0.05F, 0.25F);
@@ -179,39 +179,33 @@ public abstract class GameRendererMixin {
             }
             for (BlockPos eyePosition : noLongerEyePositions) {
                 BlockState state = savedStates.get(eyePosition);
-                client.level.setBlock(eyePosition, state);
+                client.level.setBlockAndUpdate(eyePosition, state);
                 savedStates.remove(eyePosition);
             }
             for (BlockPos p : eyePositions) {
                 BlockState stateAtP = client.level.getBlockState(p);
-                if (!savedStates.containsKey(p) && !client.level.isAir(p) && !(stateAtP.getBlock() instanceof LiquidBlock)) {
+                if (!savedStates.containsKey(p) && !client.level.isEmptyBlock(p) && !(stateAtP.getBlock() instanceof LiquidBlock)) {
                     savedStates.put(p, stateAtP);
-                    client.level.setBlock(p, Blocks.AIR.defaultBlockState());
+                    client.level.setBlockAndUpdate(p, Blocks.AIR.defaultBlockState());
                 }
             }
         } else if (savedStates.size() > 0) {
             Set<BlockPos> noLongerEyePositions = new HashSet<>(savedStates.keySet());
             for (BlockPos eyePosition : noLongerEyePositions) {
                 BlockState state = savedStates.get(eyePosition);
-                client.level.setBlock(eyePosition, state);
+                client.level.setBlockAndUpdate(eyePosition, state);
                 savedStates.remove(eyePosition);
             }
         }
     }
 
-    // PHASING
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;update(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/world/entity/Entity;ZZF)V"), method = "renderWorld")
-    private void preventThirdPerson(Camera camera, BlockGetter area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta) {
-        if (PowerHolderComponent.getPowerTypes(camera.getFocusedEntity(), PhasingPowerType.class).stream().anyMatch(pp -> pp.getRenderType() == PhasingPowerType.RenderType.REMOVE_BLOCKS)) {
-            camera.update(area, focusedEntity, false, false, tickDelta);
-        } else {
-            camera.update(area, focusedEntity, thirdPerson, inverseView, tickDelta);
-        }
-    }
+    // PHASING: In MC 26.1 Camera.update() takes only a DeltaTracker - third person prevention handled elsewhere
+    // The Camera.update(DeltaTracker) method no longer accepts direct parameters for third person mode.
+    // TODO: Re-implement phasing third-person prevention using the new Camera API (setCameraType or similar).
 
     @Unique
     private Set<BlockPos> getEyePos(float rangeX, float rangeY, float rangeZ) {
-        Vec3 pos = camera.getFocusedEntity().position().add(0, camera.getFocusedEntity().getEyeHeight(camera.getFocusedEntity().getPose()), 0);
+        Vec3 pos = camera.entity().getEyePosition();
         AABB cameraBox = new AABB(pos, pos);
         cameraBox = cameraBox.inflate(rangeX, rangeY, rangeZ);
         HashSet<BlockPos> set = new HashSet<>();

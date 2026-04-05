@@ -2,12 +2,10 @@ package io.github.apace100.apoli.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import com.mojang.serialization.MapCodec;
 import io.github.apace100.apoli.access.BlockStateCollisionShapeAccess;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.type.PhasingPowerType;
 import io.github.apace100.apoli.power.type.PreventBlockSelectionPowerType;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,14 +35,14 @@ public abstract class AbstractBlockStateMixin extends StateHolder<Block, BlockSt
     @Unique
     private boolean apoli$queryOriginal = false;
 
-    protected AbstractBlockStateMixin(Block owner, Reference2ObjectArrayMap<Property<?>, Comparable<?>> propertyMap, MapCodec<BlockState> codec) {
-        super(owner, propertyMap, codec);
+    protected AbstractBlockStateMixin(Block owner, Property<?>[] properties, Comparable<?>[] values) {
+        super(owner, properties, values);
     }
 
     @ModifyReturnValue(method = "getOutlineShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/CollisionContext;)Lnet/minecraft/world/phys/shapes/VoxelShape;", at = @At("RETURN"))
     private VoxelShape apoli$preventBlockSelection(VoxelShape original, BlockGetter blockView, BlockPos blockPos, CollisionContext context) {
 
-        if (context == CollisionContext.absent()) {
+        if (context == CollisionContext.empty()) {
             return original;
         }
 
@@ -59,7 +57,7 @@ public abstract class AbstractBlockStateMixin extends StateHolder<Block, BlockSt
     @ModifyReturnValue(method = "getCollisionShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/CollisionContext;)Lnet/minecraft/world/phys/shapes/VoxelShape;", at = @At("RETURN"))
     private VoxelShape apoli$phaseThroughBlocks(VoxelShape original, BlockGetter blockView, BlockPos blockPos, CollisionContext context) {
 
-        if (context == CollisionContext.absent()) {
+        if (context == CollisionContext.empty()) {
             return original;
         }
 

@@ -74,8 +74,8 @@ public abstract class ClientPlayerInteractionManagerMixin {
                 continue;
             }
 
-            if (previousResult.shouldSwingHand()) {
-                player.swingHand(mHand);
+            if (previousResult instanceof InteractionResult.Success) {
+                player.swing(mHand);
             }
 
             return previousResult;
@@ -133,8 +133,8 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
         }
 
-        if (newResult.shouldSwingHand()) {
-            player.swingHand(hand);
+        if (newResult instanceof InteractionResult.Success) {
+            player.swing(hand);
         }
 
         return ActionResultUtil.shouldOverride(original, newResult)
@@ -186,22 +186,12 @@ public abstract class ClientPlayerInteractionManagerMixin {
                 continue;
             }
 
-            if (previousResult.shouldSwingHand()) {
-                player.swingHand(hand);
+            if (previousResult instanceof InteractionResult.Success) {
+                player.swing(hand);
             }
 
-            return switch (previousResult) {
-                case SUCCESS, SUCCESS_NO_ITEM_USED ->
-                    InteractionResult.SUCCESS;
-                case CONSUME ->
-                    InteractionResult.CONSUME;
-                case CONSUME_PARTIAL ->
-                    InteractionResult.CONSUME_PARTIAL;
-                case FAIL ->
-                    InteractionResult.FAIL;
-                default ->
-                    throw new IllegalStateException("Unexpected value: " + previousResult);
-            };
+            // InteractionResult is now a sealed interface in 26.1; return the result directly
+            return previousResult;
 
         }
 
@@ -254,8 +244,8 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
         }
 
-        if (newResult.shouldSwingHand()) {
-            player.swingHand(hand);
+        if (newResult instanceof InteractionResult.Success) {
+            player.swing(hand);
         }
 
         return ActionResultUtil.shouldOverride(original, newResult)

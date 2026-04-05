@@ -18,6 +18,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -57,7 +58,7 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
         float alpha = modelColorPowers.stream().map(ModelColorPowerType::getAlpha).min(Float::compare).orElse(1.0f);
 
         int packedArgb = ((int)(alpha * 255) << 24) | ((int)(red * 255) << 16) | ((int)(green * 255) << 8) | (int)(blue * 255);
-        instance.render(matrices, mVertexConsumers.getBuffer(RenderType.getEntityTranslucent(skinTextureId)), light, overlay, packedArgb);
+        instance.render(matrices, mVertexConsumers.getBuffer(RenderTypes.entityTranslucent(skinTextureId)), light, overlay, packedArgb);
 
     }
 

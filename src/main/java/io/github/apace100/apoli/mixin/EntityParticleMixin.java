@@ -29,7 +29,7 @@ public abstract class EntityParticleMixin extends Entity {
     private void apoli$emitParticles(CallbackInfo ci) {
 
         LocalPlayer player = Minecraft.getInstance().player;
-        boolean inFirstPerson = Minecraft.getInstance().options.getPerspective().isFirstPerson();
+        boolean inFirstPerson = Minecraft.getInstance().options.getCameraType().isFirstPerson();
 
         if (player == null) {
             return;
@@ -50,7 +50,7 @@ public abstract class EntityParticleMixin extends Entity {
                 .multiply(this.getBbWidth(), this.getEyeHeight(this.getPose()), this.getBbWidth());
             Vec3 particlePos = this
                 .position()
-                .add(particlePower.getX(), particlePower.getY(), particlePower.getZ());
+                .add(particlePower.getOffsetX(), particlePower.getOffsetY(), particlePower.getOffsetZ());
 
             if (particlePower.getCount() == 0) {
 
@@ -58,7 +58,7 @@ public abstract class EntityParticleMixin extends Entity {
                 velocityY = spread.y() * particlePower.getSpeed();
                 velocityZ = spread.z() * particlePower.getSpeed();
 
-                this.level().addParticle(particlePower.getParticle(), particlePower.shouldForce(), particlePos.x(), particlePos.y(), particlePos.z(), velocityX, velocityY, velocityZ);
+                this.level().addParticle(particlePower.getParticle(), particlePower.shouldForce(), particlePower.shouldForce(), particlePos.x(), particlePos.y(), particlePos.z(), velocityX, velocityY, velocityZ);
 
             } else {
 
@@ -71,7 +71,7 @@ public abstract class EntityParticleMixin extends Entity {
                     velocityY = (2.0 * this.random.nextDouble() - 1.0) * particlePower.getSpeed();
                     velocityZ = (2.0 * this.random.nextDouble() - 1.0) * particlePower.getSpeed();
 
-                    this.level().addParticle(particlePower.getParticle(), particlePower.shouldForce(), newParticlePos.x(), newParticlePos.y(), newParticlePos.z(), velocityX, velocityY, velocityZ);
+                    this.level().addParticle(particlePower.getParticle(), particlePower.shouldForce(), particlePower.shouldForce(), newParticlePos.x(), newParticlePos.y(), newParticlePos.z(), velocityX, velocityY, velocityZ);
 
                 }
 

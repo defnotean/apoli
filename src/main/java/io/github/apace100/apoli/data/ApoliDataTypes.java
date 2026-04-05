@@ -160,7 +160,9 @@ public class ApoliDataTypes {
 
     public static final SerializableDataType<Comparison> COMPARISON = SerializableDataType.enumValue(Comparison.class, SerializationHelper.buildEnumMap(Comparison.class, Comparison::getComparisonString));
 
-    public static final SerializableDataType<PlayerAbility> PLAYER_ABILITY = SerializableDataTypes.IDENTIFIER.xmap(id -> Pal.provideRegisteredAbility(id).get(), PlayerAbility::getId);
+    // TODO: PAL (PlayerAbilityLib) uses intermediary class names not available in 26.1. Re-enable when PAL updates.
+    // public static final SerializableDataType<PlayerAbility> PLAYER_ABILITY = SerializableDataTypes.IDENTIFIER.xmap(id -> Pal.provideRegisteredAbility(id).get(), PlayerAbility::getId);
+    public static final SerializableDataType<PlayerAbility> PLAYER_ABILITY = SerializableDataTypes.IDENTIFIER.xmap(id -> { throw new UnsupportedOperationException("PAL not available for MC 26.1"); }, ability -> { throw new UnsupportedOperationException("PAL not available for MC 26.1"); });
 
     public static final SerializableDataType<ArgumentWrapper<Integer>> ITEM_SLOT = SerializableDataType.argumentType(SlotArgument.slot());
 

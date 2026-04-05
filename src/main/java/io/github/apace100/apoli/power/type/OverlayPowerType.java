@@ -137,8 +137,8 @@ public class OverlayPowerType extends PowerType {
     @Environment(EnvType.CLIENT)
     public boolean shouldRender(Options options, DrawPhase targetDrawPhase) {
         return this.getDrawPhase() == targetDrawPhase
-            && (!options.hudHidden || !this.doesHideWithHud())
-            && (options.getPerspective().isFirstPerson() || this.shouldBeVisibleInThirdPerson());
+            && (!options.hideGui || !this.doesHideWithHud())
+            && (options.getCameraType().isFirstPerson() || this.shouldBeVisibleInThirdPerson());
     }
 
     @SuppressWarnings("SwitchStatementWithTooFewBranches")
@@ -168,84 +168,12 @@ public class OverlayPowerType extends PowerType {
 
         }
 
-        int scaledWidth = client.getWindow().getScaledWidth();
-        int scaledHeight = client.getWindow().getScaledHeight();
-
-        float width, height, x1, y1, x2, y2, red, green, blue, alpha;
-
-        RenderSystem.disableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.enableBlend();
-
-        switch (drawMode) {
-            case NAUSEA -> {
-
-                RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE);
-                float stretch = Mth.lerp(strength, 2.0F, 1.0F);
-
-                red = this.red * strength;
-                green = this.green * strength;
-                blue = this.blue * strength;
-
-                width = scaledWidth * stretch;
-                height = scaledHeight * stretch;
-
-                x1 = (scaledWidth - width) / 2.0F;
-                y1 = (scaledHeight - height) / 2.0F;
-
-                alpha = 1.0F;
-
-            }
-            default -> {
-
-                RenderSystem.defaultBlendFunc();
-
-                red = this.red;
-                green = this.green;
-                blue = this.blue;
-
-                width = scaledWidth;
-                height = scaledHeight;
-
-                x1 = 0;
-                y1 = 0;
-
-                alpha = strength;
-
-            }
-        }
-
-        TextureAtlasSprite sprite = overlaySpriteHolder.apoli$getSprite(spriteId);
-        Identifier textureToDraw = sprite.atlasLocation();
-
-        float minU = sprite.getU0();
-        float maxU = sprite.getU1();
-
-        float minV = sprite.getV0();
-        float maxV = sprite.getV1();
-
-        RenderSystem.setShaderColor(red, green, blue, alpha);
-        RenderSystem.setShaderTexture(0, textureToDraw);
-
-        x2 = x1 + width;
-        y2 = y1 + height;
-
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-
-        bufferBuilder.addVertex(x1, y1, -1.0F).setUv(minU, minV);
-        bufferBuilder.addVertex(x1, y2, -1.0F).setUv(minU, maxV);
-        bufferBuilder.addVertex(x2, y2, -1.0F).setUv(maxU, maxV);
-        bufferBuilder.addVertex(x2, y1, -1.0F).setUv(maxU, minV);
-
-        MeshData meshData = bufferBuilder.buildOrThrow();
-        BufferBuilder.drawWithShader(meshData);
-
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.disableBlend();
-        RenderSystem.depthMask(true);
-        RenderSystem.enableDepthTest();
+        // TODO: MC 26.1 completely overhauled the rendering pipeline. RenderSystem.disableDepthTest,
+        // RenderSystem.enableBlend, RenderSystem.setShaderColor, RenderSystem.setShaderTexture,
+        // GlStateManager.SrcFactor/DstFactor, and BufferBuilder.drawWithShader are all removed.
+        // The overlay rendering needs to be reimplemented using the new RenderPipeline system.
+        // For now, this is stubbed out to allow compilation.
+        Apoli.LOGGER.debug("Overlay rendering is not yet implemented for MC 26.1");
 
     }
 
@@ -253,7 +181,7 @@ public class OverlayPowerType extends PowerType {
     public static final class SpriteHolder extends TextureAtlas {
 
         public SpriteHolder(TextureManager manager) {
-            super(manager, ATLAS_TEXTURE, Apoli.identifier("overlay"), Set.of(AnimationMetadataSection.SERIALIZER, TextureMetadataSection.SERIALIZER));
+            super(ATLAS_TEXTURE);
         }
 
         @Override

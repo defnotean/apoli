@@ -75,18 +75,18 @@ public abstract class GrindstoneScreenHandlerMixin extends AbstractContainerMenu
     @Inject(method = "updateResult", at = @At("RETURN"))
     private void modifyResult(CallbackInfo ci) {
 
-        ItemStack topStack = input.getStack(INPUT_1_ID);
-        ItemStack bottomStack = input.getStack(INPUT_2_ID);
+        ItemStack topStack = input.getItem(INPUT_1_ID);
+        ItemStack bottomStack = input.getItem(INPUT_2_ID);
 
-        SlotAccess outputStackRef = InventoryUtil.createStackReference(result.getStack(0));
+        SlotAccess outputStackRef = InventoryUtil.createStackReference(result.getItem(0));
         this.apoli$appliedPowers = PowerHolderComponent.getPowerTypes(apoli$cachedPlayer, ModifyGrindstonePowerType.class)
             .stream()
             .filter(mgp -> mgp.doesApply(topStack, bottomStack, outputStackRef.get(), apoli$getPos()))
             .peek(mgp -> mgp.setOutput(topStack, bottomStack, outputStackRef))
             .collect(Collectors.toCollection(LinkedList::new));
 
-        result.setStack(0, outputStackRef.get());
-        this.sendContentUpdates();
+        result.setItem(0, outputStackRef.get());
+        this.broadcastChanges();
 
     }
 
@@ -104,7 +104,7 @@ public abstract class GrindstoneScreenHandlerMixin extends AbstractContainerMenu
         applyingPowers.forEach(mgpt -> mgpt.executeActions(this.apoli$getPos(), stackReference));
 
         if (stackReference.get().isEmpty()) {
-            this.getSlot(slotIndex).onTakeItem(player, copy);
+            this.getSlot(slotIndex).onTake(player, copy);
         }
 
         return stackReference.get();
@@ -124,7 +124,7 @@ public abstract class GrindstoneScreenHandlerMixin extends AbstractContainerMenu
     @Nullable
     @Override
     public BlockPos apoli$getPos() {
-        return this.context.get((world, pos) -> pos, null);
+        return this.context.evaluate((world, pos) -> pos, null);
     }
 
 }

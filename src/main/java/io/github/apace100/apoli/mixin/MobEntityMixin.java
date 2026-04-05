@@ -32,11 +32,11 @@ public abstract class MobEntityMixin extends LivingEntity implements Targeting {
     @WrapOperation(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;loot(Lnet/minecraft/world/entity/item/ItemEntity;)V"))
     private void apoli$actionOnItemPickup(Mob mobEntity, ItemEntity itemEntity, Operation<Void> original) {
 
-        SlotAccess stackReference = InventoryUtil.createStackReference(itemEntity.getStack());
-        Entity thrower = MiscUtil.getEntityByUuid(((ItemEntityAccessor) itemEntity).getThrowerUuid(), this.getServer());
+        SlotAccess stackReference = InventoryUtil.createStackReference(itemEntity.getItem());
+        Entity thrower = MiscUtil.getEntityByUuid(((ItemEntityAccessor) itemEntity).getThrowerUuid(), this.level().getServer());
 
         Prioritized.CallInstance<ActionOnItemPickupPowerType> callInstance = ActionOnItemPickupPowerType.executeItemAction(thrower, stackReference, this);
-        itemEntity.setStack(stackReference.get());
+        itemEntity.setItem(stackReference.get());
 
         original.call(mobEntity, itemEntity);
         ActionOnItemPickupPowerType.executeBiEntityAction(callInstance, thrower);
