@@ -11,7 +11,8 @@ import java.util.List;
 @Mixin(AdvancementCommands.class)
 public interface AdvancementCommandAccessor {
 
-    @Invoker
+    // MC 26.1: method renamed from 'addChildrenRecursivelyToList' to 'addChildren'
+    @Invoker("addChildren")
     static void callAddChildrenRecursivelyToList(AdvancementNode parent, List<AdvancementHolder> children) {
         throw new AssertionError();
     }

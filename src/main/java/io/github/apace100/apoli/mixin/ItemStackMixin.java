@@ -43,9 +43,8 @@ import java.lang.ref.WeakReference;
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin implements DataComponentHolder, EntityLinkedItemStack, FabricItemStack {
 
-    @Nullable
-    @Shadow
-    public abstract Entity getHolder();
+    // MC 26.1: ItemStack.getHolder() no longer exists. Entity tracking is now
+    // handled entirely through the apoli$holdingEntity WeakReference below.
 
     @Shadow
     public abstract Item getItem();
@@ -67,10 +66,8 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
 
     @Override
     public Entity apoli$getEntity(boolean prioritiseVanillaHolder) {
-        Entity vanillaHolder = getHolder();
-        if (prioritiseVanillaHolder && vanillaHolder != null) {
-            return vanillaHolder;
-        }
+        // MC 26.1: ItemStack.getHolder() no longer exists, so we rely entirely
+        // on the apoli$holdingEntity WeakReference for entity tracking.
         if (apoli$holdingEntity != null) {
             return apoli$holdingEntity.get();
         }

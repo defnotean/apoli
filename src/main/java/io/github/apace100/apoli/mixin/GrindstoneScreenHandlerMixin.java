@@ -33,29 +33,35 @@ import java.util.stream.Collectors;
 @Mixin(GrindstoneMenu.class)
 public abstract class GrindstoneScreenHandlerMixin extends AbstractContainerMenu implements PowerModifiedGrindstone {
 
+    // MC 26.1: field renamed from 'input' to 'repairSlots'
     @Shadow
     @Final
-    Container input;
+    Container repairSlots;
 
+    // MC 26.1: field renamed from 'result' to 'resultSlots'
     @Shadow
     @Final
-    private Container result;
+    private Container resultSlots;
 
+    // MC 26.1: field renamed from 'INPUT_1_ID' to 'INPUT_SLOT'
     @Shadow
     @Final
-    public static int INPUT_1_ID;
+    public static int INPUT_SLOT;
 
+    // MC 26.1: field renamed from 'INPUT_2_ID' to 'ADDITIONAL_SLOT'
     @Shadow
     @Final
-    public static int INPUT_2_ID;
+    public static int ADDITIONAL_SLOT;
 
+    // MC 26.1: field renamed from 'OUTPUT_ID' to 'RESULT_SLOT'
     @Shadow
     @Final
-    public static int OUTPUT_ID;
+    public static int RESULT_SLOT;
 
+    // MC 26.1: field renamed from 'context' to 'access'
     @Shadow
     @Final
-    private ContainerLevelAccess context;
+    private ContainerLevelAccess access;
 
     @Unique
     private Player apoli$cachedPlayer;
@@ -67,25 +73,27 @@ public abstract class GrindstoneScreenHandlerMixin extends AbstractContainerMenu
         super(type, syncId);
     }
 
-    @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/AbstractContainerMenuContext;)V", at = @At("RETURN"))
-    private void cachePlayer(int syncId, Inventory playerInventory, ContainerLevelAccess context, CallbackInfo ci) {
+    // MC 26.1: constructor takes ContainerLevelAccess, not AbstractContainerMenuContext
+    @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/ContainerLevelAccess;)V", at = @At("RETURN"))
+    private void cachePlayer(int syncId, Inventory playerInventory, ContainerLevelAccess access, CallbackInfo ci) {
         apoli$cachedPlayer = playerInventory.player;
     }
 
-    @Inject(method = "updateResult", at = @At("RETURN"))
+    // MC 26.1: method renamed from 'updateResult' to 'createResult'
+    @Inject(method = "createResult", at = @At("RETURN"))
     private void modifyResult(CallbackInfo ci) {
 
-        ItemStack topStack = input.getItem(INPUT_1_ID);
-        ItemStack bottomStack = input.getItem(INPUT_2_ID);
+        ItemStack topStack = repairSlots.getItem(INPUT_SLOT);
+        ItemStack bottomStack = repairSlots.getItem(ADDITIONAL_SLOT);
 
-        SlotAccess outputStackRef = InventoryUtil.createStackReference(result.getItem(0));
+        SlotAccess outputStackRef = InventoryUtil.createStackReference(resultSlots.getItem(0));
         this.apoli$appliedPowers = PowerHolderComponent.getPowerTypes(apoli$cachedPlayer, ModifyGrindstonePowerType.class)
             .stream()
             .filter(mgp -> mgp.doesApply(topStack, bottomStack, outputStackRef.get(), apoli$getPos()))
             .peek(mgp -> mgp.setOutput(topStack, bottomStack, outputStackRef))
             .collect(Collectors.toCollection(LinkedList::new));
 
-        result.setItem(0, outputStackRef.get());
+        resultSlots.setItem(0, outputStackRef.get());
         this.broadcastChanges();
 
     }
@@ -96,7 +104,7 @@ public abstract class GrindstoneScreenHandlerMixin extends AbstractContainerMenu
         List<ModifyGrindstonePowerType> applyingPowers = this.apoli$getAppliedPowers();
         SlotAccess stackReference = InventoryUtil.createStackReference(original);
 
-        if (slotIndex != OUTPUT_ID || applyingPowers == null || applyingPowers.isEmpty()) {
+        if (slotIndex != RESULT_SLOT || applyingPowers == null || applyingPowers.isEmpty()) {
             return original;
         }
 
@@ -124,7 +132,7 @@ public abstract class GrindstoneScreenHandlerMixin extends AbstractContainerMenu
     @Nullable
     @Override
     public BlockPos apoli$getPos() {
-        return this.context.evaluate((world, pos) -> pos, null);
+        return this.access.evaluate((world, pos) -> pos, null);
     }
 
 }

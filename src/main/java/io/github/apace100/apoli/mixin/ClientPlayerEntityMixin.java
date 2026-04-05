@@ -40,12 +40,13 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayer imple
     @Unique
     private boolean apoli$isMoving = false;
 
+    // MC 26.1: field is 'minecraft' not 'client' on LocalPlayer
     @Shadow
     @Final
-    protected Minecraft client;
+    protected Minecraft minecraft;
 
-    @Shadow
-    protected abstract boolean isWalking();
+    // MC 26.1: isWalking() no longer exists on LocalPlayer.
+    // Replaced by checking input.hasForwardImpulse() inline where needed.
 
     @Shadow @Final private ClientRecipeBook recipeBook;
 
@@ -77,7 +78,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayer imple
         return apoli$isMoving;
     }
 
-    @Redirect(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Abilities;getFlySpeed()F"))
+    @Redirect(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Abilities;getFlyingSpeed()F"))
     private float modifyFlySpeed(Abilities playerAbilities){
         return PowerHolderComponent.modify(this, ModifyAirSpeedPowerType.class, playerAbilities.getFlyingSpeed());
     }
@@ -99,7 +100,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayer imple
 
     @ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/LocalPlayer;canStartSprinting()Z"))
     private boolean apoli$allowActivePowerSprinting(boolean original, @Share("sprintingPowers") LocalRef<List<SprintingPowerType>> sprintingPowersRef, @Share("preventSprinting") LocalBooleanRef preventSprintingRef) {
-        return original || (this.isWalking() && sprintingPowersRef.get()
+        return original || (((LocalPlayer) (Object) this).input.hasForwardImpulse() && sprintingPowersRef.get()
             .stream()
             .anyMatch(SprintingPowerType::shouldRequireInput));
     }
@@ -131,7 +132,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayer imple
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void apoli$cachePlayerToRecipeBook(Minecraft client, ClientLevel world, ClientPacketListener networkHandler, StatsCounter stats, ClientRecipeBook recipeBook, boolean lastSneaking, boolean lastSprinting, CallbackInfo ci) {
+    private void apoli$cachePlayerToRecipeBook(Minecraft client, ClientLevel world, ClientPacketListener networkHandler, StatsCounter stats, ClientRecipeBook recipeBook, net.minecraft.world.entity.player.Input lastInput, boolean lastSprinting, net.minecraft.client.multiplayer.chat.ChatAbilities chatAbilities, CallbackInfo ci) {
 
         if (this.recipeBook instanceof PowerCraftingObject pco) {
             pco.apoli$setPlayer(this);

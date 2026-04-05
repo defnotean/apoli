@@ -17,6 +17,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.inventory.CraftingMenu;
+import net.minecraft.world.inventory.AbstractCraftingMenu;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
@@ -34,11 +35,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.LinkedList;
 
 @Mixin(CraftingMenu.class)
-public abstract class CraftingScreenHandlerMixin extends RecipeBookMenu implements ScreenHandlerUsabilityOverride {
+public abstract class CraftingScreenHandlerMixin extends AbstractCraftingMenu implements ScreenHandlerUsabilityOverride {
 
-    @Shadow
-    @Final
-    private CraftingContainer input;
+    // MC 26.1: 'input' field is now 'craftSlots' on parent AbstractCraftingMenu,
+    // accessible directly since we extend it. @Shadow removed.
 
     @Shadow @Final private Player player;
     @Unique
@@ -54,11 +54,12 @@ public abstract class CraftingScreenHandlerMixin extends RecipeBookMenu implemen
         this.apoli$canUse = canUse;
     }
 
-    private CraftingScreenHandlerMixin(MenuType screenHandlerType, int i) {
-        super(screenHandlerType, i);
+    private CraftingScreenHandlerMixin(MenuType screenHandlerType, int i, int w, int h) {
+        super(screenHandlerType, i, w, h);
     }
 
-    @ModifyExpressionValue(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/AbstractContainerMenuContext;)V", at = @At(value = "NEW", target = "(Lnet/minecraft/world/inventory/AbstractContainerMenu;II)Lnet/minecraft/world/inventory/TransientCraftingContainer;"))
+    // MC 26.1: constructor takes ContainerLevelAccess, not AbstractContainerMenuContext
+    @ModifyExpressionValue(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/ContainerLevelAccess;)V", at = @At(value = "NEW", target = "(Lnet/minecraft/world/inventory/AbstractContainerMenu;II)Lnet/minecraft/world/inventory/TransientCraftingContainer;"))
     private TransientCraftingContainer apoli$cachePlayerToCraftingInventory(TransientCraftingContainer original, int syncId, Inventory playerInventory) {
 
         if (original instanceof PowerCraftingInventory pci) {
@@ -69,9 +70,10 @@ public abstract class CraftingScreenHandlerMixin extends RecipeBookMenu implemen
 
     }
 
-    // TODO: MC 26.1 renamed getFirstMatch -> getRecipeFor
-    @Inject(method = "updateResult", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeManager;getRecipeFor(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/item/crafting/RecipeInput;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/crafting/RecipeHolder;)Ljava/util/Optional;"))
-    private static void apoli$clearPowerCraftingInventory(AbstractContainerMenu handler, Level world, Player player, CraftingContainer craftingInventory, ResultContainer resultInventory, @Nullable RecipeHolder<CraftingRecipe> recipe, CallbackInfo ci) {
+    // MC 26.1: method renamed from 'updateResult' to 'slotChangedCraftingGrid'
+    // Signature: (AbstractContainerMenu, ServerLevel, Player, CraftingContainer, ResultContainer, RecipeHolder)
+    @Inject(method = "slotChangedCraftingGrid", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeManager;getRecipeFor(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/item/crafting/RecipeInput;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/crafting/RecipeHolder;)Ljava/util/Optional;"))
+    private static void apoli$clearPowerCraftingInventory(AbstractContainerMenu handler, net.minecraft.server.level.ServerLevel world, Player player, CraftingContainer craftingInventory, ResultContainer resultInventory, @Nullable RecipeHolder<CraftingRecipe> recipe, CallbackInfo ci) {
 
         if (craftingInventory instanceof PowerCraftingInventory pci) {
             pci.apoli$setPowerTypes(new LinkedList<>());
@@ -88,7 +90,7 @@ public abstract class CraftingScreenHandlerMixin extends RecipeBookMenu implemen
     // TODO: MC 26.1 renamed quickMove -> quickMoveStack, insertItem -> moveItemStackTo
     @ModifyVariable(method = "quickMoveStack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/CraftingMenu;moveItemStackTo(Lnet/minecraft/world/item/ItemStack;IIZ)Z", ordinal = 0), ordinal = 1)
     private ItemStack apoli$modifyResultStackOnQuickMove(ItemStack original, Player player, int slotId, @Local Slot slot) {
-        return ModifyCraftingPowerType.executeAfterCraftingAction(player, input, slot, original);
+        return ModifyCraftingPowerType.executeAfterCraftingAction(player, craftSlots, slot, original);
     }
 
 }

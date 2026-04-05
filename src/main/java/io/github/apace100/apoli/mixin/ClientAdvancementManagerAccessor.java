@@ -11,7 +11,8 @@ import java.util.Map;
 @Mixin(ClientAdvancements.class)
 public interface ClientAdvancementManagerAccessor {
 
-    @Accessor
+    // MC 26.1: field renamed from 'advancementProgresses' to 'progress'
+    @Accessor("progress")
     Map<AdvancementHolder, AdvancementProgress> getAdvancementProgresses();
 
 }

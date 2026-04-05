@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ResultSlot.class)
 public interface CraftingResultSlotAccessor {
-    @Accessor
+    // MC 26.1: field renamed from 'input' to 'craftSlots'
+    @Accessor("craftSlots")
     CraftingContainer getInput();
 }

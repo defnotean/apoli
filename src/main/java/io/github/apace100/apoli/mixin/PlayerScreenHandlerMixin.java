@@ -12,21 +12,24 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.AbstractCraftingMenu;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Slice;
 
 @Mixin(InventoryMenu.class)
-public abstract class PlayerScreenHandlerMixin {
+public abstract class PlayerScreenHandlerMixin extends AbstractCraftingMenu {
 
-    @Shadow
-    @Final
-    private CraftingContainer craftingInput;
+    // MC 26.1: 'craftSlots' no longer on InventoryMenu directly.
+    // 'craftSlots' is inherited from AbstractCraftingMenu.
+
+    private PlayerScreenHandlerMixin(MenuType<?> type, int syncId, int w, int h) {
+        super(type, syncId, w, h);
+    }
 
     @ModifyExpressionValue(method = "<init>", at = @At(value = "NEW", target = "(Lnet/minecraft/world/inventory/AbstractContainerMenu;II)Lnet/minecraft/world/inventory/TransientCraftingContainer;"))
     private TransientCraftingContainer apoli$cachePlayerToCraftingInventory(TransientCraftingContainer original, Inventory playerInventory) {
@@ -47,7 +50,7 @@ public abstract class PlayerScreenHandlerMixin {
 
     @ModifyVariable(method = "quickMoveStack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/InventoryMenu;moveItemStackTo(Lnet/minecraft/world/item/ItemStack;IIZ)Z", ordinal = 0), ordinal = 1)
     private ItemStack apoli$modifyResultStackOnQuickMove(ItemStack original, Player player, int slotId, @Local Slot slot) {
-        return ModifyCraftingPowerType.executeAfterCraftingAction(player, craftingInput, slot, original);
+        return ModifyCraftingPowerType.executeAfterCraftingAction(player, craftSlots, slot, original);
     }
 
 }

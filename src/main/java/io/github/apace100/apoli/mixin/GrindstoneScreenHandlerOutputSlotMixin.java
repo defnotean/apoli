@@ -22,7 +22,8 @@ public abstract class GrindstoneScreenHandlerOutputSlotMixin {
     @Shadow
     GrindstoneMenu this$0;
 
-    @ModifyReturnValue(method = "getExperience(Lnet/minecraft/world/Level;)I", at = @At("RETURN"))
+    // MC 26.1: method renamed from 'getExperience' to 'getExperienceAmount'
+    @ModifyReturnValue(method = "getExperienceAmount(Lnet/minecraft/world/level/Level;)I", at = @At("RETURN"))
     private int apoli$modifyExperience(int original, Level world) {
 
         if (!(this$0 instanceof PowerModifiedGrindstone powerModifiedGrindstone)) {

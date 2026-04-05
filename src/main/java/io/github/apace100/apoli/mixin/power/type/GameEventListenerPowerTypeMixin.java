@@ -14,7 +14,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -62,13 +61,11 @@ public abstract class GameEventListenerPowerTypeMixin {
 	@Mixin(Entity.class)
 	public static abstract class EventHandlerUpdater {
 
-		@Shadow
-		public abstract Level getWorld();
-
+		// MC 26.1: Entity.getWorld() no longer exists; level() is the direct method on Entity
 		@Inject(method = "updateEventHandler", at = @At("HEAD"))
 		private void apoli$update(BiConsumer<VibrationSystem.Listener, ServerLevel> callback, CallbackInfo ci) {
 
-			if (getWorld() instanceof ServerLevel serverWorld) {
+			if (((Entity) (Object) this).level() instanceof ServerLevel serverWorld) {
 				PowerHolderComponent.getPowerTypes((Entity) (Object) this, GameEventListenerPowerType.class, true)
 					.stream()
 					.map(GameEventListenerPowerType::getGameEventHandler)

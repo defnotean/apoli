@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(TransientCraftingContainer.class)
 public interface CraftingInventoryAccessor {
 
-    @Accessor
+    // MC 26.1: field renamed from 'handler' to 'menu'
+    @Accessor("menu")
     AbstractContainerMenu getHandler();
 }

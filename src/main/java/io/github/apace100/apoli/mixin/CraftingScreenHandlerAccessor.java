@@ -12,6 +12,7 @@ public interface CraftingScreenHandlerAccessor {
     @Accessor
     Player getPlayer();
 
-    @Accessor
+    // MC 26.1: field renamed from 'context' to 'access'
+    @Accessor("access")
     ContainerLevelAccess getContext();
 }

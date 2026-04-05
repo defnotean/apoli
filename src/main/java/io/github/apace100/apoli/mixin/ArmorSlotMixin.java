@@ -15,14 +15,16 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(ArmorSlot.class)
 public abstract class ArmorSlotMixin {
 
-    @Shadow @Final private LivingEntity entity;
+    // MC 26.1: field renamed from 'entity' to 'owner'
+    @Shadow @Final private LivingEntity owner;
 
-    @Shadow @Final private EquipmentSlot equipmentSlot;
+    // MC 26.1: field renamed from 'equipmentSlot' to 'slot'
+    @Shadow @Final private EquipmentSlot slot;
 
     @ModifyReturnValue(method = "mayPlace", at = @At("RETURN"))
     private boolean apoli$preventArmorInsertion(boolean original, ItemStack stack) {
         return original
-            && !PowerHolderComponent.hasPowerType(this.entity, RestrictArmorPowerType.class, p -> p.doesRestrict(stack, this.equipmentSlot));
+            && !PowerHolderComponent.hasPowerType(this.owner, RestrictArmorPowerType.class, p -> p.doesRestrict(stack, this.slot));
     }
 
 }

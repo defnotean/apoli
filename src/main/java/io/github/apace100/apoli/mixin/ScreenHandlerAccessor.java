@@ -8,7 +8,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(AbstractContainerMenu.class)
 public interface ScreenHandlerAccessor {
 
-    @Invoker
+    // MC 26.1: renamed from getCursorStackReference -> createCarriedSlotAccess
+    @Invoker("createCarriedSlotAccess")
     SlotAccess callGetCursorStackReference();
 
 }

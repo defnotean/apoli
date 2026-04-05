@@ -11,7 +11,10 @@ import java.util.Map;
 @Mixin(RecipeManager.class)
 public interface RecipeManagerAccessor {
 
-	@Accessor
-	Map<Identifier, RecipeHolder<?>> getRecipesById();
+	// TODO: MC 26.1 - RecipeManager no longer has a 'recipesById' Map field.
+	// It now uses RecipeMap with ResourceKey-based lookups via byKey().
+	// This accessor and all callers need fundamental redesign.
+	// @Accessor
+	// Map<Identifier, RecipeHolder<?>> getRecipesById();
 
 }

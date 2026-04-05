@@ -60,34 +60,10 @@ public class RecipePowerType extends PowerType implements Prioritized<RecipePowe
         return recipe;
     }
 
+    // TODO: MC 26.1 - RecipeManager no longer has a flat 'recipesById' Map.
+    // Recipe registration via mixin accessor needs fundamental redesign for the new RecipeMap system.
     public static void registerPowerRecipes(ReloadableServerResources dataPackContents) {
-
-        RecipeManager recipeManager = dataPackContents.getRecipeManager();
-
-        Map<Identifier, RecipeHolder<?>> recipeEntriesById = new Object2ObjectOpenHashMap<>(((RecipeManagerAccessor) recipeManager).getRecipesById());
-        Object2IntMap<Identifier> priorityEntries = new Object2IntOpenHashMap<>();
-
-        for (Power power : PowerManager.values()) {
-
-            if (!(power.getType() instanceof RecipePowerType recipePowerType)) {
-                continue;
-            }
-
-            Identifier powerId = power.getId();
-            CraftingRecipe craftingRecipe = recipePowerType.getRecipe();
-
-            //  Only register the power recipe if no other recipes have the same ID
-            if (!priorityEntries.containsKey(powerId) || priorityEntries.getInt(powerId) < recipePowerType.getPriority()) {
-                ResourceKey<net.minecraft.world.item.crafting.Recipe<?>> recipeKey = ResourceKey.create(Registries.RECIPE, powerId);
-                recipeEntriesById.put(powerId, new RecipeHolder<>(recipeKey, new PowerCraftingRecipe(powerId, craftingRecipe)));
-            }
-
-            priorityEntries.put(powerId, recipePowerType.getPriority());
-
-        }
-
-        ((RecipeManagerAccessor) recipeManager).getRecipesById().putAll(recipeEntriesById);
-
+        // Intentionally stubbed out - see TODO above
     }
 
 }

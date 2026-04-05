@@ -9,7 +9,9 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(ServerLevel.class)
 public interface ServerWorldAccessor {
 
-    @Invoker
-    EntityLookup<Entity> callGetEntityLookup();
+    // TODO: MC 26.1 - getEntityLookup() no longer exists on ServerLevel.
+    // Entity access is now through PersistentEntitySectionManager or getEntities().
+    // @Invoker
+    // EntityLookup<Entity> callGetEntityLookup();
 
 }

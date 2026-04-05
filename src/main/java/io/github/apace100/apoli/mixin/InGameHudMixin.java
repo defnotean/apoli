@@ -25,9 +25,10 @@ import java.util.Optional;
 @Environment(EnvType.CLIENT)
 public abstract class InGameHudMixin {
 
-    @Shadow @Final private Minecraft client;
+    // MC 26.1: field is 'minecraft' not 'client' on Gui
+    @Shadow @Final private Minecraft minecraft;
 
-    @Shadow protected abstract Player getCameraPlayer();
+    // MC 26.1: getCameraPlayer() is private on Gui. Not currently used, shadow removed.
 
     @Unique
     private static Optional<OverrideHudTexturePowerType> apoli$getOverrideHudTexturePower(Player player) {
@@ -49,7 +50,7 @@ public abstract class InGameHudMixin {
 
     @WrapOperation(method = "extractHeart", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V"))
     private void apoli$overrideHeartSprite(GuiGraphicsExtractor extractor, com.mojang.blaze3d.pipeline.RenderPipeline pipeline, Identifier texture, int x, int y, int width, int height, Operation<Void> original, GuiGraphicsExtractor mExtractor, Gui.HeartType type, int mX, int mY, boolean hardcore, boolean blinking, boolean half) {
-        Optional<OverrideHudTexturePowerType> power = apoli$getOverrideHudTexturePower(this.client.player);
+        Optional<OverrideHudTexturePowerType> power = apoli$getOverrideHudTexturePower(this.minecraft.player);
         if (power.isPresent()) {
             power.get().drawHeartTexture(extractor, type, x, y, width, height, hardcore, blinking, half);
         } else {

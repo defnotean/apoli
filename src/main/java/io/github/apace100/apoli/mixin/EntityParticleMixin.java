@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LivingEntity.class)
 public abstract class EntityParticleMixin extends Entity {
 
-    @Shadow public abstract EntityDimensions getDimensions(Pose pose);
+    // MC 26.1: getDimensions shadow removed; not used in mixin methods and accessible via Entity parent.
 
     public EntityParticleMixin(EntityType<?> type, Level world) {
         super(type, world);

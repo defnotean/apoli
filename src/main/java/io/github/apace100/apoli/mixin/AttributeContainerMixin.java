@@ -21,9 +21,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(AttributeMap.class)
 public abstract class AttributeContainerMixin implements OwnableAttributeContainer {
 
+    // MC 26.1: field renamed from 'fallback' to 'supplier'
     @Shadow
     @Final
-    private AttributeSupplier fallback;
+    private AttributeSupplier supplier;
 
     @Unique
     @Nullable
@@ -57,7 +58,7 @@ public abstract class AttributeContainerMixin implements OwnableAttributeContain
             ownableAttributeInstance.apoli$setOwner(this.apoli$getOwner());
         }
 
-        if (this.fallback instanceof OwnableAttributeContainer ownableAttributeContainer) {
+        if (this.supplier instanceof OwnableAttributeContainer ownableAttributeContainer) {
             ownableAttributeContainer.apoli$setOwner(this.apoli$getOwner());
         }
 

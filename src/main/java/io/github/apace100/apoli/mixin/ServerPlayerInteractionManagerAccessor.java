@@ -9,12 +9,15 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ServerPlayerGameMode.class)
 public interface ServerPlayerInteractionManagerAccessor {
 
-    @Accessor
+    // MC 26.1: field renamed from 'miningPos' to 'destroyPos'
+    @Accessor("destroyPos")
     BlockPos getMiningPos();
 
-    @Accessor
+    // MC 26.1: field renamed from 'mining' to 'isDestroyingBlock'
+    @Accessor("isDestroyingBlock")
     boolean getMining();
 
-    @Accessor
+    // MC 26.1: field renamed from 'gameMode' to 'gameModeForPlayer'
+    @Accessor("gameModeForPlayer")
     GameType getGameMode();
 }

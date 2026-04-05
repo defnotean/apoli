@@ -15,16 +15,20 @@ import java.util.Set;
 @Mixin(TextureManager.class)
 public interface TextureManagerAccessor {
 
-    @Accessor
+    // MC 26.1: field renamed from 'resourceContainer' to 'resourceManager'
+    @Accessor("resourceManager")
     ResourceManager getResourceContainer();
 
-    @Accessor
+    // MC 26.1: field renamed from 'textures' to 'byPath'
+    @Accessor("byPath")
     Map<Identifier, AbstractTexture> getTextures();
 
-    @Accessor
+    // MC 26.1: field renamed from 'tickListeners' to 'tickableTextures'
+    @Accessor("tickableTextures")
     Set<TickableTexture> getTickListeners();
 
-    @Invoker
+    // MC 26.1: method renamed from 'closeTexture' to 'safeClose'
+    @Invoker("safeClose")
     void callCloseTexture(Identifier id, AbstractTexture texture);
 
 }

@@ -8,7 +8,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(LocalPlayer.class)
 public interface ClientPlayerEntityAccessor {
 
-    @Accessor
+    // MC 26.1: field renamed from 'client' to 'minecraft'
+    @Accessor("minecraft")
     Minecraft getClient();
 
 }
