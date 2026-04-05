@@ -69,7 +69,6 @@
 		"StatusEffectInstanceMixin",
 		"StatusEffectMixin",
 		"TagGroupLoaderMixin",
-		"TextCodecsMixin",
 		"TranslatableTextContentAccessor",
 		"internal.DefaultAttributeContainerAccessor",
 		"internal.DefaultAttributeRegistryAccessor",
