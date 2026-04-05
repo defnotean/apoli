@@ -19,29 +19,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(SectionRenderDispatcher.class)
 public class ChunkRendererRegionMixin {
 
-    @Inject(method = "getBlockState", at = @At("HEAD"), cancellable = true)
-    private void modifyBlockRender(BlockPos pos, CallbackInfoReturnable<BlockState> cir) {
-        Minecraft client = Minecraft.getInstance();
-        if(client.level != null && client.player != null) {
-            for(ModifyBlockRenderPowerType power : PowerHolderComponent.getPowerTypes(client.player, ModifyBlockRenderPowerType.class)) {
-                if(power.doesPrevent(client.level, pos)) {
-                    cir.setReturnValue(power.getBlockState());
-                    return;
-                }
-            }
-        }
-    }
+    // TODO: MC 26.1 removed getBlockState()/getFluidState() from SectionRenderDispatcher.
+    // The chunk rendering region API was restructured. These need reimplementing against
+    // the new render chunk system.
+    // @Inject(method = "getBlockState", at = @At("HEAD"), cancellable = true)
+    // private void modifyBlockRender(BlockPos pos, CallbackInfoReturnable<BlockState> cir) { ... }
 
-    @Inject(method = "getFluidState", at = @At("HEAD"), cancellable = true)
-    private void modifyFluidRender(BlockPos pos, CallbackInfoReturnable<FluidState> cir) {
-        Minecraft client = Minecraft.getInstance();
-        if(client.level != null && client.player != null) {
-            for(ModifyFluidRenderPowerType power : PowerHolderComponent.getPowerTypes(client.player, ModifyFluidRenderPowerType.class)) {
-                if(power.doesPrevent(client.level, pos)) {
-                    cir.setReturnValue(power.getFluidState());
-                    return;
-                }
-            }
-        }
-    }
+    // @Inject(method = "getFluidState", at = @At("HEAD"), cancellable = true)
+    // private void modifyFluidRender(BlockPos pos, CallbackInfoReturnable<FluidState> cir) { ... }
 }

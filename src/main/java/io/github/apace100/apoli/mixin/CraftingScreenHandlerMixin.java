@@ -69,7 +69,8 @@ public abstract class CraftingScreenHandlerMixin extends RecipeBookMenu implemen
 
     }
 
-    @Inject(method = "updateResult", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeManager;getFirstMatch(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/item/crafting/RecipeInput;Lnet/minecraft/world/Level;Lnet/minecraft/world/item/crafting/RecipeHolder;)Ljava/util/Optional;"))
+    // TODO: MC 26.1 renamed getFirstMatch -> getRecipeFor
+    @Inject(method = "updateResult", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeManager;getRecipeFor(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/item/crafting/RecipeInput;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/crafting/RecipeHolder;)Ljava/util/Optional;"))
     private static void apoli$clearPowerCraftingInventory(AbstractContainerMenu handler, Level world, Player player, CraftingContainer craftingInventory, ResultContainer resultInventory, @Nullable RecipeHolder<CraftingRecipe> recipe, CallbackInfo ci) {
 
         if (craftingInventory instanceof PowerCraftingInventory pci) {
@@ -78,12 +79,14 @@ public abstract class CraftingScreenHandlerMixin extends RecipeBookMenu implemen
 
     }
 
-    @ModifyReturnValue(method = "canUse", at = @At("RETURN"))
+    // TODO: MC 26.1 renamed canUse -> stillValid
+    @ModifyReturnValue(method = "stillValid", at = @At("RETURN"))
     private boolean apoli$allowUsingViaPower(boolean original, Player playerEntity) {
         return original || this.apoli$canUse();
     }
 
-    @ModifyVariable(method = "quickMove", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/CraftingMenu;insertItem(Lnet/minecraft/world/item/ItemStack;IIZ)Z", ordinal = 0), ordinal = 1)
+    // TODO: MC 26.1 renamed quickMove -> quickMoveStack, insertItem -> moveItemStackTo
+    @ModifyVariable(method = "quickMoveStack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/CraftingMenu;moveItemStackTo(Lnet/minecraft/world/item/ItemStack;IIZ)Z", ordinal = 0), ordinal = 1)
     private ItemStack apoli$modifyResultStackOnQuickMove(ItemStack original, Player player, int slotId, @Local Slot slot) {
         return ModifyCraftingPowerType.executeAfterCraftingAction(player, input, slot, original);
     }

@@ -16,16 +16,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(value = PlayerList.class, priority = 800)
 public abstract class PlayerManagerMixin {
 
-	@WrapWithCondition(method = "respawnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;setSpawnPointFrom(Lnet/minecraft/server/network/ServerPlayer;)V"))
-	private boolean apoli$preventEndExitSpawnpointResetting(ServerPlayer newPlayer, ServerPlayer oldPlayer) {
-		return ((EndRespawningEntity) oldPlayer).apoli$hasRealRespawnPoint();
-	}
+	// TODO: MC 26.1 renamed PlayerList.respawnPlayer -> respawn, and ServerPlayer.setSpawnPointFrom/onSpawn were removed.
+	// Both injections need reimplementing against the new respawn flow.
+	// @WrapWithCondition(method = "respawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;setSpawnPointFrom(Lnet/minecraft/server/network/ServerPlayer;)V"))
+	// private boolean apoli$preventEndExitSpawnpointResetting(ServerPlayer newPlayer, ServerPlayer oldPlayer) {
+	//     return ((EndRespawningEntity) oldPlayer).apoli$hasRealRespawnPoint();
+	// }
 
-	@Inject(method = "respawnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;onSpawn()V"))
-	private void apoli$invokeOnRespawnPowerCallback(ServerPlayer player, boolean alive, Entity.RemovalReason removalReason, CallbackInfoReturnable<ServerPlayer> cir, @Local(ordinal = 1) ServerPlayer newPlayer) {
-		if (!alive) {
-			PowerHolderComponent.KEY.get(newPlayer).getPowerTypes().forEach(PowerType::onRespawn);
-		}
-	}
+	// TODO: MC 26.1 removed ServerPlayer.onSpawn(). Find new injection point in respawn().
+	// @Inject(method = "respawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;onSpawn()V"))
+	// private void apoli$invokeOnRespawnPowerCallback(ServerPlayer player, boolean alive, Entity.RemovalReason removalReason, CallbackInfoReturnable<ServerPlayer> cir, @Local(ordinal = 1) ServerPlayer newPlayer) {
+	//     if (!alive) {
+	//         PowerHolderComponent.KEY.get(newPlayer).getPowerTypes().forEach(PowerType::onRespawn);
+	//     }
+	// }
 
 }

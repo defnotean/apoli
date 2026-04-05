@@ -40,7 +40,8 @@ public abstract class AttributeContainerMixin implements OwnableAttributeContain
         this.apoli$owner = owner;
     }
 
-    @Inject(method = "getCustomInstance", at = @At("RETURN"))
+    // TODO: MC 26.1 renamed getCustomInstance -> getInstance
+    @Inject(method = "getInstance", at = @At("RETURN"))
     private void apoli$setCustomAttributeInstanceOwner(Holder<Attribute> attribute, CallbackInfoReturnable<AttributeInstance> cir) {
 
         if (cir.getReturnValue() instanceof OwnableAttributeInstance ownableAttributeInstance) {

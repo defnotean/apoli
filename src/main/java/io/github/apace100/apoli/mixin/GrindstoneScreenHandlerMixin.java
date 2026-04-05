@@ -90,7 +90,7 @@ public abstract class GrindstoneScreenHandlerMixin extends AbstractContainerMenu
 
     }
 
-    @ModifyVariable(method = "quickMove", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;copy()Lnet/minecraft/world/item/ItemStack;"), ordinal = 1)
+    @ModifyVariable(method = "quickMoveStack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;copy()Lnet/minecraft/world/item/ItemStack;"), ordinal = 1)
     private ItemStack performAfterGrindstoneActionsQuickMove(ItemStack original, Player player, int slotIndex, @Local Slot slot) {
 
         List<ModifyGrindstonePowerType> applyingPowers = this.apoli$getAppliedPowers();

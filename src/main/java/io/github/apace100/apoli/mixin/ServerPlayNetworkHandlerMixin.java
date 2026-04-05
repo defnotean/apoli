@@ -21,12 +21,14 @@ public class ServerPlayNetworkHandlerMixin {
     @Shadow
     public ServerPlayer player;
 
-    @Inject(method = "handleClientCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerList;respawnPlayer(Lnet/minecraft/server/network/ServerPlayer;ZLnet/minecraft/world/entity/Entity$RemovalReason;)Lnet/minecraft/server/network/ServerPlayer;", ordinal = 0))
+    // TODO: MC 26.1 renamed PlayerList.respawnPlayer -> respawn, and moved it to net.minecraft.server.players.PlayerList
+    @Inject(method = "handleClientCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;respawn(Lnet/minecraft/server/level/ServerPlayer;ZLnet/minecraft/world/entity/Entity$RemovalReason;)Lnet/minecraft/server/level/ServerPlayer;", ordinal = 0))
     private void saveEndRespawnStatus(ServerboundClientCommandPacket packet, CallbackInfo ci) {
         ((EndRespawningEntity)this.player).apoli$setEndRespawning(true);
     }
 
-    @Inject(method = "handleClientCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/critereon/ChangedDimensionTrigger;trigger(Lnet/minecraft/server/network/ServerPlayer;Lnet/minecraft/core/ResourceKey;Lnet/minecraft/core/ResourceKey;)V"))
+    // TODO: MC 26.1 renamed ChangedDimensionTrigger -> ChangeDimensionTrigger, and the package is now criterion (not critereon)
+    @Inject(method = "handleClientCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/criterion/ChangeDimensionTrigger;trigger(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceKey;)V"))
     private void undoEndRespawnStatus(ServerboundClientCommandPacket packet, CallbackInfo ci) {
         ((EndRespawningEntity)this.player).apoli$setEndRespawning(false);
     }
@@ -38,7 +40,8 @@ public class ServerPlayNetworkHandlerMixin {
         }
     }
 
-    @Inject(method = "onPlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;stopUsingItem()V"))
+    // TODO: MC 26.1 renamed onPlayerAction -> handlePlayerAction
+    @Inject(method = "handlePlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;stopUsingItem()V"))
     private void callActionOnUseStopBySwappingHands(ServerboundPlayerActionPacket packet, CallbackInfo ci) {
         if(player.isUsingItem()) {
             ActionOnItemUsePowerType.executeActions(player, SlotAccess.of(() -> player.getInventory().getSelectedItem(), stack -> player.getInventory().setSelectedItem(stack)), player.getUseItem(), ActionOnItemUsePowerType.TriggerType.STOP, PriorityPhase.ALL);

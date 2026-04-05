@@ -25,7 +25,7 @@ public abstract class InteractionEntityMixin extends Entity {
         super(type, world);
     }
 
-    @WrapWithCondition(method = "handleAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/criterion/PlayerHurtEntityTrigger;trigger(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;FFZ)V"))
+    @WrapWithCondition(method = "skipAttackInteraction", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/criterion/PlayerHurtEntityTrigger;trigger(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;FFZ)V"))
     private boolean apoli$cacheDamageData(PlayerHurtEntityTrigger criterion, ServerPlayer player, Entity entity, DamageSource source, float dealt, float taken, boolean blocked, @Share("damageSource") LocalRef<DamageSource> damageSourceRef, @Share("damageDealt") LocalFloatRef damageDealtRef, @Share("damageTaken") LocalFloatRef damageTakenRef) {
 
         damageSourceRef.set(source);
@@ -37,7 +37,7 @@ public abstract class InteractionEntityMixin extends Entity {
 
     }
 
-    @Inject(method = "handleAttack", at = @At(value = "RETURN", ordinal = 0))
+    @Inject(method = "skipAttackInteraction", at = @At(value = "RETURN", ordinal = 0))
     private void apoli$invokeHitActions(Entity attacker, CallbackInfoReturnable<Boolean> cir, @Share("damageSource") LocalRef<DamageSource> damageSourceRef, @Share("damageDealt") LocalFloatRef damageDealtRef, @Share("damageTaken") LocalFloatRef damageTakenRef) {
 
         DamageSource damageSource = damageSourceRef.get();

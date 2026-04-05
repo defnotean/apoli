@@ -372,7 +372,11 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
     }
 
     // SLOW_FALLING
-    @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/Level;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"), method = "travel", name = "d", ordinal = 0)
+    // TODO: MC 26.1 refactored travel() into travelInAir()/travelInFluid()/travelFallFlying().
+    // The gravity variable 'd' (now 'movementY') moved from travel() to travelInAir().
+    // Retargeted to travelInAir at the getEffectiveGravity() invoke, which is where
+    // gravity is subtracted from movementY.
+    @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getEffectiveGravity()D"), method = "travelInAir", ordinal = 0)
     public double modifyFallingVelocity(double original) {
 
         if (this.getDeltaMovement().y > 0D) {
@@ -396,7 +400,9 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
 
     }
 
-    @ModifyVariable(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;onGround()Z", ordinal = 0))
+    // TODO: MC 26.1 refactored travel() - the friction/slipperiness logic moved to travelInAir().
+    // The onGround() call and blockFriction variable are now in travelInAir.
+    @ModifyVariable(method = "travelInAir", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;onGround()Z", ordinal = 0))
     private float modifySlipperiness(float original) {
         return PowerHolderComponent.modify(this, ModifySlipperinessPowerType.class, original, p -> p.doesApply(this.level(), this.getBlockPosBelowThatAffectsMyMovement()));
     }

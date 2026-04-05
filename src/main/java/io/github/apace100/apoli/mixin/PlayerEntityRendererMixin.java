@@ -62,34 +62,18 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
 
     }
 
-    @ModifyExpressionValue(method = "setupRotations(Lnet/minecraft/client/multiplayer/AbstractClientPlayer;Lcom/mojang/blaze3d/vertex/PoseStack;FFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/AbstractClientPlayer;isFallFlying()Z"))
-    private boolean apoli$forceFallFlyingPose(boolean original, AbstractClientPlayer player, @Share("applyPseudoFallFlyingTicks") LocalBooleanRef applyPseudoFallFlyingTicksRef, @Share("pseudoRoll") LocalIntRef pseudoRollRef) {
+    // TODO: MC 26.1 changed AvatarRenderer.setupRotations signature from
+    // (AbstractClientPlayer, PoseStack, FFFF) to (AvatarRenderState, PoseStack, FF).
+    // The entity data (isFallFlying, isUsingRiptide, getFallFlyingTicks) is now accessed
+    // through render state fields, not entity method calls. These need reimplementing.
+    // @ModifyExpressionValue(method = "setupRotations(Lnet/minecraft/client/multiplayer/AbstractClientPlayer;Lcom/mojang/blaze3d/vertex/PoseStack;FFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/AbstractClientPlayer;isFallFlying()Z"))
+    // private boolean apoli$forceFallFlyingPose(boolean original, AbstractClientPlayer player, ...) { ... }
 
-        if (original || !(player instanceof PseudoRenderDataHolder renderData)) {
-            return original;
-        }
+    // @ModifyExpressionValue(method = "setupRotations(Lnet/minecraft/client/multiplayer/AbstractClientPlayer;Lcom/mojang/blaze3d/vertex/PoseStack;FFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/AbstractClientPlayer;isUsingRiptide()Z"))
+    // private boolean apoli$accountForForcedRiptide(boolean original, AbstractClientPlayer player) { ... }
 
-        int pseudoRoll = renderData.apoli$getPseudoFallFlyingTicks();
-        boolean apply = pseudoRoll > 0;
-
-        pseudoRollRef.set(pseudoRoll);
-        applyPseudoFallFlyingTicksRef.set(apply);
-
-        return apply;
-
-    }
-
-    @ModifyExpressionValue(method = "setupRotations(Lnet/minecraft/client/multiplayer/AbstractClientPlayer;Lcom/mojang/blaze3d/vertex/PoseStack;FFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/AbstractClientPlayer;isUsingRiptide()Z"))
-    private boolean apoli$accountForForcedRiptide(boolean original, AbstractClientPlayer player) {
-        return original || PosePowerType.hasEntityPose(player, Pose.SPIN_ATTACK);
-    }
-
-    @ModifyExpressionValue(method = "setupRotations(Lnet/minecraft/client/multiplayer/AbstractClientPlayer;Lcom/mojang/blaze3d/vertex/PoseStack;FFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/AbstractClientPlayer;getFallFlyingTicks()I"))
-    private int apoli$applyPseudoFallFlyingTicks(int original, AbstractClientPlayer player, @Share("applyPseudoFallFlyingTicks") LocalBooleanRef applyPseudoFallFlyingTicksRef, @Share("pseudoRoll") LocalIntRef pseudoRollRef) {
-        return applyPseudoFallFlyingTicksRef.get()
-            ? pseudoRollRef.get()
-            : original;
-    }
+    // @ModifyExpressionValue(method = "setupRotations(Lnet/minecraft/client/multiplayer/AbstractClientPlayer;Lcom/mojang/blaze3d/vertex/PoseStack;FFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/AbstractClientPlayer;getFallFlyingTicks()I"))
+    // private int apoli$applyPseudoFallFlyingTicks(int original, AbstractClientPlayer player, ...) { ... }
 
     @ModifyReturnValue(method = "getArmPose", at = @At("RETURN"))
     private static HumanoidModel.ArmPose apoli$overrideArmPose(HumanoidModel.ArmPose original, AbstractClientPlayer player) {

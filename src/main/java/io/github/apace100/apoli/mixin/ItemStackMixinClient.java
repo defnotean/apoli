@@ -69,22 +69,12 @@ public abstract class ItemStackMixinClient implements DataComponentHolder {
     @Unique
     private List<Component> apoli$tooltip;
 
-    @Inject(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/MutableComponent;append(Lnet/minecraft/network/chat/Component;)Lnet/minecraft/network/chat/MutableComponent;"))
-    private void apoli$cacheTooltipStuff(Item.TooltipContext context, @Nullable Player player, TooltipFlag type, CallbackInfoReturnable<List<Component>> cir, @Local List<Component> tooltip) {
+    // TODO: MC 26.1 restructured getTooltipLines() (formerly getTooltip()). The MutableComponent.append
+    // call no longer exists at the same point. Needs reimplementing against addDetailsToTooltip().
+    // @Inject(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/MutableComponent;append(Lnet/minecraft/network/chat/Component;)Lnet/minecraft/network/chat/MutableComponent;"))
+    // private void apoli$cacheTooltipStuff(Item.TooltipContext context, @Nullable Player player, TooltipFlag type, CallbackInfoReturnable<List<Component>> cir, @Local List<Component> tooltip) { ... }
 
-		// Although this is a client-only mixin, this is still seen by the internal server.
-        if (player == null || !player.level().isClientSide()) {
-            return;
-        }
-
-        this.apoli$appendedSlots = EnumSet.noneOf(EquipmentSlotGroup.class);
-        this.apoli$tooltipContext = context;
-        this.apoli$tooltipType = type;
-        this.apoli$tooltip = tooltip;
-
-    }
-
-    @Inject(method = "getTooltip", at = @At(value = "RETURN"))
+    @Inject(method = "getTooltipLines", at = @At(value = "RETURN"))
     private void apoli$clearCachedTooltipStuff(CallbackInfoReturnable<?> cir) {
         this.apoli$appendedSlots = null;
         this.apoli$tooltipContext = null;
@@ -92,82 +82,12 @@ public abstract class ItemStackMixinClient implements DataComponentHolder {
         this.apoli$tooltip = null;
     }
 
-    @Inject(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;appendTooltip(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/Item$TooltipContext;Ljava/util/List;Lnet/minecraft/world/item/tooltip/TooltipFlag;)V", shift = At.Shift.AFTER))
-    private void apoli$appendUnusableTooltip(Item.TooltipContext context, @Nullable Player player, TooltipFlag type, CallbackInfoReturnable<List<Component>> cir) {
+    // TODO: MC 26.1 removed Item.appendTooltip() from getTooltipLines(). The tooltip system
+    // was restructured to use addDetailsToTooltip(). This needs reimplementing.
+    // @Inject(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;appendTooltip(...)V", shift = At.Shift.AFTER))
+    // private void apoli$appendUnusableTooltip(...) { ... }
 
-        if (!(Apoli.config instanceof ApoliConfigClient config) || !config.tooltips.showUsabilityHints) {
-            return;
-        }
-
-        List<PreventItemUsePowerType> preventItemUsePowers = PowerHolderComponent.getPowerTypes(player, PreventItemUsePowerType.class)
-            .stream()
-            .filter(p -> p.doesPrevent((ItemStack) (Object) this))
-            .toList();
-
-        if (preventItemUsePowers.isEmpty()) {
-            return;
-        }
-
-        String translationKey = "tooltip.apoli.unusable." + this.getUseAnimation().toString().toLowerCase(Locale.ROOT) + (preventItemUsePowers.size() == 1 ? ".single" : ".multiple");
-
-        ChatFormatting baseTextFormat = ChatFormatting.GRAY;
-        ChatFormatting powerTextFormat = ChatFormatting.RED;
-
-        Component powerText;
-        Component baseText;
-
-        if (preventItemUsePowers.size() == 1) {
-
-            PreventItemUsePowerType preventItemUsePower = preventItemUsePowers.getFirst();
-
-            powerText = preventItemUsePower.getPower().getName().withStyle(powerTextFormat);
-            baseText = Component.translatable(translationKey, powerText).withStyle(baseTextFormat);
-
-            apoli$tooltip.add(baseText);
-
-        }
-
-        else if (config.tooltips.compactUsabilityHints) {
-
-            Minecraft client = Minecraft.getInstance();
-            KeyMapping keyBinding = ApoliClient.showPowersOnUsabilityHint;
-
-            Integer keyCode = !keyBinding.isUnbound()
-                ? InputConstants.getKey(keyBinding.saveString()).getValue()
-                : null;
-            boolean isKeyPressed = keyCode != null
-                && InputConstants.isKeyDown(client.getWindow(), keyCode);
-
-            if (isKeyPressed) {
-                this.apoli$appendExpandedTooltip(preventItemUsePowers, apoli$tooltip, translationKey, powerTextFormat, powerTextFormat);
-            }
-
-            else {
-
-                powerText = Component.translatable("tooltip.apoli.usability_hint.power_count", preventItemUsePowers.size()).withStyle(powerTextFormat);
-                baseText = Component.translatable(translationKey, powerText).withStyle(baseTextFormat);
-
-                apoli$tooltip.add(baseText);
-                apoli$tooltip.add(Component.empty());
-
-                Component keyBindingText = KeyBindingUtil.getLocalizedName(keyBinding.getName()).withStyle(style -> style
-                    .withColor(ChatFormatting.YELLOW)
-                    .withItalic(keyBinding.isUnbound()));
-
-                Component guideText = Component.translatable("tooltip.apoli.usability_hint.show_powers", keyBindingText).withStyle(baseTextFormat);
-                apoli$tooltip.add(guideText);
-
-            }
-
-        }
-
-        else {
-            this.apoli$appendExpandedTooltip(preventItemUsePowers, apoli$tooltip, translationKey, powerTextFormat, baseTextFormat);
-        }
-
-    }
-
-    @WrapOperation(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;appendTooltip(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/item/Item$TooltipContext;Ljava/util/function/Consumer;Lnet/minecraft/world/item/tooltip/TooltipFlag;)V"))
+    @WrapOperation(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;appendTooltip(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/item/Item$TooltipContext;Ljava/util/function/Consumer;Lnet/minecraft/world/item/tooltip/TooltipFlag;)V"))
     private void apoli$appendPowerTooltips(ItemStack stack, DataComponentType<?> componentType, Item.TooltipContext context, Consumer<Component> tooltipConsumer, TooltipFlag type, Operation<Void> original, Item.TooltipContext mContext, @Nullable Player player, @Local List<Component> tooltip) {
 
         original.call(stack, componentType, context, tooltipConsumer, type);
@@ -182,27 +102,10 @@ public abstract class ItemStackMixinClient implements DataComponentHolder {
 
     }
 
-    @Inject(method = "addAttributeTooltips", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;applyAttributeModifier(Lnet/minecraft/world/item/component/EquipmentSlotGroup;Ljava/util/function/BiConsumer;)V", shift = At.Shift.AFTER))
-    private void apoli$appendItemPowersTooltips(Consumer<Component> tooltipConsumer, @Nullable Player player, CallbackInfo ci, @Local EquipmentSlotGroup modifierSlot, @Local MutableBoolean shouldAppendSlotName) {
-
-        ItemPowersComponent itemPowersComponent = this.getOrDefault(ApoliDataComponentTypes.POWERS, ItemPowersComponent.DEFAULT);
-        if (apoli$appendedSlots == null || apoli$appendedSlots.contains(modifierSlot) || !itemPowersComponent.containsSlot(modifierSlot)) {
-            return;
-        }
-
-        if (shouldAppendSlotName.isTrue()) {
-
-            tooltipConsumer.accept(CommonComponents.EMPTY);
-            tooltipConsumer.accept(Component.translatable("item.modifiers." + modifierSlot.getSerializedName()).withStyle(ChatFormatting.GRAY));
-
-            shouldAppendSlotName.setFalse();
-
-        }
-
-        itemPowersComponent.appendTooltip(modifierSlot, apoli$tooltipContext, apoli$tooltip::add, apoli$tooltipType);
-        apoli$appendedSlots.add(modifierSlot);
-
-    }
+    // TODO: MC 26.1 changed addAttributeTooltips signature and removed applyAttributeModifier.
+    // The attribute tooltip system was restructured. Needs reimplementing.
+    // @Inject(method = "addAttributeTooltips", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;applyAttributeModifier(...)V", shift = At.Shift.AFTER))
+    // private void apoli$appendItemPowersTooltips(...) { ... }
 
     @Unique
     private void apoli$appendExpandedTooltip(List<PreventItemUsePowerType> powers, List<Component> tooltip, String translationKey, ChatFormatting powerTextColor, ChatFormatting baseTextColor) {

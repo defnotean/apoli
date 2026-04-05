@@ -117,11 +117,13 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayer imple
 
     }
 
-    @ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/LocalPlayer;canSprint()Z"))
-    private boolean apoli$accountForSprintingPowersWhenCancelling(boolean original, @Share("sprintingPowers") LocalRef<List<SprintingPowerType>> sprintingPowersRef, @Share("preventSprinting") LocalBooleanRef preventSprintingRef) {
-        return (original || !sprintingPowersRef.get().isEmpty())
-            && !preventSprintingRef.get();
-    }
+    // TODO: MC 26.1 removed LocalPlayer.canSprint(). The sprint cancel logic now uses
+    // shouldStopSwimSprinting() and shouldStopRunSprinting(). This needs reimplementing.
+    // @ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/LocalPlayer;canSprint()Z"))
+    // private boolean apoli$accountForSprintingPowersWhenCancelling(boolean original, @Share("sprintingPowers") LocalRef<List<SprintingPowerType>> sprintingPowersRef, @Share("preventSprinting") LocalBooleanRef preventSprintingRef) {
+    //     return (original || !sprintingPowersRef.get().isEmpty())
+    //         && !preventSprintingRef.get();
+    // }
 
     @ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/LocalPlayer;isShiftKeyDown()Z"))
     private boolean apoli$forceSneakingPose(boolean original) {

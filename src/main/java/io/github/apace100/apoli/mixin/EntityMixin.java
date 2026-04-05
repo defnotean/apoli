@@ -112,11 +112,13 @@ public abstract class EntityMixin implements MovingEntity, ModifiedPoseHolder, C
             || PowerHolderComponent.hasPowerType((Entity) (Object) this, InvulnerabilityPowerType.class, p -> p.doesApply(source));
     }
 
-    @ModifyExpressionValue(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;isWet()Z"))
-    private boolean apoli$preventExtinguishingFromPowerSwimming(boolean original) {
-        return original
-            && !(this.isSwimming() && PowerHolderComponent.hasPowerType((Entity) (Object) this, SwimmingPowerType.class));
-    }
+    // TODO: MC 26.1 removed Entity.isWet() and moved fire extinguishing from move() to baseTick().
+    // The move() method no longer calls isWet(). This needs reimplementing against the new fire tick mechanism.
+    // @ModifyExpressionValue(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;isWet()Z"))
+    // private boolean apoli$preventExtinguishingFromPowerSwimming(boolean original) {
+    //     return original
+    //         && !(this.isSwimming() && PowerHolderComponent.hasPowerType((Entity) (Object) this, SwimmingPowerType.class));
+    // }
 
     @ModifyReturnValue(method = "isInvisible", at = @At("RETURN"))
     private boolean apoli$invisibility(boolean original) {

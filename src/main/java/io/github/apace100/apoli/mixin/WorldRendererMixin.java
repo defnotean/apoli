@@ -22,25 +22,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LevelRenderer.class)
 public abstract class WorldRendererMixin {
 
-    @Shadow public abstract void reload();
+    // TODO: MC 26.1 completely restructured LevelRenderer. Both renderSky() and render()
+    // no longer exist with these signatures. The rendering pipeline was overhauled with
+    // frame graph architecture. These need reimplementing against the new API.
+    // @Shadow public abstract void reload();
 
-    @Inject(method = "renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V", at = @At(value = "INVOKE", target = "Ljava/lang/Runnable;run()V", shift = At.Shift.AFTER, ordinal = 0), cancellable = true)
-    private void skipSkyRenderingForPhasingBlindness(Matrix4f matrix4f, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean thickFog, Runnable fogCallback, CallbackInfo ci) {
+    // @Inject(method = "renderSky(...)", ...)
+    // private void skipSkyRenderingForPhasingBlindness(...) { ... }
 
-        Entity cameraFocusedEntity = camera.entity();
-
-        if (PowerHolderComponent.hasPowerType(cameraFocusedEntity, PhasingPowerType.class, p -> p.getRenderType() == PhasingPowerType.RenderType.BLINDNESS) && MiscUtil.getInWallBlockState(cameraFocusedEntity) != null) {
-            ci.cancel();
-        }
-
-    }
-
-    @Inject(method = "render", at = @At("HEAD"))
-    private void updateChunksIfRenderChanged(DeltaTracker tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, Lightmap lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-        if (ApoliClient.shouldReloadWorldRenderer) {
-            reload();
-            ApoliClient.shouldReloadWorldRenderer = false;
-        }
-    }
+    // @Inject(method = "render", ...)
+    // private void updateChunksIfRenderChanged(...) { ... }
 
 }

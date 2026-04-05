@@ -17,15 +17,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ScreenEffectRenderer.class)
 public class InGameOverlayRendererMixin {
 
-    @Inject(method = "renderInWallOverlay", at = @At("HEAD"), cancellable = true)
-    private static void preventInWallOverlayRendering(TextureAtlasSprite sprite, PoseStack matrixStack, CallbackInfo ci) {
-
-        Minecraft client = Minecraft.getInstance();
-
-        if (PowerHolderComponent.hasPowerType(client.getCameraEntity(), PhasingPowerType.class)) {
-            ci.cancel();
-        }
-
-    }
+    // TODO: MC 26.1 removed ScreenEffectRenderer.renderInWallOverlay().
+    // The wall overlay rendering is now part of renderScreenEffect(). Needs reimplementing.
+    // @Inject(method = "renderInWallOverlay", at = @At("HEAD"), cancellable = true)
+    // private static void preventInWallOverlayRendering(TextureAtlasSprite sprite, PoseStack matrixStack, CallbackInfo ci) {
+    //     Minecraft client = Minecraft.getInstance();
+    //     if (PowerHolderComponent.hasPowerType(client.getCameraEntity(), PhasingPowerType.class)) {
+    //         ci.cancel();
+    //     }
+    // }
 
 }

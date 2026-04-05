@@ -146,7 +146,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
         PowerHolderComponent.withPowerTypes(this, KeepInventoryPowerType.class, p -> true, KeepInventoryPowerType::restoreSavedItems);
     }
 
-    @ModifyReturnValue(method = "canEquip", at = @At("RETURN"))
+    // TODO: MC 26.1 renamed Player.canEquip -> LivingEntity.canEquipWithDispenser
+    @ModifyReturnValue(method = "canEquipWithDispenser", at = @At("RETURN"))
     private boolean apoli$preventArmorDispensing(boolean original, ItemStack stack) {
         return original
             && !PowerHolderComponent.hasPowerType(this, RestrictArmorPowerType.class, p -> p.doesRestrict(stack, this.getEquipmentSlotForItem(stack)));

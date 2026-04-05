@@ -39,7 +39,8 @@ public abstract class AbstractBlockStateMixin extends StateHolder<Block, BlockSt
         super(owner, properties, values);
     }
 
-    @ModifyReturnValue(method = "getOutlineShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/CollisionContext;)Lnet/minecraft/world/phys/shapes/VoxelShape;", at = @At("RETURN"))
+    // TODO: MC 26.1 renamed getOutlineShape -> getShape
+    @ModifyReturnValue(method = "getShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/shapes/CollisionContext;)Lnet/minecraft/world/phys/shapes/VoxelShape;", at = @At("RETURN"))
     private VoxelShape apoli$preventBlockSelection(VoxelShape original, BlockGetter blockView, BlockPos blockPos, CollisionContext context) {
 
         if (context == CollisionContext.empty()) {
@@ -69,8 +70,10 @@ public abstract class AbstractBlockStateMixin extends StateHolder<Block, BlockSt
 
     }
 
-    @WrapWithCondition(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;onEntityCollision(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)V"))
-    private boolean apoli$preventOnEntityCollisionCallWhenPhasing(Block instance, BlockState state, Level world, BlockPos blockPos, Entity entity) {
+    // TODO: MC 26.1 renamed onEntityCollision -> entityInside with new signature including InsideBlockEffectApplier and boolean.
+    // Block.onEntityCollision no longer exists. The method and target both need updating.
+    @WrapWithCondition(method = "entityInside", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;entityInside(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/InsideBlockEffectApplier;Z)V"))
+    private boolean apoli$preventOnEntityCollisionCallWhenPhasing(Block instance, BlockState state, Level world, BlockPos blockPos, Entity entity, net.minecraft.world.entity.InsideBlockEffectApplier applier, boolean bl) {
         return !PowerHolderComponent.hasPowerType(entity, PhasingPowerType.class, p -> p.doesApply(blockPos));
     }
 

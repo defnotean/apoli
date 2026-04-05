@@ -11,7 +11,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ReloadableServerResources.class)
 public abstract class DataPackContentsMixin {
 
-	@Inject(method = "refresh", at = @At("HEAD"))
+	// TODO: MC 26.1 renamed ReloadableServerResources.refresh -> updateComponentsAndStaticRegistryTags
+	@Inject(method = "updateComponentsAndStaticRegistryTags", at = @At("HEAD"))
 	private void onRefresh(CallbackInfo ci) {
 		PowerManager.validate();
 		RecipePowerType.registerPowerRecipes((ReloadableServerResources) (Object) this);

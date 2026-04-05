@@ -19,7 +19,8 @@ import java.util.Optional;
 @Mixin(RecipeManager.class)
 public abstract class RecipeManagerMixin {
 
-    @ModifyReturnValue(method = "getFirstMatch(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/item/crafting/RecipeInput;Lnet/minecraft/world/Level;Lnet/minecraft/world/item/crafting/RecipeHolder;)Ljava/util/Optional;", at = @At("RETURN"))
+    // TODO: MC 26.1 renamed getFirstMatch -> getRecipeFor, and its 4th parameter changed from RecipeHolder to ResourceKey<Recipe<?>>
+    @ModifyReturnValue(method = "getRecipeFor(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/item/crafting/RecipeInput;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/crafting/RecipeHolder;)Ljava/util/Optional;", at = @At("RETURN"))
     private Optional<RecipeHolder<?>> apoli$modifyCraftingRecipe(Optional<RecipeHolder<?>> original, RecipeType<?> type, RecipeInput input, Level world) {
         return original.map(entry -> {
 
@@ -38,7 +39,8 @@ public abstract class RecipeManagerMixin {
         });
     }
 
-    @ModifyExpressionValue(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At(value = "NEW", target = "(Lnet/minecraft/resources/Identifier;Lnet/minecraft/world/item/crafting/Recipe;)Lnet/minecraft/world/item/crafting/RecipeHolder;"))
+    // TODO: MC 26.1 changed apply() first param from Map to RecipeMap, and RecipeHolder constructor takes ResourceKey not Identifier
+    @ModifyExpressionValue(method = "apply(Lnet/minecraft/world/item/crafting/RecipeMap;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At(value = "NEW", target = "(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/item/crafting/Recipe;)Lnet/minecraft/world/item/crafting/RecipeHolder;"))
     private RecipeHolder<?> apoli$validateRecipe(RecipeHolder<?> original, @Local Recipe<?> recipe) {
         return RecipeUtil.validateRecipe(recipe)
             .map(r -> original)

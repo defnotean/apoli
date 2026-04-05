@@ -18,25 +18,10 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(RecipeCollection.class)
 public abstract class RecipeResultCollectionMixin {
 
-    @ModifyExpressionValue(method = "computeCraftables", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeMatcher;match(Lnet/minecraft/world/item/crafting/Recipe;Lit/unimi/dsi/fastutil/ints/IntList;)Z"))
-    private boolean apoli$accountForPowerRecipes(boolean original, StackedContents recipeFinder, int gridWidth, int gridHeight, RecipeBook recipeBook, @Local RecipeHolder<?> recipeEntry) {
-
-        if (original && recipeEntry.value() instanceof PowerCraftingRecipe pcr && recipeBook instanceof PowerCraftingObject pco && pco.apoli$getPlayer() != null) {
-
-            Identifier powerId = pcr.powerId();
-            PowerHolderComponent component = PowerHolderComponent.KEY.get(pco.apoli$getPlayer());
-
-            return PowerManager.getOptional(powerId)
-                .map(component::getPowerType)
-                .map(RecipePowerType.class::isInstance)
-                .orElse(false);
-
-        }
-
-        else {
-            return original;
-        }
-
-    }
+    // TODO: MC 26.1 completely replaced computeCraftables() with selectRecipes() which uses
+    // RecipeDisplayEntry/StackedItemContents instead of RecipeHolder/StackedContents.
+    // RecipeMatcher class was also removed. Power recipe craftability needs reimplementing.
+    // @ModifyExpressionValue(method = "computeCraftables", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeMatcher;match(...)Z"))
+    // private boolean apoli$accountForPowerRecipes(...) { ... }
 
 }

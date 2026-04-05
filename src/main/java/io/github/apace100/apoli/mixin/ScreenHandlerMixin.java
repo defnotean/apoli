@@ -26,8 +26,9 @@ import java.util.Optional;
 @Mixin(AbstractContainerMenu.class)
 public class ScreenHandlerMixin {
 
-    @ModifyExpressionValue(method = "internalOnSlotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;tryRemove(IILnet/minecraft/world/entity/player/Player;)Ljava/util/Optional;"))
-    private Optional<ItemStack> apoli$performAfterCraftingActions(Optional<ItemStack> original, int slotIndex, int button, ClickAction actionType, Player player, @Local Slot slot) {
+    // TODO: MC 26.1 renamed internalOnSlotClick -> doClick, and ClickAction -> ContainerInput
+    @ModifyExpressionValue(method = "doClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;tryRemove(IILnet/minecraft/world/entity/player/Player;)Ljava/util/Optional;"))
+    private Optional<ItemStack> apoli$performAfterCraftingActions(Optional<ItemStack> original, int slotIndex, int button, net.minecraft.world.inventory.ContainerInput actionType, Player player, @Local Slot slot) {
 
         if ((AbstractContainerMenu) (Object) this instanceof PowerModifiedGrindstone pmg && original.isPresent() && slotIndex == 2) {
 

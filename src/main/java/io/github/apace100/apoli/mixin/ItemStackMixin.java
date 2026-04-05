@@ -221,19 +221,21 @@ public abstract class ItemStackMixin implements DataComponentHolder, EntityLinke
             .orElse(original);
     }
 
-    @ModifyReturnValue(method = "getEatingSound", at = @At("RETURN"))
-    private SoundEvent apoli$replaceEatingSound(SoundEvent original) {
-        return EdibleItemPowerType.get((ItemStack) (Object) this)
-            .map(EdibleItemPowerType::getConsumeSoundEvent)
-            .orElse(original);
-    }
+    // TODO: MC 26.1 removed ItemStack.getEatingSound() and getDrinkingSound().
+    // The consume sound system was reworked. These need reimplementing.
+    // @ModifyReturnValue(method = "getEatingSound", at = @At("RETURN"))
+    // private SoundEvent apoli$replaceEatingSound(SoundEvent original) {
+    //     return EdibleItemPowerType.get((ItemStack) (Object) this)
+    //         .map(EdibleItemPowerType::getConsumeSoundEvent)
+    //         .orElse(original);
+    // }
 
-    @ModifyReturnValue(method = "getDrinkingSound", at = @At("RETURN"))
-    private SoundEvent apoli$replaceDrinkingSound(SoundEvent original) {
-        return EdibleItemPowerType.get((ItemStack) (Object) this)
-            .map(EdibleItemPowerType::getConsumeSoundEvent)
-            .orElse(original);
-    }
+    // @ModifyReturnValue(method = "getDrinkingSound", at = @At("RETURN"))
+    // private SoundEvent apoli$replaceDrinkingSound(SoundEvent original) {
+    //     return EdibleItemPowerType.get((ItemStack) (Object) this)
+    //         .map(EdibleItemPowerType::getConsumeSoundEvent)
+    //         .orElse(original);
+    // }
 
     @ModifyReturnValue(method = "getUseDuration", at = @At("RETURN"))
     private int apoli$modifyMaxUseTicks(int original) {
