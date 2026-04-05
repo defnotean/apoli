@@ -10,7 +10,7 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.entity.layers.FeatureRenderer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -47,7 +47,7 @@ public class PreventFeatureRenderPowerType extends PowerType {
     }
 
     @Environment(EnvType.CLIENT)
-    public <T extends FeatureRenderer<?, ?>> boolean doesApply(T featureRenderer) {
+    public <T extends RenderLayer<?, ?>> boolean doesApply(T featureRenderer) {
         return featureRendererReferences.isEmpty() || featureRendererReferences
             .stream()
             .map(ApoliClassDataClient.FEATURE_RENDERERS::mapStringToClass)

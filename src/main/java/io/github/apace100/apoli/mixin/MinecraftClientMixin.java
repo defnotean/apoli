@@ -11,13 +11,12 @@ import io.github.apace100.apoli.power.type.SelfGlowPowerType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.RunArgs;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.server.packs.resources.ReloadableResourceManagerImpl;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,7 +35,7 @@ public abstract class MinecraftClientMixin implements OverlaySpriteHolder {
 
     @Shadow
     @Final
-    private ReloadableResourceManagerImpl resourceManager;
+    private ReloadableResourceManager resourceManager;
 
     @Shadow
     public abstract boolean isFinishedLoading();
@@ -59,16 +58,18 @@ public abstract class MinecraftClientMixin implements OverlaySpriteHolder {
         return apoli$overlaySpriteHolder.getSprite(id);
     }
 
-    @Inject(method = "<init>", at = @At(value = "NEW", target = "(Lnet/minecraft/client/Minecraft;)Lnet/minecraft/client/gui/Gui;"))
-    private void apoli$registerCustomAtlases(RunArgs args, CallbackInfo ci) {
-        this.apoli$overlaySpriteHolder = new OverlayPowerType.SpriteHolder(this.getTextureManager());
-        this.resourceManager.registerReloader(apoli$overlaySpriteHolder);
-    }
+    // TODO: MC 26.1 - RunArgs removed from Minecraft constructor. Find new injection point.
+    // @Inject(method = "<init>", at = @At(value = "NEW", target = "(Lnet/minecraft/client/Minecraft;)Lnet/minecraft/client/gui/Gui;"))
+    // private void apoli$registerCustomAtlases(RunArgs args, CallbackInfo ci) {
+    //     this.apoli$overlaySpriteHolder = new OverlayPowerType.SpriteHolder(this.getTextureManager());
+    //     this.resourceManager.registerReloader(apoli$overlaySpriteHolder);
+    // }
 
-    @Inject(method = "onFinishedLoading", at = @At("HEAD"))
-    private void apoli$postReloadTextures(Minecraft.LoadingContext loadingContext, CallbackInfo ci) {
-        PostLoadTexturesCallback.EVENT.invoker().onPostLoad((Minecraft) (Object) this, this.isFinishedLoading());
-    }
+    // TODO: MC 26.1 - LoadingContext removed. Find new callback mechanism.
+    // @Inject(method = "onFinishedLoading", at = @At("HEAD"))
+    // private void apoli$postReloadTextures(Minecraft.LoadingContext loadingContext, CallbackInfo ci) {
+    //     PostLoadTexturesCallback.EVENT.invoker().onPostLoad((Minecraft) (Object) this, this.isFinishedLoading());
+    // }
 
     @Inject(method = "setLevel", at = @At("HEAD"))
     private void apoli$onJoinWorld(ClientLevel world, CallbackInfo ci) {

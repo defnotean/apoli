@@ -12,10 +12,10 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.PostEffectProcessor;
-import net.minecraft.client.renderer.Camera;
+import net.minecraft.client.renderer.PostChain;
+import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.RenderTickCounter;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -51,7 +51,7 @@ public abstract class GameRendererMixin {
     protected abstract void loadPostProcessor(Identifier identifier);
 
     @Shadow
-    PostEffectProcessor postProcessor;
+    PostChain postProcessor;
     @Shadow
     private boolean postProcessorEnabled;
 
@@ -84,7 +84,7 @@ public abstract class GameRendererMixin {
     }
 
     @Inject(at = @At("HEAD"), method = "render")
-    private void apoli$loadShaderFromPower(RenderTickCounter tickCounter, boolean tick, CallbackInfo ci) {
+    private void apoli$loadShaderFromPower(DeltaTracker tickCounter, boolean tick, CallbackInfo ci) {
 
         //  Load a shader from a shader power with a high priority
         PowerHolderComponent.getPowerTypes(client.getCameraEntity(), ShaderPowerType.class)
@@ -114,7 +114,7 @@ public abstract class GameRendererMixin {
     }
 
     @Inject(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hudHidden:Z"))
-    private void apoli$renderOverlayPowersBelowHud(RenderTickCounter tickCounter, boolean tick, CallbackInfo ci) {
+    private void apoli$renderOverlayPowersBelowHud(DeltaTracker tickCounter, boolean tick, CallbackInfo ci) {
         PowerHolderComponent.getPowerTypes(client.getCameraEntity(), OverlayPowerType.class)
             .stream()
             .filter(p -> p.shouldRender(client.options, OverlayPowerType.DrawPhase.BELOW_HUD))
@@ -123,7 +123,7 @@ public abstract class GameRendererMixin {
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", ordinal = 0))
-    private void apoli$renderOverlayPowersAboveHud(RenderTickCounter tickCounter, boolean tick, CallbackInfo ci) {
+    private void apoli$renderOverlayPowersAboveHud(DeltaTracker tickCounter, boolean tick, CallbackInfo ci) {
         PowerHolderComponent.getPowerTypes(client.getCameraEntity(), OverlayPowerType.class)
             .stream()
             .filter(p -> p.shouldRender(client.options, OverlayPowerType.DrawPhase.ABOVE_HUD))
@@ -151,7 +151,7 @@ public abstract class GameRendererMixin {
             .orElseGet(() -> original.call(entity, tickDelta));
     }
 
-    @ModifyExpressionValue(method = "getFov", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Camera;getSubmersionType()Lnet/minecraft/world/level/material/FogType;"))
+    @ModifyExpressionValue(method = "getFov", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getSubmersionType()Lnet/minecraft/world/level/material/FogType;"))
     private FogType apoli$modifySubmersionTypeFov(FogType original, Camera camera) {
         return PowerHolderComponent.getPowerTypes(camera.getFocusedEntity(), ModifyCameraSubmersionTypePowerType.class, true)
             .stream()
@@ -166,7 +166,7 @@ public abstract class GameRendererMixin {
 
     // PHASING: remove_blocks
     @Inject(at = @At(value = "HEAD"), method = "render")
-    private void beforeRender(RenderTickCounter tickCounter, boolean tick, CallbackInfo ci) {
+    private void beforeRender(DeltaTracker tickCounter, boolean tick, CallbackInfo ci) {
         List<PhasingPowerType> phasings = PowerHolderComponent.getPowerTypes(camera.getFocusedEntity(), PhasingPowerType.class);
         if (phasings.stream().anyMatch(pp -> pp.getRenderType() == PhasingPowerType.RenderType.REMOVE_BLOCKS)) {
             float view = phasings.stream().filter(pp -> pp.getRenderType() == PhasingPowerType.RenderType.REMOVE_BLOCKS).map(PhasingPowerType::getViewDistance).min(Float::compareTo).get();
@@ -179,28 +179,28 @@ public abstract class GameRendererMixin {
             }
             for (BlockPos eyePosition : noLongerEyePositions) {
                 BlockState state = savedStates.get(eyePosition);
-                client.world.setBlock(eyePosition, state);
+                client.level.setBlock(eyePosition, state);
                 savedStates.remove(eyePosition);
             }
             for (BlockPos p : eyePositions) {
-                BlockState stateAtP = client.world.getBlockState(p);
-                if (!savedStates.containsKey(p) && !client.world.isAir(p) && !(stateAtP.getBlock() instanceof LiquidBlock)) {
+                BlockState stateAtP = client.level.getBlockState(p);
+                if (!savedStates.containsKey(p) && !client.level.isAir(p) && !(stateAtP.getBlock() instanceof LiquidBlock)) {
                     savedStates.put(p, stateAtP);
-                    client.world.setBlock(p, Blocks.AIR.getDefaultState());
+                    client.level.setBlock(p, Blocks.AIR.defaultBlockState());
                 }
             }
         } else if (savedStates.size() > 0) {
             Set<BlockPos> noLongerEyePositions = new HashSet<>(savedStates.keySet());
             for (BlockPos eyePosition : noLongerEyePositions) {
                 BlockState state = savedStates.get(eyePosition);
-                client.world.setBlock(eyePosition, state);
+                client.level.setBlock(eyePosition, state);
                 savedStates.remove(eyePosition);
             }
         }
     }
 
     // PHASING
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Camera;update(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/world/entity/Entity;ZZF)V"), method = "renderWorld")
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;update(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/world/entity/Entity;ZZF)V"), method = "renderWorld")
     private void preventThirdPerson(Camera camera, BlockGetter area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta) {
         if (PowerHolderComponent.getPowerTypes(camera.getFocusedEntity(), PhasingPowerType.class).stream().anyMatch(pp -> pp.getRenderType() == PhasingPowerType.RenderType.REMOVE_BLOCKS)) {
             camera.update(area, focusedEntity, false, false, tickDelta);

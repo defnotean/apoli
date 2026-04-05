@@ -16,7 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.gui.screens.recipebook.ClientRecipeBook;
+import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Abilities;

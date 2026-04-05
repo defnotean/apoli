@@ -3,7 +3,7 @@ package io.github.apace100.apoli.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import io.github.apace100.apoli.power.type.EdibleItemPowerType;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.item.ItemInHandRenderer;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.InteractionHand;
 import org.spongepowered.asm.mixin.Mixin;

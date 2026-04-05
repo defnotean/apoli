@@ -5,7 +5,7 @@ import io.github.apace100.apoli.power.type.PhasingPowerType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScreenEffectRenderer;
+import net.minecraft.client.renderer.ScreenEffectRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import com.mojang.blaze3d.vertex.PoseStack;
 import org.spongepowered.asm.mixin.Mixin;

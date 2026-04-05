@@ -1,6 +1,6 @@
 package io.github.apace100.apoli.power.type;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.access.OverlaySpriteHolder;
@@ -19,10 +19,16 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.renderer.*;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.client.resource.metadata.AnimationResourceMetadata;
 import net.minecraft.client.resource.metadata.TextureResourceMetadata;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureAtlasSpriteAtlasHolder;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -211,31 +217,31 @@ public class OverlayPowerType extends PowerType {
         }
 
         TextureAtlasSprite sprite = overlaySpriteHolder.apoli$getSprite(spriteId);
-        Identifier textureToDraw = sprite.getAtlasId();
+        Identifier textureToDraw = sprite.atlasLocation();
 
-        float minU = sprite.getMinU();
-        float maxU = sprite.getMaxU();
+        float minU = sprite.getU0();
+        float maxU = sprite.getU1();
 
-        float minV = sprite.getMinV();
-        float maxV = sprite.getMaxV();
+        float minV = sprite.getV0();
+        float maxV = sprite.getV1();
 
         RenderSystem.setShaderColor(red, green, blue, alpha);
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+        RenderSystem.setShader(CoreShaders.POSITION_TEX);
 
         x2 = x1 + width;
         y2 = y1 + height;
 
         RenderSystem.setShaderTexture(0, textureToDraw);
 
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+        Tesselator tessellator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 
-        bufferBuilder.vertex(x1, y1, -1.0F).texture(minU, minV);
-        bufferBuilder.vertex(x1, y2, -1.0F).texture(minU, maxV);
-        bufferBuilder.vertex(x2, y2, -1.0F).texture(maxU, maxV);
-        bufferBuilder.vertex(x2, y1, -1.0F).texture(maxU, minV);
+        bufferBuilder.addVertex(x1, y1, -1.0F).setUv(minU, minV);
+        bufferBuilder.addVertex(x1, y2, -1.0F).setUv(minU, maxV);
+        bufferBuilder.addVertex(x2, y2, -1.0F).setUv(maxU, maxV);
+        bufferBuilder.addVertex(x2, y1, -1.0F).setUv(maxU, minV);
 
-        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.defaultBlendFunc();
@@ -246,7 +252,7 @@ public class OverlayPowerType extends PowerType {
     }
 
     @Environment(EnvType.CLIENT)
-    public static final class SpriteHolder extends SpriteAtlasHolder {
+    public static final class SpriteHolder extends TextureAtlas {
 
         public SpriteHolder(TextureManager manager) {
             super(manager, ATLAS_TEXTURE, Apoli.identifier("overlay"), Set.of(AnimationResourceMetadata.READER, TextureResourceMetadata.READER));

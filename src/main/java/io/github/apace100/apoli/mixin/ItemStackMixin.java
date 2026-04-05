@@ -17,14 +17,14 @@ import io.github.apace100.apoli.util.InventoryUtil;
 import io.github.apace100.apoli.util.PriorityPhase;
 import io.github.apace100.apoli.util.StackClickPhase;
 import net.fabricmc.fabric.api.item.v1.FabricItemStack;
-import net.minecraft.core.component.ComponentHolder;
+import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUsage;
+// TODO: MC 26.1 - ItemUsage removed, consumeHeldItem inlined below
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.inventory.ClickAction;
@@ -41,7 +41,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import java.lang.ref.WeakReference;
 
 @Mixin(ItemStack.class)
-public abstract class ItemStackMixin implements ComponentHolder, EntityLinkedItemStack, FabricItemStack {
+public abstract class ItemStackMixin implements DataComponentHolder, EntityLinkedItemStack, FabricItemStack {
 
     @Nullable
     @Shadow
@@ -125,9 +125,13 @@ public abstract class ItemStackMixin implements ComponentHolder, EntityLinkedIte
             .map(fc -> user.canConsume(fc.canAlwaysEat()))
             .orElse(false);
 
-        InteractionResult<ItemStack> action = canConsumeCustomFood
-            ? ItemUsage.consumeHeldItem(world, user, hand)
-            : original.call(useStack.getItem(), world, user, hand);
+        InteractionResult<ItemStack> action;
+        if (canConsumeCustomFood) {
+            user.startUsingItem(hand);
+            action = InteractionResult.CONSUME;
+        } else {
+            action = original.call(useStack.getItem(), world, user, hand);
+        }
 
         if (!action.getResult().isAccepted()) {
             return action;

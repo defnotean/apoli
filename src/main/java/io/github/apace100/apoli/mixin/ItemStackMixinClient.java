@@ -17,8 +17,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.core.component.ComponentHolder;
-import net.minecraft.core.component.ComponentMap;
+import net.minecraft.core.component.DataComponentHolder;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -46,13 +46,13 @@ import java.util.function.Consumer;
 
 @Environment(EnvType.CLIENT)
 @Mixin(ItemStack.class)
-public abstract class ItemStackMixinClient implements ComponentHolder {
+public abstract class ItemStackMixinClient implements DataComponentHolder {
 
     @Shadow
     public abstract ItemUseAnimation getUseAnimation();
 
     @Shadow
-    public abstract ComponentMap getComponents();
+    public abstract DataComponentMap getComponents();
 
     @Shadow
     public abstract Item getItem();

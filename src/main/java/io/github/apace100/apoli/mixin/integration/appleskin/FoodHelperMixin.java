@@ -1,5 +1,7 @@
 package io.github.apace100.apoli.mixin.integration.appleskin;
 
+// TODO: MC 26.1 - AppleSkin not available for 26.1 yet. Re-enable when mod is ported.
+/*
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import io.github.apace100.apoli.power.type.EdibleItemPowerType;
 import net.minecraft.world.item.ItemStack;
@@ -18,4 +20,9 @@ public class FoodHelperMixin {
             || EdibleItemPowerType.get(stack).isPresent();
     }
 
+}
+*/
+
+// Stub class to prevent compilation errors
+public class FoodHelperMixin {
 }

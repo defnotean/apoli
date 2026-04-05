@@ -109,7 +109,7 @@ public class TextureUtil {
                 throw new IllegalArgumentException("Identifier \"" + atlasId + "\" does not refer to an atlas texture!");
             }
 
-            TextureAtlasSprite missingSprite = ((SpriteAtlasTextureAccessor) atlasTexture).getMissingTextureAtlasSprite();
+            TextureAtlasSprite missingSprite = ((SpriteAtlasTextureAccessor) atlasTexture).getMissingSprite();
             TextureAtlasSprite sprite = atlasTexture.getSprite(spriteId);
 
             if (sprite == missingSprite) {

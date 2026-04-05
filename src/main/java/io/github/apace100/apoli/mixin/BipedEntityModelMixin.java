@@ -16,14 +16,14 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(HumanoidModel.class)
 public abstract class HumanoidModelMixin<T extends LivingEntity> extends EntityModel<T> implements ArmedModel, HeadedModel {
 
-    @ModifyExpressionValue(method = "positionRightArm", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/entity/model/HumanoidModel;rightArmPose:Lnet/minecraft/client/renderer/entity/model/HumanoidModel$ArmPose;"))
+    @ModifyExpressionValue(method = "positionRightArm", at = @At(value = "FIELD", target = "Lnet/minecraft/client/model/HumanoidModel;rightArmPose:Lnet/minecraft/client/model/HumanoidModel$ArmPose;"))
     private HumanoidModel.ArmPose apoli$overrideRightArmPose(HumanoidModel.ArmPose original, T entity) {
         return ArmPoseReference
             .getArmPose(entity)
             .orElse(original);
     }
 
-    @ModifyExpressionValue(method = "positionLeftArm", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/entity/model/HumanoidModel;leftArmPose:Lnet/minecraft/client/renderer/entity/model/HumanoidModel$ArmPose;"))
+    @ModifyExpressionValue(method = "positionLeftArm", at = @At(value = "FIELD", target = "Lnet/minecraft/client/model/HumanoidModel;leftArmPose:Lnet/minecraft/client/model/HumanoidModel$ArmPose;"))
     private HumanoidModel.ArmPose apoli$overrideLeftArmPose(HumanoidModel.ArmPose original, T entity) {
         return ArmPoseReference
             .getArmPose(entity)

@@ -71,7 +71,7 @@ public class ModifyFluidRenderPowerType extends PowerType {
     }
 
     public FluidState getFluidState() {
-        return fluid.getDefaultState();
+        return fluid.defaultFluidState();
     }
 
 }

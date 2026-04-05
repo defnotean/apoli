@@ -10,7 +10,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.render.GuiRenderer;
-import net.minecraft.client.gui.LayeredDraw;
+// TODO: MC 26.1 - LayeredDraw removed
 import net.minecraft.client.gui.Gui;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
@@ -36,14 +36,13 @@ public abstract class InGameHudMixin {
 
     @Shadow protected abstract Player getCameraPlayer();
 
-    @Inject(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/Gui;layeredDrawer:Lnet/minecraft/client/gui/LayeredDraw;", opcode = Opcodes.GETFIELD))
-    private void apoli$renderResourceBars(Minecraft client, CallbackInfo ci, @Local(ordinal = 0) LayeredDraw layeredDrawer) {
-
-        for (GameHudRender hudRender : GameHudRender.HUD_RENDERS) {
-            ((LayeredDrawerAccessor) layeredDrawer).getLayers().add(3, hudRender::render);
-        }
-
-    }
+    // TODO: MC 26.1 - LayeredDraw removed. Find new way to register HUD renders.
+    // @Inject(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/Gui;layeredDrawer:Lnet/minecraft/client/gui/LayeredDraw;", opcode = Opcodes.GETFIELD))
+    // private void apoli$renderResourceBars(Minecraft client, CallbackInfo ci, @Local(ordinal = 0) LayeredDraw layeredDrawer) {
+    //     for (GameHudRender hudRender : GameHudRender.HUD_RENDERS) {
+    //         ((LayeredDrawerAccessor) layeredDrawer).getLayers().add(3, hudRender::render);
+    //     }
+    // }
 
     @Unique
     private static Optional<OverrideHudTexturePowerType> apoli$getOverrideHudTexturePower(Player player) {

@@ -15,10 +15,10 @@ import io.github.apace100.apoli.power.type.PosePowerType;
 import io.github.apace100.apoli.util.ArmPoseReference;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.ModelPart;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -29,7 +29,6 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.resources.Identifier;
-import net.minecraft.core.ColorHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -43,7 +42,7 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
         super(ctx, model, shadowRadius);
     }
 
-    @WrapOperation(method = "renderPlayerArm", at = {@At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelPart;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/VertexConsumer;II)V", ordinal = 0), @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelPart;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/VertexConsumer;II)V", ordinal = 1)})
+    @WrapOperation(method = "renderPlayerArm", at = {@At(value = "INVOKE", target = "Lnet/minecraft/client/model/geom/ModelPart;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;II)V", ordinal = 0), @At(value = "INVOKE", target = "Lnet/minecraft/client/model/geom/ModelPart;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;II)V", ordinal = 1)})
     private void apoli$makeArmAndSleeveTransparent(ModelPart instance, PoseStack matrices, VertexConsumer vertices, int light, int overlay, Operation<Void> original, PoseStack mMatrices, MultiBufferSource mVertexConsumers, int mLight, AbstractClientPlayer mPlayer, @Local Identifier skinTextureId) {
 
         List<ModelColorPowerType> modelColorPowers = PowerHolderComponent.getPowerTypes(mPlayer, ModelColorPowerType.class);
@@ -57,7 +56,8 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
         float blue = modelColorPowers.stream().map(ModelColorPowerType::getBlue).reduce((a, b) -> a * b).orElse(1.0f);
         float alpha = modelColorPowers.stream().map(ModelColorPowerType::getAlpha).min(Float::compare).orElse(1.0f);
 
-        instance.render(matrices, mVertexConsumers.getBuffer(RenderType.getEntityTranslucent(skinTextureId)), light, overlay, ColorHelper.Argb.fromFloats(alpha, red, green, blue));
+        int packedArgb = ((int)(alpha * 255) << 24) | ((int)(red * 255) << 16) | ((int)(green * 255) << 8) | (int)(blue * 255);
+        instance.render(matrices, mVertexConsumers.getBuffer(RenderType.getEntityTranslucent(skinTextureId)), light, overlay, packedArgb);
 
     }
 

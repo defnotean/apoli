@@ -11,7 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.client.renderer.fog.FogRenderer;
-import net.minecraft.client.renderer.Camera;
+import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -41,7 +41,7 @@ public abstract class BackgroundRendererMixin {
             || PowerHolderComponent.hasPowerType(cameraFocusedEntity, NightVisionPowerType.class);
     }
 
-    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Camera;getSubmersionType()Lnet/minecraft/world/level/material/FogType;"))
+    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getSubmersionType()Lnet/minecraft/world/level/material/FogType;"))
     private static FogType apoli$modifyCameraSubmersionType(FogType original, Camera camera) {
         return PowerHolderComponent.getPowerTypes(camera.getFocusedEntity(), ModifyCameraSubmersionTypePowerType.class, true)
             .stream()
@@ -51,7 +51,7 @@ public abstract class BackgroundRendererMixin {
             .orElse(original);
     }
 
-    @ModifyExpressionValue(method = "applyFog", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Camera;getSubmersionType()Lnet/minecraft/world/level/material/FogType;"))
+    @ModifyExpressionValue(method = "applyFog", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getSubmersionType()Lnet/minecraft/world/level/material/FogType;"))
     private static FogType apoli$modifyCameraSubmersionTypeFog(FogType original, Camera camera) {
         return PowerHolderComponent.getPowerTypes(camera.getFocusedEntity(), ModifyCameraSubmersionTypePowerType.class, true)
             .stream()
@@ -61,7 +61,7 @@ public abstract class BackgroundRendererMixin {
             .orElse(original);
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/FogRenderer;getFogModifier(Lnet/minecraft/world/entity/Entity;F)Lnet/minecraft/client/renderer/FogRenderer$MobEffectFogModifier;"))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/fog/FogRenderer;getFogModifier(Lnet/minecraft/world/entity/Entity;F)Lnet/minecraft/client/renderer/fog/FogRenderer$MobEffectFogModifier;"))
     private static void modifyFogColor(Camera camera, float tickDelta, ClientLevel world, int viewDistance, float skyDarkness, CallbackInfo ci) {
         if(camera.getFocusedEntity() instanceof LivingEntity) {
             if(PowerHolderComponent.getPowerTypes(camera.getFocusedEntity(), PhasingPowerType.class).stream().anyMatch(pp -> pp.getRenderType() == PhasingPowerType.RenderType.BLINDNESS)) {

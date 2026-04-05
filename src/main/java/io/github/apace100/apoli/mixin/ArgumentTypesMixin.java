@@ -5,7 +5,7 @@ import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.command.argument.PowerArgumentType;
 import io.github.apace100.apoli.command.argument.PowerHolderArgumentType;
 import io.github.apace100.apoli.command.argument.PowerOperationArgumentType;
-import net.minecraft.commands.arguments.ArgumentTypes;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(ArgumentTypes.class)
+@Mixin(ArgumentTypeInfos.class)
 public abstract class ArgumentTypesMixin {
     @Shadow
     private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.ArgumentTypeProperties<A>> ArgumentTypeInfo<A, T> register(Registry<ArgumentTypeInfo<?, ?>> registry, String string, Class<? extends A> clazz, ArgumentTypeInfo<A, T> argumentSerializer) {

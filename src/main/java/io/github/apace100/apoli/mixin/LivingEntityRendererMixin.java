@@ -12,20 +12,19 @@ import io.github.apace100.apoli.access.PseudoRenderDataHolder;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.type.*;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.renderer.entity.layers.ArmorFeatureRenderer;
-import net.minecraft.client.renderer.entity.layers.FeatureRenderer;
-import net.minecraft.client.renderer.entity.model.EntityModel;
+import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.model.EntityModel;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.core.ColorHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -55,12 +54,12 @@ public abstract class LivingEntityRendererMixin extends EntityRenderer<LivingEnt
     }
 
     @WrapWithCondition(method = "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/layers/RenderLayer;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/Entity;FFFFFF)V"))
-    private boolean apoli$preventFeatureRender(FeatureRenderer<?, ?> instance, PoseStack matrices, MultiBufferSource vertexConsumers, int light, Entity entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
-        return (!(instance instanceof ArmorFeatureRenderer<?, ?, ?>) || !PowerHolderComponent.hasPowerType(entity, InvisibilityPowerType.class, Predicate.not(InvisibilityPowerType::shouldRenderArmor)))
+    private boolean apoli$preventFeatureRender(RenderLayer<?, ?> instance, PoseStack matrices, MultiBufferSource vertexConsumers, int light, Entity entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+        return (!(instance instanceof HumanoidArmorLayer<?, ?, ?>) || !PowerHolderComponent.hasPowerType(entity, InvisibilityPowerType.class, Predicate.not(InvisibilityPowerType::shouldRenderArmor)))
             && !PowerHolderComponent.hasPowerType(entity, PreventFeatureRenderPowerType.class, p -> p.doesApply(instance));
     }
 
-    @WrapOperation(method = "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/model/EntityModel;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/VertexConsumer;III)V"))
+    @WrapOperation(method = "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/EntityModel;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V"))
     private void apoli$renderColorChangedModel(EntityModel<LivingEntity> entityModel, PoseStack matrixStack, VertexConsumer vertexConsumer, int light, int overlay, int argb, Operation<Void> original, LivingEntity entity) {
 
         List<ModelColorPowerType> modelColorPowers = PowerHolderComponent.getPowerTypes(entity, ModelColorPowerType.class);
@@ -73,17 +72,17 @@ public abstract class LivingEntityRendererMixin extends EntityRenderer<LivingEnt
         float newRed = modelColorPowers
             .stream()
             .map(ModelColorPowerType::getRed)
-            .reduce((float) ColorHelper.Argb.getRed(argb) / 255, (a, b) -> a * b);
+            .reduce((float) ((argb >> 16) & 0xFF) / 255, (a, b) -> a * b);
         float newGreen = modelColorPowers
             .stream()
             .map(ModelColorPowerType::getGreen)
-            .reduce((float) ColorHelper.Argb.getGreen(argb) / 255, (a, b) -> a * b);
+            .reduce((float) ((argb >> 8) & 0xFF) / 255, (a, b) -> a * b);
         float newBlue = modelColorPowers
             .stream()
             .map(ModelColorPowerType::getBlue)
-            .reduce((float) ColorHelper.Argb.getBlue(argb) / 255, (a, b) -> a * b);
+            .reduce((float) (argb & 0xFF) / 255, (a, b) -> a * b);
 
-        float oldAlpha = (float) ColorHelper.Argb.getAlpha(argb) / 255;
+        float oldAlpha = (float) ((argb >> 24) & 0xFF) / 255;
         float newAlpha = modelColorPowers
             .stream()
             .map(ModelColorPowerType::getAlpha)
@@ -91,7 +90,8 @@ public abstract class LivingEntityRendererMixin extends EntityRenderer<LivingEnt
             .map(alphaFactor -> oldAlpha * alphaFactor)
             .orElse(oldAlpha);
 
-        original.call(entityModel, matrixStack, vertexConsumer, light, overlay, ColorHelper.Argb.fromFloats(newAlpha, newRed, newGreen, newBlue));
+        int packedArgb = ((int)(newAlpha * 255) << 24) | ((int)(newRed * 255) << 16) | ((int)(newGreen * 255) << 8) | (int)(newBlue * 255);
+        original.call(entityModel, matrixStack, vertexConsumer, light, overlay, packedArgb);
 
     }
 

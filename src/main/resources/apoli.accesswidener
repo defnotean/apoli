@@ -5,7 +5,7 @@ accessible method net/minecraft/world/item/ItemStack <init> (Ljava/lang/Void;)V
 extendable class net/minecraft/world/item/ItemStack
 accessible class net/minecraft/world/item/enchantment/EnchantmentHelper$Consumer
 accessible class net/minecraft/world/item/enchantment/EnchantmentHelper$ContextAwareConsumer
-accessible class net/minecraft/client/renderer/FogRenderer$FogData
+accessible class net/minecraft/client/renderer/fog/FogRenderer$FogData
 accessible class net/minecraft/server/commands/AdvancementCommands$Action
 accessible class net/minecraft/server/commands/AdvancementCommands$Mode
 accessible method net/minecraft/server/commands/AdvancementCommands$Action perform (Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/advancements/AdvancementHolder;)Z
