@@ -62,7 +62,7 @@ public abstract class GameEventListenerPowerTypeMixin {
 	public static abstract class EventHandlerUpdater {
 
 		// MC 26.1: Entity.getWorld() no longer exists; level() is the direct method on Entity
-		@Inject(method = "updateEventHandler", at = @At("HEAD"))
+		@Inject(method = "updateDynamicGameEventListener", at = @At("HEAD"))
 		private void apoli$update(BiConsumer<VibrationSystem.Listener, ServerLevel> callback, CallbackInfo ci) {
 
 			if (((Entity) (Object) this).level() instanceof ServerLevel serverWorld) {
