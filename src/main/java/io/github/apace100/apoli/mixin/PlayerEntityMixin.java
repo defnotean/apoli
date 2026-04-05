@@ -288,10 +288,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
 
     }
 
-    @ModifyExpressionValue(method = "jumpFromGround", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSprinting()Z"))
-    private boolean apoli$shouldApplySprintJumpExhaustion(boolean original) {
-        return original && this.apoli$applySprintJumpEffects();
-    }
+    // TODO: MC 26.1 - jumpFromGround is on LivingEntity, not Player. Move to LivingEntityMixin.
+    // @ModifyExpressionValue(method = "jumpFromGround", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSprinting()Z"))
+    // private boolean apoli$shouldApplySprintJumpExhaustion(boolean original) {
+    //     return original && this.apoli$applySprintJumpEffects();
+    // }
 
     @WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;updatePlayerPose()V"))
     private boolean apoli$preventUpdatingPose(Player player) {
