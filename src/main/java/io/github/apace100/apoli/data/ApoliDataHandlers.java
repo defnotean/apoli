@@ -9,10 +9,13 @@ import java.util.Set;
 
 public class ApoliDataHandlers {
 
-    public static final EntityDataSerializer<Set<String>> STRING_SET = EntityDataSerializer.create(ByteBufCodecs.collection(HashSet::new, ByteBufCodecs.string(32767)));
+    @SuppressWarnings("unchecked")
+    public static final EntityDataSerializer<Set<String>> STRING_SET = EntityDataSerializer.forValueType(
+        (net.minecraft.network.codec.StreamCodec) ByteBufCodecs.collection(HashSet::new, ByteBufCodecs.stringUtf8(32767))
+    );
 
     public static void register() {
-        EntityDataSerializers.register(STRING_SET);
+        EntityDataSerializers.registerSerializer(STRING_SET);
     }
 
 }

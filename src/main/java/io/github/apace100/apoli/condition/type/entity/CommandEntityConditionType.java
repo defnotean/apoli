@@ -91,7 +91,7 @@ public class CommandEntityConditionType extends EntityConditionType {
         if (Apoli.config.executeCommand.showOutput) {
 
             CommandSource output = entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
-                ? serverPlayer
+                ? serverPlayer.commandSource()
                 : server;
 
             commandSource = commandSource.withSource(output);

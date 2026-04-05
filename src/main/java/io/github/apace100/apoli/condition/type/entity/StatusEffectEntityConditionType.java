@@ -11,26 +11,27 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.NotNull;
 
 public class StatusEffectEntityConditionType extends EntityConditionType {
 
     public static final TypedDataObjectFactory<StatusEffectEntityConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("effect", SerializableDataTypes.STATUS_EFFECT_ENTRY)
+            .add("effect", SerializableDataTypes.STATUS_EFFECT)
             .add("min_amplifier", SerializableDataTypes.INT, 0)
             .add("max_amplifier", SerializableDataTypes.INT, Integer.MAX_VALUE)
             .add("min_duration", SerializableDataTypes.INT, -1)
             .add("max_duration", SerializableDataTypes.INT, Integer.MAX_VALUE),
         data -> new StatusEffectEntityConditionType(
-            data.get("effect"),
+            BuiltInRegistries.MOB_EFFECT.wrapAsHolder(data.get("effect")),
             data.get("min_amplifier"),
             data.get("max_amplifier"),
             data.get("min_duration"),
             data.get("max_duration")
         ),
         (conditionType, serializableData) -> serializableData.instance()
-            .set("effect", conditionType.effect)
+            .set("effect", conditionType.effect.value())
             .set("min_amplifier", conditionType.minAmplifier)
             .set("max_amplifier", conditionType.maxAmplifier)
             .set("min_duration", conditionType.minDuration)

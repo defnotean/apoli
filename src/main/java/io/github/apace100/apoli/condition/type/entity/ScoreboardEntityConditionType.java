@@ -56,12 +56,12 @@ public class ScoreboardEntityConditionType extends EntityConditionType {
 
         Entity entity = context.entity();
 
-        ScoreHolder scoreHolder = ScoreHolder.fromName(name.orElse(entity.getNameForScoreboard()));
+        ScoreHolder scoreHolder = ScoreHolder.forNameOnly(name.orElse(entity.getScoreboardName()));
         Scoreboard scoreboard = entity.level().getScoreboard();
 
-        return Optional.ofNullable(scoreboard.getNullableObjective(objective))
-            .flatMap(objective -> Optional.ofNullable(scoreboard.getScore(scoreHolder, objective)))
-            .map(ReadOnlyScoreInfo::getScore)
+        return Optional.ofNullable(scoreboard.getObjective(objective))
+            .map(obj -> scoreboard.getPlayerScoreInfo(scoreHolder, obj))
+            .map(ReadOnlyScoreInfo::value)
             .map(score -> comparison.compare(score, compareTo))
             .orElse(false);
 

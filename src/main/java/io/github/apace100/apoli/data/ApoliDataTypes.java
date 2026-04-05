@@ -110,8 +110,8 @@ public class ApoliDataTypes {
             DataObjectFactories.ITEM_STACK.fromData(data)
         ),
         (positionedStack, serializableData) -> DataObjectFactories.ITEM_STACK
-            .toData(positionedStack.getRight(), serializableData)
-            .set("slot", positionedStack.getLeft())
+            .toData(positionedStack.getSecond(), serializableData)
+            .set("slot", positionedStack.getFirst())
     );
 
 	/**
@@ -162,7 +162,7 @@ public class ApoliDataTypes {
 
     public static final SerializableDataType<PlayerAbility> PLAYER_ABILITY = SerializableDataTypes.IDENTIFIER.xmap(id -> Pal.provideRegisteredAbility(id).get(), PlayerAbility::getId);
 
-    public static final SerializableDataType<ArgumentWrapper<Integer>> ITEM_SLOT = SerializableDataType.argumentType(SlotArgument.itemSlot());
+    public static final SerializableDataType<ArgumentWrapper<Integer>> ITEM_SLOT = SerializableDataType.argumentType(SlotArgument.slot());
 
     public static final SerializableDataType<List<ArgumentWrapper<Integer>>> ITEM_SLOTS = ITEM_SLOT.list();
 
@@ -183,8 +183,8 @@ public class ApoliDataTypes {
     public static final SerializableDataType<AdvancementCommands.Mode> ADVANCEMENT_SELECTION = SerializableDataType.enumValue(AdvancementCommands.Mode.class);
 
     public static final SerializableDataType<ClickAction> CLICK_TYPE = SerializableDataType.enumValue(ClickAction.class, () -> ImmutableMap.of(
-        "left", ClickAction.LEFT,
-        "right", ClickAction.RIGHT
+        "left", ClickAction.PRIMARY,
+        "right", ClickAction.SECONDARY
     ));
 
     public static final SerializableDataType<EnumSet<ClickAction>> CLICK_TYPE_SET = SerializableDataType.enumSet(CLICK_TYPE);
@@ -231,7 +231,7 @@ public class ApoliDataTypes {
 			}
 
 		},
-		ComponentSerialization.UNLIMITED_REGISTRY_PACKET_CODEC
+		ComponentSerialization.TRUSTED_STREAM_CODEC
 	);
 
     public static final SerializableDataType<StackClickPhase> STACK_CLICK_PHASE = SerializableDataType.enumValue(StackClickPhase.class);
@@ -246,12 +246,12 @@ public class ApoliDataTypes {
 
     public static final SerializableDataType<ArmPoseReference> ARM_POSE_REFERENCE = SerializableDataType.enumValue(ArmPoseReference.class);
 
-	public static final SerializableDataType<CraftingRecipe> DISALLOWING_INTERNAL_CRAFTING_RECIPE = SerializableDataTypes.RECIPE.comapFlatMap(RecipeUtil::validateCraftingRecipe, Function.identity());
+	public static final SerializableDataType<CraftingRecipe> DISALLOWING_INTERNAL_CRAFTING_RECIPE = SerializableDataTypes.RECIPE.comapFlatMap(holder -> RecipeUtil.validateCraftingRecipe(holder.value()), recipe -> new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE, Identifier.withDefaultNamespace("unknown")), recipe));
 
 	public static final SerializableDataType<Float> NORMALIZED_FLOAT = SerializableDataType.boundNumber(SerializableDataTypes.FLOAT, 0F, 1F);
 
-	public static final SerializableDataType<ContainerType> CONTAINER_TYPE = new SerializableDataType<>(
-		new Codec<>() {
+	public static final SerializableDataType<ContainerType> CONTAINER_TYPE = SerializableDataType.of(
+		new Codec<ContainerType>() {
 
 			@Override
 			public <T> DataResult<com.mojang.datafixers.util.Pair<ContainerType, T>> decode(DynamicOps<T> ops, T input) {
@@ -304,7 +304,7 @@ public class ApoliDataTypes {
 			}
 
 		},
-		new StreamCodec<>() {
+		new StreamCodec<RegistryFriendlyByteBuf, ContainerType>() {
 
 			@Override
 			public ContainerType decode(RegistryFriendlyByteBuf buf) {
@@ -348,9 +348,9 @@ public class ApoliDataTypes {
 			data.get("z")
 		),
 		(vec3i, serializableData) -> serializableData.instance()
-			.set("x", vec3i.x())
-			.set("y", vec3i.y())
-			.set("z", vec3i.z())
+			.set("x", vec3i.getX())
+			.set("y", vec3i.getY())
+			.set("z", vec3i.getZ())
 	);
 
 	public static final SerializableDataType<Vector3f> VECTOR_3_FLOAT = SerializableDataType.compound(

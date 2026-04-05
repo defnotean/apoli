@@ -76,10 +76,10 @@ public class OverrideHudTexturePowerType extends PowerType implements Prioritize
 
         textureOrMapping.ifRight(mapping -> {
 
-            Identifier texture = heartType.getTexture(hardcore, half, blinking);
+            Identifier texture = heartType.getSprite(hardcore, half, blinking);
             Identifier newTexture = mapping.getOrDefault(texture, texture);
 
-            extractor.blitSprite(com.mojang.blaze3d.pipeline.RenderPipelines.GUI_TEXTURED, newTexture, x, y, width, height);
+            extractor.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, newTexture, x, y, width, height);
 
         });
 
@@ -88,13 +88,13 @@ public class OverrideHudTexturePowerType extends PowerType implements Prioritize
     @Environment(EnvType.CLIENT)
     public void drawTextureRegion(GuiGraphicsExtractor extractor, Identifier texture, int width, int height, int minU, int minV, int legacyMinU, int legacyMinV, int x, int y, int maxU, int maxV) {
         textureOrMapping
-            .ifRight(mapping -> extractor.blitSprite(com.mojang.blaze3d.pipeline.RenderPipelines.GUI_TEXTURED, mapping.getOrDefault(texture, texture), width, height, minU, minV, x, y, maxU, maxV));
+            .ifRight(mapping -> extractor.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, mapping.getOrDefault(texture, texture), width, height, minU, minV, x, y, maxU, maxV));
     }
 
     @Environment(EnvType.CLIENT)
     public void drawTexture(GuiGraphicsExtractor extractor, Identifier texture, int x, int y, int legacyU, int legacyV, int width, int height) {
         textureOrMapping
-            .ifRight(mapping -> extractor.blitSprite(com.mojang.blaze3d.pipeline.RenderPipelines.GUI_TEXTURED, mapping.getOrDefault(texture, texture), x, y, width, height));
+            .ifRight(mapping -> extractor.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, mapping.getOrDefault(texture, texture), x, y, width, height));
     }
 
 }

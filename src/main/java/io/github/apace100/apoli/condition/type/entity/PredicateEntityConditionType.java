@@ -49,9 +49,10 @@ public class PredicateEntityConditionType extends EntityConditionType {
         }
 
         LootItemCondition lootCondition = serverWorld.getServer().reloadableRegistries()
-            .registryAccess()
-            .get(Registries.PREDICATE)
-            .getOrThrow(predicate);
+            .lookup()
+            .lookupOrThrow(Registries.PREDICATE)
+            .getOrThrow(predicate)
+            .value();
         LootParams lootContextParameterSet = new LootParams.Builder(serverWorld)
             .withParameter(LootContextParams.ORIGIN, entity.position())
             .withOptionalParameter(LootContextParams.THIS_ENTITY, entity)

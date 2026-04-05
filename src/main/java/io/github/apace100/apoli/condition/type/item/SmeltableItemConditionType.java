@@ -4,6 +4,7 @@ import io.github.apace100.apoli.condition.ConditionConfiguration;
 import io.github.apace100.apoli.condition.context.ItemConditionContext;
 import io.github.apace100.apoli.condition.type.ItemConditionType;
 import io.github.apace100.apoli.condition.type.ItemConditionTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
@@ -18,8 +19,12 @@ public class SmeltableItemConditionType extends ItemConditionType {
         ItemStack stack = context.stack();
         Level world = context.world();
 
-        return world.getRecipeManager()
-            .getFirstMatch(RecipeType.SMELTING, new SingleRecipeInput(stack), world)
+        if (!(world instanceof ServerLevel serverLevel)) {
+            return false;
+        }
+
+        return serverLevel.recipeAccess()
+            .getRecipeFor(RecipeType.SMELTING, new SingleRecipeInput(stack), world)
             .isPresent();
 
     }

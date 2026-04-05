@@ -65,7 +65,7 @@ public class EnchantmentEntityConditionType extends EntityConditionType {
 
         if (context.entity() instanceof LivingEntity livingEntity) {
 
-            Holder<Enchantment> enchantment = livingEntity.registryAccess().get(Registries.ENCHANTMENT).getOrThrow(enchantmentKey);
+            Holder<Enchantment> enchantment = livingEntity.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(enchantmentKey);
             int level = calculation.queryTotalLevel(livingEntity, enchantment, useModifications);
 
             return comparison.compare(level, compareTo);

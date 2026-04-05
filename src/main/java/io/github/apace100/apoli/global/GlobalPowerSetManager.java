@@ -31,7 +31,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Util;
-import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -76,7 +76,7 @@ public class GlobalPowerSetManager extends IdentifiableMultiJsonDataLoader imple
     }
 
     @Override
-    protected void apply(MultiJsonDataContainer prepared, ResourceManager manager, Profiler profiler) {
+    protected void apply(MultiJsonDataContainer prepared, ResourceManager manager, ProfilerFiller profiler) {
 
         Apoli.LOGGER.info("Reading global power sets from data packs...");
         startBuilding();
@@ -86,15 +86,15 @@ public class GlobalPowerSetManager extends IdentifiableMultiJsonDataLoader imple
 
             try {
 
-                SerializableData.CURRENT_NAMESPACE = id.getNamespace();
-                SerializableData.CURRENT_PATH = id.getPath();
+                SerializableData.CURRENT_NAMESPACE.set(id.getNamespace());
+                SerializableData.CURRENT_PATH.set(id.getPath());
 
                 if (!(jsonElement instanceof JsonObject jsonObject)) {
                     throw new JsonSyntaxException("Not a JSON object: " + jsonElement);
                 }
 
-                GlobalPowerSet globalPowerSet = GlobalPowerSet.DATA_TYPE.read(wrapperLookup.getOps(JsonOps.INSTANCE), jsonObject).getOrThrow();
-                int currLoadingPriority = GsonHelper.getInt(jsonObject, "loading_priority", 0);
+                GlobalPowerSet globalPowerSet = GlobalPowerSet.DATA_TYPE.read(jsonObject);
+                int currLoadingPriority = GsonHelper.getAsInt(jsonObject, "loading_priority", 0);
 
                 PrioritizedEntry<GlobalPowerSet> entry = new PrioritizedEntry<>(globalPowerSet, currLoadingPriority);
                 int prevLoadingPriority = LOADING_PRIORITIES.getOrDefault(id, Integer.MIN_VALUE);
@@ -134,8 +134,8 @@ public class GlobalPowerSetManager extends IdentifiableMultiJsonDataLoader imple
 
         });
 
-        SerializableData.CURRENT_NAMESPACE = null;
-        SerializableData.CURRENT_PATH = null;
+        SerializableData.CURRENT_NAMESPACE.set(null);
+        SerializableData.CURRENT_PATH.set(null);
 
         Apoli.LOGGER.info("Finished reading global power sets from data packs. Merging similar global power sets...");
 
@@ -166,15 +166,6 @@ public class GlobalPowerSetManager extends IdentifiableMultiJsonDataLoader imple
     }
 
     @Override
-    public void onReject(String packName, Identifier resourceId) {
-
-        if (!contains(resourceId)) {
-            disable(resourceId);
-        }
-
-    }
-
-    @Override
     public Identifier getFabricId() {
         return ID;
     }
@@ -186,29 +177,27 @@ public class GlobalPowerSetManager extends IdentifiableMultiJsonDataLoader imple
 
     private GlobalPowerSet merge(GlobalPowerSet oldSet, GlobalPowerSet newSet) {
 
-        TagLike.Builder<EntityType<?>> oldBuilder = new TagLike.Builder<>(Registries.ENTITY_TYPE);
-        TagLike.Builder<EntityType<?>> newBuilder = new TagLike.Builder<>(Registries.ENTITY_TYPE);
-
-        oldSet.getEntityTypes().map(TagLike::entries).ifPresent(oldBuilder::addAll);
-        newSet.getEntityTypes().map(TagLike::entries).ifPresent(newBuilder::addAll);
+        TagLike<EntityType<?>> mergedEntityTypes = new TagLike<>(BuiltInRegistries.ENTITY_TYPE);
+        oldSet.getEntityTypes().ifPresent(mergedEntityTypes::addAll);
+        newSet.getEntityTypes().ifPresent(mergedEntityTypes::addAll);
 
         Set<PowerReference> powerReferences = new ObjectLinkedOpenHashSet<>(oldSet.getPowerReferences());
         int order = oldSet.getOrder();
 
         if (newSet.shouldReplace()) {
 
-            oldBuilder.clear();
+            mergedEntityTypes.clear();
+            newSet.getEntityTypes().ifPresent(mergedEntityTypes::addAll);
             powerReferences.clear();
 
             order = newSet.getOrder();
 
         }
 
-        oldBuilder.addAll(newBuilder);
         powerReferences.addAll(newSet.getPowerReferences());
 
         Optional<TagLike<EntityType<?>>> entityTypes = oldSet.getEntityTypes().isPresent() || newSet.getEntityTypes().isPresent()
-            ? Optional.of(oldBuilder.build(wrapperLookup.getWrapperOrThrow(Registries.ENTITY_TYPE)))
+            ? Optional.of(mergedEntityTypes)
             : Optional.empty();
 
         return new GlobalPowerSet(

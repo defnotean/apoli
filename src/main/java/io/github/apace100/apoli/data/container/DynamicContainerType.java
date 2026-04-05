@@ -6,8 +6,10 @@ import io.github.apace100.apoli.util.TextAlignment;
 import io.github.apace100.calio.data.CompoundSerializableDataType;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
@@ -50,19 +52,31 @@ public record DynamicContainerType(TextAlignment titleAlignment, Identifier text
         // For standard 9-wide chests (1-6 rows), use vanilla ChestMenu — vanilla-compatible and renderable
         if (columns == 9 && rows >= 1 && rows <= 6) {
             MenuType<ChestMenu> menuType = switch (rows) {
-                case 1 -> MenuType.GENERIC_9X1;
-                case 2 -> MenuType.GENERIC_9X2;
-                case 3 -> MenuType.GENERIC_9X3;
-                case 4 -> MenuType.GENERIC_9X4;
-                case 5 -> MenuType.GENERIC_9X5;
-                default -> MenuType.GENERIC_9X6;
+                case 1 -> MenuType.GENERIC_9x1;
+                case 2 -> MenuType.GENERIC_9x2;
+                case 3 -> MenuType.GENERIC_9x3;
+                case 4 -> MenuType.GENERIC_9x4;
+                case 5 -> MenuType.GENERIC_9x5;
+                default -> MenuType.GENERIC_9x6;
             };
-            return (syncId, playerInventory, player) ->
-                new ChestMenu(menuType, syncId, playerInventory, inventory, rows);
+            return new MenuProvider() {
+                @Override
+                public Component getDisplayName() { return Component.empty(); }
+                @Override
+                public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+                    return new ChestMenu(menuType, syncId, playerInventory, inventory, rows);
+                }
+            };
         }
         // For non-standard sizes, clamp to the nearest valid chest size and use dynamic slots
-        return (syncId, playerInventory, player) ->
-            new DynamicMenu(syncId, playerInventory, inventory, columns, rows);
+        return new MenuProvider() {
+            @Override
+            public Component getDisplayName() { return Component.empty(); }
+            @Override
+            public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+                return new DynamicMenu(syncId, playerInventory, inventory, columns, rows);
+            }
+        };
     }
 
     /**
@@ -107,12 +121,12 @@ public record DynamicContainerType(TextAlignment titleAlignment, Identifier text
         private static MenuType<?> resolveMenuType(int columns, int rows) {
             // Use the closest standard chest menu type for the row count
             return switch (Math.min(rows, 6)) {
-                case 1 -> MenuType.GENERIC_9X1;
-                case 2 -> MenuType.GENERIC_9X2;
-                case 3 -> MenuType.GENERIC_9X3;
-                case 4 -> MenuType.GENERIC_9X4;
-                case 5 -> MenuType.GENERIC_9X5;
-                default -> MenuType.GENERIC_9X6;
+                case 1 -> MenuType.GENERIC_9x1;
+                case 2 -> MenuType.GENERIC_9x2;
+                case 3 -> MenuType.GENERIC_9x3;
+                case 4 -> MenuType.GENERIC_9x4;
+                case 5 -> MenuType.GENERIC_9x5;
+                default -> MenuType.GENERIC_9x6;
             };
         }
 

@@ -45,10 +45,10 @@ public class ItemCooldownItemConditionType extends ItemConditionType {
 
         if (!stack.isEmpty() && ((EntityLinkedItemStack) stack).apoli$getEntity(true) instanceof Player player) {
 
-            ItemCooldowns.Entry cooldownEntry = player.getCooldowns().entries.get(stack.getItem());
-            int cooldown = cooldownEntry != null
-                ? Math.abs(cooldownEntry.endTick - cooldownEntry.startTick)
-                : 0;
+            ItemCooldowns cooldowns = player.getCooldowns();
+            // In MC 26.1, ItemCooldowns no longer exposes entries directly.
+            // Use isOnCooldown as a boolean check and compare 1 (on cooldown) or 0 (not) to compareTo.
+            int cooldown = cooldowns.isOnCooldown(stack) ? 1 : 0;
 
             return comparison.compare(cooldown, compareTo);
 

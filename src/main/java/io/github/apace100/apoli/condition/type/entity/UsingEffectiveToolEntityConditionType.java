@@ -49,7 +49,7 @@ public class UsingEffectiveToolEntityConditionType extends EntityConditionType {
             return false;
         }
 
-        return playerEntity.canHarvest(miningBlockState);
+        return playerEntity.hasCorrectToolForDrops(miningBlockState);
 
     }
 

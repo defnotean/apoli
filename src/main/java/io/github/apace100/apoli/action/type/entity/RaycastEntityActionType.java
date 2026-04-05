@@ -214,7 +214,7 @@ public class RaycastEntityActionType extends EntityActionType {
 
             switch (hitResult) {
                 case BlockHitResult blockResult ->
-                    blockAction.ifPresent(action -> action.execute(entity.level(), blockResult.blockPosition(), Optional.of(blockResult.getDirection())));
+                    blockAction.ifPresent(action -> action.execute(entity.level(), blockResult.getBlockPos(), Optional.of(blockResult.getDirection())));
                 case EntityHitResult entityResult ->
                     biEntityAction.ifPresent(action -> action.execute(entity, entityResult.getEntity()));
                 default -> {

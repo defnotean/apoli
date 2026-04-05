@@ -15,7 +15,7 @@ public class FoodItemConditionType extends ItemConditionType {
     public boolean test(ItemConditionContext context) {
         ItemStack stack = context.stack();
         return EdibleItemPowerType.get(stack).isPresent()
-            || stack.contains(DataComponents.FOOD);
+            || stack.has(DataComponents.FOOD);
     }
 
     @Override

@@ -56,12 +56,12 @@ public class ModifyItemActionType extends ItemActionType {
             .value();
 
         LootParams lootContextParameterSet = new LootParams.Builder(world)
-            .add(LootContextParams.ORIGIN, world.getLevelData().getRespawnData().pos().getCenter())
-            .add(LootContextParams.TOOL, oldStack)
-            .addOptional(LootContextParams.THIS_ENTITY, ((EntityLinkedItemStack) oldStack).apoli$getEntity())
-            .build(ApoliLootContextTypes.ANY);
+            .withParameter(LootContextParams.ORIGIN, world.getLevelData().getRespawnData().pos().getCenter())
+            .withParameter(LootContextParams.TOOL, oldStack)
+            .withOptionalParameter(LootContextParams.THIS_ENTITY, ((EntityLinkedItemStack) oldStack).apoli$getEntity())
+            .create(ApoliLootContextTypes.ANY);
 
-        ItemStack newStack = itemModifier.apply(oldStack, new LootContext.Builder(lootContextParameterSet).build(ApoliLootContextTypes.ANY));
+        ItemStack newStack = itemModifier.apply(oldStack, new LootContext.Builder(lootContextParameterSet).create(Optional.empty()));
         stackReference.set(newStack);
 
     }

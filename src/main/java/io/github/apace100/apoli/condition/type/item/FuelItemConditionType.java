@@ -39,9 +39,9 @@ public class FuelItemConditionType extends ItemConditionType {
 
 	@Override
 	public boolean test(ItemConditionContext context) {
-		// In MC 26.1, FuelRegistry was removed. Fuel values are now per-level via FuelValues.
-		// We approximate by checking if the item is a known fuel (burn time > 0 through component data)
-		int burnTime = context.stack().getBurnTime();
+		// In MC 26.1, burn times come from FuelValues which requires a Level context
+		FuelValues fuelValues = FuelValues.vanillaBurnTimes(context.world().registryAccess(), context.world().enabledFeatures());
+		int burnTime = fuelValues.burnDuration(context.stack());
 		return comparison.compare(burnTime, compareTo);
 	}
 

@@ -45,7 +45,7 @@ public class ItemPowersComponent {
 		ItemPowersComponent::entries
     );
 
-    public static final StreamCodec<ByteBuf, ItemPowersComponent> PACKET_CODEC = ByteBufCodecs.collection(ObjectLinkedOpenHashSet::new, Entry.PACKET_CODEC).xmap(
+    public static final StreamCodec<ByteBuf, ItemPowersComponent> PACKET_CODEC = ByteBufCodecs.collection(ObjectLinkedOpenHashSet::new, Entry.PACKET_CODEC).map(
         ItemPowersComponent::new,
         ItemPowersComponent::entries
     );
@@ -159,9 +159,8 @@ public class ItemPowersComponent {
         }
 
         CompoundTag customData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
-        CompoundTag powerDataTag = customData.contains(STACK_POWER_DATA_KEY)
-            ? customData.getCompound(STACK_POWER_DATA_KEY)
-            : new CompoundTag();
+        CompoundTag powerDataTag = customData.getCompound(STACK_POWER_DATA_KEY)
+            .orElseGet(CompoundTag::new);
 
         for (Power power : powers) {
             PowerType powerType = component.getPowerType(power);
@@ -200,7 +199,7 @@ public class ItemPowersComponent {
             return;
         }
 
-        CompoundTag powerDataTag = customData.getCompound(STACK_POWER_DATA_KEY);
+        CompoundTag powerDataTag = customData.getCompound(STACK_POWER_DATA_KEY).orElseGet(CompoundTag::new);
 
         for (Power power : powers) {
             String key = power.getId().toString();
@@ -262,9 +261,9 @@ public class ItemPowersComponent {
             Codec.BOOL.optionalFieldOf("negative", false).forGetter(Entry::negative)
         ).apply(instance, Entry::new));
 
-        public static final StreamCodec<ByteBuf, Entry> PACKET_CODEC = StreamCodec.tuple(
-            Identifier.PACKET_CODEC, Entry::powerId,
-            EquipmentSlotGroup.PACKET_CODEC, Entry::slot,
+        public static final StreamCodec<ByteBuf, Entry> PACKET_CODEC = StreamCodec.composite(
+            Identifier.STREAM_CODEC, Entry::powerId,
+            EquipmentSlotGroup.STREAM_CODEC, Entry::slot,
             ByteBufCodecs.BOOL, Entry::hidden,
             ByteBufCodecs.BOOL, Entry::negative,
             Entry::new

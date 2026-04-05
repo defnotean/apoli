@@ -13,7 +13,6 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.core.HolderLookup;
@@ -239,15 +238,12 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
         HolderLookup.Provider lookup = input.lookup();
         var ops = RegistryOps.create(NbtOps.INSTANCE, lookup);
 
-        var powersInput = input.childrenListOrEmpty("powers");
-        for (int i = 0; i < powersInput.size(); i++) {
-
-            ValueInput powerInput = powersInput.get(i);
+        var powersInput = input.listOrEmpty("powers", Power.DataEntry.CODEC.codec());
+        int i = 0;
+        for (Power.DataEntry powerDataEntry : powersInput) {
 
             try {
 
-                // Read power data entry via codec from the child input
-                Power.DataEntry powerDataEntry = powerInput.read(Power.DataEntry.CODEC).orElseThrow();
                 PowerReference powerReference = powerDataEntry.powerReference();
 
                 try {
@@ -283,6 +279,7 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
                 Apoli.LOGGER.warn("Error trying to decode power at index {} from NBT of entity {} (UUID: {}) (skipping): {}", i, owner.getName().getString(), owner.getStringUUID(), t.getMessage());
             }
 
+            i++;
         }
 
     }
@@ -293,21 +290,18 @@ public class PowerHolderComponentImpl implements PowerHolderComponent {
         HolderLookup.Provider lookup = owner.level().registryAccess();
         var ops = RegistryOps.create(NbtOps.INSTANCE, lookup);
 
-        ListTag powersTag = new ListTag();
+        List<Power.DataEntry> powersEntries = new ArrayList<>();
         powers.forEach((power, powerType) -> {
 
             PowerConfiguration<?> typeConfig = power.getType().getConfig();
             PowerReference powerReference = PowerReference.of(power.getId());
 
-            Power.DataEntry.CODEC.codec().encodeStart(ops, new Power.DataEntry(typeConfig, powerReference, powerType.toTag(), powerSources.get(power)))
-                .mapError(err -> "Error encoding power \"" + power.getId() + "\" to NBT of entity " + owner.getName().getString() + " (UUID: " + owner.getStringUUID() + ") (skipping): " + err)
-                .resultOrPartial(Apoli.LOGGER::warn)
-                .ifPresent(powersTag::add);
+            powersEntries.add(new Power.DataEntry(typeConfig, powerReference, powerType.toTag(), powerSources.get(power)));
 
         });
 
-        // Store the list using a codec-based approach
-        output.store("powers", ListTag.CODEC, powersTag);
+        // Store the list using codec-based approach
+        output.store("powers", Power.DataEntry.CODEC.codec().listOf(), powersEntries);
 
     }
 

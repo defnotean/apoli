@@ -276,7 +276,7 @@ public class PowerCommand {
 
 				List<Component> sourcesTooltip = powerComponent.getSources(power)
 					.stream()
-					.map(id -> Component.literal(id.toString()))
+					.<Component>map(id -> Component.literal(id.toString()))
 					.toList();
 
 				Component joinedSourcesTooltip = Component.translatable("commands.apoli.list.sources", ComponentUtils.formatList(sourcesTooltip, Component.literal(", ")));

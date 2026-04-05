@@ -63,9 +63,9 @@ public class EnchantmentItemConditionType extends ItemConditionType {
 
         ItemEnchantments enchantmentsComponent = ModifyEnchantmentLevelPowerType.getEnchantments(stack, stack.getEnchantments(), useModifications);
         int levelOrEnchantments = enchantmentKey
-            .map(key -> world.registryAccess().get(Registries.ENCHANTMENT).getOrThrow(key))
+            .map(key -> world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(key))
             .map(enchantmentsComponent::getLevel)
-            .orElseGet(enchantmentsComponent::getSize);
+            .orElseGet(enchantmentsComponent::size);
 
         return comparison.compare(levelOrEnchantments, compareTo);
 

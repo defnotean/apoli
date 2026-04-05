@@ -40,7 +40,7 @@ public class ApoliClient implements ClientModInitializer {
 	public void onInitializeClient() {
 
 		KeyMapping.Category apoliCategory = KeyMapping.Category.register(Apoli.identifier("category"));
-		showPowersOnUsabilityHint = KeyMappingHelper.registerKeyBinding(new KeyMapping("key.apoli.usability_hint.show_powers", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, apoliCategory));
+		showPowersOnUsabilityHint = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.apoli.usability_hint.show_powers", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, apoliCategory));
 		ModPacketsS2C.register();
 
 		ApoliClassDataClient.registerAll();

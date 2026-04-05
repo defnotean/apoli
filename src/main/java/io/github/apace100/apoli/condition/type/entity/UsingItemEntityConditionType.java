@@ -37,7 +37,7 @@ public class UsingItemEntityConditionType extends EntityConditionType {
 
         if (context.entity() instanceof LivingEntity livingEntity && livingEntity.isUsingItem()) {
 
-            InteractionHand activeHand = livingEntity.getActiveHand();
+            InteractionHand activeHand = livingEntity.getUsedItemHand();
             ItemStack stackInHand = livingEntity.getItemInHand(activeHand);
 
             return itemCondition

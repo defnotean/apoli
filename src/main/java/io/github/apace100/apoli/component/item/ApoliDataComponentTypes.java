@@ -8,9 +8,10 @@ import net.minecraft.core.registries.Registries;
 
 public class ApoliDataComponentTypes {
 
+    @SuppressWarnings("unchecked")
     public static final DataComponentType<ItemPowersComponent> POWERS = DataComponentType.<ItemPowersComponent>builder()
-        .codec(ItemPowersComponent.CODEC)
-        .packetCodec(ItemPowersComponent.PACKET_CODEC)
+        .persistent(ItemPowersComponent.CODEC)
+        .networkSynchronized((net.minecraft.network.codec.StreamCodec) ItemPowersComponent.PACKET_CODEC)
         .build();
 
     public static void register() {

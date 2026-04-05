@@ -32,7 +32,7 @@ public class CustomDataItemConditionType extends ItemConditionType {
 
     @Override
     public boolean test(ItemConditionContext context) {
-        return context.stack().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.DEFAULT).test(nbt);
+        return context.stack().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).matchedBy(nbt);
     }
 
     @Override

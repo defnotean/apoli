@@ -36,8 +36,8 @@ public class HudRender implements Comparable<HudRender>, Validatable {
             .add("sprite_location", SerializableDataTypes.IDENTIFIER, DEFAULT_SPRITE)
             .add("should_render", SerializableDataTypes.BOOLEAN, true)
             .add("inverted", SerializableDataTypes.BOOLEAN, false)
-            .add("bar_index", SerializableDataTypes.NON_NEGATIVE_INT, 0)
-            .add("icon_index", SerializableDataTypes.NON_NEGATIVE_INT, 0)
+            .add("bar_index", SerializableDataTypes.INT, 0)
+            .add("icon_index", SerializableDataTypes.INT, 0)
             .add("order", SerializableDataTypes.INT, 0),
         data -> new HudRender(
             data.get("condition"),

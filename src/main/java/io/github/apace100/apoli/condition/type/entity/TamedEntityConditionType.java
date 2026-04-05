@@ -12,7 +12,7 @@ public class TamedEntityConditionType extends EntityConditionType {
 	@Override
 	public boolean test(EntityConditionContext context) {
 		return context.entity() instanceof TamableAnimal tameable
-			&& tameable.getOwnerUUID() != null;
+			&& tameable.getOwnerReference() != null;
 	}
 
 	@Override

@@ -31,7 +31,7 @@ public class SubmergedInEntityConditionType extends EntityConditionType {
 
     @Override
     public boolean test(EntityConditionContext context) {
-        return context.entity().isSubmergedIn(fluid);
+        return context.entity().isEyeInFluid(fluid);
     }
 
     @Override

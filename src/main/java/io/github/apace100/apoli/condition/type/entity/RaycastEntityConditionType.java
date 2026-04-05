@@ -144,7 +144,7 @@ public class RaycastEntityConditionType extends EntityConditionType {
         return switch (hitResult) {
             case BlockHitResult blockResult when blockCondition.isPresent() ->
                 blockResult.getType() != HitResult.Type.MISS
-                    && blockCondition.get().test(entity.level(), blockResult.blockPosition());
+                    && blockCondition.get().test(entity.level(), blockResult.getBlockPos());
             case EntityHitResult entityResult when hitBiEntityCondition.isPresent() ->
                 entityResult.getType() != HitResult.Type.MISS
                     && hitBiEntityCondition.get().test(entity, entityResult.getEntity());

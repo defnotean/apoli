@@ -47,7 +47,7 @@ public class RelativeItemCooldownItemConditionType extends ItemConditionType {
         if (!stack.isEmpty() && ((EntityLinkedItemStack) stack).apoli$getEntity(true) instanceof Player player) {
 
             ItemCooldowns cooldownManager = player.getCooldowns();
-            float cooldownProgress = cooldownManager.getCooldownProgress(stack.getItem(), 0F);
+            float cooldownProgress = cooldownManager.getCooldownPercent(stack, 0F);
 
             return comparison.compare(cooldownProgress, compareTo);
 

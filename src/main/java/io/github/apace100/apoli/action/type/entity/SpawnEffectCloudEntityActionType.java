@@ -20,7 +20,7 @@ public class SpawnEffectCloudEntityActionType extends EntityActionType {
 
     public static final TypedDataObjectFactory<SpawnEffectCloudEntityActionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("effect_component", SerializableDataType.of(PotionContents.CODEC), PotionContents.EMPTY)
+            .add("effect_component", SerializableDataType.of(PotionContents.CODEC, PotionContents.STREAM_CODEC), PotionContents.EMPTY)
             .add("wait_time", SerializableDataTypes.INT, 10)
             .add("radius", SerializableDataTypes.FLOAT, 3.0F)
             .add("radius_on_use", SerializableDataTypes.FLOAT, -0.5F)

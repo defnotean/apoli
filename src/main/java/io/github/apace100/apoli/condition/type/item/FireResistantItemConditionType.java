@@ -11,7 +11,7 @@ public class FireResistantItemConditionType extends ItemConditionType {
 
 	@Override
 	public boolean test(ItemConditionContext context) {
-		return context.stack().contains(DataComponents.FIRE_RESISTANT);
+		return context.stack().has(DataComponents.DAMAGE_RESISTANT);
 	}
 
 	@Override
