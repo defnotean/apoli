@@ -29,21 +29,21 @@ import io.github.ladysnake.pal.Pal;
 import io.github.ladysnake.pal.PlayerAbility;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ItemSlotArgumentType;
+import net.minecraft.commands.arguments.SlotArgument;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.SlotRange;
+import net.minecraft.world.inventory.SlotRange;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.resources.Identifier;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Vec3i;
-import net.minecraft.world.GameMode;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Explosion;
 import org.joml.Vector3f;
 
@@ -151,7 +151,7 @@ public class ApoliDataTypes {
 
     public static final SerializableDataType<PlayerAbility> PLAYER_ABILITY = SerializableDataTypes.IDENTIFIER.xmap(id -> Pal.provideRegisteredAbility(id).get(), PlayerAbility::getId);
 
-    public static final SerializableDataType<ArgumentWrapper<Integer>> ITEM_SLOT = SerializableDataType.argumentType(ItemSlotArgumentType.itemSlot());
+    public static final SerializableDataType<ArgumentWrapper<Integer>> ITEM_SLOT = SerializableDataType.argumentType(SlotArgument.itemSlot());
 
     public static final SerializableDataType<List<ArgumentWrapper<Integer>>> ITEM_SLOTS = ITEM_SLOT.list();
 
@@ -163,20 +163,20 @@ public class ApoliDataTypes {
 
 	public static final SerializableDataType<List<SlotRange>> SINGLE_SLOT_RANGES = SINGLE_SLOT_RANGE.list();
 
-    public static final SerializableDataType<Explosion.DestructionType> DESTRUCTION_TYPE = SerializableDataType.enumValue(Explosion.DestructionType.class);
+    public static final SerializableDataType<Explosion.BlockInteraction> DESTRUCTION_TYPE = SerializableDataType.enumValue(Explosion.BlockInteraction.class);
 
     public static final SerializableDataType<ArgumentWrapper<EntitySelector>> ENTITIES_SELECTOR = SerializableDataType.argumentType(EntityArgument.entities());
 
-    public static final SerializableDataType<AdvancementCommands.Operation> ADVANCEMENT_OPERATION = SerializableDataType.enumValue(AdvancementCommands.Operation.class);
+    public static final SerializableDataType<AdvancementCommands.Action> ADVANCEMENT_OPERATION = SerializableDataType.enumValue(AdvancementCommands.Action.class);
 
-    public static final SerializableDataType<AdvancementCommands.Selection> ADVANCEMENT_SELECTION = SerializableDataType.enumValue(AdvancementCommands.Selection.class);
+    public static final SerializableDataType<AdvancementCommands.Mode> ADVANCEMENT_SELECTION = SerializableDataType.enumValue(AdvancementCommands.Mode.class);
 
-    public static final SerializableDataType<ClickType> CLICK_TYPE = SerializableDataType.enumValue(ClickType.class, () -> ImmutableMap.of(
-        "left", ClickType.LEFT,
-        "right", ClickType.RIGHT
+    public static final SerializableDataType<ClickAction> CLICK_TYPE = SerializableDataType.enumValue(ClickAction.class, () -> ImmutableMap.of(
+        "left", ClickAction.LEFT,
+        "right", ClickAction.RIGHT
     ));
 
-    public static final SerializableDataType<EnumSet<ClickType>> CLICK_TYPE_SET = SerializableDataType.enumSet(CLICK_TYPE);
+    public static final SerializableDataType<EnumSet<ClickAction>> CLICK_TYPE_SET = SerializableDataType.enumSet(CLICK_TYPE);
 
     public static final SerializableDataType<TextAlignment> TEXT_ALIGNMENT = SerializableDataType.enumValue(TextAlignment.class);
 
@@ -192,7 +192,7 @@ public class ApoliDataTypes {
 
 	public static final SerializableDataType<Map<Pattern, String>> REGEX_REPLACEMENT_MAP = SerializableDataType.map(REGEX, SerializableDataTypes.STRING);
 
-    public static final SerializableDataType<GameMode> GAME_MODE = SerializableDataType.enumValue(GameMode.class);
+    public static final SerializableDataType<GameType> GAME_MODE = SerializableDataType.enumValue(GameType.class);
 
     //  This is for keeping backwards compatibility to fields that used to accept strings as translation keys
     public static final SerializableDataType<Component> DEFAULT_TRANSLATABLE_TEXT = SerializableDataType.of(
@@ -293,10 +293,10 @@ public class ApoliDataTypes {
 			}
 
 		},
-		new PacketCodec<>() {
+		new StreamCodec<>() {
 
 			@Override
-			public ContainerType decode(RegistryByteBuf buf) {
+			public ContainerType decode(RegistryFriendlyByteBuf buf) {
 
 				if (buf.readBoolean()) {
 					return DynamicContainerType.DATA_TYPE.receive(buf);
@@ -309,7 +309,7 @@ public class ApoliDataTypes {
 			}
 
 			@Override
-			public void encode(RegistryByteBuf buf, ContainerType value) {
+			public void encode(RegistryFriendlyByteBuf buf, ContainerType value) {
 
 				if (value instanceof DynamicContainerType dynamicContainerType) {
 					buf.writeBoolean(true);
@@ -403,10 +403,10 @@ public class ApoliDataTypes {
 
 				};
 			},
-			serializableData -> new PacketCodec<>() {
+			serializableData -> new StreamCodec<>() {
 
 				@Override
-				public C decode(RegistryByteBuf buf) {
+				public C decode(RegistryFriendlyByteBuf buf) {
 
 					SerializableData.Instance conditionData = serializableData.receive(buf);
 
@@ -418,7 +418,7 @@ public class ApoliDataTypes {
 				}
 
 				@Override
-				public void encode(RegistryByteBuf buf, C value) {
+				public void encode(RegistryFriendlyByteBuf buf, C value) {
 
 					CT conditionType = value.getType();
 					ConditionConfiguration<CT> config = (ConditionConfiguration<CT>) conditionType.getConfig();
@@ -473,10 +473,10 @@ public class ApoliDataTypes {
 
 				};
 			},
-			serializableData -> new PacketCodec<>() {
+			serializableData -> new StreamCodec<>() {
 
 				@Override
-				public A decode(RegistryByteBuf buf) {
+				public A decode(RegistryFriendlyByteBuf buf) {
 
 					SerializableData.Instance actionData = serializableData.receive(buf);
 					ActionConfiguration<AT> config = actionData.get(typeField);
@@ -486,7 +486,7 @@ public class ApoliDataTypes {
 				}
 
 				@Override
-				public void encode(RegistryByteBuf buf, A value) {
+				public void encode(RegistryFriendlyByteBuf buf, A value) {
 
 					AT actionType = value.getType();
 					ActionConfiguration<AT> config = (ActionConfiguration<AT>) actionType.getConfig();

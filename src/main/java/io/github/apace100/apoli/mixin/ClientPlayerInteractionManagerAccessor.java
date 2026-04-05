@@ -2,11 +2,11 @@ package io.github.apace100.apoli.mixin;
 
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.GameMode;
+import net.minecraft.world.level.GameType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(MultiPlayerGameMode.class)
+@Mixin(MultiPlayerGameType.class)
 public interface ClientPlayerInteractionManagerAccessor {
 
     @Accessor
@@ -16,5 +16,5 @@ public interface ClientPlayerInteractionManagerAccessor {
     boolean getBreakingBlock();
 
     @Accessor
-    GameMode getGameMode();
+    GameType getGameMode();
 }

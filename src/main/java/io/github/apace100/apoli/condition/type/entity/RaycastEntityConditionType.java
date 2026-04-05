@@ -21,7 +21,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.level.ClipContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -36,8 +36,8 @@ public class RaycastEntityConditionType extends EntityConditionType {
             .add("match_bientity_condition", BiEntityCondition.DATA_TYPE.optional(), Optional.empty())
             .add("hit_bientity_condition", BiEntityCondition.DATA_TYPE.optional(), Optional.empty())
             .add("block_condition", BlockCondition.DATA_TYPE.optional(), Optional.empty())
-            .add("shape_type", SerializableDataTypes.SHAPE_TYPE, RaycastContext.ShapeType.OUTLINE)
-            .add("fluid_handling", SerializableDataTypes.FLUID_HANDLING, RaycastContext.FluidHandling.ANY)
+            .add("shape_type", SerializableDataTypes.SHAPE_TYPE, ClipContext.Block.OUTLINE)
+            .add("fluid_handling", SerializableDataTypes.FLUID_HANDLING, ClipContext.Fluid.ANY)
             .add("direction", SerializableDataTypes.VECTOR.optional(), Optional.empty())
             .add("space", ApoliDataTypes.SPACE, Space.WORLD)
             .add("entity_distance", SerializableDataTypes.POSITIVE_DOUBLE.optional(), Optional.empty())
@@ -79,8 +79,8 @@ public class RaycastEntityConditionType extends EntityConditionType {
 
     private final Optional<BlockCondition> blockCondition;
 
-    private final RaycastContext.ShapeType shapeType;
-    private final RaycastContext.FluidHandling fluidHandling;
+    private final ClipContext.Block shapeType;
+    private final ClipContext.Fluid fluidHandling;
 
     private final Optional<Vec3> direction;
     private final Space space;
@@ -92,7 +92,7 @@ public class RaycastEntityConditionType extends EntityConditionType {
     private final boolean entity;
     private final boolean block;
 
-    public RaycastEntityConditionType(Optional<BiEntityCondition> matchBiEntityCondition, Optional<BiEntityCondition> hitBiEntityCondition, Optional<BlockCondition> blockCondition, RaycastContext.ShapeType shapeType, RaycastContext.FluidHandling fluidHandling, Optional<Vec3> direction, Space space, Optional<Double> entityDistance, Optional<Double> blockDistance, Optional<Double> distance, boolean entity, boolean block) {
+    public RaycastEntityConditionType(Optional<BiEntityCondition> matchBiEntityCondition, Optional<BiEntityCondition> hitBiEntityCondition, Optional<BlockCondition> blockCondition, ClipContext.Block shapeType, ClipContext.Fluid fluidHandling, Optional<Vec3> direction, Space space, Optional<Double> entityDistance, Optional<Double> blockDistance, Optional<Double> distance, boolean entity, boolean block) {
         this.matchBiEntityCondition = matchBiEntityCondition;
         this.hitBiEntityCondition = hitBiEntityCondition;
         this.blockCondition = blockCondition;
@@ -182,7 +182,7 @@ public class RaycastEntityConditionType extends EntityConditionType {
     }
 
     private BlockHitResult blockRaycast(Entity caster, Vec3 origin, Vec3 destination) {
-        RaycastContext context = new RaycastContext(origin, destination, shapeType, fluidHandling, caster);
+        ClipContext context = new ClipContext(origin, destination, shapeType, fluidHandling, caster);
         return caster.level().raycast(context);
     }
 

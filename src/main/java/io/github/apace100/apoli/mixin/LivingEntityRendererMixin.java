@@ -11,14 +11,15 @@ import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import io.github.apace100.apoli.access.PseudoRenderDataHolder;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.type.*;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererFactory;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.renderer.entity.feature.ArmorFeatureRenderer;
-import net.minecraft.client.renderer.entity.feature.FeatureRenderer;
+import net.minecraft.client.renderer.entity.layers.ArmorFeatureRenderer;
+import net.minecraft.client.renderer.entity.layers.FeatureRenderer;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.world.entity.Entity;
@@ -32,9 +33,9 @@ import java.util.List;
 import java.util.function.Predicate;
 
 @Mixin(LivingEntityRenderer.class)
-public abstract class LivingEntityRendererMixin extends EntityRenderer<LivingEntity> {
+public abstract class LivingEntityRendererMixin extends EntityRenderer<LivingEntity, LivingEntityRenderState> {
 
-    protected LivingEntityRendererMixin(EntityRendererFactory.Context ctx) {
+    protected LivingEntityRendererMixin(EntityRendererProvider.Context ctx) {
         super(ctx);
     }
 

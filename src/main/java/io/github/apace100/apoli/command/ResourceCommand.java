@@ -12,21 +12,21 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.type.PowerType;
 import io.github.apace100.apoli.util.PowerUtil;
-import net.minecraft.commands.arguments.ScoreHolderArgumentType;
-import net.minecraft.commands.arguments.ScoreboardObjectiveArgumentType;
+import net.minecraft.commands.arguments.ScoreHolderArgument;
+import net.minecraft.commands.arguments.ObjectiveArgument;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.ScoreAccess;
 import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Objective;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public class ResourceCommand {
 
-    public static void register(CommandNode<ServerCommandSource> baseNode) {
+    public static void register(CommandNode<CommandSourceStack> baseNode) {
 
         //  The main node of the command
         var resourceNode = literal("resource")
@@ -47,19 +47,19 @@ public class ResourceCommand {
 
     public static class HasNode {
 
-        public static CommandNode<ServerCommandSource> get() {
+        public static CommandNode<CommandSourceStack> get() {
             return literal("has")
                 .then(argument("target", PowerHolderArgumentType.holder())
                     .then(argument("resource", PowerArgumentType.resource())
                         .executes(HasNode::execute))).build();
         }
 
-        public static int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 
             Entity target = PowerHolderArgumentType.getHolder(context, "target");
             Power power = PowerArgumentType.getResource(context, "resource");
 
-            ServerCommandSource commandSource = context.getDirectEntity();
+            CommandSourceStack commandSource = context.getDirectEntity();
             PowerType powerType = PowerUtil.getOptionalPowerType(power, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), power.getId().toString()));
 
             if (powerType != null) {
@@ -78,7 +78,7 @@ public class ResourceCommand {
 
     public static class GetNode {
 
-        public static CommandNode<ServerCommandSource> get() {
+        public static CommandNode<CommandSourceStack> get() {
             return literal("get")
                 .then(argument("target", PowerHolderArgumentType.holder())
                     .then(argument("resource", PowerArgumentType.resource())
@@ -87,12 +87,12 @@ public class ResourceCommand {
                         .then(literal("")))).build();
         }
 
-        public static int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 
             Entity target = PowerHolderArgumentType.getHolder(context, "target");
             Power power = PowerArgumentType.getResource(context, "resource");
 
-            ServerCommandSource commandSource = context.getDirectEntity();
+            CommandSourceStack commandSource = context.getDirectEntity();
             PowerType powerType = PowerUtil.getOptionalPowerType(power, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), power.getId().toString()));
 
             if (powerType != null) {
@@ -115,7 +115,7 @@ public class ResourceCommand {
 
     public static class SetNode {
 
-        public static CommandNode<ServerCommandSource> get() {
+        public static CommandNode<CommandSourceStack> get() {
             return literal("set")
                 .then(argument("target", PowerHolderArgumentType.holder())
                     .then(argument("resource", PowerArgumentType.resource())
@@ -124,7 +124,7 @@ public class ResourceCommand {
                             .executes(SetNode::execute)))).build();
         }
 
-        public static int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 
             Entity target = PowerHolderArgumentType.getHolder(context, "target");
             Power power = PowerArgumentType.getResource(context, "resource");
@@ -132,7 +132,7 @@ public class ResourceCommand {
             int value = IntegerArgumentType.getInteger(context, "value");
             int newValue;
 
-            ServerCommandSource commandSource = context.getDirectEntity();
+            CommandSourceStack commandSource = context.getDirectEntity();
             PowerType powerType = PowerUtil.getOptionalPowerType(power, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), power.getId().toString()));
 
             if (PowerUtil.setResourceValue(powerType, value)) {
@@ -150,7 +150,7 @@ public class ResourceCommand {
 
     public static class ChangeNode {
 
-        public static CommandNode<ServerCommandSource> get() {
+        public static CommandNode<CommandSourceStack> get() {
             return literal("change")
                 .then(argument("target", PowerHolderArgumentType.holder())
                     .then(argument("resource", PowerArgumentType.resource())
@@ -159,7 +159,7 @@ public class ResourceCommand {
                             .executes(ChangeNode::execute)))).build();
         }
 
-        public static int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 
             Entity target = PowerHolderArgumentType.getHolder(context, "target");
             Power resource = PowerArgumentType.getResource(context, "resource");
@@ -167,7 +167,7 @@ public class ResourceCommand {
             int value = IntegerArgumentType.getInteger(context, "value");
             int newValue;
             
-            ServerCommandSource commandSource = context.getDirectEntity();
+            CommandSourceStack commandSource = context.getDirectEntity();
             PowerType powerType = PowerUtil.getOptionalPowerType(resource, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), resource.getId().toString()));
             
             if (PowerUtil.changeResourceValue(powerType, value)) {
@@ -185,28 +185,28 @@ public class ResourceCommand {
 
     public static class OperationNode {
 
-        public static CommandNode<ServerCommandSource> get() {
+        public static CommandNode<CommandSourceStack> get() {
             return literal("operation")
                 .then(argument("target", PowerHolderArgumentType.holder())
                     .then(argument("resource", PowerArgumentType.resource())
                         .suggests(PowerSuggestionProvider.resourcesFromEntity("target"))
                         .then(argument("operation", PowerOperationArgumentType.operation())
-                            .then(argument("source", ScoreHolderArgumentType.scoreHolder())
-                                .then(argument("objective", ScoreboardObjectiveArgumentType.scoreboardObjective())
+                            .then(argument("source", ScoreHolderArgument.scoreHolder())
+                                .then(argument("objective", ObjectiveArgument.scoreboardObjective())
                                     .executes(OperationNode::execute)))))).build();
         }
 
-        public static int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 
             Entity target = PowerHolderArgumentType.getHolder(context, "target");
             Power resource = PowerArgumentType.getResource(context, "resource");
 
             PowerOperationArgumentType.Operation operation = PowerOperationArgumentType.getOperation(context, "operation");
 
-            ScoreHolder source = ScoreHolderArgumentType.getScoreHolder(context, "source");
-            Objective objective = ScoreboardObjectiveArgumentType.getObjective(context, "objective");
+            ScoreHolder source = ScoreHolderArgument.getScoreHolder(context, "source");
+            Objective objective = ObjectiveArgument.getObjective(context, "objective");
 
-            ServerCommandSource commandSource = context.getDirectEntity();
+            CommandSourceStack commandSource = context.getDirectEntity();
             PowerType powerType = PowerUtil.getOptionalPowerType(resource, target).orElseThrow(() -> PowerArgumentType.POWER_NOT_GRANTED.create(target.getName(), resource.getId().toString()));
 
             ScoreAccess scoreAccess = commandSource.getServer().getScoreboard().getOrCreateScore(source, objective);

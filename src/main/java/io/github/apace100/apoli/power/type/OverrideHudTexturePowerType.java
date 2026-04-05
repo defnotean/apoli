@@ -10,7 +10,7 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
@@ -72,7 +72,7 @@ public class OverrideHudTexturePowerType extends PowerType implements Prioritize
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawHeartTexture(GuiGraphics context, Gui.HeartType heartType, int x, int y, int width, int height, boolean hardcore, boolean blinking, boolean half) {
+    public void drawHeartTexture(GuiRenderer context, Gui.HeartType heartType, int x, int y, int width, int height, boolean hardcore, boolean blinking, boolean half) {
 
         textureOrMapping.ifLeft(id -> {
 
@@ -109,14 +109,14 @@ public class OverrideHudTexturePowerType extends PowerType implements Prioritize
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawTextureRegion(GuiGraphics context, Identifier texture, int width, int height, int minU, int minV, int legacyMinU, int legacyMinV, int x, int y, int maxU, int maxV) {
+    public void drawTextureRegion(GuiRenderer context, Identifier texture, int width, int height, int minU, int minV, int legacyMinU, int legacyMinV, int x, int y, int maxU, int maxV) {
         textureOrMapping
             .ifLeft(id -> context.drawTexture(id, x, y, legacyMinU, legacyMinV, maxU, maxV))
             .ifRight(mapping -> context.drawGuiTexture(mapping.getOrDefault(texture, texture), width, height, minU, minV, x, y, maxU, maxV));
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawTexture(GuiGraphics context, Identifier texture, int x, int y, int legacyU, int legacyV, int width, int height) {
+    public void drawTexture(GuiRenderer context, Identifier texture, int x, int y, int legacyU, int legacyV, int width, int height) {
         textureOrMapping
             .ifLeft(id -> context.drawTexture(id, x, y, legacyU, legacyV, width, height))
             .ifRight(mapping -> context.drawGuiTexture(mapping.getOrDefault(texture, texture), x, y, width, height));

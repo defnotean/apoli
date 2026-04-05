@@ -11,7 +11,7 @@ import io.github.apace100.apoli.power.type.PowerType;
 import io.github.apace100.apoli.util.PowerUtil;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.world.scores.ScoreAccess;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 
 import java.util.concurrent.CompletableFuture;
@@ -26,7 +26,7 @@ public class PowerOperationArgumentType implements ArgumentType<PowerOperationAr
         return new PowerOperationArgumentType();
     }
 
-    public static Operation getOperation(CommandContext<ServerCommandSource> context, String argumentName) {
+    public static Operation getOperation(CommandContext<CommandSourceStack> context, String argumentName) {
         return context.getArgument(argumentName, Operation.class);
     }
 

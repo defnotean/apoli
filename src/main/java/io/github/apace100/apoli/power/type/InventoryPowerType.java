@@ -11,11 +11,11 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.apoli.util.keybinding.KeyBindingReference;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.core.component.EnchantmentEffectComponentTypes;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.Inventories;
-import net.minecraft.world.Inventory;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 
 @SuppressWarnings("unused")
-public class InventoryPowerType extends PowerType implements Active, Inventory {
+public class InventoryPowerType extends PowerType implements Active, Container {
 
     public static final TypedDataObjectFactory<InventoryPowerType> DATA_FACTORY = PowerType.createConditionedDataFactory(
         new SerializableData()
@@ -121,7 +121,7 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
     public CompoundTag toTag() {
 
         CompoundTag tag = new CompoundTag();
-        Inventories.save(tag, container, getHolder().registryAccess());
+        ContainerHelper.save(tag, container, getHolder().registryAccess());
 
         return tag;
 
@@ -135,7 +135,7 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
         }
 
         this.clear();
-        Inventories.load(rootNbt, container, getHolder().registryAccess());
+        ContainerHelper.load(rootNbt, container, getHolder().registryAccess());
 
     }
 
@@ -157,7 +157,7 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
     @Override
     public ItemStack removeStack(int slot, int amount) {
 
-        ItemStack stack = Inventories.splitStack(container, slot, amount);
+        ItemStack stack = ContainerHelper.splitStack(container, slot, amount);
         if (!stack.isEmpty()) {
             this.markDirty();
         }
@@ -244,7 +244,7 @@ public class InventoryPowerType extends PowerType implements Active, Inventory {
             }
 
             this.removeStack(i);
-            if (!EnchantmentHelper.hasAnyEnchantmentsWith(currentStack, EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
+            if (!EnchantmentHelper.hasAnyEnchantmentsWith(currentStack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
                 playerEntity.spawnAtLocation(currentStack, true, false);
             }
 

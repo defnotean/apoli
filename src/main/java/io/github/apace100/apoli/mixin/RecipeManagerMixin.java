@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.github.apace100.apoli.recipe.ModifiedCraftingRecipe;
 import io.github.apace100.apoli.util.RecipeUtil;
-import net.minecraft.world.item.crafting.*;;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;

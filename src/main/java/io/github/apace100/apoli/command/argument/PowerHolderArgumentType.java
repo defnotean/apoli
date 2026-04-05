@@ -7,7 +7,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 
 import java.util.LinkedList;
@@ -35,7 +35,7 @@ public class PowerHolderArgumentType extends EntityArgument {
         return new PowerHolderArgumentType(false);
     }
 
-    public static LivingEntity getHolder(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+    public static LivingEntity getHolder(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
 
         Entity entity = getEntity(context, name);
         if (!(entity instanceof LivingEntity livingEntity)) {
@@ -46,7 +46,7 @@ public class PowerHolderArgumentType extends EntityArgument {
 
     }
 
-    public static List<LivingEntity> getHolders(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+    public static List<LivingEntity> getHolders(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
 
         List<? extends Entity> entities = new LinkedList<>(getEntities(context, name));
         List<LivingEntity> holders = entities.stream()

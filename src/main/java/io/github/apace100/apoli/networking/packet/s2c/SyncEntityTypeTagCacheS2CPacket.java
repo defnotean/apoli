@@ -2,7 +2,7 @@ package io.github.apace100.apoli.networking.packet.s2c;
 
 import io.github.apace100.apoli.Apoli;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.CustomPayload;
 import net.minecraft.resources.Identifier;
 
@@ -13,7 +13,7 @@ import java.util.Map;
 public record SyncEntityTypeTagCacheS2CPacket(Map<Identifier, Collection<Identifier>> subTags) implements CustomPayload {
 
 	public static final Id<SyncEntityTypeTagCacheS2CPacket> PACKET_ID = new Id<>(Apoli.identifier("s2c/sync_entity_type_tag_cache"));
-	public static final PacketCodec<FriendlyByteBuf, SyncEntityTypeTagCacheS2CPacket> PACKET_CODEC = PacketCodec.of(SyncEntityTypeTagCacheS2CPacket::write, SyncEntityTypeTagCacheS2CPacket::read);
+	public static final StreamCodec<FriendlyByteBuf, SyncEntityTypeTagCacheS2CPacket> PACKET_CODEC = StreamCodec.of(SyncEntityTypeTagCacheS2CPacket::write, SyncEntityTypeTagCacheS2CPacket::read);
 
 	private static SyncEntityTypeTagCacheS2CPacket read(FriendlyByteBuf buf) {
 		return new SyncEntityTypeTagCacheS2CPacket(buf.readMap(FriendlyByteBuf::readIdentifier, valBuf -> valBuf.readCollection(ArrayList::new, FriendlyByteBuf::readIdentifier)));

@@ -1,7 +1,7 @@
 package io.github.apace100.apoli.data.container;
 
 import io.github.apace100.apoli.util.TextAlignment;
-import net.minecraft.world.Inventory;
+import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,13 +13,13 @@ public record PresetContainerType(int columns, int rows, @NotNull Factory factor
 	}
 
 	@Override
-	public MenuProvider create(Inventory inventory) {
+	public MenuProvider create(Container inventory) {
 		return factory().create(inventory, columns(), rows());
 	}
 
 	@FunctionalInterface
 	public interface Factory {
-		MenuProvider create(Inventory inventory, int columns, int rows);
+		MenuProvider create(Container inventory, int columns, int rows);
 	}
 
 }

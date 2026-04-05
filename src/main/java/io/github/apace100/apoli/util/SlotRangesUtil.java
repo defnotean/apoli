@@ -7,10 +7,10 @@ import com.mojang.serialization.DynamicOps;
 import io.github.apace100.apoli.mixin.SlotRangesAccessor;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.world.SlotRange;
-import net.minecraft.world.SlotRanges;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.world.inventory.SlotRange;
+import net.minecraft.world.inventory.SlotRanges;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.util.StringRepresentable;
 
 import java.util.List;
@@ -120,7 +120,7 @@ public class SlotRangesUtil {
 
 	};
 
-	public static final PacketCodec<ByteBuf, SlotRange> PACKET_CODEC = PacketCodecs.STRING.xmap(SlotRanges::fromName, StringRepresentable::asString);
+	public static final StreamCodec<ByteBuf, SlotRange> PACKET_CODEC = ByteBufCodecs.STRING.xmap(SlotRanges::fromName, StringRepresentable::asString);
 
 	public static DataResult<SlotRange> validateSingleSlot(SlotRange slotRange) {
 		return slotRange.getSlotCount() == 1

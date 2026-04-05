@@ -15,8 +15,8 @@ import io.github.apace100.calio.util.ArgumentWrapper;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandOutput;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
@@ -64,8 +64,8 @@ public class SelectorActionEntityActionType extends EntityActionType {
             return;
         }
 
-        ServerCommandSource commandSource = entity.getCommandSource()
-            .withOutput(CommandOutput.DUMMY)
+        CommandSourceStack commandSource = entity.getCommandSource()
+            .withOutput(CommandSource.DUMMY)
             .withLevel(Apoli.config.executeCommand.permissionLevel);
 
         if (Apoli.config.executeCommand.showOutput) {

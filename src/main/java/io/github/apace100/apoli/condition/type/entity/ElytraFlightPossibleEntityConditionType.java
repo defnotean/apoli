@@ -11,7 +11,6 @@ import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +60,7 @@ public class ElytraFlightPossibleEntityConditionType extends EntityConditionType
         if (checkAbility) {
             checked = true;
             ItemStack equippedChestStack = living.getItemBySlot(EquipmentSlot.CHEST);
-            ability = (equippedChestStack.is(Items.ELYTRA) && ElytraItem.isUsable(equippedChestStack) || EntityElytraEvents.CUSTOM.invoker().useCustomElytra(living, false))
+            ability = (equippedChestStack.is(Items.ELYTRA) && equippedChestStack.getDamageValue() < equippedChestStack.getMaxDamage() - 1 || EntityElytraEvents.CUSTOM.invoker().useCustomElytra(living, false))
                 && EntityElytraEvents.ALLOW.invoker().allowElytraFlight(living);
         }
 

@@ -10,12 +10,12 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandOutput;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec2f;
+import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.NotNull;
 
 public class ExecuteCommandBlockActionType extends BlockActionType {
@@ -46,10 +46,10 @@ public class ExecuteCommandBlockActionType extends BlockActionType {
         String blockTranslationKey = blockState.getBlock().getTranslationKey();
 
         MinecraftServer server = world.getServer();
-        ServerCommandSource commandSource = new ServerCommandSource(
-            Apoli.config.executeCommand.showOutput ? server : CommandOutput.DUMMY,
+        CommandSourceStack commandSource = new CommandSourceStack(
+            Apoli.config.executeCommand.showOutput ? server : CommandSource.DUMMY,
             pos.getCenter(),
-            Vec2f.ZERO,
+            Vec2.ZERO,
             world,
             Apoli.config.executeCommand.permissionLevel,
             blockTranslationKey,
@@ -58,7 +58,7 @@ public class ExecuteCommandBlockActionType extends BlockActionType {
             null
         );
 
-        server.getCommandManager().executeWithPrefix(commandSource, command);
+        server.getCommands().executeWithPrefix(commandSource, command);
 
     }
 

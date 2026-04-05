@@ -7,7 +7,7 @@ import io.github.apace100.apoli.power.type.ModifyGrindstonePowerType;
 import io.github.apace100.apoli.util.InventoryUtil;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.Inventory;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.GrindstoneMenu;
@@ -35,11 +35,11 @@ public abstract class GrindstoneScreenHandlerMixin extends AbstractContainerMenu
 
     @Shadow
     @Final
-    Inventory input;
+    Container input;
 
     @Shadow
     @Final
-    private Inventory result;
+    private Container result;
 
     @Shadow
     @Final

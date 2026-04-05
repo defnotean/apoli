@@ -11,7 +11,7 @@ import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.world.entity.player.ItemCooldownManager;
+import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -46,7 +46,7 @@ public class RelativeItemCooldownItemConditionType extends ItemConditionType {
 
         if (!stack.isEmpty() && ((EntityLinkedItemStack) stack).apoli$getEntity(true) instanceof Player player) {
 
-            ItemCooldownManager cooldownManager = player.getItemCooldownManager();
+            ItemCooldowns cooldownManager = player.getItemCooldowns();
             float cooldownProgress = cooldownManager.getCooldownProgress(stack.getItem(), 0F);
 
             return comparison.compare(cooldownProgress, compareTo);

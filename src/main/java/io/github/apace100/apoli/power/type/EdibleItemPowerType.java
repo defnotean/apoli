@@ -20,7 +20,7 @@ import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +38,7 @@ public class EdibleItemPowerType extends PowerType implements Prioritized<Edible
             .add("item_condition", ItemCondition.DATA_TYPE.optional(), Optional.empty())
             .add("food_component", SerializableDataTypes.FOOD_COMPONENT)
             .add("result_stack", SerializableDataTypes.ITEM_STACK.optional(), Optional.empty())
-            .add("consume_animation", SerializableDataType.enumValue(UseAnim.class), UseAnim.EAT)
+            .add("consume_animation", SerializableDataType.enumValue(ItemUseAnimation.class), ItemUseAnimation.EAT)
             .add("consume_sound", SerializableDataTypes.SOUND_EVENT, SoundEvents.ENTITY_GENERIC_EAT)
             .add("priority", SerializableDataTypes.INT, 0),
         (data, condition) -> new EdibleItemPowerType(
@@ -73,12 +73,12 @@ public class EdibleItemPowerType extends PowerType implements Prioritized<Edible
 
     private final FoodProperties foodComponent;
     private final Optional<ItemStack> resultStack;
-    private final UseAnim consumeAnimation;
+    private final ItemUseAnimation consumeAnimation;
     private final SoundEvent consumeSoundEvent;
 
     private final int priority;
 
-    public EdibleItemPowerType(Optional<EntityAction> entityAction, Optional<ItemAction> consumedItemAction, Optional<ItemAction> resultItemAction, Optional<ItemCondition> itemCondition, FoodProperties foodComponent, Optional<ItemStack> resultStack, UseAnim consumeAnimation, SoundEvent consumeSoundEvent, int priority, Optional<EntityCondition> condition) {
+    public EdibleItemPowerType(Optional<EntityAction> entityAction, Optional<ItemAction> consumedItemAction, Optional<ItemAction> resultItemAction, Optional<ItemCondition> itemCondition, FoodProperties foodComponent, Optional<ItemStack> resultStack, ItemUseAnimation consumeAnimation, SoundEvent consumeSoundEvent, int priority, Optional<EntityCondition> condition) {
         super(condition);
         this.entityAction = entityAction;
         this.consumedItemAction = consumedItemAction;
@@ -132,7 +132,7 @@ public class EdibleItemPowerType extends PowerType implements Prioritized<Edible
         return foodComponent;
     }
 
-    public UseAnim getConsumeAnimation() {
+    public ItemUseAnimation getConsumeAnimation() {
         return consumeAnimation;
     }
 

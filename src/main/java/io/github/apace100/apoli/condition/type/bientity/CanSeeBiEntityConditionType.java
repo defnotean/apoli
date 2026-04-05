@@ -11,15 +11,15 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.level.ClipContext;
 import org.jetbrains.annotations.NotNull;
 
 public class CanSeeBiEntityConditionType extends BiEntityConditionType {
 
     public static final TypedDataObjectFactory<CanSeeBiEntityConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("shape_type", SerializableDataTypes.SHAPE_TYPE, RaycastContext.ShapeType.VISUAL)
-            .add("fluid_handling", SerializableDataTypes.FLUID_HANDLING, RaycastContext.FluidHandling.NONE),
+            .add("shape_type", SerializableDataTypes.SHAPE_TYPE, ClipContext.Block.VISUAL)
+            .add("fluid_handling", SerializableDataTypes.FLUID_HANDLING, ClipContext.Fluid.NONE),
         data -> new CanSeeBiEntityConditionType(
             data.get("shape_type"),
             data.get("fluid_handling")
@@ -29,10 +29,10 @@ public class CanSeeBiEntityConditionType extends BiEntityConditionType {
             .set("fluid_handling", conditionType.fluidHandling)
     );
 
-    private final RaycastContext.ShapeType shapeType;
-    private final RaycastContext.FluidHandling fluidHandling;
+    private final ClipContext.Block shapeType;
+    private final ClipContext.Fluid fluidHandling;
 
-    public CanSeeBiEntityConditionType(RaycastContext.ShapeType shapeType, RaycastContext.FluidHandling fluidHandling) {
+    public CanSeeBiEntityConditionType(ClipContext.Block shapeType, ClipContext.Fluid fluidHandling) {
         this.shapeType = shapeType;
         this.fluidHandling = fluidHandling;
     }
@@ -50,8 +50,8 @@ public class CanSeeBiEntityConditionType extends BiEntityConditionType {
         Vec3 actorEyePos = actor.getEyePosition();
         Vec3 targetEyePos = target.getEyePosition();
 
-        RaycastContext raycastContext = new RaycastContext(actorEyePos, targetEyePos, shapeType, fluidHandling, actor);
-        return actor.level().raycast(raycastContext).getType() == HitResult.Type.MISS;
+        ClipContext ClipContext = new ClipContext(actorEyePos, targetEyePos, shapeType, fluidHandling, actor);
+        return actor.level().raycast(ClipContext).getType() == HitResult.Type.MISS;
 
     }
 

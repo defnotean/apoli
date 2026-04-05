@@ -5,7 +5,7 @@ import io.github.apace100.apoli.action.context.BiEntityActionContext;
 import io.github.apace100.apoli.action.type.BiEntityActionType;
 import io.github.apace100.apoli.action.type.BiEntityActionTypes;
 import io.github.apace100.apoli.util.requirement.BiEntityRequirement;
-import net.minecraft.world.entity.animal.AnimalEntity;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +14,7 @@ public class SetInLoveBiEntityActionType extends BiEntityActionType {
     @Override
     public void accept(BiEntityActionContext context) {
 
-        if (context.target() instanceof AnimalEntity animalTarget && context.actor() instanceof Player playerActor) {
+        if (context.target() instanceof Animal animalTarget && context.actor() instanceof Player playerActor) {
             animalTarget.lovePlayer(playerActor);
         }
 

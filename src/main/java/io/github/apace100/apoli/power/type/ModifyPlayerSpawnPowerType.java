@@ -25,7 +25,7 @@ import net.minecraft.ChatFormatting;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.util.Unit;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.ChunkPos;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.core.ChunkSectionPos;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;

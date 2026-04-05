@@ -16,10 +16,10 @@ import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.util.InputUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -39,7 +39,7 @@ public class ApoliClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 
-		showPowersOnUsabilityHint = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.apoli.usability_hint.show_powers", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, "category." + Apoli.MODID));
+		showPowersOnUsabilityHint = KeyMappingHelper.registerKeyBinding(new KeyMapping("key.apoli.usability_hint.show_powers", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, "category." + Apoli.MODID));
 		ModPacketsS2C.register();
 
 		ApoliClassDataClient.registerAll();

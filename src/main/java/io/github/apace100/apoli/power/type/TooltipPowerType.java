@@ -21,7 +21,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
@@ -237,7 +237,7 @@ public class TooltipPowerType extends PowerType {
         }
 
         ListIterator<Component> textIterator = texts.listIterator();
-        ServerCommandSource source = holder.getCommandSource()
+        CommandSourceStack source = holder.getCommandSource()
             .withOutput(serverWorld.getServer())
             .withLevel(Apoli.config.executeCommand.permissionLevel);
 

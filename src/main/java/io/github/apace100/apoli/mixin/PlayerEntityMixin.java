@@ -29,7 +29,7 @@ import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.server.command.CommandOutput;
+import net.minecraft.commands.CommandSource;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
@@ -52,7 +52,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(value = Player.class, priority = 999)
-public abstract class PlayerEntityMixin extends LivingEntity implements Nameable, CommandOutput, JumpingEntity, ModifiedPoseHolder {
+public abstract class PlayerEntityMixin extends LivingEntity implements Nameable, CommandSource, JumpingEntity, ModifiedPoseHolder {
 
     @Shadow
     public abstract boolean damage(DamageSource source, float amount);

@@ -1,9 +1,9 @@
 package io.github.apace100.apoli.power.type;
 
-import de.dafuqs.additionalentityattributes.AdditionalEntityAttributes;
 import io.github.apace100.apoli.condition.EntityCondition;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
+import io.github.apace100.apoli.util.ApoliAttributes;
 import io.github.apace100.apoli.util.AttributedEntityAttributeModifier;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
@@ -14,6 +14,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Modifies the entity's movement speed while in water via the {@code apoli:water_speed} attribute.
+ * <p>Previously required the AdditionalEntityAttributes mod — now self-contained.</p>
+ *
+ * @deprecated Use a conditioned_attribute power with the {@code apoli:water_speed} attribute directly.
+ */
 @Deprecated
 public class ModifySwimSpeedPowerType extends ConditionedAttributePowerType {
 
@@ -30,10 +36,15 @@ public class ModifySwimSpeedPowerType extends ConditionedAttributePowerType {
             .set("modifiers", powerType.attributeModifiers)
     );
 
-    private final List<AttributeModifier> attributeModifiers;
+    protected final List<AttributeModifier> attributeModifiers;
 
     public ModifySwimSpeedPowerType(List<AttributeModifier> attributeModifiers, Optional<EntityCondition> condition) {
-        super(attributeModifiers.stream().map(attributeModifier -> new AttributedEntityAttributeModifier(AdditionalEntityAttributes.WATER_SPEED, attributeModifier)).toList(), false, 10, condition);
+        super(
+            attributeModifiers.stream()
+                .map(attributeModifier -> new AttributedEntityAttributeModifier(ApoliAttributes.WATER_SPEED, attributeModifier))
+                .toList(),
+            false, 10, condition
+        );
         this.attributeModifiers = attributeModifiers;
     }
 

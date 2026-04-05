@@ -1,8 +1,8 @@
 package io.github.apace100.apoli.power.type;
 
-import de.dafuqs.additionalentityattributes.AdditionalEntityAttributes;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
+import io.github.apace100.apoli.util.ApoliAttributes;
 import io.github.apace100.apoli.util.AttributedEntityAttributeModifier;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
@@ -12,6 +12,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**
+ * Grants lava vision by modifying the {@code apoli:lava_visibility} attribute.
+ * <p>Previously required the AdditionalEntityAttributes mod — now self-contained.</p>
+ *
+ * @deprecated Use a conditioned_attribute power with the {@code apoli:lava_visibility} attribute directly.
+ */
 @Deprecated
 public class LavaVisionPowerType extends PowerType implements AttributeModifying {
 
@@ -39,7 +45,10 @@ public class LavaVisionPowerType extends PowerType implements AttributeModifying
 
     @Override
     public void onInit() {
-        this.modifier = new AttributedEntityAttributeModifier(AdditionalEntityAttributes.LAVA_VISIBILITY, new AttributeModifier(this.getPower().getId(), v - 1, AttributeModifier.Operation.ADD_VALUE));
+        this.modifier = new AttributedEntityAttributeModifier(
+            ApoliAttributes.LAVA_VISIBILITY,
+            new AttributeModifier(this.getPower().getId(), v - 1, AttributeModifier.Operation.ADD_VALUE)
+        );
     }
 
     @Override

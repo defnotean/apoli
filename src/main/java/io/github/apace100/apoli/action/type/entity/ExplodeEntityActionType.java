@@ -23,7 +23,7 @@ public class ExplodeEntityActionType extends EntityActionType {
         new SerializableData()
             .add("destructible", BlockCondition.DATA_TYPE, null)
             .add("indestructible", BlockCondition.DATA_TYPE, null)
-            .add("destruction_type", SerializableDataTypes.DESTRUCTION_TYPE, Explosion.DestructionType.DESTROY)
+            .add("destruction_type", SerializableDataTypes.DESTRUCTION_TYPE, Explosion.BlockInteraction.DESTROY)
             .add("damage_self", SerializableDataTypes.BOOLEAN, true)
             .add("create_fire", SerializableDataTypes.BOOLEAN, false)
             .add("power", SerializableDataTypes.NON_NEGATIVE_FLOAT)
@@ -50,7 +50,7 @@ public class ExplodeEntityActionType extends EntityActionType {
     private final BlockCondition destructibleCondition;
     private final BlockCondition indestructibleCondition;
 
-    private final Explosion.DestructionType destructionType;
+    private final Explosion.BlockInteraction destructionType;
 
     private final boolean damageSelf;
     private final boolean createFire;
@@ -58,7 +58,7 @@ public class ExplodeEntityActionType extends EntityActionType {
     private final float power;
     private final float indestructibleResistance;
 
-    public ExplodeEntityActionType(BlockCondition destructibleCondition, BlockCondition indestructibleCondition, Explosion.DestructionType destructionType, boolean damageSelf, boolean createFire, float power, float indestructibleResistance) {
+    public ExplodeEntityActionType(BlockCondition destructibleCondition, BlockCondition indestructibleCondition, Explosion.BlockInteraction destructionType, boolean damageSelf, boolean createFire, float power, float indestructibleResistance) {
         this.destructibleCondition = destructibleCondition;
         this.indestructibleCondition = indestructibleCondition;
         this.destructionType = destructionType;

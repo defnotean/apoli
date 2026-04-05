@@ -12,8 +12,8 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandOutput;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -63,14 +63,14 @@ public class CommandEntityConditionType extends EntityConditionType {
         MinecraftServer server = serverWorld.getServer();
         AtomicInteger result = new AtomicInteger();
 
-        ServerCommandSource commandSource = entity.getCommandSource()
+        CommandSourceStack commandSource = entity.getCommandSource()
             .withReturnValueConsumer((successful, returnValue) -> result.set(returnValue))
             .withLevel(Apoli.config.executeCommand.permissionLevel)
-            .withOutput(CommandOutput.DUMMY);
+            .withOutput(CommandSource.DUMMY);
 
         if (Apoli.config.executeCommand.showOutput) {
 
-            CommandOutput output = entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
+            CommandSource output = entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
                 ? serverPlayer
                 : server;
 
@@ -78,7 +78,7 @@ public class CommandEntityConditionType extends EntityConditionType {
 
         }
 
-        server.getCommandManager().executeWithPrefix(commandSource, command);
+        server.getCommands().executeWithPrefix(commandSource, command);
         return comparison.compare(result.get(), compareTo);
 
     }

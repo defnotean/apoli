@@ -2,7 +2,7 @@ package io.github.apace100.apoli.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import io.github.apace100.apoli.power.type.ModifyGrindstonePowerType;
-import net.minecraft.world.Inventory;
+import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.GrindstoneMenu;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,7 +18,7 @@ public class GrindstoneScreenHandlerTopInputSlotMixin {
     private GrindstoneMenu apoli$grindstoneHandler;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void apoli$cacheGrindstone(GrindstoneMenu grindstoneScreenHandler, Inventory inventory, int i, int j, int k, CallbackInfo ci) {
+    private void apoli$cacheGrindstone(GrindstoneMenu grindstoneScreenHandler, Container inventory, int i, int j, int k, CallbackInfo ci) {
         this.apoli$grindstoneHandler = grindstoneScreenHandler;
     }
 

@@ -12,7 +12,7 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.LootContextParameterSet;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.resources.ResourceKey;
@@ -53,7 +53,7 @@ public class ModifyItemActionType extends ItemActionType {
             .get(Registries.ITEM_MODIFIER)
             .getOrThrow(modifier);
 
-        LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(world)
+        LootParams lootContextParameterSet = new LootParams.Builder(world)
             .add(LootContextParams.ORIGIN, world.getSharedSpawnPos().getCenter())
             .add(LootContextParams.TOOL, oldStack)
             .addOptional(LootContextParams.THIS_ENTITY, ((EntityLinkedItemStack) oldStack).apoli$getEntity())

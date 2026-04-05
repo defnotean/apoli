@@ -13,7 +13,7 @@ import io.github.apace100.calio.data.SerializableData;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.GameMode;
+import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.NotNull;
 
 public class GameModeEntityConditionType extends EntityConditionType {
@@ -28,9 +28,9 @@ public class GameModeEntityConditionType extends EntityConditionType {
             .set("gamemode", conditionType.gameMode)
     );
 
-    private final GameMode gameMode;
+    private final GameType gameMode;
 
-    public GameModeEntityConditionType(GameMode gameMode) {
+    public GameModeEntityConditionType(GameType gameMode) {
         this.gameMode = gameMode;
     }
 

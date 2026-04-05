@@ -4,14 +4,14 @@ import com.google.common.collect.BiMap;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.mixin.LootContextTypesAccessor;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.level.storage.loot.LootContextParamSet;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.resources.Identifier;
 
 public class ApoliLootContextTypes {
 
-    public static final LootContextParamSet ANY = register(
+    public static final LootContextParamSets ANY = register(
         Apoli.identifier("any"),
-        LootContextParamSet.create()
+        LootContextParamSets.create()
             .allow(LootContextParams.THIS_ENTITY)
             .allow(LootContextParams.LAST_DAMAGE_PLAYER)
             .allow(LootContextParams.DAMAGE_SOURCE)
@@ -26,10 +26,10 @@ public class ApoliLootContextTypes {
 
     private ApoliLootContextTypes() {}
 
-    private static LootContextParamSet register(Identifier id, LootContextParamSet.Builder lootContextTypeBuilder) {
+    private static LootContextParamSets register(Identifier id, LootContextParamSets.Builder lootContextTypeBuilder) {
 
-        LootContextParamSet lootContextType = lootContextTypeBuilder.build();
-        BiMap<Identifier, LootContextParamSet> idAndLootContextTypeMap = LootContextTypesAccessor.getMap();
+        LootContextParamSets lootContextType = lootContextTypeBuilder.build();
+        BiMap<Identifier, LootContextParamSets> idAndLootContextTypeMap = LootContextTypesAccessor.getMap();
 
         if (idAndLootContextTypeMap.containsKey(id)) {
             throw new IllegalStateException("Loot table parameter set \"" + id + "\" is already registered!");

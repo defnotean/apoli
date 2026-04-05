@@ -13,7 +13,7 @@ import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.CraftingResultSlot;
+import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.SlotActionType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,7 +43,7 @@ public class ScreenHandlerMixin {
 
         }
 
-        else if (original.isPresent() && slot instanceof CraftingResultSlot resultSlot) {
+        else if (original.isPresent() && slot instanceof ResultSlot resultSlot) {
 
             if (!(((CraftingResultSlotAccessor) resultSlot).getInput() instanceof TransientCraftingContainer craftingInventory)) {
                 return original;

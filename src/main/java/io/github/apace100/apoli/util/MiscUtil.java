@@ -23,10 +23,10 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.SlotRange;
+import net.minecraft.world.inventory.SlotRange;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ExplosionS2CPacket;
+import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Holder;
@@ -52,15 +52,15 @@ import net.minecraft.core.registries.Registries;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class MiscUtil {
 
-    public static void createExplosion(Level world, Vec3 pos, float power, boolean createFire, Explosion.DestructionType destructionType, ExplosionBehavior behavior) {
+    public static void createExplosion(Level world, Vec3 pos, float power, boolean createFire, Explosion.BlockInteraction destructionType, ExplosionBehavior behavior) {
         createExplosion(world, null, pos, power, createFire, destructionType, behavior);
     }
 
-    public static void createExplosion(Level world, Entity entity, Vec3 pos, float power, boolean createFire, Explosion.DestructionType destructionType, ExplosionBehavior behavior) {
+    public static void createExplosion(Level world, Entity entity, Vec3 pos, float power, boolean createFire, Explosion.BlockInteraction destructionType, ExplosionBehavior behavior) {
         createExplosion(world, entity, null, pos.getX(), pos.getY(), pos.getZ(), power, createFire, destructionType, behavior);
     }
 
-    public static void createExplosion(Level world, @Nullable Entity entity, @Nullable DamageSource damageSource, double x, double y, double z, float power, boolean createFire, Explosion.DestructionType destructionType, ExplosionBehavior behavior) {
+    public static void createExplosion(Level world, @Nullable Entity entity, @Nullable DamageSource damageSource, double x, double y, double z, float power, boolean createFire, Explosion.BlockInteraction destructionType, ExplosionBehavior behavior) {
 
         Explosion explosion = new Explosion(world, entity, damageSource, behavior, x, y, z, power, createFire, destructionType, ParticleTypes.EXPLOSION, ParticleTypes.EXPLOSION_EMITTER, SoundEvents.ENTITY_GENERIC_EXPLODE);
 
@@ -78,7 +78,7 @@ public final class MiscUtil {
 
         for (ServerPlayer serverPlayerEntity : serverWorld.players()) {
             if (serverPlayerEntity.distanceToSqr(x, y, z) < 4096.0) {
-                serverPlayerEntity.connection.send(new ExplosionS2CPacket(x, y, z, power, explosion.getAffectedBlocks(), explosion.getAffectedPlayers().get(serverPlayerEntity), explosion.getDestructionType(), explosion.getParticle(), explosion.getEmitterParticle(), explosion.getSoundEvent()));
+                serverPlayerEntity.connection.send(new ClientboundExplodePacket(x, y, z, power, explosion.getAffectedBlocks(), explosion.getAffectedPlayers().get(serverPlayerEntity), explosion.getBlockInteraction(), explosion.getParticle(), explosion.getEmitterParticle(), explosion.getSoundEvent()));
             }
         }
 

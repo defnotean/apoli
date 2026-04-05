@@ -3,20 +3,20 @@ package io.github.apace100.apoli.mixin;
 import com.google.common.collect.AbstractIterator;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import io.github.apace100.apoli.access.BlockCollisionSpliteratorAccess;
+import io.github.apace100.apoli.access.BlockCollisionsAccess;
 import io.github.apace100.apoli.access.BlockStateCollisionShapeAccess;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.BlockCollisionSpliterator;
+import net.minecraft.world.level.BlockCollisions;
 import net.minecraft.world.level.BlockGetter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(BlockCollisionSpliterator.class)
-public abstract class BlockCollisionSpliteratorMixin<T> extends AbstractIterator<T> implements BlockCollisionSpliteratorAccess {
+@Mixin(BlockCollisions.class)
+public abstract class BlockCollisionSpliteratorMixin<T> extends AbstractIterator<T> implements BlockCollisionsAccess {
 
     @Unique
     boolean apoli$getOriginalShapes;

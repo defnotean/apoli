@@ -5,8 +5,8 @@ import io.github.apace100.apoli.action.context.BiEntityActionContext;
 import io.github.apace100.apoli.action.type.BiEntityActionType;
 import io.github.apace100.apoli.action.type.BiEntityActionTypes;
 import io.github.apace100.apoli.util.requirement.BiEntityRequirement;
-import net.minecraft.world.entity.animal.AbstractHorseEntity;
-import net.minecraft.world.entity.animal.TameableEntity;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,9 +18,9 @@ public class TameBiEntityActionType extends BiEntityActionType {
         if (context.actor() instanceof Player playerActor) {
 
             switch (context.target()) {
-                case TameableEntity tameableTarget when !tameableTarget.isTamed() ->
+                case TamableAnimal tameableTarget when !tameableTarget.isTamed() ->
                     tameableTarget.setOwner(playerActor);
-                case AbstractHorseEntity horseLikeTarget when !horseLikeTarget.isTame() ->
+                case AbstractHorse horseLikeTarget when !horseLikeTarget.isTame() ->
                     horseLikeTarget.bondWithPlayer(playerActor);
                 default -> {
 

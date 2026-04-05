@@ -12,7 +12,7 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerAdvancementLoader;
+import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.Identifier;
@@ -26,7 +26,7 @@ public class RevokeAdvancementEntityActionType extends EntityActionType {
     public static final TypedDataObjectFactory<RevokeAdvancementEntityActionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
             .add("advancement", SerializableDataTypes.IDENTIFIER.optional(), Optional.empty())
-            .add("selection", ApoliDataTypes.ADVANCEMENT_SELECTION, AdvancementCommands.Selection.ONLY)
+            .add("selection", ApoliDataTypes.ADVANCEMENT_SELECTION, AdvancementCommands.Mode.ONLY)
             .add("criterion", SerializableDataTypes.STRING, null)
             .addFunctionedDefault("criteria", SerializableDataTypes.STRINGS, data -> MiscUtil.singletonListOrEmpty(data.get("criterion"))),
         data -> new RevokeAdvancementEntityActionType(
@@ -41,11 +41,11 @@ public class RevokeAdvancementEntityActionType extends EntityActionType {
     );
 
     private final Optional<Identifier> advancementId;
-    private final AdvancementCommands.Selection selection;
+    private final AdvancementCommands.Mode selection;
 
     private final List<String> criteria;
 
-    public RevokeAdvancementEntityActionType(Optional<Identifier> advancementId, AdvancementCommands.Selection selection, List<String> criteria) {
+    public RevokeAdvancementEntityActionType(Optional<Identifier> advancementId, AdvancementCommands.Mode selection, List<String> criteria) {
         this.advancementId = advancementId;
         this.selection = selection;
         this.criteria = criteria;
@@ -59,10 +59,10 @@ public class RevokeAdvancementEntityActionType extends EntityActionType {
         }
 
         MinecraftServer server = serverPlayer.server;
-        ServerAdvancementLoader advancementLoader = server.getAdvancementLoader();
+        ServerAdvancementManager advancementLoader = server.getAdvancementLoader();
 
-        if (selection == AdvancementCommands.Selection.EVERYTHING) {
-            AdvancementUtil.processAdvancements(advancementLoader.getAdvancements(), AdvancementCommands.Operation.REVOKE, serverPlayer);
+        if (selection == AdvancementCommands.Mode.EVERYTHING) {
+            AdvancementUtil.processAdvancements(advancementLoader.getAdvancements(), AdvancementCommands.Action.REVOKE, serverPlayer);
         }
 
         else if (advancementId.isPresent()) {
@@ -76,11 +76,11 @@ public class RevokeAdvancementEntityActionType extends EntityActionType {
             }
 
             else if (criteria.isEmpty()) {
-                AdvancementUtil.processAdvancements(AdvancementUtil.selectEntries(advancementLoader.getManager(), advancementEntry, selection), AdvancementCommands.Operation.REVOKE, serverPlayer);
+                AdvancementUtil.processAdvancements(AdvancementUtil.selectEntries(advancementLoader.getManager(), advancementEntry, selection), AdvancementCommands.Action.REVOKE, serverPlayer);
             }
 
             else {
-                AdvancementUtil.processCriteria(advancementEntry, criteria, AdvancementCommands.Operation.REVOKE, serverPlayer);
+                AdvancementUtil.processCriteria(advancementEntry, criteria, AdvancementCommands.Action.REVOKE, serverPlayer);
             }
 
         }

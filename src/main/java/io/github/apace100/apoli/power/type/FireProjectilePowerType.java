@@ -13,7 +13,7 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.ExplosiveProjectileEntity;
+import net.minecraft.world.entity.projectile.hurtingprojectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -258,7 +258,7 @@ public class FireProjectilePowerType extends ActiveCooldownPowerType {
 
         if (entityToSpawn instanceof Projectile projectileToSpawn) {
 
-            if (projectileToSpawn instanceof ExplosiveProjectileEntity explosiveProjectileToSpawn) {
+            if (projectileToSpawn instanceof AbstractHurtingProjectile explosiveProjectileToSpawn) {
                 explosiveProjectileToSpawn.accelerationPower = speed;
             }
 

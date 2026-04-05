@@ -4,8 +4,8 @@ import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.power.Power;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.CustomPayload;
 import net.minecraft.resources.Identifier;
 
@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 public record SyncPowersS2CPacket(Map<Identifier, Power> powersById) implements CustomPayload {
 
     public static final Id<SyncPowersS2CPacket> PACKET_ID = new Id<>(Apoli.identifier("s2c/sync_power_registry"));
-    public static final PacketCodec<RegistryByteBuf, SyncPowersS2CPacket> PACKET_CODEC = PacketCodec.of(SyncPowersS2CPacket::write, SyncPowersS2CPacket::read);
+    public static final StreamCodec<RegistryFriendlyByteBuf, SyncPowersS2CPacket> PACKET_CODEC = StreamCodec.of(SyncPowersS2CPacket::write, SyncPowersS2CPacket::read);
 
-    public static SyncPowersS2CPacket read(RegistryByteBuf buf) {
+    public static SyncPowersS2CPacket read(RegistryFriendlyByteBuf buf) {
 
         try {
 
@@ -43,7 +43,7 @@ public record SyncPowersS2CPacket(Map<Identifier, Power> powersById) implements 
 
     }
 
-    public void write(RegistryByteBuf buf) {
+    public void write(RegistryFriendlyByteBuf buf) {
 
         Collection<Power> powers = powersById().values();
 

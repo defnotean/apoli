@@ -10,7 +10,7 @@ import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.apoli.util.modifier.ModifierUtil;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.world.entity.player.ItemCooldownManager;
+import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -45,8 +45,8 @@ public class ModifyItemCooldownItemActionType extends ItemActionType {
             return;
         }
 
-        ItemCooldownManager cooldownManager = player.getItemCooldownManager();
-        ItemCooldownManager.Entry cooldownEntry = cooldownManager.entries.get(stack.getItem());
+        ItemCooldowns cooldownManager = player.getItemCooldowns();
+        ItemCooldowns.Entry cooldownEntry = cooldownManager.entries.get(stack.getItem());
 
         int oldDuration = cooldownEntry != null
             ? cooldownEntry.endTick - cooldownEntry.startTick

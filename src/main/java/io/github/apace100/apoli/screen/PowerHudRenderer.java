@@ -8,7 +8,7 @@ import io.github.apace100.apoli.util.HudRender;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderTickCounter;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,7 +35,7 @@ public class PowerHudRenderer implements GameHudRender {
     private final AtomicInteger y = new AtomicInteger();
 
     @Override
-    public void render(GuiGraphics context, RenderTickCounter delta) {
+    public void render(GuiRenderer context, RenderTickCounter delta) {
 
         Minecraft client = Minecraft.getInstance();
         LocalPlayer player = client.player;

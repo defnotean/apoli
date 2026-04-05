@@ -6,8 +6,8 @@ import io.github.apace100.apoli.condition.type.BiEntityConditionType;
 import io.github.apace100.apoli.condition.type.BiEntityConditionTypes;
 import io.github.apace100.apoli.util.requirement.BiEntityRequirement;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Ownable;
-import net.minecraft.world.entity.Tameable;
+import net.minecraft.world.entity.OwnableEntity;
+import net.minecraft.world.entity.TamableAnimal;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -20,8 +20,8 @@ public class OwnerBiEntityConditionType extends BiEntityConditionType {
 		Entity actor = context.actor();
 		Entity target = context.target();
 
-		return (target instanceof Tameable tameableTarget && Objects.equals(actor, tameableTarget.getOwner()))
-			|| (target instanceof Ownable ownableTarget && Objects.equals(actor, ownableTarget.getOwner()));
+		return (target instanceof TamableAnimal tameableTarget && Objects.equals(actor, tameableTarget.getOwner()))
+			|| (target instanceof OwnableEntity ownableTarget && Objects.equals(actor, ownableTarget.getOwner()));
 
 	}
 

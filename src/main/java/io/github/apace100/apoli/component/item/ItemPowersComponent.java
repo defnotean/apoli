@@ -9,6 +9,7 @@ import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.PowerManager;
+import io.github.apace100.apoli.power.type.PowerType;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
@@ -21,8 +22,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.nbt.Tag;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.resources.Identifier;
@@ -32,7 +36,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-//  TODO: Make the data of stack powers persist in the item stack
 public class ItemPowersComponent {
 
     public static final ItemPowersComponent DEFAULT = new ItemPowersComponent(Set.of());
@@ -42,7 +45,7 @@ public class ItemPowersComponent {
 		ItemPowersComponent::entries
     );
 
-    public static final PacketCodec<ByteBuf, ItemPowersComponent> PACKET_CODEC = PacketCodecs.collection(ObjectLinkedOpenHashSet::new, Entry.PACKET_CODEC).xmap(
+    public static final StreamCodec<ByteBuf, ItemPowersComponent> PACKET_CODEC = ByteBufCodecs.collection(ObjectLinkedOpenHashSet::new, Entry.PACKET_CODEC).xmap(
         ItemPowersComponent::new,
         ItemPowersComponent::entries
     );
@@ -138,6 +141,79 @@ public class ItemPowersComponent {
         return entries.size();
     }
 
+    /**
+     * NBT key used to store per-power runtime state inside the item's CUSTOM_DATA.
+     * Format: {"apoli_stack_power_data": {"power:id": <power_nbt_tag>, ...}}
+     */
+    private static final String STACK_POWER_DATA_KEY = "apoli_stack_power_data";
+
+    /**
+     * Saves the runtime state of all item-sourced powers from the entity into the stack's CUSTOM_DATA.
+     * Called before revoking stack powers so the data is preserved when the item is dropped.
+     */
+    private static void saveStackPowerState(LivingEntity entity, Identifier sourceId, ItemStack stack, List<Power> powers) {
+
+        PowerHolderComponent component = PowerHolderComponent.KEY.getNullable(entity);
+        if (component == null || powers.isEmpty()) {
+            return;
+        }
+
+        CompoundTag customData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag powerDataTag = customData.contains(STACK_POWER_DATA_KEY)
+            ? customData.getCompound(STACK_POWER_DATA_KEY)
+            : new CompoundTag();
+
+        for (Power power : powers) {
+            PowerType powerType = component.getPowerType(power);
+            if (powerType != null) {
+                Tag stateTag = powerType.toTag();
+                if (stateTag != null) {
+                    powerDataTag.put(power.getId().toString(), stateTag);
+                }
+            }
+        }
+
+        if (!powerDataTag.isEmpty()) {
+            customData.put(STACK_POWER_DATA_KEY, powerDataTag);
+            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(customData));
+        }
+
+    }
+
+    /**
+     * Restores previously-saved runtime state of all item-sourced powers back into the entity.
+     * Called after granting stack powers so that resource values, cooldowns, etc. are recovered.
+     */
+    private static void loadStackPowerState(LivingEntity entity, Identifier sourceId, ItemStack stack, List<Power> powers) {
+
+        PowerHolderComponent component = PowerHolderComponent.KEY.getNullable(entity);
+        if (component == null || powers.isEmpty()) {
+            return;
+        }
+
+        if (!stack.has(DataComponents.CUSTOM_DATA)) {
+            return;
+        }
+
+        CompoundTag customData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        if (!customData.contains(STACK_POWER_DATA_KEY)) {
+            return;
+        }
+
+        CompoundTag powerDataTag = customData.getCompound(STACK_POWER_DATA_KEY);
+
+        for (Power power : powers) {
+            String key = power.getId().toString();
+            if (powerDataTag.contains(key)) {
+                PowerType powerType = component.getPowerType(power);
+                if (powerType != null) {
+                    powerType.fromTag(powerDataTag.get(key));
+                }
+            }
+        }
+
+    }
+
     public static void onChangeEquipment(LivingEntity entity, EquipmentSlot equipmentSlot, ItemStack previousStack, ItemStack currentStack) {
 
         Identifier sourceId = Apoli.identifier("item/" + equipmentSlot.getName());
@@ -164,11 +240,15 @@ public class ItemPowersComponent {
         }
 
         if (!revokedPowers.isEmpty()) {
+            //  Save power state into the item stack before revoking so data survives drop/pickup
+            saveStackPowerState(entity, sourceId, previousStack, revokedPowers);
             PowerHolderComponent.revokePowers(entity, Map.of(sourceId, revokedPowers), true);
         }
 
         if (!grantedPowers.isEmpty()) {
             PowerHolderComponent.grantPowers(entity, Map.of(sourceId, grantedPowers), true);
+            //  Restore previous power state from the item stack after granting
+            loadStackPowerState(entity, sourceId, currentStack, grantedPowers);
         }
 
     }
@@ -182,11 +262,11 @@ public class ItemPowersComponent {
             Codec.BOOL.optionalFieldOf("negative", false).forGetter(Entry::negative)
         ).apply(instance, Entry::new));
 
-        public static final PacketCodec<ByteBuf, Entry> PACKET_CODEC = PacketCodec.tuple(
+        public static final StreamCodec<ByteBuf, Entry> PACKET_CODEC = StreamCodec.tuple(
             Identifier.PACKET_CODEC, Entry::powerId,
             EquipmentSlotGroup.PACKET_CODEC, Entry::slot,
-            PacketCodecs.BOOL, Entry::hidden,
-            PacketCodecs.BOOL, Entry::negative,
+            ByteBufCodecs.BOOL, Entry::hidden,
+            ByteBufCodecs.BOOL, Entry::negative,
             Entry::new
         );
 

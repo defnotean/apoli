@@ -15,168 +15,228 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Optional;
 
 /**
- *	@author Alluysl
- * 	@author (refactored by) eggohito
+ *  @author Alluysl
+ *  @author (refactored by) eggohito
  */
 public interface DistanceFromCoordinatesMetaConditionType {
 
-	Reference reference();
-	Shape shape();
+    Reference reference();
+    Shape shape();
 
-	Optional<Integer> roundToDigit();
-	Vec3 offset();
+    Optional<Integer> roundToDigit();
+    Vec3 offset();
 
-//	Optional<Boolean> resultOnWrongDimension();
-//	boolean checkModifiedSpawns();
+    Optional<Boolean> resultOnWrongDimension();
+    boolean checkModifiedSpawn();
 
-	Comparison comparison();
-	double compareTo();
+    Comparison comparison();
+    double compareTo();
 
-	boolean scaleReferenceToDimension();
-	boolean scaleDistanceToDimension();
+    boolean scaleReferenceToDimension();
+    boolean scaleDistanceToDimension();
 
-	boolean ignoreX();
-	boolean ignoreY();
-	boolean ignoreZ();
+    boolean ignoreX();
+    boolean ignoreY();
+    boolean ignoreZ();
 
-	default boolean testCondition(Either<BlockConditionContext, EntityConditionContext> context) {
+    default boolean testCondition(Either<BlockConditionContext, EntityConditionContext> context) {
 
-		Level world = context.map(BlockConditionContext::world, EntityConditionContext::world);
-		BlockPos pos = context.map(BlockConditionContext::pos, EntityConditionContext::blockPos);
+        Level world = context.map(BlockConditionContext::world, EntityConditionContext::world);
+        BlockPos pos = context.map(BlockConditionContext::pos, EntityConditionContext::blockPos);
 
-		double coordinateScale = world.getDimension().coordinateScale();
+        double coordinateScale = world.getDimension().coordinateScale();
 
-		double x = 0;
-		double y = 0;
-		double z = 0;
+        double x = 0;
+        double y = 0;
+        double z = 0;
 
-		//	Query the reference's scaled coordinates
-		switch (reference()) {
-//			case PLAYER_SPAWN, PLAYER_NATURAL_SPAWN -> {
-			// 	These references are not yet implemented
-//			}
-			case WORLD_SPAWN -> {
+        switch (reference()) {
 
-				//	This, and other of it parts, has been commented since other dimensions (or worlds, in Yarn's terms) can have
-				//	its own spawn points (which can be set via `/setworldspawn`)	-eggohito
+            case PLAYER_SPAWN -> {
 
-//				if (resultOnWrongDimension().isPresent() && world.getRegistryKey != Level.OVERWORLD) {
-//					return resultOnWrongDimension().get();
-//				}
+                //  Requires an entity context — if there's no entity or no server player, fall back to world spawn
+                Entity entity = context
+                    .right()
+                    .map(EntityConditionContext::entity)
+                    .orElse(null);
 
-				BlockPos spawnPos = world.getSharedSpawnPos();
+                if (entity instanceof ServerPlayer serverPlayer) {
+                    //  Use the player's set respawn position (i.e., their bed or anchor location)
+                    //  If none is set, fall through to world spawn behaviour
+                    BlockPos spawnPos = serverPlayer.getRespawnPosition();
+                    if (spawnPos != null) {
+                        //  Check for wrong-dimension guard
+                        var respawnDimension = serverPlayer.getRespawnDimension();
+                        if (resultOnWrongDimension().isPresent() && !world.dimension().equals(respawnDimension)) {
+                            return resultOnWrongDimension().get();
+                        }
+                        x = spawnPos.getX();
+                        y = spawnPos.getY();
+                        z = spawnPos.getZ();
+                        break;
+                    }
+                }
 
-				x = spawnPos.getX();
-				y = spawnPos.getY();
-				z = spawnPos.getZ();
+                //  No player-specific spawn set — fall back to world spawn
+                BlockPos worldSpawn = world.getSharedSpawnPos();
+                x = worldSpawn.getX();
+                y = worldSpawn.getY();
+                z = worldSpawn.getZ();
 
-			}
-			case WORLD_ORIGIN -> {
-				//	The origin of a world is at 0, 0, 0, so we don't need to do anything at this point
-			}
-		}
+            }
 
-		x += offset().getX();
-		y += offset().getY();
-		z += offset().getZ();
+            case PLAYER_NATURAL_SPAWN -> {
 
-		if (scaleReferenceToDimension() && (x != 0 || z != 0)) {
+                Entity entity = context
+                    .right()
+                    .map(EntityConditionContext::entity)
+                    .orElse(null);
 
-			//	Upon further investigation, a dimension cannot have a coordinate scale of absolute 0 as its value is bound from
-			//	1.0E-5F (0.00001) to 3.0E7 (30000000), meaning that this section may be unnecessary?	-eggohito
+                if (entity instanceof ServerPlayer serverPlayer) {
+                    //  Use the "natural" (unforced / no anchor) spawn position — i.e., bed spawn only
+                    //  A forced respawn (anchor or /spawnpoint) is excluded if checkModifiedSpawn() is true
+                    BlockPos spawnPos = serverPlayer.getRespawnPosition();
+                    boolean spawnForced = serverPlayer.isRespawnForced();
 
-			//	Pocket dimensions?
-//			if (coordinateScale == 0) {
-			//	A coordinate scale of 0 means that it takes 0 blocks to travel from the overworld to travel 1 block in the dimension,
-			//	so the dimension is folded on 0, 0, so unless the overworld reference is at 0, 0, it gets scaled to infinity
-//				return outOfBounds(comparison);
-//			}
+                    if (spawnPos != null && (!checkModifiedSpawn() || !spawnForced)) {
+                        var respawnDimension = serverPlayer.getRespawnDimension();
+                        if (resultOnWrongDimension().isPresent() && !world.dimension().equals(respawnDimension)) {
+                            return resultOnWrongDimension().get();
+                        }
+                        x = spawnPos.getX();
+                        y = spawnPos.getY();
+                        z = spawnPos.getZ();
+                        break;
+                    }
+                }
 
-			x /= coordinateScale;
-			z /= coordinateScale;
+                //  No natural spawn set — fall back to world spawn
+                BlockPos worldSpawn = world.getSharedSpawnPos();
+                x = worldSpawn.getX();
+                y = worldSpawn.getY();
+                z = worldSpawn.getZ();
 
-		}
+            }
 
-		double xDistance = ignoreX() ? 0 : Math.abs(pos.getX() - x);
-		double yDistance = ignoreY() ? 0 : Math.abs(pos.getY() - y);
-		double zDistance = ignoreZ() ? 0 : Math.abs(pos.getZ() - z);
+            case WORLD_SPAWN -> {
 
-		if (scaleDistanceToDimension()) {
-			xDistance *= coordinateScale;
-			zDistance *= coordinateScale;
-		}
+                //  Dimension guard: result_on_wrong_dimension only applies in the overworld context
+                if (resultOnWrongDimension().isPresent() && !world.dimension().equals(Level.OVERWORLD)) {
+                    return resultOnWrongDimension().get();
+                }
 
-		double distance = shape().getDistance(xDistance, yDistance, zDistance);
-		double scaledDistance = roundToDigit()
-			.map(scale -> new BigDecimal(distance).setScale(scale, RoundingMode.HALF_UP).doubleValue())
-			.orElse(distance);
+                BlockPos spawnPos = world.getSharedSpawnPos();
+                x = spawnPos.getX();
+                y = spawnPos.getY();
+                z = spawnPos.getZ();
 
-		return comparison().compare(scaledDistance, compareTo());
+            }
 
-	}
+            case WORLD_ORIGIN -> {
+                //  The origin of a world is always (0, 0, 0); nothing to set
+            }
 
-	static <T extends ConditionContext, C extends Condition<T, CT>, CT extends ConditionType<T, C>, M extends ConditionType<T, C> & DistanceFromCoordinatesMetaConditionType> ConditionConfiguration<M> createConfiguration(Constructor<M> constructor) {
-		return ConditionConfiguration.of(
-			Apoli.identifier("distance_from_coordinates"),
-			new SerializableData()
-				.add("reference", SerializableDataType.enumValue(Reference.class), Reference.WORLD_ORIGIN)	//	The reference point for comparison
-				.add("shape", SerializableDataType.enumValue(Shape.class), Shape.CUBE)	//	The shape used for comparing the distance
-				.add("round_to_digit", SerializableDataTypes.INT.optional(), Optional.empty())	//	Rounds the calculated distance to this amount of digits (e.g: 0 for unitary values, 1 for decimals, -1 for multiples of ten)
-				.add("offset", SerializableDataTypes.VECTOR, Vec3.ZERO)	//	The offset for the reference point
-				.add("comparison", ApoliDataTypes.COMPARISON)
-				.add("compare_to", SerializableDataTypes.DOUBLE)
-//				.add("result_on_wrong_dimension", SerializableDataTypes.BOOLEAN.optional(), Optional.empty())	//	The value to be used as the result if the dimension is not the same as the reference's
-//				.add("check_modified_spawn", SerializableDataTypes.BOOLEAN, true)	//	Determines whether to check for modified spawns
-				.add("scale_reference_to_dimension", SerializableDataTypes.BOOLEAN, true)	//	Determines whether to scale the reference's coordinates according to the dimension it's in and the player is in
-				.add("scale_distance_to_dimension", SerializableDataTypes.BOOLEAN, false)	//	Determines whether to scale the calculated distance to the current dimension
-				.add("ignore_x", SerializableDataTypes.BOOLEAN, false)
-				.add("ignore_y", SerializableDataTypes.BOOLEAN, false)
-				.add("ignore_z", SerializableDataTypes.BOOLEAN, false),
-			data -> constructor.create(
-				data.get("reference"),
-				data.get("shape"),
-				data.get("round_to_digit"),
-				data.get("offset"),
-				data.get("comparison"),
-				data.get("compare_to"),
-				data.get("scale_reference_to_dimension"),
-				data.get("scale_distance_to_dimension"),
-				data.get("ignore_x"),
-				data.get("ignore_y"),
-				data.get("ignore_z")
-			),
-			(m, serializableData) -> serializableData.instance()
-				.set("reference", m.reference())
-				.set("shape", m.shape())
-				.set("round_to_digit", m.roundToDigit())
-				.set("offset", m.offset())
-				.set("comparison", m.comparison())
-				.set("compare_to", m.compareTo())
-				.set("scale_reference_to_dimension", m.scaleReferenceToDimension())
-				.set("scale_distance_to_dimension", m.scaleDistanceToDimension())
-				.set("ignore_x", m.ignoreX())
-				.set("ignore_y", m.ignoreY())
-				.set("ignore_z", m.ignoreZ())
-		);
-	}
+        }
 
-	interface Constructor<M extends ConditionType<?, ?> & DistanceFromCoordinatesMetaConditionType> {
-		M create(Reference reference, Shape shape, Optional<Integer> roundToDigit, Vec3 offset, Comparison comparison, double compareTo, boolean scaleReferenceToDimension, boolean scaleDistanceToDimension, boolean ignoreX, boolean ignoreY, boolean ignoreZ);
-	}
+        x += offset().getX();
+        y += offset().getY();
+        z += offset().getZ();
 
-	enum Reference {
-//		PLAYER_SPAWN,
-//		PLAYER_NATURAL_SPAWN,
-		WORLD_SPAWN,
-		WORLD_ORIGIN
-	}
+        if (scaleReferenceToDimension() && (x != 0 || z != 0)) {
+            x /= coordinateScale;
+            z /= coordinateScale;
+        }
+
+        double xDistance = ignoreX() ? 0 : Math.abs(pos.getX() - x);
+        double yDistance = ignoreY() ? 0 : Math.abs(pos.getY() - y);
+        double zDistance = ignoreZ() ? 0 : Math.abs(pos.getZ() - z);
+
+        if (scaleDistanceToDimension()) {
+            xDistance *= coordinateScale;
+            zDistance *= coordinateScale;
+        }
+
+        double distance = shape().getDistance(xDistance, yDistance, zDistance);
+        double scaledDistance = roundToDigit()
+            .map(scale -> new BigDecimal(distance).setScale(scale, RoundingMode.HALF_UP).doubleValue())
+            .orElse(distance);
+
+        return comparison().compare(scaledDistance, compareTo());
+
+    }
+
+    static <T extends ConditionContext, C extends Condition<T, CT>, CT extends ConditionType<T, C>, M extends ConditionType<T, C> & DistanceFromCoordinatesMetaConditionType> ConditionConfiguration<M> createConfiguration(Constructor<M> constructor) {
+        return ConditionConfiguration.of(
+            Apoli.identifier("distance_from_coordinates"),
+            new SerializableData()
+                .add("reference", SerializableDataType.enumValue(Reference.class), Reference.WORLD_ORIGIN)
+                .add("shape", SerializableDataType.enumValue(Shape.class), Shape.CUBE)
+                .add("round_to_digit", SerializableDataTypes.INT.optional(), Optional.empty())
+                .add("offset", SerializableDataTypes.VECTOR, Vec3.ZERO)
+                .add("comparison", ApoliDataTypes.COMPARISON)
+                .add("compare_to", SerializableDataTypes.DOUBLE)
+                .add("result_on_wrong_dimension", SerializableDataTypes.BOOLEAN.optional(), Optional.empty())
+                .add("check_modified_spawn", SerializableDataTypes.BOOLEAN, true)
+                .add("scale_reference_to_dimension", SerializableDataTypes.BOOLEAN, true)
+                .add("scale_distance_to_dimension", SerializableDataTypes.BOOLEAN, false)
+                .add("ignore_x", SerializableDataTypes.BOOLEAN, false)
+                .add("ignore_y", SerializableDataTypes.BOOLEAN, false)
+                .add("ignore_z", SerializableDataTypes.BOOLEAN, false),
+            data -> constructor.create(
+                data.get("reference"),
+                data.get("shape"),
+                data.get("round_to_digit"),
+                data.get("offset"),
+                data.get("comparison"),
+                data.get("compare_to"),
+                data.get("result_on_wrong_dimension"),
+                data.get("check_modified_spawn"),
+                data.get("scale_reference_to_dimension"),
+                data.get("scale_distance_to_dimension"),
+                data.get("ignore_x"),
+                data.get("ignore_y"),
+                data.get("ignore_z")
+            ),
+            (m, serializableData) -> serializableData.instance()
+                .set("reference", m.reference())
+                .set("shape", m.shape())
+                .set("round_to_digit", m.roundToDigit())
+                .set("offset", m.offset())
+                .set("comparison", m.comparison())
+                .set("compare_to", m.compareTo())
+                .set("result_on_wrong_dimension", m.resultOnWrongDimension())
+                .set("check_modified_spawn", m.checkModifiedSpawn())
+                .set("scale_reference_to_dimension", m.scaleReferenceToDimension())
+                .set("scale_distance_to_dimension", m.scaleDistanceToDimension())
+                .set("ignore_x", m.ignoreX())
+                .set("ignore_y", m.ignoreY())
+                .set("ignore_z", m.ignoreZ())
+        );
+    }
+
+    interface Constructor<M extends ConditionType<?, ?> & DistanceFromCoordinatesMetaConditionType> {
+        M create(Reference reference, Shape shape, Optional<Integer> roundToDigit, Vec3 offset,
+                 Comparison comparison, double compareTo,
+                 Optional<Boolean> resultOnWrongDimension, boolean checkModifiedSpawn,
+                 boolean scaleReferenceToDimension, boolean scaleDistanceToDimension,
+                 boolean ignoreX, boolean ignoreY, boolean ignoreZ);
+    }
+
+    enum Reference {
+        PLAYER_SPAWN,
+        PLAYER_NATURAL_SPAWN,
+        WORLD_SPAWN,
+        WORLD_ORIGIN
+    }
 
 }

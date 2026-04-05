@@ -9,10 +9,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FluidBlock;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gl.PostEffectProcessor;
+import net.minecraft.client.renderer.PostEffectProcessor;
 import net.minecraft.client.renderer.Camera;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderTickCounter;
@@ -184,7 +184,7 @@ public abstract class GameRendererMixin {
             }
             for (BlockPos p : eyePositions) {
                 BlockState stateAtP = client.world.getBlockState(p);
-                if (!savedStates.containsKey(p) && !client.world.isAir(p) && !(stateAtP.getBlock() instanceof FluidBlock)) {
+                if (!savedStates.containsKey(p) && !client.world.isAir(p) && !(stateAtP.getBlock() instanceof LiquidBlock)) {
                     savedStates.put(p, stateAtP);
                     client.world.setBlock(p, Blocks.AIR.getDefaultState());
                 }

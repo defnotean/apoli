@@ -16,8 +16,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
@@ -37,7 +37,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Optional;
 
-public record ModifiedCraftingRecipe(Identifier id, CraftingRecipe delegate) implements CraftingRecipe {
+public class ModifiedCraftingRecipe extends CraftingRecipe {
+    private final Identifier id;
+    private final CraftingRecipe delegate;
+
+    public ModifiedCraftingRecipe(Identifier id, CraftingRecipe delegate) {
+        super(delegate.placementInfo());
+        this.id = id;
+        this.delegate = delegate;
+    }
+
+    public Identifier id() { return id; }
+    public CraftingRecipe delegate() { return delegate; }
 
     @Override
     public CraftingRecipeCategory getCategory() {
@@ -159,12 +170,12 @@ public record ModifiedCraftingRecipe(Identifier id, CraftingRecipe delegate) imp
 
     }
 
-    private void send(RegistryByteBuf buf) {
+    private void send(RegistryFriendlyByteBuf buf) {
         buf.writeIdentifier(id());
         Recipe.PACKET_CODEC.encode(buf, delegate());
     }
 
-    private static ModifiedCraftingRecipe receive(RegistryByteBuf buf) {
+    private static ModifiedCraftingRecipe receive(RegistryFriendlyByteBuf buf) {
 
         Identifier id = buf.readIdentifier();
         Recipe<?> recipe = Recipe.PACKET_CODEC.decode(buf);
@@ -186,7 +197,7 @@ public record ModifiedCraftingRecipe(Identifier id, CraftingRecipe delegate) imp
             ApoliDataTypes.DISALLOWING_INTERNAL_CRAFTING_RECIPE.codec().fieldOf("recipe").forGetter(ModifiedCraftingRecipe::delegate)
         ).apply(instance, ModifiedCraftingRecipe::new));
 
-        public static final PacketCodec<RegistryByteBuf, ModifiedCraftingRecipe> PACKET_CODEC = PacketCodec.of(
+        public static final StreamCodec<RegistryFriendlyByteBuf, ModifiedCraftingRecipe> PACKET_CODEC = StreamCodec.of(
             ModifiedCraftingRecipe::send,
             ModifiedCraftingRecipe::receive
         );
@@ -197,7 +208,7 @@ public record ModifiedCraftingRecipe(Identifier id, CraftingRecipe delegate) imp
         }
 
         @Override
-        public PacketCodec<RegistryByteBuf, ModifiedCraftingRecipe> packetCodec() {
+        public StreamCodec<RegistryFriendlyByteBuf, ModifiedCraftingRecipe> packetCodec() {
             return PACKET_CODEC;
         }
 

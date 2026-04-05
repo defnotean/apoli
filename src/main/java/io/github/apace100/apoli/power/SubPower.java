@@ -1,17 +1,17 @@
 package io.github.apace100.apoli.power;
 
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 
 import java.util.function.Function;
 
 public class SubPower extends Power {
 
-    protected static final Function<Power, PacketCodec<RegistryByteBuf, SubPower>> PACKET_CODEC = power -> new PacketCodec<>() {
+    protected static final Function<Power, StreamCodec<RegistryFriendlyByteBuf, SubPower>> PACKET_CODEC = power -> new StreamCodec<>() {
 
         @Override
-        public SubPower decode(RegistryByteBuf buf) {
+        public SubPower decode(RegistryFriendlyByteBuf buf) {
 
             Identifier superPowerId = buf.readIdentifier();
             String subName = buf.readString();
@@ -21,7 +21,7 @@ public class SubPower extends Power {
         }
 
         @Override
-        public void encode(RegistryByteBuf buf, SubPower value) {
+        public void encode(RegistryFriendlyByteBuf buf, SubPower value) {
             buf.writeIdentifier(value.getSuperPowerId());
             buf.writeString(value.getSubName());
         }

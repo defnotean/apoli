@@ -20,8 +20,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandOutput;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -29,7 +29,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.level.ClipContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -47,8 +47,8 @@ public class RaycastEntityActionType extends EntityActionType {
             .add("bientity_action", BiEntityAction.DATA_TYPE.optional(), Optional.empty())
             .add("block_action", BlockAction.DATA_TYPE.optional(), Optional.empty())
             .add("bientity_condition", BiEntityCondition.DATA_TYPE.optional(), Optional.empty())
-            .add("shape_type", SerializableDataTypes.SHAPE_TYPE, RaycastContext.ShapeType.OUTLINE)
-            .add("fluid_handling", SerializableDataTypes.FLUID_HANDLING, RaycastContext.FluidHandling.ANY)
+            .add("shape_type", SerializableDataTypes.SHAPE_TYPE, ClipContext.Block.OUTLINE)
+            .add("fluid_handling", SerializableDataTypes.FLUID_HANDLING, ClipContext.Fluid.ANY)
             .add("direction", SerializableDataTypes.VECTOR.optional(), Optional.empty())
             .add("space", ApoliDataTypes.SPACE, Space.WORLD)
             .add("entity_distance", SerializableDataTypes.POSITIVE_DOUBLE.optional(), Optional.empty())
@@ -115,8 +115,8 @@ public class RaycastEntityActionType extends EntityActionType {
 
     private final Optional<BiEntityCondition> biEntityCondition;
 
-    private final RaycastContext.ShapeType shapeType;
-    private final RaycastContext.FluidHandling fluidHandling;
+    private final ClipContext.Block shapeType;
+    private final ClipContext.Fluid fluidHandling;
 
     private final Optional<Vec3> direction;
     private final Space space;
@@ -136,7 +136,7 @@ public class RaycastEntityActionType extends EntityActionType {
     private final boolean entity;
     private final boolean block;
 
-    public RaycastEntityActionType(Optional<EntityAction> beforeAction, Optional<EntityAction> hitAction, Optional<EntityAction> missAction, Optional<BiEntityAction> biEntityAction, Optional<BlockAction> blockAction, Optional<BiEntityCondition> biEntityCondition, RaycastContext.ShapeType shapeType, RaycastContext.FluidHandling fluidHandling, Optional<Vec3> direction, Space space, Optional<Double> entityDistance, Optional<Double> blockDistance, Optional<Double> distance, Optional<String> commandAtHit, Optional<String> commandAlongRay, Optional<Double> commandHitOffset, double commandStep, boolean commandAlongRayOnlyOnHit, boolean entity, boolean block) {
+    public RaycastEntityActionType(Optional<EntityAction> beforeAction, Optional<EntityAction> hitAction, Optional<EntityAction> missAction, Optional<BiEntityAction> biEntityAction, Optional<BlockAction> blockAction, Optional<BiEntityCondition> biEntityCondition, ClipContext.Block shapeType, ClipContext.Fluid fluidHandling, Optional<Vec3> direction, Space space, Optional<Double> entityDistance, Optional<Double> blockDistance, Optional<Double> distance, Optional<String> commandAtHit, Optional<String> commandAlongRay, Optional<Double> commandHitOffset, double commandStep, boolean commandAlongRayOnlyOnHit, boolean entity, boolean block) {
         this.beforeAction = beforeAction;
         this.hitAction = hitAction;
         this.missAction = missAction;
@@ -258,7 +258,7 @@ public class RaycastEntityActionType extends EntityActionType {
     }
 
     private BlockHitResult blockRaycast(Entity caster, Vec3 origin, Vec3 destination) {
-        RaycastContext context = new RaycastContext(origin, destination, shapeType, fluidHandling, caster);
+        ClipContext context = new ClipContext(origin, destination, shapeType, fluidHandling, caster);
         return caster.level().raycast(context);
     }
 
@@ -358,8 +358,8 @@ public class RaycastEntityActionType extends EntityActionType {
         Vec3 direction = destination.subtract(origin).normalize();
         double distance = origin.distanceTo(destination);
 
-        ServerCommandSource commandSource = entity.getCommandSource()
-            .withOutput(CommandOutput.DUMMY)
+        CommandSourceStack commandSource = entity.getCommandSource()
+            .withOutput(CommandSource.DUMMY)
             .withLevel(Apoli.config.executeCommand.permissionLevel);
 
         if (Apoli.config.executeCommand.showOutput) {
@@ -373,7 +373,7 @@ public class RaycastEntityActionType extends EntityActionType {
             Vec3 offsetPos = direction.multiply(steps);
             Vec3 newPos = origin.add(offsetPos);
 
-            server.getCommandManager().executeWithPrefix(commandSource.withPosition(newPos), commandAlongRay);
+            server.getCommands().executeWithPrefix(commandSource.withPosition(newPos), commandAlongRay);
 
         }
 
@@ -388,8 +388,8 @@ public class RaycastEntityActionType extends EntityActionType {
             return;
         }
 
-        ServerCommandSource commandSource = entity.getCommandSource()
-            .withOutput(CommandOutput.DUMMY)
+        CommandSourceStack commandSource = entity.getCommandSource()
+            .withOutput(CommandSource.DUMMY)
             .withPosition(hitPos)
             .withLevel(Apoli.config.executeCommand.permissionLevel);
 
@@ -399,7 +399,7 @@ public class RaycastEntityActionType extends EntityActionType {
                 : server);
         }
 
-        server.getCommandManager().executeWithPrefix(commandSource, commandAtHit);
+        server.getCommands().executeWithPrefix(commandSource, commandAtHit);
 
     }
 

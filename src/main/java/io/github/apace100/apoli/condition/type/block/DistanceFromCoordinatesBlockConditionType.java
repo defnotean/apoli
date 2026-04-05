@@ -14,103 +14,67 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 
 /**
- *	@author Alluysl (refactored by eggohito)
+ *  @author Alluysl (refactored by eggohito)
  */
 public class DistanceFromCoordinatesBlockConditionType extends BlockConditionType implements DistanceFromCoordinatesMetaConditionType {
 
-	private final Reference reference;
-	private final Shape shape;
+    private final Reference reference;
+    private final Shape shape;
 
-	private final Optional<Integer> roundToDigit;
-	private final Vec3 offset;
+    private final Optional<Integer> roundToDigit;
+    private final Vec3 offset;
 
-	private final Comparison comparison;
-	private final double compareTo;
+    private final Comparison comparison;
+    private final double compareTo;
 
-	private final boolean scaleReferenceToDimension;
-	private final boolean scaleDistanceToDimension;
+    private final Optional<Boolean> resultOnWrongDimension;
+    private final boolean checkModifiedSpawn;
 
-	private final boolean ignoreX;
-	private final boolean ignoreY;
-	private final boolean ignoreZ;
+    private final boolean scaleReferenceToDimension;
+    private final boolean scaleDistanceToDimension;
 
-	public DistanceFromCoordinatesBlockConditionType(DistanceFromCoordinatesMetaConditionType.Reference reference, Shape shape, Optional<Integer> roundToDigit, Vec3 offset, Comparison comparison, double compareTo, boolean scaleReferenceToDimension, boolean scaleDistanceToDimension, boolean ignoreX, boolean ignoreY, boolean ignoreZ) {
-		this.reference = reference;
-		this.shape = shape;
-		this.roundToDigit = roundToDigit;
-		this.offset = offset;
-		this.comparison = comparison;
-		this.compareTo = compareTo;
-		this.scaleReferenceToDimension = scaleReferenceToDimension;
-		this.scaleDistanceToDimension = scaleDistanceToDimension;
-		this.ignoreX = ignoreX;
-		this.ignoreY = ignoreY;
-		this.ignoreZ = ignoreZ;
-	}
+    private final boolean ignoreX;
+    private final boolean ignoreY;
+    private final boolean ignoreZ;
 
-	@Override
-	public boolean test(BlockConditionContext context) {
-		return testCondition(Either.left(context));
-	}
+    public DistanceFromCoordinatesBlockConditionType(DistanceFromCoordinatesMetaConditionType.Reference reference, Shape shape, Optional<Integer> roundToDigit, Vec3 offset, Comparison comparison, double compareTo, Optional<Boolean> resultOnWrongDimension, boolean checkModifiedSpawn, boolean scaleReferenceToDimension, boolean scaleDistanceToDimension, boolean ignoreX, boolean ignoreY, boolean ignoreZ) {
+        this.reference = reference;
+        this.shape = shape;
+        this.roundToDigit = roundToDigit;
+        this.offset = offset;
+        this.comparison = comparison;
+        this.compareTo = compareTo;
+        this.resultOnWrongDimension = resultOnWrongDimension;
+        this.checkModifiedSpawn = checkModifiedSpawn;
+        this.scaleReferenceToDimension = scaleReferenceToDimension;
+        this.scaleDistanceToDimension = scaleDistanceToDimension;
+        this.ignoreX = ignoreX;
+        this.ignoreY = ignoreY;
+        this.ignoreZ = ignoreZ;
+    }
 
-	@Override
-	public @NotNull ConditionConfiguration<?> getConfig() {
-		return BlockConditionTypes.DISTANCE_FROM_COORDINATES;
-	}
+    @Override
+    public boolean test(BlockConditionContext context) {
+        return testCondition(Either.left(context));
+    }
 
-	@Override
-	public Reference reference() {
-		return reference;
-	}
+    @Override
+    public @NotNull ConditionConfiguration<?> getConfig() {
+        return BlockConditionTypes.DISTANCE_FROM_COORDINATES;
+    }
 
-	@Override
-	public Shape shape() {
-		return shape;
-	}
-
-	@Override
-	public Optional<Integer> roundToDigit() {
-		return roundToDigit;
-	}
-
-	@Override
-	public Vec3 offset() {
-		return offset;
-	}
-
-	@Override
-	public Comparison comparison() {
-		return comparison;
-	}
-
-	@Override
-	public double compareTo() {
-		return compareTo;
-	}
-
-	@Override
-	public boolean scaleReferenceToDimension() {
-		return scaleReferenceToDimension;
-	}
-
-	@Override
-	public boolean scaleDistanceToDimension() {
-		return scaleDistanceToDimension;
-	}
-
-	@Override
-	public boolean ignoreX() {
-		return ignoreX;
-	}
-
-	@Override
-	public boolean ignoreY() {
-		return ignoreY;
-	}
-
-	@Override
-	public boolean ignoreZ() {
-		return ignoreZ;
-	}
+    @Override public Reference reference() { return reference; }
+    @Override public Shape shape() { return shape; }
+    @Override public Optional<Integer> roundToDigit() { return roundToDigit; }
+    @Override public Vec3 offset() { return offset; }
+    @Override public Comparison comparison() { return comparison; }
+    @Override public double compareTo() { return compareTo; }
+    @Override public Optional<Boolean> resultOnWrongDimension() { return resultOnWrongDimension; }
+    @Override public boolean checkModifiedSpawn() { return checkModifiedSpawn; }
+    @Override public boolean scaleReferenceToDimension() { return scaleReferenceToDimension; }
+    @Override public boolean scaleDistanceToDimension() { return scaleDistanceToDimension; }
+    @Override public boolean ignoreX() { return ignoreX; }
+    @Override public boolean ignoreY() { return ignoreY; }
+    @Override public boolean ignoreZ() { return ignoreZ; }
 
 }

@@ -16,7 +16,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.util.InputUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.core.component.ComponentHolder;
 import net.minecraft.core.component.ComponentMap;
 import net.minecraft.core.component.DataComponentType;
@@ -26,11 +26,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.inventory.ScreenTexts;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,7 +49,7 @@ import java.util.function.Consumer;
 public abstract class ItemStackMixinClient implements ComponentHolder {
 
     @Shadow
-    public abstract UseAnim getUseAnimation();
+    public abstract ItemUseAnimation getUseAnimation();
 
     @Shadow
     public abstract ComponentMap getComponents();
@@ -133,10 +133,10 @@ public abstract class ItemStackMixinClient implements ComponentHolder {
             KeyMapping keyBinding = ApoliClient.showPowersOnUsabilityHint;
 
             Integer keyCode = !keyBinding.isUnbound()
-                ? InputUtil.fromTranslationKey(keyBinding.getBoundKeyTranslationKey()).getCode()
+                ? InputConstants.fromTranslationKey(keyBinding.getBoundKeyTranslationKey()).getCode()
                 : null;
             boolean isKeyPressed = keyCode != null
-                && InputUtil.isKeyPressed(client.getWindow().getHandle(), keyCode);
+                && InputConstants.isKeyPressed(client.getWindow().getHandle(), keyCode);
 
             if (isKeyPressed) {
                 this.apoli$appendExpandedTooltip(preventItemUsePowers, apoli$tooltip, translationKey, powerTextFormat, powerTextFormat);
@@ -192,7 +192,7 @@ public abstract class ItemStackMixinClient implements ComponentHolder {
 
         if (shouldAppendSlotName.isTrue()) {
 
-            tooltipConsumer.accept(ScreenTexts.EMPTY);
+            tooltipConsumer.accept(CommonComponents.EMPTY);
             tooltipConsumer.accept(Component.translatable("item.modifiers." + modifierSlot.getSerializedName()).withStyle(ChatFormatting.GRAY));
 
             shouldAppendSlotName.setFalse();

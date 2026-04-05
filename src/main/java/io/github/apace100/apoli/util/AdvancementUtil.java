@@ -13,7 +13,7 @@ import java.util.List;
 
 public class AdvancementUtil {
 
-    public static List<AdvancementHolder> selectEntries(AdvancementTree advancementManager, AdvancementHolder advancementEntry, AdvancementCommands.Selection selection) {
+    public static List<AdvancementHolder> selectEntries(AdvancementTree advancementManager, AdvancementHolder advancementEntry, AdvancementCommands.Mode selection) {
 
         AdvancementNode placedAdvancement = advancementManager.get(advancementEntry);
         if (placedAdvancement == null) {
@@ -38,13 +38,13 @@ public class AdvancementUtil {
 
     }
 
-    public static void processCriteria(AdvancementHolder advancementEntry, Collection<String> criteria, AdvancementCommands.Operation operation, ServerPlayer serverPlayerEntity) {
+    public static void processCriteria(AdvancementHolder advancementEntry, Collection<String> criteria, AdvancementCommands.Action operation, ServerPlayer serverPlayerEntity) {
         for (String criterion : criteria.stream().filter(c -> advancementEntry.value().criteria().containsKey(c)).toList()) {
             operation.processEachCriterion(serverPlayerEntity, advancementEntry, criterion);
         }
     }
 
-    public static void processAdvancements(Collection<AdvancementHolder> advancementEntries, AdvancementCommands.Operation operation, ServerPlayer serverPlayerEntity) {
+    public static void processAdvancements(Collection<AdvancementHolder> advancementEntries, AdvancementCommands.Action operation, ServerPlayer serverPlayerEntity) {
         for (AdvancementHolder advancementEntry : advancementEntries) {
             operation.processEach(serverPlayerEntity, advancementEntry);
         }

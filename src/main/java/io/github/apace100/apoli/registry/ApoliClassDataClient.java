@@ -4,7 +4,7 @@ import io.github.apace100.calio.ClassUtil;
 import io.github.apace100.calio.data.ClassDataRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.entity.feature.*;
+import net.minecraft.client.renderer.entity.layers.*;
 
 @Environment(EnvType.CLIENT)
 public class ApoliClassDataClient {

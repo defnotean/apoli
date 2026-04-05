@@ -14,7 +14,7 @@ import io.github.apace100.apoli.power.PowerManager;
 import io.github.apace100.apoli.util.PowerUtil;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.resources.Identifier;
 
 import java.util.Collection;
@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public record PowerSuggestionProvider(Function<CommandContext<ServerCommandSource>, Collection<Entity>> getter, PowerArgumentType.PowerTarget targetType) implements SuggestionProvider<ServerCommandSource> {
+public record PowerSuggestionProvider(Function<CommandContext<CommandSourceStack>, Collection<Entity>> getter, PowerArgumentType.PowerTarget targetType) implements SuggestionProvider<CommandSourceStack> {
 
 	private static PowerSuggestionProvider entity(String entityArgumentName, PowerArgumentType.PowerTarget targetType) {
 		return new PowerSuggestionProvider(context -> {
@@ -84,7 +84,7 @@ public record PowerSuggestionProvider(Function<CommandContext<ServerCommandSourc
 	}
 
 	@Override
-	public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) {
+	public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
 
 		try {
 

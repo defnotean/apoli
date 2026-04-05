@@ -11,7 +11,7 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.LightType;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +21,7 @@ public class LightLevelBlockConditionType extends BlockConditionType {
 
     public static final TypedDataObjectFactory<LightLevelBlockConditionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
-            .add("light_type", SerializableDataType.enumValue(LightType.class).optional(), Optional.empty())
+            .add("light_type", SerializableDataType.enumValue(LightLayer.class).optional(), Optional.empty())
             .add("comparison", ApoliDataTypes.COMPARISON)
             .add("compare_to", SerializableDataTypes.INT),
         data -> new LightLevelBlockConditionType(
@@ -35,12 +35,12 @@ public class LightLevelBlockConditionType extends BlockConditionType {
             .set("compare_to", conditionType.compareTo)
     );
 
-    private final Optional<LightType> lightType;
+    private final Optional<LightLayer> lightType;
 
     private final Comparison comparison;
     private final int compareTo;
 
-    public LightLevelBlockConditionType(Optional<LightType> lightType, Comparison comparison, int compareTo) {
+    public LightLevelBlockConditionType(Optional<LightLayer> lightType, Comparison comparison, int compareTo) {
         this.lightType = lightType;
         this.comparison = comparison;
         this.compareTo = compareTo;
@@ -53,7 +53,7 @@ public class LightLevelBlockConditionType extends BlockConditionType {
         BlockPos pos = context.pos();
 
         int lightLevel = lightType
-            .map(lt -> world.getLightLevel(lt, pos))
+            .map(lt -> world.getBrightness(lt, pos))
             .orElseGet(() -> world.getLightLevel(pos));
 
         return comparison.compare(lightLevel, compareTo);

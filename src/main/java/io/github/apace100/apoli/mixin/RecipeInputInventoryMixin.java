@@ -2,18 +2,18 @@ package io.github.apace100.apoli.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import io.github.apace100.apoli.access.PowerCraftingInventory;
-import net.minecraft.world.RecipeInputInventory;
+import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.crafting.CraftingInput;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(RecipeInputInventory.class)
+@Mixin(CraftingContainer.class)
 public interface RecipeInputInventoryMixin {
 
     @ModifyReturnValue(method = "createPositionedRecipeInput", at = @At("RETURN"))
     private CraftingInput.Positioned apoli$passCacheToPositionedInput(CraftingInput.Positioned original) {
 
-        if ((RecipeInputInventory) this instanceof PowerCraftingInventory sourcePci && original.input() instanceof PowerCraftingInventory targetPci) {
+        if ((CraftingContainer) this instanceof PowerCraftingInventory sourcePci && original.input() instanceof PowerCraftingInventory targetPci) {
 
             targetPci.apoli$setPowerTypes(sourcePci.apoli$getPowerTypes());
             targetPci.apoli$setPlayer(sourcePci.apoli$getPlayer());

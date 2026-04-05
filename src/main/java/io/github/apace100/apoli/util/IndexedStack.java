@@ -5,7 +5,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.registry.DataObjectFactories;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.world.SlotRange;
+import net.minecraft.world.inventory.SlotRange;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;

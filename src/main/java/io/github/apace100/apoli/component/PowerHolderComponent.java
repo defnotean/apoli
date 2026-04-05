@@ -19,7 +19,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
@@ -451,7 +451,7 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
 
         public abstract ComponentPacketWriter write(T type);
 
-        public abstract void apply(RegistryByteBuf buf, PowerHolderComponent component);
+        public abstract void apply(RegistryFriendlyByteBuf buf, PowerHolderComponent component);
 
         public abstract int getId();
 
@@ -473,11 +473,11 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
         public static final class Impl<T> extends PacketHandler<T> {
 
             final Function<T, ComponentPacketWriter> writer;
-            final BiConsumer<RegistryByteBuf, PowerHolderComponent> applier;
+            final BiConsumer<RegistryFriendlyByteBuf, PowerHolderComponent> applier;
 
             final int id;
 
-            private Impl(Function<T, ComponentPacketWriter> writer, BiConsumer<RegistryByteBuf, PowerHolderComponent> applier, int id) {
+            private Impl(Function<T, ComponentPacketWriter> writer, BiConsumer<RegistryFriendlyByteBuf, PowerHolderComponent> applier, int id) {
                 this.writer = writer;
                 this.applier = applier;
                 this.id = id;
@@ -489,7 +489,7 @@ public interface PowerHolderComponent extends AutoSyncedComponent, CommonTicking
             }
 
             @Override
-            public void apply(RegistryByteBuf buf, PowerHolderComponent component) {
+            public void apply(RegistryFriendlyByteBuf buf, PowerHolderComponent component) {
                 applier.accept(buf, component);
             }
 

@@ -1,6 +1,6 @@
 package io.github.apace100.apoli.condition.type.entity;
 
-import io.github.apace100.apoli.access.BlockCollisionSpliteratorAccess;
+import io.github.apace100.apoli.access.BlockCollisionsAccess;
 import io.github.apace100.apoli.condition.BlockCondition;
 import io.github.apace100.apoli.condition.ConditionConfiguration;
 import io.github.apace100.apoli.condition.context.EntityConditionContext;
@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.BlockCollisionSpliterator;
+import net.minecraft.world.level.BlockCollisions;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,8 +53,8 @@ public class BlockCollisionEntityConditionType extends EntityConditionType {
         AABB boundingBox = entity.getBoundingBox().offset(offset);
         Level world = entity.level();
 
-        BlockCollisionSpliterator<BlockPos> spliterator = new BlockCollisionSpliterator<>(world, entity, boundingBox, false, (pos, shape) -> pos);
-        ((BlockCollisionSpliteratorAccess) spliterator).apoli$setGetOriginalShapes(true);
+        BlockCollisions<BlockPos> spliterator = new BlockCollisions<>(world, entity, boundingBox, false, (pos, shape) -> pos);
+        ((BlockCollisionsAccess) spliterator).apoli$setGetOriginalShapes(true);
 
         while (spliterator.hasNext()) {
 

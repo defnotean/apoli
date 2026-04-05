@@ -20,12 +20,12 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -94,10 +94,10 @@ public class Power implements Validatable {
 
 			});
         },
-        serializableData -> new PacketCodec<>() {
+        serializableData -> new StreamCodec<>() {
 
 			@Override
-			public Power decode(RegistryByteBuf buf) {
+			public Power decode(RegistryFriendlyByteBuf buf) {
 
                 Identifier powerId = buf.readIdentifier();
                 SerializableData.Instance powerData = serializableData.receive(buf);
@@ -130,7 +130,7 @@ public class Power implements Validatable {
 			}
 
 			@Override
-			public void encode(RegistryByteBuf buf, Power value) {
+			public void encode(RegistryFriendlyByteBuf buf, Power value) {
 
                 try {
 

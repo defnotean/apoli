@@ -1,9 +1,9 @@
 package io.github.apace100.apoli.power.type;
 
-import de.dafuqs.additionalentityattributes.AdditionalEntityAttributes;
 import io.github.apace100.apoli.condition.EntityCondition;
 import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.power.PowerConfiguration;
+import io.github.apace100.apoli.util.ApoliAttributes;
 import io.github.apace100.apoli.util.AttributedEntityAttributeModifier;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
@@ -14,6 +14,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Modifies the entity's movement speed while in lava via the {@code apoli:lava_speed} attribute.
+ * <p>Previously required the AdditionalEntityAttributes mod — now self-contained.</p>
+ *
+ * @deprecated Use a conditioned_attribute power with the {@code apoli:lava_speed} attribute directly.
+ */
 @Deprecated
 public class ModifyLavaSpeedPowerType extends ConditionedAttributePowerType {
 
@@ -33,7 +39,12 @@ public class ModifyLavaSpeedPowerType extends ConditionedAttributePowerType {
     protected final List<AttributeModifier> attributeModifiers;
 
     public ModifyLavaSpeedPowerType(List<AttributeModifier> attributeModifiers, Optional<EntityCondition> condition) {
-        super(attributeModifiers.stream().map(attributeModifier -> new AttributedEntityAttributeModifier(AdditionalEntityAttributes.LAVA_SPEED, attributeModifier)).toList(), false, 10, condition);
+        super(
+            attributeModifiers.stream()
+                .map(attributeModifier -> new AttributedEntityAttributeModifier(ApoliAttributes.LAVA_SPEED, attributeModifier))
+                .toList(),
+            false, 10, condition
+        );
         this.attributeModifiers = attributeModifiers;
     }
 

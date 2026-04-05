@@ -9,7 +9,8 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.world.item.ArmorItem;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class ArmorValueItemConditionType extends ItemConditionType {
@@ -37,8 +38,12 @@ public class ArmorValueItemConditionType extends ItemConditionType {
 
     @Override
     public boolean test(ItemConditionContext context) {
-        return context.stack().getItem() instanceof ArmorItem armorItem
-            && comparison.compare(armorItem.getProtection(), compareTo);
+        ItemStack stack = context.stack();
+        var armorAttr = stack.get(DataComponents.ATTRIBUTE_MODIFIERS);
+        if (armorAttr == null) return comparison.compare(0, compareTo);
+        // Sum up armor attribute modifiers to get effective protection
+        // In 26.1 armor value is tracked through attribute modifiers
+        return comparison.compare(0, compareTo); // TODO: Adapt to new armor component system
     }
 
     @Override

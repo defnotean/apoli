@@ -30,7 +30,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.util.profiling.Profiler;
 import org.jetbrains.annotations.Nullable;
 

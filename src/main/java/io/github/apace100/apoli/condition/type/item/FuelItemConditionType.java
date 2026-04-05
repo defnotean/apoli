@@ -9,7 +9,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.fabricmc.fabric.api.registry.FuelRegistry;
+import net.minecraft.world.level.block.entity.FuelValues;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -39,9 +39,10 @@ public class FuelItemConditionType extends ItemConditionType {
 
 	@Override
 	public boolean test(ItemConditionContext context) {
-		return Optional.ofNullable(FuelRegistry.INSTANCE.get(context.stack().getItem()))
-			.map(value -> comparison.compare(value, compareTo))
-			.orElse(false);
+		// In MC 26.1, FuelRegistry was removed. Fuel values are now per-level via FuelValues.
+		// We approximate by checking if the item is a known fuel (burn time > 0 through component data)
+		int burnTime = context.stack().getBurnTime();
+		return comparison.compare(burnTime, compareTo);
 	}
 
 	@Override

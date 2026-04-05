@@ -17,7 +17,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
@@ -43,7 +43,7 @@ public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType
         return new PowerArgumentType(PowerTarget.GENERAL);
     }
 
-    public static Power getPower(CommandContext<ServerCommandSource> context, String argumentName) throws CommandSyntaxException {
+    public static Power getPower(CommandContext<CommandSourceStack> context, String argumentName) throws CommandSyntaxException {
         Identifier powerId = context.getArgument(argumentName, Identifier.class);
         return PowerManager.getOptional(powerId).orElseThrow(() -> POWER_NOT_FOUND.create(powerId));
     }
@@ -52,7 +52,7 @@ public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType
         return new PowerArgumentType(PowerTarget.RESOURCE);
     }
 
-    public static Power getResource(CommandContext<ServerCommandSource> context, String argumentName) throws CommandSyntaxException {
+    public static Power getResource(CommandContext<CommandSourceStack> context, String argumentName) throws CommandSyntaxException {
         Power power = getPower(context, argumentName);
         return PowerUtil.validateResource(power.getType())
             .map(PowerType::getPower)
@@ -103,15 +103,15 @@ public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType
             return new Properties(this, argumentType.powerTarget());
         }
 
-        public record Properties(Serializer serializer, PowerTarget powerTarget) implements ArgumentTypeProperties<PowerArgumentType> {
+        public record Properties(Serializer serializer, PowerTarget powerTarget) implements ArgumentTypeInfo.Template<PowerArgumentType> {
 
             @Override
-            public PowerArgumentType createType(CommandBuildContext commandRegistryAccess) {
+            public PowerArgumentType instantiate(CommandBuildContext commandRegistryAccess) {
                 return new PowerArgumentType(powerTarget());
             }
 
             @Override
-            public ArgumentTypeInfo<PowerArgumentType, ?> getSerializer() {
+            public ArgumentTypeInfo<PowerArgumentType, ?> type() {
                 return serializer();
             }
 

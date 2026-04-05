@@ -10,7 +10,7 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.entity.feature.FeatureRenderer;
+import net.minecraft.client.renderer.entity.layers.FeatureRenderer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

@@ -6,8 +6,8 @@ import io.github.apace100.apoli.condition.type.BiEntityConditionType;
 import io.github.apace100.apoli.condition.type.BiEntityConditionTypes;
 import io.github.apace100.apoli.util.requirement.BiEntityRequirement;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Targeter;
-import net.minecraft.world.entity.monster.Angerable;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.NeutralMob;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -20,8 +20,8 @@ public class AttackTargetBiEntityConditionType extends BiEntityConditionType {
         Entity actor = context.actor();
         Entity target = context.target();
 
-        return (actor instanceof Targeter targeterActor && Objects.equals(target, targeterActor.getTarget()))
-            || (actor instanceof Angerable angerableActor && Objects.equals(target, angerableActor.getTarget()));
+        return (actor instanceof Mob targeterActor && Objects.equals(target, targeterActor.getTarget()))
+            || (actor instanceof NeutralMob angerableActor && Objects.equals(target, angerableActor.getTarget()));
 
     }
 

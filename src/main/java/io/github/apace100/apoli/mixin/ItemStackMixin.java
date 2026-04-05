@@ -27,10 +27,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUsage;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -98,13 +98,13 @@ public abstract class ItemStackMixin implements ComponentHolder, EntityLinkedIte
 
     }
 
-    @WrapOperation(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;use(Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResultHolder;"))
-    private InteractionResultHolder<ItemStack> apoli$onItemUse(Item item, Level world, Player user, InteractionHand hand, Operation<InteractionResultHolder<ItemStack>> original) {
+    @WrapOperation(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;use(Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
+    private InteractionResult<ItemStack> apoli$onItemUse(Item item, Level world, Player user, InteractionHand hand, Operation<InteractionResult<ItemStack>> original) {
 
         //  region  Prevent item use
         ItemStack thisAsStack = (ItemStack) (Object) this;
         if (PowerHolderComponent.hasPowerType(user, PreventItemUsePowerType.class, piup -> piup.doesPrevent(thisAsStack))) {
-            return InteractionResultHolder.fail(thisAsStack);
+            return InteractionResult.fail(thisAsStack);
         }
         //  endregion
 
@@ -125,7 +125,7 @@ public abstract class ItemStackMixin implements ComponentHolder, EntityLinkedIte
             .map(fc -> user.canConsume(fc.canAlwaysEat()))
             .orElse(false);
 
-        InteractionResultHolder<ItemStack> action = canConsumeCustomFood
+        InteractionResult<ItemStack> action = canConsumeCustomFood
             ? ItemUsage.consumeHeldItem(world, user, hand)
             : original.call(useStack.getItem(), world, user, hand);
 
@@ -210,7 +210,7 @@ public abstract class ItemStackMixin implements ComponentHolder, EntityLinkedIte
     }
 
     @ModifyReturnValue(method = "getUseAnimation", at = @At("RETURN"))
-    private UseAnim apoli$replaceUseAction(UseAnim original) {
+    private ItemUseAnimation apoli$replaceUseAction(ItemUseAnimation original) {
         return EdibleItemPowerType.get((ItemStack) (Object) this)
             .map(EdibleItemPowerType::getConsumeAnimation)
             .orElse(original);
@@ -244,8 +244,8 @@ public abstract class ItemStackMixin implements ComponentHolder, EntityLinkedIte
             : false;
     }
 
-    @WrapOperation(method = "overrideStackedOnOther", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;overrideStackedOnOther(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/inventory/Slot;Lnet/minecraft/world/inventory/ClickType;Lnet/minecraft/world/entity/player/Player;)Z"))
-    private boolean apoli$itemOnItem_cursorStack(Item cursorItem, ItemStack cursorStack, Slot slot, ClickType clickType, Player player, Operation<Boolean> original) {
+    @WrapOperation(method = "overrideStackedOnOther", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;overrideStackedOnOther(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/inventory/Slot;Lnet/minecraft/world/inventory/ClickAction;Lnet/minecraft/world/entity/player/Player;)Z"))
+    private boolean apoli$itemOnItem_cursorStack(Item cursorItem, ItemStack cursorStack, Slot slot, ClickAction clickType, Player player, Operation<Boolean> original) {
 
         StackClickPhase clickPhase = StackClickPhase.CURSOR;
 
@@ -258,8 +258,8 @@ public abstract class ItemStackMixin implements ComponentHolder, EntityLinkedIte
 
     }
 
-    @WrapOperation(method = "overrideOtherStackedOnMe", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;overrideOtherStackedOnMe(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/inventory/Slot;Lnet/minecraft/world/inventory/ClickType;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/SlotAccess;)Z"))
-    private boolean apoli$itemOnItem_slotStack(Item slotItem, ItemStack slotStack, ItemStack cursorStack, Slot slot, ClickType clickType, Player player, SlotAccess cursorStackReference, Operation<Boolean> original) {
+    @WrapOperation(method = "overrideOtherStackedOnMe", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;overrideOtherStackedOnMe(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/inventory/Slot;Lnet/minecraft/world/inventory/ClickAction;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/SlotAccess;)Z"))
+    private boolean apoli$itemOnItem_slotStack(Item slotItem, ItemStack slotStack, ItemStack cursorStack, Slot slot, ClickAction clickType, Player player, SlotAccess cursorStackReference, Operation<Boolean> original) {
 
         StackClickPhase clickPhase = StackClickPhase.SLOT;
         SlotAccess slotStackReference = SlotAccess.of(slot.inventory, slot.getIndex());

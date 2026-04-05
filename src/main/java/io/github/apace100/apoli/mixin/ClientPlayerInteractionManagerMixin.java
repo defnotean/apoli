@@ -19,7 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 
 import java.util.List;
 
-@Mixin(MultiPlayerGameMode.class)
+@Mixin(MultiPlayerGameType.class)
 public abstract class ClientPlayerInteractionManagerMixin {
 
     @WrapOperation(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;onUse(Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"))
@@ -143,14 +143,14 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
     }
 
-    @WrapOperation(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;onUseWithItem(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/ItemInteractionResult;"))
-    private ItemInteractionResult apoli$beforeItemUseOnBlock(BlockState state, ItemStack stack, Level world, Player player, InteractionHand hand, BlockHitResult hitResult, Operation<ItemInteractionResult> original, @Share("zeroPriority$itemUseOnBlock") LocalRef<InteractionResult> zeroPriority$itemUseOnBlockRef) {
+    @WrapOperation(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;onUseWithItem(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"))
+    private InteractionResult apoli$beforeItemUseOnBlock(BlockState state, ItemStack stack, Level world, Player player, InteractionHand hand, BlockHitResult hitResult, Operation<InteractionResult> original, @Share("zeroPriority$itemUseOnBlock") LocalRef<InteractionResult> zeroPriority$itemUseOnBlockRef) {
 
         ItemStack stackInHand = player.getItemInHand(hand);
         BlockUsagePhase usePhase = BlockUsagePhase.ITEM;
 
         if (PreventBlockUsePowerType.doesPrevent(player, usePhase, hitResult, stackInHand, hand)) {
-            return ItemInteractionResult.FAIL;
+            return InteractionResult.FAIL;
         }
 
         Prioritized.CallInstance<ActiveInteractionPowerType> aipci = new Prioritized.CallInstance<>();
@@ -192,13 +192,13 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
             return switch (previousResult) {
                 case SUCCESS, SUCCESS_NO_ITEM_USED ->
-                    ItemInteractionResult.SUCCESS;
+                    InteractionResult.SUCCESS;
                 case CONSUME ->
-                    ItemInteractionResult.CONSUME;
+                    InteractionResult.CONSUME;
                 case CONSUME_PARTIAL ->
-                    ItemInteractionResult.CONSUME_PARTIAL;
+                    InteractionResult.CONSUME_PARTIAL;
                 case FAIL ->
-                    ItemInteractionResult.FAIL;
+                    InteractionResult.FAIL;
                 default ->
                     throw new IllegalStateException("Unexpected value: " + previousResult);
             };
@@ -209,7 +209,7 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
     }
 
-    @ModifyReturnValue(method = "useItemOn", at = @At(value = "RETURN", ordinal = 0), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/ItemInteractionResult;isAccepted()Z")))
+    @ModifyReturnValue(method = "useItemOn", at = @At(value = "RETURN", ordinal = 0), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/InteractionResult;isAccepted()Z")))
     private InteractionResult apoli$afterItemUseOnBlock(InteractionResult original, LocalPlayer player, InteractionHand hand, BlockHitResult hitResult, @Share("zeroPriority$itemUseOnBlock") LocalRef<InteractionResult> zeroPriority$itemUseOnBlockRef) {
 
         InteractionResult zeroPriority$itemUseOnBlock = zeroPriority$itemUseOnBlockRef.get();

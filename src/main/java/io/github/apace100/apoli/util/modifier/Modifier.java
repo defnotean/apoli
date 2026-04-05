@@ -8,8 +8,8 @@ import com.mojang.serialization.RecordBuilder;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -124,10 +124,10 @@ public class Modifier implements Comparable<Modifier> {
 			}
 
 		},
-		new PacketCodec<>() {
+		new StreamCodec<>() {
 
 			@Override
-			public Modifier decode(RegistryByteBuf buf) {
+			public Modifier decode(RegistryFriendlyByteBuf buf) {
 
 				IModifierOperation operation = IModifierOperation.DATA_TYPE.receive(buf);
 				SerializableData.Instance operationData = operation.getSerializableData().setRoot(dataType.isRoot()).receive(buf);
@@ -137,7 +137,7 @@ public class Modifier implements Comparable<Modifier> {
 			}
 
 			@Override
-			public void encode(RegistryByteBuf buf, Modifier value) {
+			public void encode(RegistryFriendlyByteBuf buf, Modifier value) {
 
 				IModifierOperation operation = value.getOperation();
 

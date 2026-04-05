@@ -17,10 +17,10 @@ import io.github.apace100.apoli.util.JsonTextFormatter;
 import io.github.apace100.apoli.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minecraft.commands.arguments.IdentifierArgumentType;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Component;
@@ -34,14 +34,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public class PowerCommand {
 
 	public static Identifier POWER_SOURCE = Apoli.identifier("command");
 
-	public static void register(CommandNode<ServerCommandSource> baseNode) {
+	public static void register(CommandNode<CommandSourceStack> baseNode) {
 
 		//	The main node of the command
 		var powerNode = literal("power")
@@ -65,25 +65,25 @@ public class PowerCommand {
 
 	public static class GrantNode {
 
-		public static LiteralCommandNode<ServerCommandSource> get() {
+		public static LiteralCommandNode<CommandSourceStack> get() {
 			return literal("grant")
 				.then(argument("targets", PowerHolderArgumentType.holders())
 					.then(argument("power", PowerArgumentType.power())
 						.executes(context -> execute(context, false))
-						.then(argument("source", IdentifierArgumentType.identifier())
+						.then(argument("source", IdentifierArgument.identifier())
 							.executes(context -> execute(context, true))))).build();
 		}
 
-		public static int execute(CommandContext<ServerCommandSource> context, boolean specifiedSource) throws CommandSyntaxException {
+		public static int execute(CommandContext<CommandSourceStack> context, boolean specifiedSource) throws CommandSyntaxException {
 
 			List<LivingEntity> targets = PowerHolderArgumentType.getHolders(context, "targets");
 			Power power = PowerArgumentType.getPower(context, "power");
 
 			Identifier source = specifiedSource
-				? IdentifierArgumentType.getIdentifier(context, "source")
+				? IdentifierArgument.getIdentifier(context, "source")
 				: POWER_SOURCE;
 
-			ServerCommandSource commandSource = context.getDirectEntity();
+			CommandSourceStack commandSource = context.getDirectEntity();
 			List<LivingEntity> processedTargets = targets.stream()
 				.filter(e -> PowerHolderComponent.grantPower(e, power, source, true))
 				.toList();
@@ -132,29 +132,29 @@ public class PowerCommand {
 
 	public static class RevokeNode {
 
-		public static LiteralCommandNode<ServerCommandSource> get() {
+		public static LiteralCommandNode<CommandSourceStack> get() {
 			return literal("revoke")
 				.then(argument("targets", PowerHolderArgumentType.holders())
 					.then(argument("power", PowerArgumentType.power())
 						.suggests(PowerSuggestionProvider.powersFromEntities("targets"))
 						.executes(context -> executeSingle(context, false))
-						.then(argument("source", IdentifierArgumentType.identifier())
+						.then(argument("source", IdentifierArgument.identifier())
 							.executes(context -> executeSingle(context, true))))
 					.then(literal("all")
-						.then(argument("source", IdentifierArgumentType.identifier())
+						.then(argument("source", IdentifierArgument.identifier())
 							.executes(RevokeNode::executeAll)))).build();
 		}
 
-		public static int executeSingle(CommandContext<ServerCommandSource> context, boolean specifiedSource) throws CommandSyntaxException {
+		public static int executeSingle(CommandContext<CommandSourceStack> context, boolean specifiedSource) throws CommandSyntaxException {
 
 			List<LivingEntity> targets = PowerHolderArgumentType.getHolders(context, "targets");
 			Power power = PowerArgumentType.getPower(context, "power");
 
 			Identifier source = specifiedSource
-				? IdentifierArgumentType.getIdentifier(context, "source")
+				? IdentifierArgument.getIdentifier(context, "source")
 				: POWER_SOURCE;
 
-			ServerCommandSource commandSource = context.getDirectEntity();
+			CommandSourceStack commandSource = context.getDirectEntity();
 			List<LivingEntity> processedTargets = targets.stream()
 				.filter(target -> PowerHolderComponent.revokePower(target, power, source, true))
 				.toList();
@@ -199,12 +199,12 @@ public class PowerCommand {
 
 		}
 
-		public static int executeAll(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+		public static int executeAll(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 
 			List<LivingEntity> targets = PowerHolderArgumentType.getHolders(context, "targets");
-			Identifier source = IdentifierArgumentType.getIdentifier(context, "source");
+			Identifier source = IdentifierArgument.getIdentifier(context, "source");
 
-			ServerCommandSource commandSource = context.getDirectEntity();
+			CommandSourceStack commandSource = context.getDirectEntity();
 			List<LivingEntity> processedTargets = new ObjectArrayList<>();
 
 			AtomicInteger revokedPowers = new AtomicInteger();
@@ -251,7 +251,7 @@ public class PowerCommand {
 
 	public static class ListNode {
 
-		public static LiteralCommandNode<ServerCommandSource> get() {
+		public static LiteralCommandNode<CommandSourceStack> get() {
 			return literal("list")
 				.executes(context -> execute(context, true, false))
 				.then(argument("target", PowerHolderArgumentType.holder())
@@ -260,9 +260,9 @@ public class PowerCommand {
 						.executes(context -> execute(context, false, BoolArgumentType.getBool(context, "subPowers"))))).build();
 		}
 
-		public static int execute(CommandContext<ServerCommandSource> context, boolean self, boolean includeSubPowers) throws CommandSyntaxException {
+		public static int execute(CommandContext<CommandSourceStack> context, boolean self, boolean includeSubPowers) throws CommandSyntaxException {
 
-			ServerCommandSource commandSource = context.getDirectEntity();
+			CommandSourceStack commandSource = context.getDirectEntity();
 			Entity target = self
 				? commandSource.getEntityOrThrow()
 				: PowerHolderArgumentType.getHolder(context, "target");
@@ -304,19 +304,19 @@ public class PowerCommand {
 
 	public static class HasNode {
 
-		public static LiteralCommandNode<ServerCommandSource> get() {
+		public static LiteralCommandNode<CommandSourceStack> get() {
 			return literal("has")
 				.then(argument("targets", PowerHolderArgumentType.holders())
 					.then(argument("power", PowerArgumentType.power())
 						.executes(HasNode::execute))).build();
 		}
 
-		public static int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+		public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 
 			List<LivingEntity> targets = PowerHolderArgumentType.getHolders(context, "targets");
 			Power power = PowerArgumentType.getPower(context, "power");
 
-			ServerCommandSource commandSource = context.getDirectEntity();
+			CommandSourceStack commandSource = context.getDirectEntity();
 			List<LivingEntity> processedTargets = targets.stream()
 				.filter(target -> PowerHolderComponent.KEY.get(target).hasPower(power))
 				.toList();
@@ -353,7 +353,7 @@ public class PowerCommand {
 
 	public static class SourcesNode {
 
-		public static LiteralCommandNode<ServerCommandSource> get() {
+		public static LiteralCommandNode<CommandSourceStack> get() {
 			return literal("sources")
 				.then(argument("target", PowerHolderArgumentType.holder())
 					.then(argument("power", PowerArgumentType.power())
@@ -362,12 +362,12 @@ public class PowerCommand {
 						.then(literal("")))).build();
 		}
 
-		public static int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+		public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 
 			Entity target = PowerHolderArgumentType.getHolder(context, "target");
 			Power power = PowerArgumentType.getPower(context, "power");
 
-			ServerCommandSource commandSource = context.getDirectEntity();
+			CommandSourceStack commandSource = context.getDirectEntity();
 			PowerHolderComponent powerComponent = PowerHolderComponent.KEY.get(target);
 
 			List<Identifier> sources = powerComponent.getSources(power);
@@ -392,7 +392,7 @@ public class PowerCommand {
 
 	public static class RemoveNode {
 
-		public static LiteralCommandNode<ServerCommandSource> get() {
+		public static LiteralCommandNode<CommandSourceStack> get() {
 			return literal("remove")
 				.then(argument("targets", PowerHolderArgumentType.holders())
 					.then(argument("power", PowerArgumentType.power())
@@ -401,12 +401,12 @@ public class PowerCommand {
 						.then(literal("")))).build();
 		}
 
-		public static int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+		public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 
 			List<LivingEntity> targets = PowerHolderArgumentType.getHolders(context, "targets");
 			Power power = PowerArgumentType.getPower(context, "power");
 
-			ServerCommandSource commandSource = context.getDirectEntity();
+			CommandSourceStack commandSource = context.getDirectEntity();
 			List<LivingEntity> processedTargets = new ObjectArrayList<>();
 
 			for (LivingEntity target : targets) {
@@ -453,19 +453,19 @@ public class PowerCommand {
 
 	public static class ClearNode {
 
-		public static LiteralCommandNode<ServerCommandSource> get() {
+		public static LiteralCommandNode<CommandSourceStack> get() {
 			return literal("clear")
 				.executes(context -> execute(context, true))
 				.then(argument("targets", PowerHolderArgumentType.holders())
 					.executes(context -> execute(context, false))).build();
 		}
 
-		public static int execute(CommandContext<ServerCommandSource> context, boolean self) throws CommandSyntaxException {
+		public static int execute(CommandContext<CommandSourceStack> context, boolean self) throws CommandSyntaxException {
 
 			List<Entity> targets = new ObjectArrayList<>();
 			List<Entity> processedTargets = new ObjectArrayList<>();
 
-			ServerCommandSource commandSource = context.getDirectEntity();
+			CommandSourceStack commandSource = context.getDirectEntity();
 			AtomicInteger clearedPowers = new AtomicInteger();
 
 			if (self) {
@@ -532,7 +532,7 @@ public class PowerCommand {
 
 	public static class DumpNode {
 
-		public static LiteralCommandNode<ServerCommandSource> get() {
+		public static LiteralCommandNode<CommandSourceStack> get() {
 			return literal("dump")
 				.then(argument("power", PowerArgumentType.power())
 					.executes(context -> execute(context, 4))
@@ -540,10 +540,10 @@ public class PowerCommand {
 						.executes(context -> execute(context, IntegerArgumentType.getInteger(context, "indent"))))).build();
 		}
 
-		public static int execute(CommandContext<ServerCommandSource> context, int indent) throws CommandSyntaxException {
+		public static int execute(CommandContext<CommandSourceStack> context, int indent) throws CommandSyntaxException {
 
 			Power power = PowerArgumentType.getPower(context, "power");
-			ServerCommandSource commandSource = context.getDirectEntity();
+			CommandSourceStack commandSource = context.getDirectEntity();
 
 			return Power.DATA_TYPE.write(commandSource.registryAccess().getOps(JsonOps.INSTANCE), power)
 				.ifSuccess(powerJson -> commandSource.sendFeedback(() -> new JsonTextFormatter(indent).apply(powerJson), false))

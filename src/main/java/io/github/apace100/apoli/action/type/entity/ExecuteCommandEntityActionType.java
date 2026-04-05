@@ -10,8 +10,8 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandOutput;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.NotNull;
@@ -44,13 +44,13 @@ public class ExecuteCommandEntityActionType extends EntityActionType {
         }
 
         MinecraftServer server = serverWorld.getServer();
-        ServerCommandSource commandSource = entity.getCommandSource()
+        CommandSourceStack commandSource = entity.getCommandSource()
             .withLevel(Apoli.config.executeCommand.permissionLevel)
-            .withOutput(CommandOutput.DUMMY);
+            .withOutput(CommandSource.DUMMY);
 
         if (Apoli.config.executeCommand.showOutput) {
 
-            CommandOutput output = entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
+            CommandSource output = entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null
                 ? serverPlayer
                 : server;
 
@@ -58,7 +58,7 @@ public class ExecuteCommandEntityActionType extends EntityActionType {
 
         }
 
-        server.getCommandManager().executeWithPrefix(commandSource, command);
+        server.getCommands().executeWithPrefix(commandSource, command);
 
     }
 

@@ -7,8 +7,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.function.BiConsumer;
@@ -52,7 +52,7 @@ public class SyncStatusEffectsUtil {
 
         });
 
-        public static final PacketCodec<FriendlyByteBuf, UpdateType> PACKET_CODEC = PacketCodecs.indexed(index -> values()[index], UpdateType::ordinal).cast();
+        public static final StreamCodec<FriendlyByteBuf, UpdateType> PACKET_CODEC = ByteBufCodecs.indexed(index -> values()[index], UpdateType::ordinal).cast();
 
         final BiConsumer<LivingEntity, MobEffectInstance> consumer;
         UpdateType(BiConsumer<LivingEntity, MobEffectInstance> consumer) {

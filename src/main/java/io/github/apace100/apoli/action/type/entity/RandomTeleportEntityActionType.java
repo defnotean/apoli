@@ -16,11 +16,11 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.ChunkPos;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.Heightmap;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +34,7 @@ public class RandomTeleportEntityActionType extends EntityActionType {
             .add("fail_action", EntityAction.DATA_TYPE.optional(), Optional.empty())
             .add("landing_condition", EntityCondition.DATA_TYPE.optional(), Optional.empty())
             .add("landing_block_condition", BlockCondition.DATA_TYPE.optional(), Optional.empty())
-            .add("heightmap", SerializableDataType.enumValue(Heightmap.Type.class).optional(), Optional.empty())
+            .add("heightmap", SerializableDataType.enumValue(net.minecraft.world.level.levelgen.Heightmap.Types.class).optional(), Optional.empty())
             .add("landing_offset", SerializableDataTypes.VECTOR, Vec3.ZERO)
             .add("area_width", SerializableDataTypes.POSITIVE_DOUBLE, 8.0D)
             .add("area_height", SerializableDataTypes.POSITIVE_DOUBLE, 8.0D)
@@ -71,7 +71,7 @@ public class RandomTeleportEntityActionType extends EntityActionType {
     private final Optional<EntityCondition> landingCondition;
     private final Optional<BlockCondition> landingBlockCondition;
 
-    private final Optional<Heightmap.Type> heightmapType;
+    private final Optional<net.minecraft.world.level.levelgen.Heightmap.Types> heightmapType;
     private final Vec3 landingOffset;
 
     private final double areaWidth;
@@ -80,7 +80,7 @@ public class RandomTeleportEntityActionType extends EntityActionType {
     private final boolean loadedChunksOnly;
     private final int attempts;
 
-    public RandomTeleportEntityActionType(Optional<EntityAction> successAction, Optional<EntityAction> failAction, Optional<EntityCondition> landingCondition, Optional<BlockCondition> landingBlockCondition, Optional<Heightmap.Type> heightmapType, Vec3 landingOffset, double areaWidth, double areaHeight, boolean loadedChunksOnly, int attempts) {
+    public RandomTeleportEntityActionType(Optional<EntityAction> successAction, Optional<EntityAction> failAction, Optional<EntityCondition> landingCondition, Optional<BlockCondition> landingBlockCondition, Optional<net.minecraft.world.level.levelgen.Heightmap.Types> heightmapType, Vec3 landingOffset, double areaWidth, double areaHeight, boolean loadedChunksOnly, int attempts) {
         this.successAction = successAction;
         this.failAction = failAction;
         this.landingCondition = landingCondition;

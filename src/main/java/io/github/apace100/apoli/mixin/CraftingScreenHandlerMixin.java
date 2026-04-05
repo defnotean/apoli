@@ -9,8 +9,8 @@ import io.github.apace100.apoli.power.type.ModifyCraftingPowerType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.TransientCraftingContainer;
-import net.minecraft.world.CraftingResultInventory;
-import net.minecraft.world.RecipeInputInventory;
+import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -34,11 +34,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.LinkedList;
 
 @Mixin(CraftingMenu.class)
-public abstract class CraftingScreenHandlerMixin extends RecipeBookMenu<CraftingInput, CraftingRecipe> implements ScreenHandlerUsabilityOverride {
+public abstract class CraftingScreenHandlerMixin extends RecipeBookMenu implements ScreenHandlerUsabilityOverride {
 
     @Shadow
     @Final
-    private RecipeInputInventory input;
+    private CraftingContainer input;
 
     @Shadow @Final private Player player;
     @Unique
@@ -70,7 +70,7 @@ public abstract class CraftingScreenHandlerMixin extends RecipeBookMenu<Crafting
     }
 
     @Inject(method = "updateResult", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeManager;getFirstMatch(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/item/crafting/RecipeInput;Lnet/minecraft/world/Level;Lnet/minecraft/world/item/crafting/RecipeHolder;)Ljava/util/Optional;"))
-    private static void apoli$clearPowerCraftingInventory(AbstractContainerMenu handler, Level world, Player player, RecipeInputInventory craftingInventory, CraftingResultInventory resultInventory, @Nullable RecipeHolder<CraftingRecipe> recipe, CallbackInfo ci) {
+    private static void apoli$clearPowerCraftingInventory(AbstractContainerMenu handler, Level world, Player player, CraftingContainer craftingInventory, ResultContainer resultInventory, @Nullable RecipeHolder<CraftingRecipe> recipe, CallbackInfo ci) {
 
         if (craftingInventory instanceof PowerCraftingInventory pci) {
             pci.apoli$setPowerTypes(new LinkedList<>());

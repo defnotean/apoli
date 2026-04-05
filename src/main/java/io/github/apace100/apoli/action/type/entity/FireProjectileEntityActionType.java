@@ -1,6 +1,7 @@
 package io.github.apace100.apoli.action.type.entity;
 
 import io.github.apace100.apoli.action.ActionConfiguration;
+import io.github.apace100.apoli.action.BiEntityAction;
 import io.github.apace100.apoli.action.EntityAction;
 import io.github.apace100.apoli.action.context.EntityActionContext;
 import io.github.apace100.apoli.action.type.EntityActionType;
@@ -11,7 +12,7 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.projectile.ExplosiveProjectileEntity;
+import net.minecraft.world.entity.projectile.hurtingprojectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -22,15 +23,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-/**
- *  TODO: Add a {@code bientity_action} field -eggohito
- */
 public class FireProjectileEntityActionType extends EntityActionType {
 
     public static final TypedDataObjectFactory<FireProjectileEntityActionType> DATA_FACTORY = TypedDataObjectFactory.simple(
         new SerializableData()
             .add("entity_type", SerializableDataTypes.ENTITY_TYPE)
             .add("projectile_action", EntityAction.DATA_TYPE.optional(), Optional.empty())
+            .add("bientity_action", BiEntityAction.DATA_TYPE.optional(), Optional.empty())
             .add("tag", SerializableDataTypes.NBT_COMPOUND, new CompoundTag())
             .add("divergence", SerializableDataTypes.FLOAT, 1.0F)
             .add("speed", SerializableDataTypes.FLOAT, 1.5F)
@@ -38,6 +37,7 @@ public class FireProjectileEntityActionType extends EntityActionType {
         data -> new FireProjectileEntityActionType(
             data.get("entity_type"),
             data.get("projectile_action"),
+            data.get("bientity_action"),
             data.get("tag"),
             data.get("divergence"),
             data.get("speed"),
@@ -46,6 +46,7 @@ public class FireProjectileEntityActionType extends EntityActionType {
         (actionType, serializableData) -> serializableData.instance()
             .set("entity_type", actionType.entityType)
             .set("projectile_action", actionType.projectileAction)
+            .set("bientity_action", actionType.biEntityAction)
             .set("tag", actionType.tag)
             .set("divergence", actionType.divergence)
             .set("speed", actionType.speed)
@@ -54,6 +55,7 @@ public class FireProjectileEntityActionType extends EntityActionType {
 
     private final EntityType<?> entityType;
     private final Optional<EntityAction> projectileAction;
+    private final Optional<BiEntityAction> biEntityAction;
 
     private final CompoundTag tag;
 
@@ -62,9 +64,10 @@ public class FireProjectileEntityActionType extends EntityActionType {
 
     private final int count;
 
-    public FireProjectileEntityActionType(EntityType<?> entityType, Optional<EntityAction> projectileAction, CompoundTag tag, float divergence, float speed, int count) {
+    public FireProjectileEntityActionType(EntityType<?> entityType, Optional<EntityAction> projectileAction, Optional<BiEntityAction> biEntityAction, CompoundTag tag, float divergence, float speed, int count) {
         this.entityType = entityType;
         this.projectileAction = projectileAction;
+        this.biEntityAction = biEntityAction;
         this.tag = tag;
         this.divergence = divergence;
         this.speed = speed;
@@ -100,7 +103,7 @@ public class FireProjectileEntityActionType extends EntityActionType {
 
             if (entityToSpawn instanceof Projectile projectileToSpawn) {
 
-                if (projectileToSpawn instanceof ExplosiveProjectileEntity explosiveProjectileToSpawn) {
+                if (projectileToSpawn instanceof AbstractHurtingProjectile explosiveProjectileToSpawn) {
                     explosiveProjectileToSpawn.accelerationPower = speed;
                 }
 
@@ -139,6 +142,9 @@ public class FireProjectileEntityActionType extends EntityActionType {
 
             serverWorld.spawnNewEntityAndPassengers(entityToSpawn);
             projectileAction.ifPresent(action -> action.execute(entityToSpawn));
+            //  Execute the bientity_action with the shooter as actor and projectile as target
+            final Entity spawnedFinal = entityToSpawn;
+            biEntityAction.ifPresent(action -> action.execute(entity, spawnedFinal));
 
         }
 

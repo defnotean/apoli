@@ -8,8 +8,8 @@ import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.PowerManager;
 import io.github.apace100.apoli.power.type.RecipePowerType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
@@ -23,7 +23,18 @@ import net.minecraft.world.level.Level;
 
 import java.util.Objects;
 
-public record PowerCraftingRecipe(Identifier powerId, CraftingRecipe delegate) implements CraftingRecipe {
+public class PowerCraftingRecipe extends CraftingRecipe {
+    private final Identifier powerId;
+    private final CraftingRecipe delegate;
+
+    public PowerCraftingRecipe(Identifier powerId, CraftingRecipe delegate) {
+        super(delegate.placementInfo());
+        this.powerId = powerId;
+        this.delegate = delegate;
+    }
+
+    public Identifier powerId() { return powerId; }
+    public CraftingRecipe delegate() { return delegate; }
 
     @Override
     public CraftingRecipeCategory getCategory() {
@@ -99,12 +110,12 @@ public record PowerCraftingRecipe(Identifier powerId, CraftingRecipe delegate) i
         return delegate().getGroup();
     }
 
-    private void send(RegistryByteBuf buf) {
+    private void send(RegistryFriendlyByteBuf buf) {
         buf.writeIdentifier(powerId());
         Recipe.PACKET_CODEC.encode(buf, delegate());
     }
 
-    private static PowerCraftingRecipe receive(RegistryByteBuf buf) {
+    private static PowerCraftingRecipe receive(RegistryFriendlyByteBuf buf) {
 
         Identifier powerId = buf.readIdentifier();
         Recipe<?> recipe = Recipe.PACKET_CODEC.decode(buf);
@@ -126,7 +137,7 @@ public record PowerCraftingRecipe(Identifier powerId, CraftingRecipe delegate) i
             ApoliDataTypes.DISALLOWING_INTERNAL_CRAFTING_RECIPE.codec().fieldOf("recipe").forGetter(PowerCraftingRecipe::delegate)
         ).apply(instance, PowerCraftingRecipe::new));
 
-        public static final PacketCodec<RegistryByteBuf, PowerCraftingRecipe> PACKET_CODEC = PacketCodec.of(
+        public static final StreamCodec<RegistryFriendlyByteBuf, PowerCraftingRecipe> PACKET_CODEC = StreamCodec.of(
             PowerCraftingRecipe::send,
             PowerCraftingRecipe::receive
         );
@@ -137,7 +148,7 @@ public record PowerCraftingRecipe(Identifier powerId, CraftingRecipe delegate) i
         }
 
         @Override
-        public PacketCodec<RegistryByteBuf, PowerCraftingRecipe> packetCodec() {
+        public StreamCodec<RegistryFriendlyByteBuf, PowerCraftingRecipe> packetCodec() {
             return PACKET_CODEC;
         }
 

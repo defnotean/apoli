@@ -16,13 +16,14 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Piglin;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.*;
 import net.minecraft.world.level.storage.loot.entries.NestedLootTable;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.ReloadableRegistries;
+import net.minecraft.server.ReloadableServerRegistries;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -41,7 +42,7 @@ import net.minecraft.core.registries.Registries;
 
 public abstract class ReplaceLootTablePowerTypeMixin {
 
-	@Mixin(ReloadableRegistries.Lookup.class)
+	@Mixin(ReloadableServerRegistries.Holder.class)
 	public static abstract class Replacer {
 
 		@Inject(method = "<init>", at = @At("TAIL"))
@@ -51,7 +52,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 				ResourceKey<LootTable> key = reference.registryKey();
 
 				if (reference.value() instanceof KeyableLootTable keyable) {
-					keyable.apoli$setup(key, (ReloadableRegistries.Lookup) (Object) this);
+					keyable.apoli$setup(key, (ReloadableServerRegistries.Holder) (Object) this);
 				}
 
 			});
@@ -79,7 +80,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 		@WrapOperation(method = "generateLoot", at = @At(value = "INVOKE", target = "Lcom/mojang/datafixers/util/Either;map(Ljava/util/function/Function;Ljava/util/function/Function;)Ljava/lang/Object;"))
 		private <T, L extends ResourceKey<LootTable>, R extends LootTable> T replaceGetter(Either<L, R> either, Function<? super L, ? extends T> leftFunction, Function<? super R, ? extends T> rightFunction, Operation<T> original, Consumer<ItemStack> stackConsumer, LootContext lootContext) {
 
-			ReloadableRegistries.Lookup lookup = lootContext.level().getServer().getReloadableRegistries();
+			ReloadableServerRegistries.Holder lookup = lootContext.level().getServer().getReloadableServerRegistries();
 			Function<? super L, ? extends T> newGetter = l -> (T) lookup.getLootTable(l);
 
 			return original.call(either, newGetter, rightFunction);
@@ -95,7 +96,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 		private ResourceKey<LootTable> apoli$key;
 
 		@Unique
-		private ReloadableRegistries.Lookup apoli$lookup;
+		private ReloadableServerRegistries.Holder apoli$lookup;
 
 		@Override
 		public ResourceKey<LootTable> apoli$getKey() {
@@ -103,7 +104,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 		}
 
 		@Override
-		public void apoli$setup(ResourceKey<LootTable> lootTableKey, ReloadableRegistries.Lookup lookup) {
+		public void apoli$setup(ResourceKey<LootTable> lootTableKey, ReloadableServerRegistries.Holder lookup) {
 			this.apoli$key = lootTableKey;
 			this.apoli$lookup = lookup;
 		}
@@ -115,7 +116,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 				return;
 			}
 
-			LootContextParamSet contextType = replacingContext.apoli$getType();
+			LootContextParamSets contextType = replacingContext.apoli$getType();
 			ResourceKey<LootTable> key = this.apoli$getKey();
 
 			if (key == null || replacingContext.apoli$isReplaced(key)) {
@@ -125,7 +126,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 			Entity thisEntity = context.get(LootContextParams.THIS_ENTITY);
 			Entity holder = thisEntity;
 
-			if (contextType == BuiltInLootContextParamSets.FISHING) {
+			if (contextType == LootContextParamSets.FISHING) {
 
 				if (thisEntity instanceof FishingHook bobber) {
 					holder = bobber.getOwner();
@@ -133,7 +134,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 
 			}
 
-			else if (contextType == BuiltInLootContextParamSets.ENTITY) {
+			else if (contextType == LootContextParamSets.ENTITY) {
 
 				if (context.hasParameter(LootContextParams.ATTACKING_ENTITY)) {
 					holder = context.get(LootContextParams.ATTACKING_ENTITY);
@@ -141,7 +142,7 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 
 			}
 
-			else if (contextType == BuiltInLootContextParamSets.BARTER) {
+			else if (contextType == LootContextParamSets.BARTER) {
 
 				if (thisEntity instanceof Piglin piglin) {
 					holder = piglin.getBrain().getOptionalRegisteredMemory(MemoryModuleType.NEAREST_VISIBLE_PLAYER).orElse(null);
@@ -209,13 +210,13 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 
 		@Shadow
 		@Final
-		private LootContextParameterSet parameters;
+		private LootParams parameters;
 
 		@Unique
 		private final Set<ResourceKey<LootTable>> apoli$replacedTables = new ObjectOpenHashSet<>();
 
 		@Override
-		public LootContextParamSet apoli$getType() {
+		public LootContextParamSets apoli$getType() {
 			return ((LootContextTypeHolder) this.parameters).apoli$getType();
 		}
 
@@ -231,29 +232,29 @@ public abstract class ReplaceLootTablePowerTypeMixin {
 
 	}
 
-	@Mixin(LootContextParameterSet.class)
+	@Mixin(LootParams.class)
 	public static abstract class LootContextParametersCache implements LootContextTypeHolder {
 
 		@Unique
-		private LootContextParamSet apoli$contextType;
+		private LootContextParamSets apoli$contextType;
 
 		@Override
-		public LootContextParamSet apoli$getType() {
+		public LootContextParamSets apoli$getType() {
 			return Objects.requireNonNull(this.apoli$contextType, "Loot context parameters are not initialized properly!");
 		}
 
 		@Override
-		public void apoli$setType(LootContextParamSet type) {
+		public void apoli$setType(LootContextParamSets type) {
 			this.apoli$contextType = type;
 		}
 
 	}
 
-	@Mixin(LootContextParameterSet.Builder.class)
+	@Mixin(LootParams.Builder.class)
 	public static abstract class LootContextParametersCacheInit {
 
 		@ModifyReturnValue(method = "build", at = @At("RETURN"))
-		private LootContextParameterSet cacheType(LootContextParameterSet original, LootContextParamSet type) {
+		private LootParams cacheType(LootParams original, LootContextParamSets type) {
 
 			((LootContextTypeHolder) original).apoli$setType(type);
 

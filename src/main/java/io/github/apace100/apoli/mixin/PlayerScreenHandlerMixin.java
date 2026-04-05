@@ -10,7 +10,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.TransientCraftingContainer;
-import net.minecraft.world.RecipeInputInventory;
+import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
@@ -26,7 +26,7 @@ public abstract class PlayerScreenHandlerMixin {
 
     @Shadow
     @Final
-    private RecipeInputInventory craftingInput;
+    private CraftingContainer craftingInput;
 
     @ModifyExpressionValue(method = "<init>", at = @At(value = "NEW", target = "(Lnet/minecraft/world/inventory/AbstractContainerMenu;II)Lnet/minecraft/world/inventory/TransientCraftingContainer;"))
     private TransientCraftingContainer apoli$cachePlayerToCraftingInventory(TransientCraftingContainer original, Inventory playerInventory) {

@@ -8,7 +8,7 @@ import io.github.apace100.apoli.data.TypedDataObjectFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.entity.AreaEffectCloudEntity;
+import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.server.level.ServerLevel;
@@ -70,7 +70,7 @@ public class SpawnEffectCloudEntityActionType extends EntityActionType {
             return;
         }
 
-        AreaEffectCloudEntity aec = new AreaEffectCloudEntity(entity.level(), pos.getX(), pos.getY(), pos.getZ());
+        AreaEffectCloud aec = new AreaEffectCloud(entity.level(), pos.getX(), pos.getY(), pos.getZ());
 
         if (entity instanceof LivingEntity living) {
             aec.setOwner(living);

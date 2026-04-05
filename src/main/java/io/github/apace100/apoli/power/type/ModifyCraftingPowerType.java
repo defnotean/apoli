@@ -13,10 +13,10 @@ import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.RecipeInputInventory;
+import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.inventory.CraftingResultSlot;
+import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.resources.Identifier;
 import net.minecraft.core.BlockPos;
@@ -120,7 +120,7 @@ public class ModifyCraftingPowerType extends PowerType implements Prioritized<Mo
         entityAction.ifPresent(action -> action.execute(getHolder()));
     }
 
-    public static ItemStack executeAfterCraftingAction(Player player, RecipeInputInventory recipeInput, Slot slot, ItemStack stack) {
+    public static ItemStack executeAfterCraftingAction(Player player, CraftingContainer recipeInput, Slot slot, ItemStack stack) {
 
         if (!(recipeInput instanceof PowerCraftingInventory pci)) {
             return stack;
@@ -137,7 +137,7 @@ public class ModifyCraftingPowerType extends PowerType implements Prioritized<Mo
             return stack;
         }
 
-        if (MiscUtil.hasSpaceInInventory(player, stack) && slot instanceof CraftingResultSlot) {
+        if (MiscUtil.hasSpaceInInventory(player, stack) && slot instanceof ResultSlot) {
 
             ItemStack copy = stack.copy();
             modifyCraftingPowers.forEach(mcpt -> mcpt.applyAfterCraftingItemAction(stackReference));

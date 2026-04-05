@@ -1,12 +1,12 @@
 package io.github.apace100.apoli.util;
 
-import io.github.apace100.apoli.access.BlockCollisionSpliteratorAccess;
+import io.github.apace100.apoli.access.BlockCollisionsAccess;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.BlockCollisionSpliterator;
-import net.minecraft.world.Heightmap;
+import net.minecraft.world.level.BlockCollisions;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import org.jetbrains.annotations.Nullable;
@@ -17,8 +17,8 @@ public class WorldUtil {
 
     public static Iterable<VoxelShape> getOriginalBlockCollisions(Level world, @Nullable Entity entity, AABB box) {
 
-        BlockCollisionSpliterator<VoxelShape> spliterator = new BlockCollisionSpliterator<>(world, entity, box, false, (pos, voxelShape) -> voxelShape);
-        ((BlockCollisionSpliteratorAccess) spliterator).apoli$setGetOriginalShapes(true);
+        BlockCollisions<VoxelShape> spliterator = new BlockCollisions<>(world, entity, box, false, (pos, voxelShape) -> voxelShape);
+        ((BlockCollisionsAccess) spliterator).apoli$setGetOriginalShapes(true);
 
         return () -> spliterator;
 

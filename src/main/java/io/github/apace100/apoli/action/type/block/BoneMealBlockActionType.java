@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.WorldEvents;
+import net.minecraft.world.level.block.LevelEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -74,7 +74,7 @@ public class BoneMealBlockActionType extends BlockActionType {
     private void boneMealEvent(Level world, BlockPos pos) {
 
         if (showEffects && !world.isClientSide()) {
-            world.syncWorldEvent(WorldEvents.BONE_MEAL_USED, pos, 0);
+            world.syncWorldEvent(LevelEvent.BONE_MEAL_USED, pos, 0);
         }
 
     }
