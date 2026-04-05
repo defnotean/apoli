@@ -18,7 +18,7 @@ import io.github.apace100.apoli.util.SavedBlockPosition;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.protocol.game.PlayerActionC2SPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.level.ServerLevel;
@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 import java.util.WeakHashMap;
 
-@Mixin(ServerPlayerGameType.class)
+@Mixin(ServerPlayerGameMode.class)
 public class ServerPlayerInteractionManagerMixin {
 
     @Shadow
@@ -56,7 +56,7 @@ public class ServerPlayerInteractionManagerMixin {
     private Direction apoli$blockBreakDirection;
 
     @Inject(method = "handleBlockBreakAction", at = @At("HEAD"))
-    private void apoli$cacheBlockBreakDirection(BlockPos pos, PlayerActionC2SPacket.Action action, Direction direction, int worldHeight, int sequence, CallbackInfo ci) {
+    private void apoli$cacheBlockBreakDirection(BlockPos pos, ServerboundPlayerActionPacket.Action action, Direction direction, int worldHeight, int sequence, CallbackInfo ci) {
         this.apoli$blockBreakDirection = direction;
     }
 

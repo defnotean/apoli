@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ArgumentTypeInfos.class)
 public abstract class ArgumentTypesMixin {
     @Shadow
-    private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.ArgumentTypeProperties<A>> ArgumentTypeInfo<A, T> register(Registry<ArgumentTypeInfo<?, ?>> registry, String string, Class<? extends A> clazz, ArgumentTypeInfo<A, T> argumentSerializer) {
+    private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> ArgumentTypeInfo<A, T> register(Registry<ArgumentTypeInfo<?, ?>> registry, String string, Class<? extends A> clazz, ArgumentTypeInfo<A, T> argumentSerializer) {
         throw new AssertionError("Mixins for basic functionality are fun.");
     }
     @Inject(method = "register(Lnet/minecraft/core/Registry;)Lnet/minecraft/command/argument/serialize/ArgumentTypeInfo;", at = @At("RETURN"))

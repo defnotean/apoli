@@ -3,16 +3,16 @@ package io.github.apace100.apoli.networking.packet.s2c;
 import io.github.apace100.apoli.Apoli;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.CustomPayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-public record SyncEntityTypeTagCacheS2CPacket(Map<Identifier, Collection<Identifier>> subTags) implements CustomPayload {
+public record SyncEntityTypeTagCacheS2CPacket(Map<Identifier, Collection<Identifier>> subTags) implements CustomPacketPayload {
 
-	public static final Id<SyncEntityTypeTagCacheS2CPacket> PACKET_ID = new Id<>(Apoli.identifier("s2c/sync_entity_type_tag_cache"));
+	public static final CustomPacketPayload.Id<SyncEntityTypeTagCacheS2CPacket> PACKET_ID = new CustomPacketPayload.Id<>(Apoli.identifier("s2c/sync_entity_type_tag_cache"));
 	public static final StreamCodec<FriendlyByteBuf, SyncEntityTypeTagCacheS2CPacket> PACKET_CODEC = StreamCodec.of(SyncEntityTypeTagCacheS2CPacket::write, SyncEntityTypeTagCacheS2CPacket::read);
 
 	private static SyncEntityTypeTagCacheS2CPacket read(FriendlyByteBuf buf) {
@@ -24,7 +24,7 @@ public record SyncEntityTypeTagCacheS2CPacket(Map<Identifier, Collection<Identif
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Id<? extends CustomPacketPayload> getId() {
 		return PACKET_ID;
 	}
 

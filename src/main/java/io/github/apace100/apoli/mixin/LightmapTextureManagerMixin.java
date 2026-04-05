@@ -5,14 +5,14 @@ import io.github.apace100.apoli.power.type.NightVisionPowerType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.Lightmap;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-@Mixin(LightTexture.class)
+@Mixin(Lightmap.class)
 @Environment(EnvType.CLIENT)
 public abstract class LightmapTextureManagerMixin implements AutoCloseable {
 

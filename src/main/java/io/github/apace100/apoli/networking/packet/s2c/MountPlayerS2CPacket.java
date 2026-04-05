@@ -4,11 +4,11 @@ import io.github.apace100.apoli.Apoli;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.protocol.CustomPayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record MountPlayerS2CPacket(int actorId, int targetId) implements CustomPayload {
+public record MountPlayerS2CPacket(int actorId, int targetId) implements CustomPacketPayload {
 
-    public static final Id<MountPlayerS2CPacket> PACKET_ID = new Id<>(Apoli.identifier("s2c/mount_player"));
+    public static final CustomPacketPayload.Id<MountPlayerS2CPacket> PACKET_ID = new CustomPacketPayload.Id<>(Apoli.identifier("s2c/mount_player"));
     public static final StreamCodec<FriendlyByteBuf, MountPlayerS2CPacket> PACKET_CODEC = StreamCodec.tuple(
         ByteBufCodecs.VAR_INT, MountPlayerS2CPacket::actorId,
         ByteBufCodecs.VAR_INT, MountPlayerS2CPacket::targetId,
@@ -16,7 +16,7 @@ public record MountPlayerS2CPacket(int actorId, int targetId) implements CustomP
     );
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public CustomPacketPayload.Id<? extends CustomPacketPayload> getId() {
         return PACKET_ID;
     }
 

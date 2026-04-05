@@ -3,9 +3,9 @@ package io.github.apace100.apoli.screen.widget;
 import io.github.apace100.apoli.util.TextAlignment;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.render.GuiRenderer;
-import net.minecraft.client.gui.widget.AbstractTextWidget;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractStringWidget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import net.minecraft.util.Mth;
@@ -13,12 +13,12 @@ import net.minecraft.util.Mth;
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
-public class ScrollingTextWidget extends AbstractTextWidget {
+public class ScrollingTextWidget extends AbstractStringWidget {
 
     private TextAlignment textAlignment = TextAlignment.CENTER;
     private final boolean hasShadow;
 
-    public ScrollingTextWidget(int x, int y, int width, int height, Component text, boolean hasShadow, TextRenderer textRenderer) {
+    public ScrollingTextWidget(int x, int y, int width, int height, Component text, boolean hasShadow, Font textRenderer) {
         super(x, y, width, height, text, textRenderer);
         this.hasShadow = hasShadow;
     }
@@ -28,14 +28,14 @@ public class ScrollingTextWidget extends AbstractTextWidget {
     }
 
     @Override
-    public void renderWidget(GuiRenderer context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
         int left = this.getX() + 2;
         int right = this.getX() + this.getWidth() - 2;
         int top = this.getY();
         int bottom = this.getY() + this.getHeight();
 
-        drawScrollingText(context, getTextRenderer(), this.getMessage(), textAlignment, left, top, right, bottom, getTextColor(), hasShadow);
+        drawScrollingText(context, getFont(), this.getMessage(), textAlignment, left, top, right, bottom, getTextColor(), hasShadow);
 
     }
 
@@ -44,7 +44,7 @@ public class ScrollingTextWidget extends AbstractTextWidget {
         return false;
     }
 
-    protected static void drawScrollingText(GuiRenderer context, TextRenderer textRenderer, Component text, TextAlignment textAlignment, int left, int top, int right, int bottom, int color, boolean hasShadow) {
+    protected static void drawScrollingText(GuiGraphics context, Font textRenderer, Component text, TextAlignment textAlignment, int left, int top, int right, int bottom, int color, boolean hasShadow) {
 
         int textWidth = textRenderer.getWidth(text);
 

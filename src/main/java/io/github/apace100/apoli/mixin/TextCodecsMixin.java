@@ -4,7 +4,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.RecordBuilder;
 import io.github.apace100.apoli.text.ForcedTranslatableTextContent;
 import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.chat.contents.ComponentContents;
+import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.util.StringRepresentable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

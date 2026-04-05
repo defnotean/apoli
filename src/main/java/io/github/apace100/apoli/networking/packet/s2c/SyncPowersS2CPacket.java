@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.CustomPayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
 import java.util.Collection;
@@ -14,9 +14,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public record SyncPowersS2CPacket(Map<Identifier, Power> powersById) implements CustomPayload {
+public record SyncPowersS2CPacket(Map<Identifier, Power> powersById) implements CustomPacketPayload {
 
-    public static final Id<SyncPowersS2CPacket> PACKET_ID = new Id<>(Apoli.identifier("s2c/sync_power_registry"));
+    public static final CustomPacketPayload.Id<SyncPowersS2CPacket> PACKET_ID = new CustomPacketPayload.Id<>(Apoli.identifier("s2c/sync_power_registry"));
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncPowersS2CPacket> PACKET_CODEC = StreamCodec.of(SyncPowersS2CPacket::write, SyncPowersS2CPacket::read);
 
     public static SyncPowersS2CPacket read(RegistryFriendlyByteBuf buf) {
@@ -53,7 +53,7 @@ public record SyncPowersS2CPacket(Map<Identifier, Power> powersById) implements 
     }
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public CustomPacketPayload.Id<? extends CustomPacketPayload> getId() {
         return PACKET_ID;
     }
 

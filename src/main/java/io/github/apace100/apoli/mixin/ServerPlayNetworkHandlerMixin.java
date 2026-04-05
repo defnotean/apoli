@@ -4,8 +4,8 @@ import io.github.apace100.apoli.access.EndRespawningEntity;
 import io.github.apace100.apoli.power.type.ActionOnItemUsePowerType;
 import io.github.apace100.apoli.util.PriorityPhase;
 import net.minecraft.world.entity.SlotAccess;
-import net.minecraft.network.protocol.game.ClientStatusC2SPacket;
-import net.minecraft.network.protocol.game.PlayerActionC2SPacket;
+import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,12 +22,12 @@ public class ServerPlayNetworkHandlerMixin {
     public ServerPlayer player;
 
     @Inject(method = "handleClientCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerList;respawnPlayer(Lnet/minecraft/server/network/ServerPlayer;ZLnet/minecraft/world/entity/Entity$RemovalReason;)Lnet/minecraft/server/network/ServerPlayer;", ordinal = 0))
-    private void saveEndRespawnStatus(ClientStatusC2SPacket packet, CallbackInfo ci) {
+    private void saveEndRespawnStatus(ServerboundClientCommandPacket packet, CallbackInfo ci) {
         ((EndRespawningEntity)this.player).apoli$setEndRespawning(true);
     }
 
-    @Inject(method = "handleClientCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/criterion/ChangedDimensionTrigger;trigger(Lnet/minecraft/server/network/ServerPlayer;Lnet/minecraft/core/ResourceKey;Lnet/minecraft/core/ResourceKey;)V"))
-    private void undoEndRespawnStatus(ClientStatusC2SPacket packet, CallbackInfo ci) {
+    @Inject(method = "handleClientCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/critereon/ChangedDimensionTrigger;trigger(Lnet/minecraft/server/network/ServerPlayer;Lnet/minecraft/core/ResourceKey;Lnet/minecraft/core/ResourceKey;)V"))
+    private void undoEndRespawnStatus(ServerboundClientCommandPacket packet, CallbackInfo ci) {
         ((EndRespawningEntity)this.player).apoli$setEndRespawning(false);
     }
 
@@ -39,7 +39,7 @@ public class ServerPlayNetworkHandlerMixin {
     }
 
     @Inject(method = "onPlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayer;stopUsingItem()V"))
-    private void callActionOnUseStopBySwappingHands(PlayerActionC2SPacket packet, CallbackInfo ci) {
+    private void callActionOnUseStopBySwappingHands(ServerboundPlayerActionPacket packet, CallbackInfo ci) {
         if(player.isUsingItem()) {
             ActionOnItemUsePowerType.executeActions(player, SlotAccess.of(player.getInventory(), this.player.getInventory().selectedSlot), player.getUseItem(), ActionOnItemUsePowerType.TriggerType.STOP, PriorityPhase.ALL);
         }

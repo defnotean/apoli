@@ -7,7 +7,7 @@ import io.github.apace100.apoli.power.PowerConfiguration;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.world.entity.Dismounting;
+import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -154,7 +154,7 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
         float pitch = serverPlayer.getXRot();
         float yaw = serverPlayer.getYRot();
 
-        Vec3 placement = Dismounting.findRespawnPos(serverPlayer.getType(), spawnPointDimension, spawnPointPosition, true);
+        Vec3 placement = DismountHelper.findRespawnPos(serverPlayer.getType(), spawnPointDimension, spawnPointPosition, true);
         if (placement == null) {
             Apoli.LOGGER.warn("Power \"{}\" could not find a suitable spawn point for player {}! Teleporting to the found location directly...", this.getPower().getId(), serverPlayer.getName().getString());
             serverPlayer.teleport(spawnPointDimension, spawnPointPosition.getX(), spawnPointPosition.getY(), spawnPointPosition.getZ(), pitch, yaw);
@@ -380,14 +380,14 @@ public class ModifyPlayerSpawnPowerType extends PowerType implements Prioritized
 
                 //  Offset the Y axis (up and down) of the current position to check for valid spawn positions
                 mutableStartPos.setY(center + upOffset);
-                spawnPos = Dismounting.findRespawnPos(getHolder().getType(), targetDimension, mutableStartPos, true);
+                spawnPos = DismountHelper.findRespawnPos(getHolder().getType(), targetDimension, mutableStartPos, true);
 
                 if (spawnPos != null) {
                     return Optional.of(spawnPos);
                 }
 
                 mutableStartPos.setY(center + downOffset);
-                spawnPos = Dismounting.findRespawnPos(getHolder().getType(), targetDimension, mutableStartPos, true);
+                spawnPos = DismountHelper.findRespawnPos(getHolder().getType(), targetDimension, mutableStartPos, true);
 
                 if (spawnPos != null) {
                     return Optional.of(spawnPos);

@@ -99,7 +99,7 @@ public record PowerArgumentType(PowerTarget powerTarget) implements ArgumentType
         }
 
         @Override
-        public Properties getArgumentTypeProperties(PowerArgumentType argumentType) {
+        public Properties getTemplate(PowerArgumentType argumentType) {
             return new Properties(this, argumentType.powerTarget());
         }
 

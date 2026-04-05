@@ -2,7 +2,7 @@ package io.github.apace100.apoli.screen;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.render.GuiRenderer;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.DeltaTracker;
 
 import java.util.ArrayList;
@@ -13,5 +13,5 @@ public interface GameHudRender {
 
     List<GameHudRender> HUD_RENDERS = new ArrayList<>();
 
-    void render(GuiRenderer context, DeltaTracker renderTickCounter);
+    void render(GuiGraphics context, DeltaTracker renderTickCounter);
 }

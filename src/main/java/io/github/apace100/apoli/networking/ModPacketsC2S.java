@@ -13,7 +13,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerConfigurationNetworkHandler;
+import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -33,7 +33,7 @@ public class ModPacketsC2S {
 
     }
 
-    private static void handshake(ServerConfigurationNetworkHandler handler, MinecraftServer server) {
+    private static void handshake(ServerConfigurationPacketListenerImpl handler, MinecraftServer server) {
 
         if (ServerConfigurationNetworking.canSend(handler, VersionHandshakePacket.PACKET_ID)) {
             handler.addTask(new VersionHandshakeTask(Apoli.SEMVER));
@@ -48,7 +48,7 @@ public class ModPacketsC2S {
 
     private static void handleHandshakeReply(VersionHandshakePacket payload, ServerConfigurationNetworking.Context context) {
 
-        ServerConfigurationNetworkHandler handler = context.connection();
+        ServerConfigurationPacketListenerImpl handler = context.connection();
 
         int[] semver = payload.semver();
         boolean mismatch = semver.length != Apoli.SEMVER.length;

@@ -4,22 +4,22 @@ import io.github.apace100.apoli.Apoli;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.protocol.CustomPayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public record UseActivePowerTypesC2SPacket(List<Identifier> powerIds) implements CustomPayload {
+public record UseActivePowerTypesC2SPacket(List<Identifier> powerIds) implements CustomPacketPayload {
 
-    public static final Id<UseActivePowerTypesC2SPacket> PACKET_ID = new Id<>(Apoli.identifier("c2s/use_active_power_types"));
+    public static final CustomPacketPayload.Id<UseActivePowerTypesC2SPacket> PACKET_ID = new CustomPacketPayload.Id<>(Apoli.identifier("c2s/use_active_power_types"));
     public static final StreamCodec<RegistryFriendlyByteBuf, UseActivePowerTypesC2SPacket> PACKET_CODEC = StreamCodec.tuple(
         ByteBufCodecs.collection(ArrayList::new, Identifier.PACKET_CODEC), UseActivePowerTypesC2SPacket::powerIds,
         UseActivePowerTypesC2SPacket::new
     );
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public CustomPacketPayload.Id<? extends CustomPacketPayload> getId() {
         return PACKET_ID;
     }
 

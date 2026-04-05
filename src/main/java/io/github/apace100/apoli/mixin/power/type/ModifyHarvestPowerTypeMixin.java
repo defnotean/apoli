@@ -42,7 +42,7 @@ public abstract class ModifyHarvestPowerTypeMixin {
 
 	}
 
-	@Mixin(ServerPlayerGameType.class)
+	@Mixin(ServerPlayerGameMode.class)
 	public abstract static class HarvestabilityProxy {
 
 		@Shadow

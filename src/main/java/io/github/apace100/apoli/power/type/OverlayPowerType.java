@@ -22,11 +22,10 @@ import net.minecraft.client.renderer.*;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import net.minecraft.client.renderer.CoreShaders;
-import net.minecraft.client.resource.metadata.AnimationResourceMetadata;
-import net.minecraft.client.resource.metadata.TextureResourceMetadata;
+import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
+import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -226,12 +225,10 @@ public class OverlayPowerType extends PowerType {
         float maxV = sprite.getV1();
 
         RenderSystem.setShaderColor(red, green, blue, alpha);
-        RenderSystem.setShader(CoreShaders.POSITION_TEX);
+        RenderSystem.setShaderTexture(0, textureToDraw);
 
         x2 = x1 + width;
         y2 = y1 + height;
-
-        RenderSystem.setShaderTexture(0, textureToDraw);
 
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
@@ -241,7 +238,8 @@ public class OverlayPowerType extends PowerType {
         bufferBuilder.addVertex(x2, y2, -1.0F).setUv(maxU, maxV);
         bufferBuilder.addVertex(x2, y1, -1.0F).setUv(maxU, minV);
 
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        MeshData meshData = bufferBuilder.buildOrThrow();
+        BufferBuilder.drawWithShader(meshData);
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.defaultBlendFunc();
@@ -255,7 +253,7 @@ public class OverlayPowerType extends PowerType {
     public static final class SpriteHolder extends TextureAtlas {
 
         public SpriteHolder(TextureManager manager) {
-            super(manager, ATLAS_TEXTURE, Apoli.identifier("overlay"), Set.of(AnimationResourceMetadata.READER, TextureResourceMetadata.READER));
+            super(manager, ATLAS_TEXTURE, Apoli.identifier("overlay"), Set.of(AnimationMetadataSection.SERIALIZER, TextureMetadataSection.SERIALIZER));
         }
 
         @Override

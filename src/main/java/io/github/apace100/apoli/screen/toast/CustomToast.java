@@ -6,11 +6,11 @@ import io.github.apace100.apoli.util.TextureUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.render.GuiRenderer;
-import net.minecraft.client.toast.ToastManager;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.chat.OrderedText;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -23,8 +23,8 @@ public class CustomToast implements PositionAwareToast {
     private static final int TITLE_BASE_COLOR = 16776960;
     private static final int DESCRIPTION_BASE_COLOR = 16777215;
 
-    private final List<OrderedText> title;
-    private final List<OrderedText> description;
+    private final List<FormattedCharSequence> title;
+    private final List<FormattedCharSequence> description;
     private final ItemStack iconStack;
     private final Identifier texture;
 
@@ -44,7 +44,7 @@ public class CustomToast implements PositionAwareToast {
 
     public CustomToast(Component title, Component description, Identifier texture, ItemStack iconStack, int duration) {
 
-        TextRenderer textRenderer = Minecraft.getInstance().textRenderer;
+        Font textRenderer = Minecraft.getInstance().font;
         int maxWidth = this.getWidth() - 33;
 
         this.title = textRenderer.wrapLines(title, maxWidth);
@@ -69,9 +69,9 @@ public class CustomToast implements PositionAwareToast {
     }
 
     @Override
-    public Visibility draw(int x, int y, GuiRenderer context, ToastManager manager, long startTime) {
+    public Visibility draw(int x, int y, GuiGraphics context, ToastManager manager, long startTime) {
 
-        TextRenderer textRenderer = manager.getClient().textRenderer;
+        Font textRenderer = manager.getClient().font;
         int alphaShift = Mth.floor(Mth.clamp((float) Math.abs(alphaShiftEnd - startTime) / 300, 0.0, 1.0) * 255.0f) << 24 | 67108864;
 
         int toastTextX = 30;

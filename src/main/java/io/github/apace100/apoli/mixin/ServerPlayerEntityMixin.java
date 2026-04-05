@@ -22,7 +22,7 @@ import io.github.apace100.apoli.power.type.PreventSleepPowerType;
 import io.github.apace100.apoli.util.InventoryUtil;
 import io.github.apace100.apoli.util.PriorityPhase;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.world.entity.Dismounting;
+import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.ItemStack;
@@ -32,7 +32,7 @@ import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerRecipeBook;
+import net.minecraft.stats.ServerRecipeBook;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.network.chat.Component;
 import com.mojang.datafixers.util.Pair;
@@ -171,7 +171,7 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
 
         if (originalRespawnPos.isEmpty() && PowerHolderComponent.hasPowerType(this, ModifyPlayerSpawnPowerType.class)) {
             return Optional
-                .ofNullable(Dismounting.findRespawnPos(this.getType(), world, pos, spawnForced))
+                .ofNullable(DismountHelper.findRespawnPos(this.getType(), world, pos, spawnForced))
                 .map(newPos -> ServerPlayer.RespawnPos.fromCurrentPos(newPos, pos));
         }
 
@@ -249,7 +249,7 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
         ServerPlayNetworking.send((ServerPlayer) (Object) this, new ShowToastS2CPacket(toastData));
     }
 
-    @ModifyExpressionValue(method = "<init>", at = @At(value = "NEW", target = "()Lnet/minecraft/server/network/ServerRecipeBook;"))
+    @ModifyExpressionValue(method = "<init>", at = @At(value = "NEW", target = "()Lnet/minecraft/stats/ServerRecipeBook;"))
     private ServerRecipeBook apoli$cachePlayerToRecipeBook(ServerRecipeBook original) {
 
         if (original instanceof PowerCraftingObject pco) {

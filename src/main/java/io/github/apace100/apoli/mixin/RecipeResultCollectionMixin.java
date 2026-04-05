@@ -9,7 +9,7 @@ import io.github.apace100.apoli.power.type.RecipePowerType;
 import io.github.apace100.apoli.recipe.PowerCraftingRecipe;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeMatcher;
+import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.stats.RecipeBook;
 import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class RecipeResultCollectionMixin {
 
     @ModifyExpressionValue(method = "computeCraftables", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeMatcher;match(Lnet/minecraft/world/item/crafting/Recipe;Lit/unimi/dsi/fastutil/ints/IntList;)Z"))
-    private boolean apoli$accountForPowerRecipes(boolean original, RecipeMatcher recipeFinder, int gridWidth, int gridHeight, RecipeBook recipeBook, @Local RecipeHolder<?> recipeEntry) {
+    private boolean apoli$accountForPowerRecipes(boolean original, StackedContents recipeFinder, int gridWidth, int gridHeight, RecipeBook recipeBook, @Local RecipeHolder<?> recipeEntry) {
 
         if (original && recipeEntry.value() instanceof PowerCraftingRecipe pcr && recipeBook instanceof PowerCraftingObject pco && pco.apoli$getPlayer() != null) {
 
